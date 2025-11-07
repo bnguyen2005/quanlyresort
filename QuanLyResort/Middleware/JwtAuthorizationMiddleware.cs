@@ -347,6 +347,7 @@ public class JwtAuthorizationMiddleware
             // Cho phép truy cập restaurant-orders: tạo, xem đơn của mình, thanh toán đơn của mình
             // Cho phép truy cập reviews: xem reviews (GET), tạo review của mình (POST), xem review của mình
             // Cho phép truy cập payment: tạo payment session, xem payment status, nhận webhook
+            // Cho phép truy cập simplepayment: tạo PayOs payment link, xem webhook status
             // (Controller sẽ kiểm tra authorization chi tiết hơn)
             bool hasPermission = path.StartsWith("/api/rooms") ||
                    path.StartsWith("/api/services") ||
@@ -355,7 +356,8 @@ public class JwtAuthorizationMiddleware
                    path.StartsWith("/api/customers/profile") ||
                    path.StartsWith("/api/restaurant-orders") ||
                    path.StartsWith("/api/reviews") ||
-                   path.StartsWith("/api/payment");
+                   path.StartsWith("/api/payment") ||
+                   path.StartsWith("/api/simplepayment");
             
             // Log để debug
             if (!hasPermission)
