@@ -24,10 +24,13 @@ public class SimplePaymentController : ControllerBase
 
     /// <summary>
     /// Webhook đơn giản - nhận từ PayOs/VietQR
+    /// Hỗ trợ 2 format:
+    /// 1. PayOs format: { "code": "00", "desc": "success", "success": true, "data": { "orderCode": 123, "amount": 3000, "description": "BOOKING7", ... }, "signature": "..." }
+    /// 2. Simple format: { "content": "BOOKING7", "amount": 5000, "transactionId": "..." }
     /// </summary>
     [HttpPost("webhook")]
     [Microsoft.AspNetCore.Authorization.AllowAnonymous]
-    public async Task<IActionResult> Webhook([FromBody] SimpleWebhookRequest? request = null)
+    public async Task<IActionResult> Webhook([FromBody] object? rawRequest = null)
     {
         var webhookId = Guid.NewGuid().ToString("N")[..8];
         var startTime = DateTime.UtcNow;
@@ -35,7 +38,7 @@ public class SimplePaymentController : ControllerBase
         try
         {
             // Handle PayOs verification request (empty body)
-            if (request == null || (string.IsNullOrEmpty(request.Content) && request.Amount == 0))
+            if (rawRequest == null)
             {
                 _logger.LogInformation("🔍 [WEBHOOK-{WebhookId}] PayOs verification request (empty body)", webhookId);
                 return Ok(new
@@ -49,23 +52,84 @@ public class SimplePaymentController : ControllerBase
             
             _logger.LogInformation("═══════════════════════════════════════════════════════════");
             _logger.LogInformation("📥 [WEBHOOK-{WebhookId}] Webhook received at {Time}", webhookId, startTime);
-            _logger.LogInformation("   Content: {Content}", request.Content);
-            _logger.LogInformation("   Amount: {Amount:N0} VND", request.Amount);
-            _logger.LogInformation("   TransactionId: {TransactionId}", request.TransactionId ?? "N/A");
+            _logger.LogInformation("   Raw request: {RawRequest}", System.Text.Json.JsonSerializer.Serialize(rawRequest));
             _logger.LogInformation("   IP Address: {RemoteIp}", HttpContext.Connection.RemoteIpAddress?.ToString());
             _logger.LogInformation("   User-Agent: {UserAgent}", Request.Headers["User-Agent"].ToString());
             
-            Console.WriteLine($"\n📥 [WEBHOOK-{webhookId}] Webhook received: {request.Content} - {request.Amount:N0} VND");
+            // Parse request - hỗ trợ cả PayOs format và Simple format
+            string? content = null;
+            decimal amount = 0;
+            string? transactionId = null;
+            int? orderCode = null;
+            
+            // Try PayOs format first
+            var payOsRequest = System.Text.Json.JsonSerializer.Deserialize<PayOsWebhookRequest>(System.Text.Json.JsonSerializer.Serialize(rawRequest));
+            if (payOsRequest != null && payOsRequest.Success && payOsRequest.Data != null)
+            {
+                // PayOs format
+                _logger.LogInformation("📋 [WEBHOOK-{WebhookId}] Detected PayOs format", webhookId);
+                content = payOsRequest.Data.Description; // PayOs gửi booking ID trong description
+                amount = payOsRequest.Data.Amount;
+                transactionId = payOsRequest.Data.Reference;
+                orderCode = payOsRequest.Data.OrderCode;
+                
+                _logger.LogInformation("   PayOs - Code: {Code}, Desc: {Desc}", payOsRequest.Code, payOsRequest.Desc);
+                _logger.LogInformation("   PayOs - OrderCode: {OrderCode}, Amount: {Amount:N0} VND", orderCode, amount);
+                _logger.LogInformation("   PayOs - Description: {Description}", content);
+                _logger.LogInformation("   PayOs - Reference: {Reference}", transactionId);
+            }
+            else
+            {
+                // Try Simple format
+                var simpleRequest = System.Text.Json.JsonSerializer.Deserialize<SimpleWebhookRequest>(System.Text.Json.JsonSerializer.Serialize(rawRequest));
+                if (simpleRequest != null && (!string.IsNullOrEmpty(simpleRequest.Content) || simpleRequest.Amount > 0))
+                {
+                    _logger.LogInformation("📋 [WEBHOOK-{WebhookId}] Detected Simple format", webhookId);
+                    content = simpleRequest.Content;
+                    amount = simpleRequest.Amount;
+                    transactionId = simpleRequest.TransactionId;
+                }
+            }
+            
+            // If still no data, check if it's empty verification request
+            if (string.IsNullOrEmpty(content) && amount == 0)
+            {
+                _logger.LogInformation("🔍 [WEBHOOK-{WebhookId}] PayOs verification request (empty data)", webhookId);
+                return Ok(new
+                {
+                    status = "active",
+                    endpoint = "/api/simplepayment/webhook",
+                    message = "Webhook endpoint is ready",
+                    timestamp = DateTime.UtcNow
+                });
+            }
+            
+            Console.WriteLine($"\n📥 [WEBHOOK-{webhookId}] Webhook received: {content} - {amount:N0} VND");
 
-            // Parse booking ID từ content
-            _logger.LogInformation("🔍 [WEBHOOK-{WebhookId}] Extracting booking ID from content...", webhookId);
-            var bookingId = ExtractBookingId(request.Content);
+            // Parse booking ID từ content hoặc orderCode
+            _logger.LogInformation("🔍 [WEBHOOK-{WebhookId}] Extracting booking ID...", webhookId);
+            int? bookingId = null;
+            
+            // Try orderCode first (PayOs format)
+            if (orderCode.HasValue && orderCode.Value > 0)
+            {
+                bookingId = orderCode.Value;
+                _logger.LogInformation("✅ [WEBHOOK-{WebhookId}] Using orderCode as bookingId: {BookingId}", webhookId, bookingId);
+            }
+            // Try extract from content/description
+            else if (!string.IsNullOrEmpty(content))
+            {
+                bookingId = ExtractBookingId(content);
+            }
+            
             if (!bookingId.HasValue)
             {
-                _logger.LogWarning("⚠️ [WEBHOOK-{WebhookId}] Cannot extract booking ID from content: {Content}", webhookId, request.Content);
+                _logger.LogWarning("⚠️ [WEBHOOK-{WebhookId}] Cannot extract booking ID. Content: {Content}, OrderCode: {OrderCode}", 
+                    webhookId, content, orderCode);
                 Console.WriteLine($"⚠️ [WEBHOOK-{webhookId}] Failed: Cannot extract booking ID");
                 return BadRequest(new { message = "Không tìm thấy booking ID trong nội dung", webhookId });
             }
+            
             _logger.LogInformation("✅ [WEBHOOK-{WebhookId}] Extracted booking ID: {BookingId}", webhookId, bookingId.Value);
             Console.WriteLine($"✅ [WEBHOOK-{webhookId}] Booking ID: {bookingId.Value}");
 
@@ -93,29 +157,29 @@ public class SimplePaymentController : ControllerBase
 
             // Verify amount (optional - có thể bỏ qua nếu muốn đơn giản hơn)
             var estimatedAmount = booking.EstimatedTotalAmount ?? 0;
-            if (request.Amount > 0 && estimatedAmount > 0)
+            if (amount > 0 && estimatedAmount > 0)
             {
                  // Cho phép sai số 10% hoặc chấp nhận nếu amount >= expected
-                var diff = Math.Abs(request.Amount - estimatedAmount);
+                var diff = Math.Abs(amount - estimatedAmount);
                 var maxDiff = estimatedAmount * 0.1m;
                 
                 // Chấp nhận nếu:
                 // 1. Amount >= estimatedAmount (thanh toán đủ hoặc nhiều hơn)
                 // 2. Hoặc sai số <= 10%
-                if (request.Amount < estimatedAmount && diff > maxDiff)
+                if (amount < estimatedAmount && diff > maxDiff)
                 {
                     _logger.LogWarning("⚠️ Amount mismatch: Expected={Expected}, Received={Received}", 
-                        estimatedAmount, request.Amount);
+                        estimatedAmount, amount);
                     return BadRequest(new { message = "Số tiền không khớp" });
                 }
                 
                 _logger.LogInformation("✅ Amount verified: Expected={Expected}, Received={Received}, Diff={Diff}", 
-                    estimatedAmount, request.Amount, diff);
+                    estimatedAmount, amount, diff);
             }
 
             // Update booking status using ProcessOnlinePaymentAsync
             _logger.LogInformation("🔄 [WEBHOOK-{WebhookId}] Updating booking {BookingId} to Paid status...", webhookId, bookingId.Value);
-            var performedBy = $"Webhook-{request.TransactionId ?? webhookId}";
+            var performedBy = $"Webhook-{transactionId ?? webhookId}";
             var updated = await _bookingService.ProcessOnlinePaymentAsync(bookingId.Value, performedBy);
             if (!updated)
             {
@@ -244,12 +308,40 @@ public class SimplePaymentController : ControllerBase
 }
 
 /// <summary>
-/// Request model cho webhook đơn giản
+/// Request model cho webhook đơn giản (Simple format)
 /// </summary>
 public class SimpleWebhookRequest
 {
     public string Content { get; set; } = string.Empty; // Nội dung chuyển khoản: "BOOKING-39"
     public decimal Amount { get; set; } // Số tiền
     public string? TransactionId { get; set; } // Mã giao dịch (optional)
+}
+
+/// <summary>
+/// Request model cho PayOs webhook (PayOs format)
+/// Format từ PayOs API documentation
+/// </summary>
+public class PayOsWebhookRequest
+{
+    public string Code { get; set; } = string.Empty; // "00" = success
+    public string Desc { get; set; } = string.Empty; // "success"
+    public bool Success { get; set; }
+    public PayOsWebhookData? Data { get; set; }
+    public string? Signature { get; set; }
+}
+
+/// <summary>
+/// Data trong PayOs webhook
+/// </summary>
+public class PayOsWebhookData
+{
+    public int? OrderCode { get; set; } // Order code (có thể dùng làm bookingId)
+    public decimal Amount { get; set; } // Số tiền
+    public string? Description { get; set; } // Mô tả (có thể chứa booking ID: "BOOKING7")
+    public string? AccountNumber { get; set; }
+    public string? Reference { get; set; } // Mã tham chiếu giao dịch
+    public string? TransactionDateTime { get; set; }
+    public string? Currency { get; set; }
+    public string? PaymentLinkId { get; set; }
 }
 
