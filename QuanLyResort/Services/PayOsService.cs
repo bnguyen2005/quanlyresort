@@ -52,22 +52,13 @@ public class PayOsService
         {
             _logger.LogInformation("🔄 [PayOs] Creating payment link: OrderCode={OrderCode}, Amount={Amount:N0} VND", orderCode, amount);
 
-            // Convert amount to integer (PayOs expects integer)
-            var amountInt = (int)Math.Round(amount);
+            // Convert amount to integer (PayOs expects integer/long)
+            var amountLong = (long)Math.Round(amount);
 
-            // Prepare data for signature
-            var dataForSignature = new Dictionary<string, string>
-            {
-                { "amount", amountInt.ToString() },
-                { "cancelUrl", cancelUrl },
-                { "description", description },
-                { "orderCode", orderCode.ToString() },
-                { "returnUrl", returnUrl }
-            };
-
-            // Sort alphabetically and create signature string
-            var sortedKeys = dataForSignature.Keys.OrderBy(k => k).ToList();
-            var signatureString = string.Join("&", sortedKeys.Select(k => $"{k}={dataForSignature[k]}"));
+            // PayOs signature format: FIXED ORDER (not alphabetical!)
+            // Format: amount={amount}&cancelUrl={cancelUrl}&description={description}&orderCode={orderCode}&returnUrl={returnUrl}
+            // Reference: PayOs official library - CreateSignatureOfPaymentRequest
+            var signatureString = $"amount={amountLong}&cancelUrl={cancelUrl}&description={description}&orderCode={orderCode}&returnUrl={returnUrl}";
             
             _logger.LogInformation("🔐 [PayOs] Signature string: {SignatureString}", signatureString);
             
@@ -85,14 +76,15 @@ public class PayOsService
                 expiredAtUnix = (int)(expiredAt.Value.ToUniversalTime().Subtract(epoch).TotalSeconds);
             }
             
+            // PayOs expects long for orderCode and amount
             var requestBody = new
             {
-                orderCode = orderCode,
-                amount = amountInt,
+                orderCode = (long)orderCode,
+                amount = amountLong,
                 description = description,
                 cancelUrl = cancelUrl,
                 returnUrl = returnUrl,
-                expiredAt = expiredAtUnix,
+                expiredAt = expiredAtUnix > 0 ? (long?)expiredAtUnix : null,
                 signature = signature
             };
 
@@ -172,12 +164,13 @@ public class PayOsService
 
     /// <summary>
     /// Compute HMAC SHA256
+    /// PayOs uses lowercase hexadecimal format
     /// </summary>
     private string ComputeHmacSha256(string data, string key)
     {
         using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(key));
         var hashBytes = hmac.ComputeHash(Encoding.UTF8.GetBytes(data));
-        return BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
+        return BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
     }
 }
 
