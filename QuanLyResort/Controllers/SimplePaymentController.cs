@@ -141,6 +141,24 @@ public class SimplePaymentController : ControllerBase
     }
 
     /// <summary>
+    /// Endpoint để PayOs verify webhook URL (GET request)
+    /// PayOs sẽ gửi GET request để verify webhook URL trước khi chấp nhận
+    /// </summary>
+    [HttpGet("webhook")]
+    [Microsoft.AspNetCore.Authorization.AllowAnonymous]
+    public IActionResult VerifyWebhook()
+    {
+        _logger.LogInformation("🔍 [WEBHOOK-VERIFY] PayOs verification request received");
+        return Ok(new
+        {
+            status = "active",
+            endpoint = "/api/simplepayment/webhook",
+            message = "Webhook endpoint is ready",
+            timestamp = DateTime.UtcNow
+        });
+    }
+
+    /// <summary>
     /// Endpoint để kiểm tra trạng thái webhook system
     /// </summary>
     [HttpGet("webhook-status")]

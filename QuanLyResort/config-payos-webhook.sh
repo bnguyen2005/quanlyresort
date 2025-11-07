@@ -22,7 +22,8 @@ echo "🔄 Đang cấu hình webhook..."
 echo ""
 
 # Call PayOs API to configure webhook
-RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "https://api.payos.vn/v2/webhook-url" \
+# PayOs uses api-merchant.payos.vn, not api.payos.vn
+RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "https://api-merchant.payos.vn/confirm-webhook" \
   -H "Content-Type: application/json" \
   -H "x-client-id: $CLIENT_ID" \
   -H "x-api-key: $API_KEY" \
