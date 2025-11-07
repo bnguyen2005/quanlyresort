@@ -283,12 +283,10 @@ using (var scope = app.Services.CreateScope())
         var canConnect = await context.Database.CanConnectAsync();
         logger.LogInformation($"   Database can connect: {canConnect}");
         
-        // Get all migrations
-        var allMigrations = await context.Database.GetMigrationsAsync();
+        // Get migration status
         var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();
         var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
         
-        logger.LogInformation($"   Total migrations: {allMigrations.Count()}");
         logger.LogInformation($"   Applied migrations: {appliedMigrations.Count()}");
         logger.LogInformation($"   Pending migrations: {pendingMigrations.Count()}");
         
