@@ -48,7 +48,7 @@ namespace QuanLyResort.Migrations
                 type: "TEXT",
                 nullable: false,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
+                oldType: "TEXT");
 
             migrationBuilder.AlterColumn<DateTime>(
                 name: "LastLoginAt",
@@ -2066,7 +2066,7 @@ namespace QuanLyResort.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "PasswordHash",
                 table: "Users",
-                type: "nvarchar(max)",
+                type: "TEXT",
                 nullable: false,
                 oldClrType: typeof(string),
                 oldType: "TEXT");

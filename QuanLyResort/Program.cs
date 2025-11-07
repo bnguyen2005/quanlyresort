@@ -24,12 +24,19 @@ builder.Services.AddDbContext<ResortDbContext>(options =>
     // SQLite works on all platforms (Windows, Linux, macOS)
     if (connectionString != null && (connectionString.Contains("Data Source=") || connectionString.Contains(".db")))
     {
-        options.UseSqlite(connectionString);
+        options.UseSqlite(connectionString, sqliteOptions =>
+        {
+            // SQLite doesn't support nvarchar(max), map to TEXT instead
+            sqliteOptions.MigrationsHistoryTable("__EFMigrationsHistory");
+        });
     }
     else if (builder.Environment.IsDevelopment())
     {
         // Development: prefer SQLite for cross-platform
-        options.UseSqlite(connectionString ?? "Data Source=ResortDev.db");
+        options.UseSqlite(connectionString ?? "Data Source=ResortDev.db", sqliteOptions =>
+        {
+            sqliteOptions.MigrationsHistoryTable("__EFMigrationsHistory");
+        });
     }
     else
     {
@@ -37,7 +44,10 @@ builder.Services.AddDbContext<ResortDbContext>(options =>
         if (connectionString != null && connectionString.Contains("(localdb)"))
         {
             // LocalDB not supported on Linux (Render), use SQLite instead
-            options.UseSqlite("Data Source=resort.db");
+            options.UseSqlite("Data Source=resort.db", sqliteOptions =>
+            {
+                sqliteOptions.MigrationsHistoryTable("__EFMigrationsHistory");
+            });
         }
         else
         {
