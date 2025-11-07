@@ -44,6 +44,26 @@ public class ResortDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
+        // SQLite-specific configurations for auto-increment primary keys
+        // SQLite requires INTEGER PRIMARY KEY (not int) for auto-increment
+        if (Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite")
+        {
+            // Configure all entities with int primary keys to use INTEGER for SQLite
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                var primaryKey = entityType.FindPrimaryKey();
+                if (primaryKey != null && primaryKey.Properties.Count == 1)
+                {
+                    var property = primaryKey.Properties[0];
+                    if (property.ClrType == typeof(int) && property.Name.EndsWith("Id"))
+                    {
+                        // SQLite will auto-increment INTEGER PRIMARY KEY
+                        property.SetColumnType("INTEGER");
+                    }
+                }
+            }
+        }
+
         // Apply configurations
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ResortDbContext).Assembly);
 

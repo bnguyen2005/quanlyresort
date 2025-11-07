@@ -293,32 +293,36 @@ using (var scope = app.Services.CreateScope())
         var canConnect = await context.Database.CanConnectAsync();
         logger.LogInformation($"   Database can connect: {canConnect}");
         
-        // Get migration status
-        var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();
-        var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
+        // Check if using SQLite
+        var isSqlite = context.Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite";
+        logger.LogInformation($"   Database provider: {context.Database.ProviderName}");
         
-        logger.LogInformation($"   Applied migrations: {appliedMigrations.Count()}");
-        logger.LogInformation($"   Pending migrations: {pendingMigrations.Count()}");
-        
-        if (!canConnect || pendingMigrations.Any())
+        if (isSqlite)
         {
-            logger.LogInformation("📦 Creating/updating database and applying migrations...");
-            try
-            {
-                await context.Database.MigrateAsync();
-                logger.LogInformation("✅ Database created/updated and migrations applied");
-            }
-            catch (Exception migrateEx)
-            {
-                logger.LogError(migrateEx, "❌ Error applying migrations, trying EnsureCreated...");
-                // Fallback: use EnsureCreated if Migrate fails
-                await context.Database.EnsureCreatedAsync();
-                logger.LogInformation("✅ Database created using EnsureCreated");
-            }
+            // For SQLite, use EnsureCreated to avoid migration issues with AUTOINCREMENT
+            logger.LogInformation("📦 Using SQLite - creating database with EnsureCreated...");
+            await context.Database.EnsureCreatedAsync();
+            logger.LogInformation("✅ Database created using EnsureCreated");
         }
         else
         {
-            logger.LogInformation("✅ Database is up to date");
+            // For SQL Server, use migrations
+            var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();
+            var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
+            
+            logger.LogInformation($"   Applied migrations: {appliedMigrations.Count()}");
+            logger.LogInformation($"   Pending migrations: {pendingMigrations.Count()}");
+            
+            if (!canConnect || pendingMigrations.Any())
+            {
+                logger.LogInformation("📦 Creating/updating database and applying migrations...");
+                await context.Database.MigrateAsync();
+                logger.LogInformation("✅ Database created/updated and migrations applied");
+            }
+            else
+            {
+                logger.LogInformation("✅ Database is up to date");
+            }
         }
         
         // Seed initial data (only if tables are empty)
