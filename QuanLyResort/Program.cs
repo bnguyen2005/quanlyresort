@@ -270,16 +270,52 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-// Seed initial data and ensure database exists in Development
+// Seed initial data and ensure database exists (Development and Production)
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ResortDbContext>();
-    if (app.Environment.IsDevelopment())
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    
+    try
     {
-        await context.Database.EnsureCreatedAsync();
+        // Check if database can be connected
+        logger.LogInformation("🔧 Checking database connection...");
+        var canConnect = await context.Database.CanConnectAsync();
+        
+        if (!canConnect)
+        {
+            logger.LogInformation("📦 Database not found, creating database and applying migrations...");
+            await context.Database.MigrateAsync();
+            logger.LogInformation("✅ Database created and migrations applied");
+        }
+        else
+        {
+            // Database exists, check for pending migrations
+            var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
+            if (pendingMigrations.Any())
+            {
+                logger.LogInformation($"📦 Applying {pendingMigrations.Count()} pending migrations...");
+                await context.Database.MigrateAsync();
+                logger.LogInformation("✅ Migrations applied");
+            }
+            else
+            {
+                logger.LogInformation("✅ Database is up to date");
+            }
+        }
+        
+        // Seed initial data (only if tables are empty)
+        logger.LogInformation("🌱 Seeding initial data...");
+        var seeder = new DataSeeder(context);
+        await seeder.SeedAsync();
+        logger.LogInformation("✅ Data seeded successfully");
     }
-    var seeder = new DataSeeder(context);
-    await seeder.SeedAsync();
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "❌ Error initializing database");
+        // Don't throw - let app start even if seeding fails
+        // This allows manual database setup if needed
+    }
 }
 
 // Configure the HTTP request pipeline
