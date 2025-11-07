@@ -107,13 +107,7 @@ public class PayOsService
             _logger.LogInformation("📥 [PayOs] Response status: {Status}", response.StatusCode);
             _logger.LogInformation("📥 [PayOs] Response body: {Body}", responseContent);
 
-            if (!response.IsSuccessStatusCode)
-            {
-                _logger.LogError("❌ [PayOs] Failed to create payment link: {Status} - {Content}", 
-                    response.StatusCode, responseContent);
-                return null;
-            }
-
+            // Parse response even if status code is not success to get error details
             PayOsPaymentLinkResponse? result = null;
             try
             {
@@ -122,7 +116,19 @@ public class PayOsService
             catch (JsonException jsonEx)
             {
                 _logger.LogError(jsonEx, "❌ [PayOs] Failed to deserialize response: {ResponseBody}", responseContent);
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogError("❌ [PayOs] HTTP Error: {Status} - {Content}", response.StatusCode, responseContent);
+                }
                 return null;
+            }
+
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogError("❌ [PayOs] HTTP Error: {Status} - {Content}", response.StatusCode, responseContent);
+                _logger.LogError("❌ [PayOs] PayOs Error Code: {Code}, Desc: {Desc}", 
+                    result?.Code ?? "NULL", result?.Desc ?? "NULL");
+                return result; // Return result để controller có thể lấy error message
             }
             
             if (result?.Code == "00" && result.Data != null)

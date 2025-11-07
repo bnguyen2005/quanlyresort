@@ -272,14 +272,24 @@ public class SimplePaymentController : ControllerBase
                 expiredAt: expiredAt
             );
 
-            if (paymentLink == null || paymentLink.Data == null)
+            if (paymentLink == null)
             {
-                _logger.LogError("❌ [CreateLink] Failed to create PayOs payment link. Code: {Code}, Desc: {Desc}", 
-                    paymentLink?.Code, paymentLink?.Desc);
+                _logger.LogError("❌ [CreateLink] PayOs service returned null");
                 return StatusCode(500, new { 
-                    message = $"Không thể tạo mã thanh toán. {paymentLink?.Desc ?? "Vui lòng thử lại."}",
-                    code = paymentLink?.Code,
-                    desc = paymentLink?.Desc
+                    message = "Không thể tạo mã thanh toán. Vui lòng thử lại.",
+                    error = "PayOs service returned null"
+                });
+            }
+
+            if (paymentLink.Data == null)
+            {
+                _logger.LogError("❌ [CreateLink] PayOs returned error. Code: {Code}, Desc: {Desc}", 
+                    paymentLink.Code, paymentLink.Desc);
+                return StatusCode(500, new { 
+                    message = $"Không thể tạo mã thanh toán. {paymentLink.Desc ?? "Vui lòng thử lại."}",
+                    code = paymentLink.Code,
+                    desc = paymentLink.Desc,
+                    error = "PayOs API returned error"
                 });
             }
 
@@ -313,15 +323,17 @@ public class SimplePaymentController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "❌ [CreateLink] Error creating payment link: {Message}", ex.Message);
+            _logger.LogError(ex, "❌ [CreateLink] Exception creating payment link: {Message}", ex.Message);
             if (ex.InnerException != null)
             {
                 _logger.LogError(ex.InnerException, "❌ [CreateLink] Inner exception: {Message}", ex.InnerException.Message);
             }
+            _logger.LogError("❌ [CreateLink] Stack trace: {StackTrace}", ex.StackTrace);
             return StatusCode(500, new { 
                 message = "Lỗi tạo mã thanh toán", 
                 error = ex.Message,
-                innerError = ex.InnerException?.Message
+                innerError = ex.InnerException?.Message,
+                stackTrace = ex.StackTrace
             });
         }
     }
