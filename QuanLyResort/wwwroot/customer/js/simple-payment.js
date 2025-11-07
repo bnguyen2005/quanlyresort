@@ -217,18 +217,82 @@ async function updatePaymentModal(bookingId, bookingCode, amount) {
 
     const result = await response.json();
     console.log('✅ [updatePaymentModal] PayOs payment link created:', result);
+    console.log('🔍 [updatePaymentModal] Full PayOs response:', JSON.stringify(result, null, 2));
 
-    if (!result.success || !result.qrCode) {
-      throw new Error('Không thể tạo mã thanh toán từ PayOs');
+    // Check if we have QR code - PayOs có thể trả về:
+    // 1. URL QR: "https://img.vietqr.io/image/..."
+    // 2. Base64: "iVBORw0KGgoAAAANSUhEUgAA..."
+    // 3. Không có QR code, chỉ có checkoutUrl
+    let qrCodeData = result.qrCode || result.data?.qrCode || result.qrCodeBase64;
+    console.log('🔍 [updatePaymentModal] QR Code data type:', typeof qrCodeData);
+    console.log('🔍 [updatePaymentModal] QR Code data length:', qrCodeData?.length || 0);
+    console.log('🔍 [updatePaymentModal] QR Code data preview:', qrCodeData?.substring(0, 50) || 'NULL');
+    console.log('🔍 [updatePaymentModal] Has checkoutUrl:', !!result.checkoutUrl);
+
+    if (!result.success) {
+      throw new Error(`PayOs API error: ${result.desc || result.message || 'Unknown error'}`);
     }
 
-    // Display QR code from PayOs (base64)
+    // Display QR code from PayOs
     if (qrImg) {
-      // PayOs returns base64 QR code image
-      qrImg.src = `data:image/png;base64,${result.qrCode}`;
-      qrImg.style.display = 'block';
-      qrImg.alt = `PayOs QR - ${bookingCode}`;
-      console.log('✅ [updatePaymentModal] QR image set from PayOs');
+      if (qrCodeData) {
+        // Case 1: QR code là URL (https://...)
+        if (qrCodeData.startsWith('http://') || qrCodeData.startsWith('https://')) {
+          console.log('🌐 [updatePaymentModal] QR Code is URL:', qrCodeData);
+          qrImg.src = qrCodeData;
+          qrImg.style.display = 'block';
+          qrImg.alt = `PayOs QR - ${bookingCode}`;
+          
+          qrImg.onerror = function(e) {
+            console.error('❌ [updatePaymentModal] QR URL failed to load:', e);
+            generateQRFromCheckoutUrl(result.checkoutUrl, qrImg.parentElement);
+          };
+          
+          qrImg.onload = function() {
+            console.log('✅ [updatePaymentModal] QR URL loaded successfully');
+            qrImg.style.border = '4px solid #e9ecef';
+          };
+        }
+        // Case 2: QR code là Base64
+        else {
+          console.log('📦 [updatePaymentModal] QR Code is Base64');
+          // Remove any whitespace/newlines from base64 string
+          qrCodeData = qrCodeData.trim().replace(/\s/g, '');
+          
+          // Check if it's already a data URL
+          let qrSrc = qrCodeData;
+          if (!qrCodeData.startsWith('data:')) {
+            // Add data URL prefix if not present
+            qrSrc = `data:image/png;base64,${qrCodeData}`;
+          }
+          
+          console.log('🖼️ [updatePaymentModal] Setting QR image src (first 100 chars):', qrSrc.substring(0, 100));
+          
+          qrImg.src = qrSrc;
+          qrImg.style.display = 'block';
+          qrImg.alt = `PayOs QR - ${bookingCode}`;
+          
+          qrImg.onerror = function(e) {
+            console.error('❌ [updatePaymentModal] QR Base64 failed to load:', e);
+            console.error('❌ [updatePaymentModal] Failed src (first 200 chars):', qrSrc.substring(0, 200));
+            generateQRFromCheckoutUrl(result.checkoutUrl, qrImg.parentElement);
+          };
+          
+          qrImg.onload = function() {
+            console.log('✅ [updatePaymentModal] QR Base64 loaded successfully');
+            qrImg.style.border = '4px solid #e9ecef';
+          };
+        }
+      } 
+      // Case 3: Không có QR code, chỉ có checkoutUrl - tự generate QR code
+      else if (result.checkoutUrl) {
+        console.log('🔄 [updatePaymentModal] No QR code, generating from checkoutUrl');
+        generateQRFromCheckoutUrl(result.checkoutUrl, qrImg.parentElement);
+      } 
+      else {
+        console.error('❌ [updatePaymentModal] No QR code and no checkoutUrl');
+        throw new Error('PayOs không trả về QR code hoặc checkout URL');
+      }
     }
 
     // Show QR section
@@ -245,6 +309,16 @@ async function updatePaymentModal(bookingId, bookingCode, amount) {
     if (result.accountName) {
       const bankNameEl = document.getElementById('spBankName');
       if (bankNameEl) bankNameEl.textContent = result.accountName;
+    }
+
+    // Update amount from PayOs response (to ensure accuracy)
+    if (result.amount && result.amount > 0) {
+      const amountEl = document.getElementById('spAmount');
+      if (amountEl) {
+        // PayOs returns amount in VND (integer)
+        amountEl.textContent = formatCurrency(result.amount);
+        console.log('✅ [updatePaymentModal] Amount updated from PayOs:', result.amount);
+      }
     }
 
     // Update content
@@ -276,6 +350,84 @@ async function updatePaymentModal(bookingId, bookingCode, amount) {
     }
     
     showSimpleToast(`Lỗi tạo mã thanh toán: ${error.message}`, 'danger');
+  }
+}
+
+/**
+ * Generate QR code from checkoutUrl using QRCode.js library
+ * Fallback khi PayOs không trả về QR code
+ */
+function generateQRFromCheckoutUrl(checkoutUrl, container) {
+  if (!checkoutUrl) {
+    console.error('❌ [generateQRFromCheckoutUrl] No checkoutUrl provided');
+    return;
+  }
+
+  if (!container) {
+    console.error('❌ [generateQRFromCheckoutUrl] No container provided');
+    return;
+  }
+
+  console.log('🔄 [generateQRFromCheckoutUrl] Generating QR code from checkoutUrl:', checkoutUrl);
+
+  // Check if QRCode.js is loaded
+  if (typeof QRCode === 'undefined') {
+    console.error('❌ [generateQRFromCheckoutUrl] QRCode.js library not loaded');
+    // Fallback: show link button
+    container.innerHTML = `
+      <div class="text-center">
+        <a href="${checkoutUrl}" target="_blank" class="btn btn-primary btn-lg">
+          <i class="icon-credit-card"></i> Click để thanh toán qua PayOs
+        </a>
+        <p class="mt-2 text-muted">QR code không khả dụng. Vui lòng click nút trên để thanh toán.</p>
+      </div>
+    `;
+    return;
+  }
+
+  // Clear container
+  container.innerHTML = '';
+
+  // Create QR code container
+  const qrContainer = document.createElement('div');
+  qrContainer.id = 'qrcode-' + Date.now();
+  qrContainer.style.display = 'inline-block';
+  qrContainer.style.padding = '15px';
+  qrContainer.style.background = 'white';
+  qrContainer.style.borderRadius = '15px';
+  qrContainer.style.border = '4px solid #e9ecef';
+  container.appendChild(qrContainer);
+
+  try {
+    // Generate QR code
+    new QRCode(qrContainer, {
+      text: checkoutUrl,
+      width: 300,
+      height: 300,
+      colorDark: '#000000',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.H
+    });
+
+    console.log('✅ [generateQRFromCheckoutUrl] QR code generated successfully');
+
+    // Add click handler to open checkout URL
+    qrContainer.style.cursor = 'pointer';
+    qrContainer.title = 'Click để mở trang thanh toán';
+    qrContainer.onclick = function() {
+      window.open(checkoutUrl, '_blank');
+    };
+  } catch (error) {
+    console.error('❌ [generateQRFromCheckoutUrl] Error generating QR code:', error);
+    // Fallback: show link button
+    container.innerHTML = `
+      <div class="text-center">
+        <a href="${checkoutUrl}" target="_blank" class="btn btn-primary btn-lg">
+          <i class="icon-credit-card"></i> Click để thanh toán qua PayOs
+        </a>
+        <p class="mt-2 text-muted">QR code không khả dụng. Vui lòng click nút trên để thanh toán.</p>
+      </div>
+    `;
   }
 }
 

@@ -135,8 +135,25 @@ public class PayOsService
             
             if (result?.Code == "00" && result.Data != null)
             {
-                _logger.LogInformation("✅ [PayOs] Payment link created: PaymentLinkId={PaymentLinkId}, QRCode={HasQR}", 
-                    result.Data.PaymentLinkId, !string.IsNullOrEmpty(result.Data.QrCode));
+                _logger.LogInformation("✅ [PayOs] Payment link created: PaymentLinkId={PaymentLinkId}", 
+                    result.Data.PaymentLinkId);
+                
+                // Log QR code details
+                var hasQrCode = !string.IsNullOrEmpty(result.Data.QrCode);
+                _logger.LogInformation("🔍 [PayOs] QR Code available: {HasQR}, Length: {Length}", 
+                    hasQrCode, result.Data.QrCode?.Length ?? 0);
+                
+                if (hasQrCode)
+                {
+                    _logger.LogInformation("🔍 [PayOs] QR Code preview (first 50 chars): {Preview}", 
+                        result.Data.QrCode.Substring(0, Math.Min(50, result.Data.QrCode.Length)));
+                }
+                else
+                {
+                    _logger.LogWarning("⚠️ [PayOs] QR Code is NULL or empty. Available fields: PaymentLinkId={PaymentLinkId}, CheckoutUrl={CheckoutUrl}", 
+                        result.Data.PaymentLinkId, result.Data.CheckoutUrl);
+                }
+                
                 return result;
             }
             else

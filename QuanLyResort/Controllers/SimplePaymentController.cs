@@ -285,13 +285,24 @@ public class SimplePaymentController : ControllerBase
 
             _logger.LogInformation("✅ [CreateLink] Payment link created: PaymentLinkId={PaymentLinkId}", 
                 paymentLink.Data.PaymentLinkId);
+            
+            // Log QR code details
+            var hasQrCode = !string.IsNullOrEmpty(paymentLink.Data.QrCode);
+            _logger.LogInformation("🔍 [CreateLink] QR Code in response: {HasQR}, Length: {Length}", 
+                hasQrCode, paymentLink.Data.QrCode?.Length ?? 0);
+            
+            if (!hasQrCode)
+            {
+                _logger.LogWarning("⚠️ [CreateLink] PayOs did not return QR code. CheckoutUrl: {CheckoutUrl}", 
+                    paymentLink.Data.CheckoutUrl);
+            }
 
             return Ok(new
             {
                 success = true,
                 paymentLinkId = paymentLink.Data.PaymentLinkId,
                 orderCode = paymentLink.Data.OrderCode,
-                qrCode = paymentLink.Data.QrCode, // Base64 QR code image
+                qrCode = paymentLink.Data.QrCode, // Base64 QR code image (may be null)
                 checkoutUrl = paymentLink.Data.CheckoutUrl,
                 amount = paymentLink.Data.Amount,
                 description = paymentLink.Data.Description,
