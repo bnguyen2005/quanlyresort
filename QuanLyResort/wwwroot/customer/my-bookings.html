@@ -1,0 +1,1763 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Đặt phòng của tôi | Resort</title>
+  <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/globals.css">
+  <link rel="stylesheet" href="/css/grid.css">
+  <link rel="stylesheet" href="/css/components/navbar.css">
+  <link rel="stylesheet" href="css/navbar-auth.css">
+  <link rel="stylesheet" href="css/open-iconic-bootstrap.min.css">
+  <!-- SignalR removed - using simple polling instead -->
+  <style>
+    body{font-family:'Poppins',sans-serif;padding-top:0;overflow-x:hidden;background:#f8f9fa}
+    .ftco-navbar{position:sticky!important;top:0!important;z-index:1030!important;background-color:#1a1a1a!important;width:100%!important;margin:0!important}
+    
+    /* Modern Hero Section - Same as other pages */
+    .rooms-hero {
+      background-image: url('images/bg_1.jpg');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      background-repeat: no-repeat;
+      padding: 140px 0 100px;
+      color: #fff;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 60px;
+      min-height: 500px;
+      display: flex;
+      align-items: center;
+    }
+    .rooms-hero::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(135deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 100%);
+      z-index: 0;
+    }
+    .rooms-hero::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+      opacity: 0.3;
+      z-index: 1;
+    }
+    .rooms-hero-content {
+      position: relative;
+      z-index: 2;
+      animation: slideUp 0.8s ease;
+      width: 100%;
+    }
+    .rooms-hero h1 {
+      font-size: 48px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: #ffffff !important;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      animation: fadeInDown 1s ease;
+    }
+    .rooms-hero p {
+      font-size: 20px;
+      color: #ffffff !important;
+      opacity: 0.95;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      animation: fadeInUp 1.2s ease;
+    }
+    
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .rooms-hero {
+        padding: 100px 0 60px;
+        min-height: 400px;
+      }
+      .rooms-hero h1 {
+        font-size: 32px;
+      }
+      .rooms-hero p {
+        font-size: 16px;
+      }
+    }
+    
+    .booking-card{background:#fff;padding:30px;border-radius:20px;box-shadow:0 10px 40px rgba(0,0,0,0.1);margin-bottom:25px;transition:all 0.3s;animation:slideUp 0.6s ease forwards;opacity:0}
+    .booking-card:nth-child(1){animation-delay:0.1s}
+    .booking-card:nth-child(2){animation-delay:0.2s}
+    .booking-card:nth-child(3){animation-delay:0.3s}
+    .booking-card:hover{transform:translateY(-5px);box-shadow:0 15px 50px rgba(0,0,0,0.15)}
+    
+    .booking-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:20px;border-bottom:2px solid #e9ecef}
+    .booking-code{font-size:24px;font-weight:700;color:#c8a97e}
+    .booking-status{display:inline-block;padding:8px 20px;border-radius:20px;font-weight:600;font-size:14px}
+    
+    .booking-details{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;margin:20px 0}
+    .detail-item{padding:15px;background:#f8f9fa;border-radius:10px}
+    .detail-label{font-size:12px;color:#666;text-transform:uppercase;margin-bottom:5px}
+    .detail-value{font-size:18px;font-weight:600;color:#1a1a1a}
+    
+    .status-pending{background:#fff3cd;color:#856404}
+    .status-confirmed{background:#d1ecf1;color:#0c5460}
+    .status-paid{background:#d4edda;color:#155724;border:2px solid #c3e6cb}
+    .status-assigned{background:#cfe2ff;color:#084298}
+    .status-checkedin{background:#d1e7dd;color:#0f5132}
+    .status-checkedout{background:#e2e3e5;color:#41464b}
+    .status-cancelled{background:#f8d7da;color:#842029}
+    
+    .booking-actions{display:flex;gap:10px;margin-top:20px}
+    
+    /* Modal payment styling - ensure visible and scrollable */
+    #payListModal .modal-dialog{
+      max-height:90vh;
+      margin:1.75rem auto;
+      z-index:9999;
+    }
+    #payListModal .modal-content{
+      max-height:90vh;
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+    }
+    #payListModal .modal-body{
+      max-height:calc(90vh - 150px);
+      overflow-y:auto;
+      overflow-x:hidden;
+      padding:30px;
+    }
+    #payListModal .modal-footer{
+      flex-shrink:0;
+      position:sticky;
+      bottom:0;
+      background:#fff;
+      z-index:10;
+      border-top:2px solid #f0f0f0;
+      margin-top:auto;
+    }
+    #payListModal #plVqrImg{
+      max-width:100%;
+      width:320px;
+      height:320px;
+      border:4px solid #e9ecef;
+      border-radius:20px;
+      padding:15px;
+      background:#fff;
+      box-shadow:0 8px 25px rgba(0,0,0,0.15);
+      object-fit:contain;
+    }
+    @media(max-width:768px){
+      #payListModal .modal-dialog{
+        max-height:95vh;
+        margin:0.5rem;
+      }
+      #payListModal .modal-content{
+        max-height:95vh;
+      }
+      #payListModal .modal-body{
+        max-height:calc(95vh - 140px);
+        padding:20px;
+      }
+      #payListModal #plVqrImg{
+        width:280px;
+        height:280px;
+      }
+    }
+    
+    @keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+  </style>
+</head>
+<body>
+  <!-- Header placeholder - will be loaded by load-header.js -->
+  <div id="header-placeholder"></div>
+  
+  <!-- Load header component -->
+  <script src="js/load-header.js"></script>
+
+  <!-- Hero Section -->
+  <section class="rooms-hero">
+    <div class="container">
+      <div class="rooms-hero-content">
+        <h1>📅 Đặt phòng của tôi</h1>
+        <p>Xem và quản lý các đặt phòng của bạn</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="container mb-5 mt-4">
+    <div id="bookingsList">
+      <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="sr-only">Loading...</span>
+        </div>
+        <p class="mt-3 text-muted">Đang tải danh sách đặt phòng...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Thanh toán (My Bookings) -->
+  <div class="modal fade" id="payListModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content" style="border-radius:20px;overflow:hidden">
+        <div class="modal-header" style="background:linear-gradient(135deg,#c8a97e 0%,#b89968 100%);color:#fff;border:none;padding:25px 30px">
+          <h5 class="modal-title" style="font-size:24px;font-weight:700;margin:0">💳 Chọn phương thức thanh toán</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" style="opacity:1"></button>
+        </div>
+        <div class="modal-body" style="padding:30px">
+          <div class="mb-4">
+            <label class="form-label" style="font-size:16px;font-weight:600;margin-bottom:12px;display:block">
+              📱 Chọn phương thức thanh toán
+            </label>
+            <select id="plPaymentMethod" class="form-select" style="min-height:56px;font-size:16px;padding:16px 45px 16px 18px;border:2px solid #e9ecef;border-radius:12px">
+              <option value="BankTransfer" selected>💳 Chuyển khoản qua QR (VietQR)</option>
+              <option value="Cash">💵 Thanh toán tại khách sạn</option>
+            </select>
+          </div>
+          
+          <div id="plBankSection" class="mt-3">
+            <p class="mb-4" style="font-size:16px;line-height:1.6;color:#555">
+              <strong style="color:#1a1a1a;font-size:17px">Chuyển khoản nhanh qua QR.</strong><br>
+              Nội dung chuyển khoản: <code style="background:#f8f9fa;padding:8px 12px;border-radius:8px;font-size:15px;font-weight:600;color:#c8a97e">BOOKING-<span id="plCode2">#</span></code>
+            </p>
+            <div class="text-center mb-4">
+              <img id="plVqrImg" alt="VietQR">
+            </div>
+            <div class="card" style="background:#f8f9fa;border:2px solid #e9ecef;border-radius:15px;padding:25px">
+              <div style="font-size:16px;line-height:2">
+                <div class="mb-3"><strong style="color:#1a1a1a;font-size:17px">Ngân hàng:</strong> <span id="plBankName" style="color:#555;font-size:16px">MBBank</span></div>
+                <div class="mb-3"><strong style="color:#1a1a1a;font-size:17px">STK:</strong> <span id="plBankAcc" style="color:#555;font-size:16px;font-weight:600">0901329227</span> · <strong style="color:#1a1a1a;font-size:17px">CTK:</strong> <span id="plBankAccName" style="color:#555;font-size:16px">Resort Deluxe</span></div>
+                <div class="mb-0"><strong style="color:#1a1a1a;font-size:17px">Số tiền:</strong> <span id="plAmount" style="color:#c8a97e;font-size:20px;font-weight:700">0 ₫</span></div>
+              </div>
+            </div>
+          </div>
+          
+          <div id="plCashSection" class="mt-3" style="display:none">
+            <div class="alert alert-info" style="padding:20px;border-radius:12px;border-left:4px solid #0dcaf0">
+              <h6 style="font-weight:700;margin-bottom:10px">💵 Thanh toán tại khách sạn</h6>
+              <p style="margin:0;font-size:15px">
+                Bạn có thể thanh toán bằng tiền mặt hoặc thẻ tại quầy lễ tân khi làm thủ tục check-in.
+                <br><strong>Địa chỉ:</strong> 123 Đường Biển Xanh, Thành phố Biển, Việt Nam
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer" style="border-top:2px solid #f0f0f0;padding:20px 30px">
+          <button class="btn btn-outline-secondary" data-bs-dismiss="modal" style="padding:12px 28px;font-size:16px;font-weight:600;border-radius:10px">Đóng</button>
+          <div id="plPaymentStatus" style="text-align:center;flex:1;padding:0 20px">
+            <div id="plWaitingMessage" style="display:none;color:#0dcaf0;font-weight:600;font-size:15px">
+              <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+              <span id="plWaitingText">Đang chờ xác nhận thanh toán...</span>
+            </div>
+            <div id="plPaidMessage" style="display:none;color:#198754;font-weight:600;font-size:15px">
+              <span class="oi oi-check me-2"></span>
+              Thanh toán thành công! Đang cập nhật...
+            </div>
+            <div id="plFailedMessage" style="display:none;color:#dc3545;font-weight:600;font-size:15px">
+              <span class="oi oi-x me-2"></span>
+              Thanh toán thất bại
+            </div>
+            <div id="plExpiredMessage" style="display:none;color:#ffc107;font-weight:600;font-size:15px">
+              <span class="oi oi-clock me-2"></span>
+              QR đã hết hạn
+            </div>
+            <div id="plTimer" style="display:none;color:#6c757d;font-size:14px;margin-top:8px">
+              ⏰ Thời gian còn lại: <span id="plTimerValue">15:00</span>
+            </div>
+          </div>
+          <!-- Test Payment Button (chỉ hiển thị khi localhost hoặc development) -->
+          <button id="plTestPaymentBtn" class="btn btn-warning" onclick="testPayment()" style="display:none;padding:12px 28px;font-size:14px;font-weight:600;border-radius:10px">
+            🧪 Test Payment
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Thanh Toán Đơn Giản -->
+  <div class="modal fade" id="simplePaymentModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content" style="border-radius: 20px;">
+        <div class="modal-header" style="background: linear-gradient(135deg, #c8a97e 0%, #b89968 100%); color: white;">
+          <h5 class="modal-title" style="font-size: 24px; font-weight: 700;">💳 Thanh Toán</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" style="padding: 30px;">
+          <div class="text-center mb-4">
+            <h6>Mã đặt phòng: <strong id="spBookingCode">-</strong></h6>
+            <h4 class="text-primary">Số tiền: <span id="spAmount">0 ₫</span></h4>
+          </div>
+
+          <div id="spQRSection">
+            <p class="text-center mb-3">
+              <strong>Nội dung chuyển khoản:</strong><br>
+              <code id="spContent" style="background: #f8f9fa; padding: 8px 12px; border-radius: 8px; font-size: 16px; font-weight: 600;">BOOKING-</code>
+            </p>
+            <div class="text-center mb-4">
+              <img id="spQRImage" alt="QR Code" style="max-width: 300px; border: 4px solid #e9ecef; border-radius: 15px; padding: 15px; display: none;">
+            </div>
+            <div class="card" style="background: #f8f9fa; padding: 20px; border-radius: 12px;">
+              <p class="mb-2"><strong>Ngân hàng:</strong> MBBank</p>
+              <p class="mb-2"><strong>Số tài khoản:</strong> <span id="spBankAccount">0901329227</span></p>
+              <p class="mb-0"><strong>Chủ tài khoản:</strong> <span id="spBankName">Resort Deluxe</span></p>
+            </div>
+          </div>
+
+          <div id="spWaiting" class="text-center mt-4" style="display: block;">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2">Đang chờ thanh toán...</p>
+          </div>
+
+          <div id="spSuccess" class="text-center mt-4" style="display: none;">
+            <div class="alert alert-success">
+              <h5>✅ Thanh toán thành công!</h5>
+              <p>Đang cập nhật thông tin...</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/jquery.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js/popper.min.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="js/navbar-auth.js"></script>
+  <!-- payment-websocket.js removed - using simple-payment.js instead -->
+  <script src="js/simple-payment.js"></script>
+  <script>
+    let customerId = null;
+    // BANK_CODE, BANK_ACCOUNT, BANK_ACCOUNT_NAME are defined in simple-payment.js
+
+    function vnd(n) {
+      try {
+        // IMPORTANT: VND has no minor units (no cents), so we must set minimumFractionDigits: 0
+        // to prevent automatic division by 100
+        return new Intl.NumberFormat('vi-VN', {
+          style: 'currency', 
+          currency: 'VND',
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0
+        }).format(n || 0);
+      } catch(_) {
+        return (n || 0).toLocaleString('vi-VN') + ' ₫';
+      }
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '-';
+      const d = new Date(dateStr);
+      return d.toLocaleDateString('vi-VN');
+    }
+
+    function getStatusClass(status) {
+      const classes = {
+        'Pending': 'status-pending',
+        'Confirmed': 'status-confirmed',
+        'Paid': 'status-paid',
+        'Assigned': 'status-assigned',
+        'CheckedIn': 'status-checkedin',
+        'CheckedOut': 'status-checkedout',
+        'Cancelled': 'status-cancelled'
+      };
+      return classes[status] || 'status-pending';
+    }
+
+    function getStatusText(status) {
+      const texts = {
+        'Pending': '⏳ Chờ xác nhận',
+        'Confirmed': '✅ Đã xác nhận',
+        'Paid': '💰 Đã thanh toán',
+        'Assigned': '🏨 Đã phân phòng',
+        'CheckedIn': '🔑 Đã nhận phòng',
+        'CheckedOut': '👋 Đã trả phòng',
+        'Cancelled': '❌ Đã hủy'
+      };
+      return texts[status] || status;
+    }
+    
+    function formatPaymentDate(dateString) {
+      if (!dateString) return '-';
+      try {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffMs = now - date;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+        
+        if (diffMins < 1) return 'Vừa xong';
+        if (diffMins < 60) return `${diffMins} phút trước`;
+        if (diffHours < 24) return `${diffHours} giờ trước`;
+        if (diffDays < 7) return `${diffDays} ngày trước`;
+        
+        return formatDate(dateString);
+      } catch(e) {
+        return formatDate(dateString);
+      }
+    }
+    
+    function canPayBooking(booking) {
+      // Chỉ cho phép thanh toán khi booking ở trạng thái Pending hoặc Confirmed và chưa thanh toán
+      return (booking.status === 'Pending' || booking.status === 'Confirmed') && booking.status !== 'Paid';
+    }
+
+    function escapeHtml(str){
+      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function renderSpecialRequests(special){
+      if (!special) return '';
+      try{
+        const obj = JSON.parse(special);
+        if (obj && typeof obj === 'object'){
+          const map = [
+            ['guestName','Họ tên'],
+            ['guestEmail','Email'],
+            ['guestPhone','SĐT'],
+            ['nationality','Quốc tịch'],
+            ['idCard','CMND/CCCD'],
+            ['passport','Hộ chiếu'],
+            ['address','Địa chỉ'],
+            ['arrivalTime','Giờ đến dự kiến'],
+            ['flightNumber','Chuyến bay'],
+            ['paymentMethod','Thanh toán'],
+            ['note','Ghi chú']
+          ];
+          const rows = map
+            .filter(([k]) => obj[k])
+            .map(([k,label]) => `<div class="d-flex justify-content-between"><span class="text-muted">${label}</span><span class="fw-semibold">${escapeHtml(obj[k])}</span></div>`)
+            .join('');
+          if (rows) return `<div class="mt-3 p-3 bg-light rounded"><strong>Thông tin bổ sung:</strong><div class="mt-2">${rows}</div></div>`;
+        }
+      }catch(_){ /* not JSON */ }
+      return `<div class="mt-3 p-3 bg-light rounded"><strong>Yêu cầu đặc biệt:</strong><p class="mb-0">${escapeHtml(special)}</p></div>`;
+    }
+
+    function getCustomerIdFromToken(token) {
+      try {
+        const parts = token.split('.');
+        if (parts.length >= 2) {
+          const payload = JSON.parse(atob(parts[1]));
+          return payload.CustomerId || payload.customerId || null;
+        }
+      } catch(e) {
+        console.warn('Error decoding token:', e);
+      }
+      return null;
+    }
+
+    // Fetch booking detail for amount calculation (async, updates UI after fetch)
+    async function fetchBookingDetailForAmount(bookingId, bookingObj) {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+        
+        const detailUrl = `${location.origin}/api/bookings/${bookingId}?_=${Date.now()}`;
+        const detailResp = await fetch(detailUrl, {
+          headers: { 'Authorization': `Bearer ${token}` },
+          cache: 'no-store'
+        });
+        
+        if (detailResp.ok) {
+          const detail = await detailResp.json();
+          console.log(`✅ [fetchBookingDetailForAmount] Fetched detail for booking ${bookingId}:`, detail);
+          
+          // Calculate amount from detail (same logic as payBooking)
+          let amount = Number(detail.estimatedTotalAmount ?? detail.totalAmount ?? detail.amount ?? 0);
+          
+          // Trust backend amount - Database đã được sửa về giá đúng (5,000 VND)
+          // Không cần correction nữa
+          console.log(`✅ [fetchBookingDetailForAmount] Booking ${bookingId}: Using amount from backend:`, amount);
+          
+          if (amount <= 0 && detail.checkInDate && detail.checkOutDate) {
+            const checkin = new Date(detail.checkInDate);
+            const checkout = new Date(detail.checkOutDate);
+            const nights = Math.ceil((checkout - checkin) / (1000 * 60 * 60 * 24));
+            
+            // Try multiple ways to get room price (same as payBooking)
+            let roomPrice = 0;
+            if (detail.room?.pricePerNight) {
+              roomPrice = Number(detail.room.pricePerNight);
+              console.log(`✅ [fetchBookingDetailForAmount] Room price from room.pricePerNight: ${roomPrice}`);
+            } else if (detail.room?.roomTypeNavigation?.pricePerNight) {
+              roomPrice = Number(detail.room.roomTypeNavigation.pricePerNight);
+              console.log(`✅ [fetchBookingDetailForAmount] Room price from roomTypeNavigation.pricePerNight: ${roomPrice}`);
+            } else if (detail.pricePerNight) {
+              roomPrice = Number(detail.pricePerNight);
+              console.log(`✅ [fetchBookingDetailForAmount] Room price from bookingDetail.pricePerNight: ${roomPrice}`);
+            } else if (detail.roomPrice) {
+              roomPrice = Number(detail.roomPrice);
+              console.log(`✅ [fetchBookingDetailForAmount] Room price from bookingDetail.roomPrice: ${roomPrice}`);
+            } else {
+              // Try to fetch room by RequestedRoomType (same as payBooking)
+              console.log('🔵 [fetchBookingDetailForAmount] No room price found, trying to fetch by requestedRoomType...');
+              const requestedType = detail?.requestedRoomType || bookingObj?.requestedRoomType;
+              if (requestedType) {
+                try {
+                  const roomsResp = await fetch(`${location.origin}/api/rooms?roomTypeId=${detail?.roomTypeId || ''}&_=${Date.now()}`, {
+                    cache: 'no-store',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                  });
+                  if (roomsResp.ok) {
+                    const rooms = await roomsResp.json();
+                    const matchingRoom = Array.isArray(rooms) ? rooms.find(r => 
+                      r.roomTypeName === requestedType || 
+                      r.roomType === requestedType ||
+                      r.typeName === requestedType
+                    ) : null;
+                    if (matchingRoom?.pricePerNight) {
+                      roomPrice = Number(matchingRoom.pricePerNight);
+                      console.log(`✅ [fetchBookingDetailForAmount] Room price from API search: ${roomPrice}`);
+                    }
+                  }
+                } catch(e) {
+                  console.error('❌ [fetchBookingDetailForAmount] Error fetching rooms:', e);
+                }
+              }
+            }
+            
+            if (nights > 0 && roomPrice > 0) {
+              amount = nights * roomPrice;
+              console.log(`✅ [fetchBookingDetailForAmount] Calculated: ${vnd(amount)} (${nights} nights × ${vnd(roomPrice)})`);
+            } else {
+              console.warn(`⚠️ [fetchBookingDetailForAmount] Cannot calculate: nights=${nights}, roomPrice=${roomPrice}`);
+            }
+          }
+          
+          if (amount > 0) {
+            // Update booking object
+            bookingObj.estimatedTotalAmount = amount;
+            console.log(`✅ [fetchBookingDetailForAmount] Updated amount for booking ${bookingId}: ${vnd(amount)}`);
+            
+            // Update UI
+            updateBookingCardAmount(bookingId, amount, detail.bookingCode);
+          }
+        }
+      } catch(e) {
+        console.error(`❌ [fetchBookingDetailForAmount] Error for booking ${bookingId}:`, e);
+      }
+    }
+    
+    // Fetch booking detail synchronously and return calculated amount (for initial render)
+    async function fetchBookingDetailForAmountSync(bookingId, bookingObj) {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return 0;
+        
+        const detailUrl = `${location.origin}/api/bookings/${bookingId}?_=${Date.now()}`;
+        const detailResp = await fetch(detailUrl, {
+          headers: { 'Authorization': `Bearer ${token}` },
+          cache: 'no-store'
+        });
+        
+        if (!detailResp.ok) return 0;
+        
+        const detail = await detailResp.json();
+        console.log(`✅ [fetchBookingDetailForAmountSync] Fetched detail for booking ${bookingId}`);
+        
+        // Calculate amount (same logic as payBooking)
+        let amount = Number(detail.estimatedTotalAmount ?? detail.totalAmount ?? detail.amount ?? 0);
+        
+        // Trust backend amount - Database đã được sửa về giá đúng (5,000 VND)
+        // Không cần correction nữa
+        console.log(`✅ [fetchBookingDetailForAmountSync] Booking ${bookingId}: Using amount from backend:`, amount);
+        
+        if (amount <= 0 && detail.checkInDate && detail.checkOutDate) {
+          const checkin = new Date(detail.checkInDate);
+          const checkout = new Date(detail.checkOutDate);
+          const nights = Math.ceil((checkout - checkin) / (1000 * 60 * 60 * 24));
+          
+          let roomPrice = 0;
+          if (detail.room?.pricePerNight) {
+            roomPrice = Number(detail.room.pricePerNight);
+          } else if (detail.room?.roomTypeNavigation?.pricePerNight) {
+            roomPrice = Number(detail.room.roomTypeNavigation.pricePerNight);
+          } else if (detail.pricePerNight) {
+            roomPrice = Number(detail.pricePerNight);
+          } else if (detail.roomPrice) {
+            roomPrice = Number(detail.roomPrice);
+          }
+          
+          if (nights > 0 && roomPrice > 0) {
+            amount = nights * roomPrice;
+          }
+        }
+        
+        if (amount > 0) {
+          bookingObj.estimatedTotalAmount = amount;
+        }
+        
+        return amount;
+      } catch(e) {
+        console.error(`❌ [fetchBookingDetailForAmountSync] Error for booking ${bookingId}:`, e);
+        return 0;
+      }
+    }
+    
+    // Update booking card amount display
+    function updateBookingCardAmount(bookingId, amount, bookingCode) {
+      const bookingCards = document.querySelectorAll('.booking-card');
+      bookingCards.forEach((card) => {
+        const codeEl = card.querySelector('.booking-code');
+        if (codeEl && (codeEl.textContent.includes(`#${bookingId}`) || (bookingCode && codeEl.textContent.includes(`#${bookingCode}`)))) {
+          const amountEl = card.querySelector('.detail-value.text-primary');
+          if (amountEl) {
+            amountEl.textContent = vnd(amount);
+            console.log(`✅ [updateBookingCardAmount] Updated display for booking ${bookingId}`);
+          }
+        }
+      });
+    }
+
+    async function loadBookings() {
+      try {
+        const token = localStorage.getItem('token');
+        const userStr = localStorage.getItem('user');
+        
+        if (!token || !userStr) {
+          showToast('Vui lòng đăng nhập', 'warning');
+          setTimeout(() => window.location.href = '../admin/html/login.html', 2000);
+          return;
+        }
+
+        // Try to get CustomerId from token first, then from user object
+        let customerIdFromToken = getCustomerIdFromToken(token);
+        const user = JSON.parse(userStr);
+        customerId = customerIdFromToken || user.customerId || user.userId || user.CustomerId;
+        
+        console.log('🔵 [loadBookings] CustomerId from token:', customerIdFromToken);
+        console.log('🔵 [loadBookings] CustomerId from user:', user.customerId || user.userId || user.CustomerId);
+        console.log('🔵 [loadBookings] Final CustomerId:', customerId);
+        
+        if (!customerId) {
+          showToast('Không tìm thấy thông tin khách hàng. Vui lòng đăng nhập lại', 'danger');
+          setTimeout(() => window.location.href = '../admin/html/login.html', 2000);
+          return;
+        }
+
+        showPageLoading('Đang tải đặt phòng...');
+        
+        // Dùng endpoint /api/bookings/my để lấy theo JWT, tránh lệ thuộc CustomerId
+        const apiUrl = `${location.origin}/api/bookings/my?_=${Date.now()}`;
+        console.log('🔵 [loadBookings] Fetching:', apiUrl);
+        const resp = await fetch(apiUrl, {
+          cache: 'no-store',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        console.log('🔵 [loadBookings] Response status:', resp.status, resp.statusText);
+        if (!resp.ok) {
+          if (resp.status === 403) {
+            throw new Error('Bạn không có quyền truy cập. Vui lòng đăng nhập lại.');
+          }
+          const errorText = await resp.text();
+          console.error('❌ [loadBookings] API Error:', errorText);
+          throw new Error(errorText || 'Không thể tải danh sách đặt phòng');
+        }
+
+        const bookings = await resp.json();
+        const bookingsArray = Array.isArray(bookings) ? bookings : [];
+        
+        // Try to load room types for price calculation (if not cached)
+        if (!window._roomTypesCache) {
+          try {
+            const roomTypesResp = await fetch(`${location.origin}/api/room-types?_=${Date.now()}`, {
+              cache: 'no-store',
+              headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (roomTypesResp.ok) {
+              window._roomTypesCache = await roomTypesResp.json();
+              console.log('✅ [loadBookings] Room types cached for price calculation');
+            }
+          } catch(e) {
+            console.warn('⚠️ [loadBookings] Could not load room types:', e);
+          }
+        }
+        
+        // Check if any booking status changed to Paid (to show notification)
+        const oldBookings = window._bookings || [];
+        bookingsArray.forEach(newBooking => {
+          const oldBooking = oldBookings.find(b => b.bookingId === newBooking.bookingId);
+          if (oldBooking && oldBooking.status !== 'Paid' && newBooking.status === 'Paid') {
+            console.log('✅ [loadBookings] Payment detected! Booking', newBooking.bookingId, 'changed from', oldBooking.status, 'to Paid');
+            showToast(`✅ Thanh toán thành công cho đặt phòng ${newBooking.bookingCode}!`, 'success');
+            
+            // Nếu modal đang mở cho booking này, update UI
+            if (currentPollingBookingId === newBooking.bookingId) {
+              const paidMsg = document.getElementById('plPaidMessage');
+              const qrImg = document.getElementById('plVqrImg');
+              const bankSection = document.getElementById('plBankSection');
+              const waitingMsg = document.getElementById('plWaitingMessage');
+              
+              if (paidMsg) paidMsg.style.display = 'block';
+              if (waitingMsg) waitingMsg.style.display = 'none';
+              if (qrImg) qrImg.style.display = 'none';
+              if (bankSection) bankSection.style.display = 'none';
+              
+              // Dừng polling (using simple-payment.js)
+              if (window.paymentPollingInterval) {
+                clearInterval(window.paymentPollingInterval);
+                window.paymentPollingInterval = null;
+              }
+            }
+          }
+        });
+        
+        renderBookings(bookingsArray);
+        window._bookings = bookingsArray;
+        
+        // After rendering, fetch booking details for bookings with amount = 0
+        // This ensures all amounts are displayed correctly
+        setTimeout(() => {
+          bookingsArray.forEach(booking => {
+            const amount = Number(booking.estimatedTotalAmount ?? booking.totalAmount ?? booking.amount ?? booking.totalPrice ?? 0);
+            if (amount <= 0 && booking.bookingId) {
+              console.log(`🔵 [loadBookings] Fetching detail for booking ${booking.bookingId} (amount = 0)`);
+              fetchBookingDetailForAmount(booking.bookingId, booking);
+            }
+          });
+        }, 500); // Small delay to ensure DOM is ready
+        
+      } catch(e) {
+        console.error('Error loading bookings:', e);
+        showToast('Lỗi: ' + e.message, 'danger');
+        document.getElementById('bookingsList').innerHTML = `
+          <div class="alert alert-warning">
+            <h5>Không thể tải danh sách đặt phòng</h5>
+            <p>${e.message}</p>
+          </div>
+        `;
+      } finally {
+        hidePageLoading();
+      }
+    }
+
+    function renderBookings(bookings) {
+      const container = document.getElementById('bookingsList');
+      
+      if (!Array.isArray(bookings) || bookings.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-5">
+            <div style="font-size:80px;margin-bottom:20px">📭</div>
+            <h4>Chưa có đặt phòng nào</h4>
+            <p class="text-muted">Bắt đầu đặt phòng ngay để có những trải nghiệm tuyệt vời!</p>
+            <a href="rooms.html" class="btn btn-primary mt-3">Đặt phòng ngay</a>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = bookings.map((booking, idx) => {
+        const checkin = formatDate(booking.checkInDate);
+        const checkout = formatDate(booking.checkOutDate);
+        const bookingDate = formatDate(booking.bookingDate || booking.createdAt);
+        const nights = booking.checkInDate && booking.checkOutDate 
+          ? Math.ceil((new Date(booking.checkOutDate) - new Date(booking.checkInDate)) / (1000 * 60 * 60 * 24))
+          : '-';
+        const specialBlock = renderSpecialRequests(booking.specialRequests);
+        
+        // Get amount from backend - TRUST BACKEND VALUE
+        // Database đã được sửa về giá đúng (5,000 VND), không cần correction nữa
+        let amount = Number(booking.estimatedTotalAmount ?? booking.totalAmount ?? booking.amount ?? booking.totalPrice ?? 0);
+        console.log(`✅ [renderBookings] Booking ${booking.bookingId}: Using amount from backend:`, amount);
+        
+        // If amount is 0, try to calculate from room price and nights
+        if (amount <= 0 && booking.checkInDate && booking.checkOutDate && nights !== '-') {
+          const nightsNum = typeof nights === 'number' ? nights : Math.ceil((new Date(booking.checkOutDate) - new Date(booking.checkInDate)) / (1000 * 60 * 60 * 24));
+          
+          // Try to get room price from various sources
+          let roomPrice = 0;
+          
+          // Priority 1: From assigned room
+          if (booking.room?.pricePerNight) {
+            roomPrice = Number(booking.room.pricePerNight);
+            console.log(`🔵 [renderBookings] Found price from booking.room.pricePerNight: ${roomPrice}`);
+          } else if (booking.room?.roomTypeNavigation?.pricePerNight) {
+            roomPrice = Number(booking.room.roomTypeNavigation.pricePerNight);
+            console.log(`🔵 [renderBookings] Found price from booking.room.roomTypeNavigation.pricePerNight: ${roomPrice}`);
+          }
+          // Priority 2: From booking directly
+          else if (booking.pricePerNight) {
+            roomPrice = Number(booking.pricePerNight);
+            console.log(`🔵 [renderBookings] Found price from booking.pricePerNight: ${roomPrice}`);
+          } else if (booking.roomPrice) {
+            roomPrice = Number(booking.roomPrice);
+            console.log(`🔵 [renderBookings] Found price from booking.roomPrice: ${roomPrice}`);
+          }
+          // Priority 3: From requestedRoomType using room types cache
+          else if (booking.requestedRoomType && window._roomTypesCache && Array.isArray(window._roomTypesCache)) {
+            const roomType = window._roomTypesCache.find(rt => 
+              rt.typeName?.toLowerCase() === booking.requestedRoomType?.toLowerCase() ||
+              rt.roomTypeName?.toLowerCase() === booking.requestedRoomType?.toLowerCase() ||
+              String(rt.roomTypeId) === String(booking.roomTypeId)
+            );
+            if (roomType?.pricePerNight) {
+              roomPrice = Number(roomType.pricePerNight);
+              console.log(`🔵 [renderBookings] Found price from room types cache (${booking.requestedRoomType}): ${roomPrice}`);
+            }
+          }
+          // Priority 4: Try to get from roomTypeId if available
+          else if (booking.roomTypeId && window._roomTypesCache && Array.isArray(window._roomTypesCache)) {
+            const roomType = window._roomTypesCache.find(rt => String(rt.roomTypeId) === String(booking.roomTypeId));
+            if (roomType?.pricePerNight) {
+              roomPrice = Number(roomType.pricePerNight);
+              console.log(`🔵 [renderBookings] Found price from roomTypeId (${booking.roomTypeId}): ${roomPrice}`);
+            }
+          }
+          
+          if (nightsNum > 0 && roomPrice > 0) {
+            amount = nightsNum * roomPrice;
+            // Update booking object for future use
+            booking.estimatedTotalAmount = amount;
+            console.log(`✅ [renderBookings] Calculated amount for booking ${booking.bookingId}: ${vnd(amount)} (${nightsNum} nights × ${vnd(roomPrice)})`);
+          } else {
+            console.warn(`⚠️ [renderBookings] Cannot calculate amount for booking ${booking.bookingId}: nights=${nightsNum}, roomPrice=${roomPrice}, requestedRoomType=${booking.requestedRoomType}`);
+            // If still 0, fetch booking detail synchronously before rendering
+            // This ensures amount is available when card is rendered
+            if (booking.bookingId) {
+              // Fetch immediately and wait for result (for first render)
+              fetchBookingDetailForAmountSync(booking.bookingId, booking).then(calculatedAmount => {
+                if (calculatedAmount > 0) {
+                  amount = calculatedAmount;
+                  booking.estimatedTotalAmount = calculatedAmount;
+                  // Re-render just this booking card
+                  updateBookingCardAmount(booking.bookingId, calculatedAmount);
+                }
+              }).catch(e => {
+                console.error(`❌ [renderBookings] Error fetching detail for ${booking.bookingId}:`, e);
+              });
+            }
+          }
+        } else if (amount <= 0) {
+          // If no dates or amount is 0, fetch booking detail immediately
+          console.warn(`⚠️ [renderBookings] Amount is 0 for booking ${booking.bookingId}, fetching detail synchronously`);
+          if (booking.bookingId) {
+            fetchBookingDetailForAmountSync(booking.bookingId, booking).then(calculatedAmount => {
+              if (calculatedAmount > 0) {
+                amount = calculatedAmount;
+                booking.estimatedTotalAmount = calculatedAmount;
+                // Re-render just this booking card
+                updateBookingCardAmount(booking.bookingId, calculatedAmount);
+              }
+            }).catch(e => {
+              console.error(`❌ [renderBookings] Error fetching detail for ${booking.bookingId}:`, e);
+            });
+          }
+        }
+        
+        return `
+          <div class="booking-card" style="animation-delay:${0.1 * idx}s">
+            <div class="booking-header">
+              <div>
+                <div class="booking-code">#${booking.bookingCode || booking.bookingId}</div>
+                <small class="text-muted">Đặt ngày: ${bookingDate}</small>
+              </div>
+              <span class="booking-status ${getStatusClass(booking.status)}">${getStatusText(booking.status)}</span>
+            </div>
+            
+            <div class="booking-details">
+              <div class="detail-item">
+                <div class="detail-label">📅 Ngày nhận</div>
+                <div class="detail-value">${checkin}</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">📅 Ngày trả</div>
+                <div class="detail-value">${checkout}</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">🌙 Số đêm</div>
+                <div class="detail-value">${nights}</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">👥 Số khách</div>
+                <div class="detail-value">${booking.numberOfGuests || '-'} khách</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">🏨 Phòng</div>
+                <div class="detail-value">${booking.room?.roomNumber || booking.roomNumber || booking.requestedRoomType || '-'}</div>
+              </div>
+              <div class="detail-item">
+                <div class="detail-label">💰 Tổng tiền</div>
+                <div class="detail-value text-primary">${vnd(amount)}</div>
+              </div>
+            </div>
+            
+            ${specialBlock}
+            
+            <div class="booking-actions">
+              ${canPayBooking(booking) ? `
+                <button class=\"btn btn-outline-danger\" onclick=\"cancelBooking(${booking.bookingId})\">Hủy đặt phòng</button>
+                <button class=\"btn btn-primary\" onclick=\"openSimplePayment(${booking.bookingId})\">
+                  <span class=\"oi oi-credit-card mr-2\"></span>Thanh toán
+                </button>
+              ` : booking.status === 'Pending' || booking.status === 'Confirmed' ? `
+                <button class=\"btn btn-outline-danger\" onclick=\"cancelBooking(${booking.bookingId})\">Hủy đặt phòng</button>
+              ` : ''}
+              ${(booking.status === 'CheckedOut' || 
+                 (booking.status === 'Paid' && booking.checkOutDate && new Date(booking.checkOutDate) <= new Date()) ||
+                 (booking.status === 'Confirmed' && booking.checkOutDate && new Date(booking.checkOutDate) <= new Date(Date.now() - 24*60*60*1000))
+                ) && booking.roomId ? `
+                <button class=\"btn btn-success\" onclick=\"reviewRoom(${booking.roomId}, ${booking.bookingId})\">
+                  <span class=\"oi oi-star mr-2\"></span>Đánh giá phòng
+                </button>
+              ` : ''}
+              ${booking.status === 'Paid' && booking.invoice ? `
+                <div class=\"payment-info\">
+                  <div class=\"payment-info-item\">
+                    <span class=\"payment-info-label\">💰 Thời gian thanh toán:</span>
+                    <span class=\"payment-info-value\">${formatPaymentDate(booking.invoice.paidDate || booking.updatedAt)}</span>
+                  </div>
+                  <div class=\"payment-info-item\">
+                    <span class=\"payment-info-label\">📄 Số giao dịch:</span>
+                    <span class=\"payment-info-value\">${booking.invoice.invoiceNumber || booking.bookingCode}</span>
+                  </div>
+                </div>
+              ` : ''}
+              <button class="btn btn-outline-secondary" onclick="viewBookingDetails(${booking.bookingId})">Xem chi tiết</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function cancelBooking(bookingId) {
+      const ok = await showConfirm('Hủy đặt phòng', 'Bạn có chắc chắn muốn hủy đặt phòng này?', 'Hủy', 'Không');
+      if (!ok) return;
+      
+      try {
+        showPageLoading('Đang hủy đặt phòng...');
+        const token = localStorage.getItem('token');
+        const resp = await fetch(`${location.origin}/api/bookings/${bookingId}/cancel`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({reason: 'Khách hàng hủy qua website'})
+        });
+        
+        if (!resp.ok) {
+          const error = await resp.json().catch(() => ({message: 'Lỗi hủy đặt phòng'}));
+          throw new Error(error.message || 'Lỗi hủy đặt phòng');
+        }
+        
+        showToast('Hủy đặt phòng thành công', 'success');
+        loadBookings();
+      } catch(e) {
+        showToast('Lỗi: ' + e.message, 'danger');
+      } finally {
+        hidePageLoading();
+      }
+    }
+
+    function viewBookingDetails(bookingId) {
+      window.location.href = `booking-details.html?id=${bookingId}`;
+    }
+
+    function reviewRoom(roomId, bookingId) {
+      // Redirect to reviews page with room pre-selected
+      window.location.href = `reviews.html?roomId=${roomId}&bookingId=${bookingId}`;
+    }
+
+    // Old payment system - removed, using simple-payment.js instead
+    // let payingId = null;
+    // let plModal = null;
+    // let paymentWebSocketManager = null;
+
+    // Old initPaymentModal function - removed, using simplePaymentModal instead
+    // function initPaymentModal() { ... }
+
+    // Định nghĩa hàm payBooking ở global scope để onclick có thể gọi được
+    window.payBooking = async function(bookingId){
+      console.log('🔵 [payBooking] Called with bookingId:', bookingId);
+      
+      try {
+        // Old payment system - redirect to simple payment
+        // Using openSimplePayment instead
+        console.log('⚠️ [payBooking] Old payBooking called, redirecting to openSimplePayment');
+        if (typeof openSimplePayment === 'function') {
+          openSimplePayment(bookingId);
+          return;
+        } else {
+          showToast('Hệ thống thanh toán đang được cập nhật, vui lòng thử lại sau', 'warning');
+          return;
+        }
+        
+        /* OLD CODE - Commented out
+        // Đảm bảo modal đã được khởi tạo
+        if (!plModal) {
+          initPaymentModal();
+          if (!plModal) {
+            showToast('Hệ thống đang khởi tạo, vui lòng thử lại sau', 'warning');
+            return;
+          }
+        }
+        */
+
+        payingId = bookingId;
+        const bList = window._bookings || [];
+        const b = bList.find(x => String(x.bookingId) === String(bookingId));
+        
+        console.log('🔵 [payBooking] Booking found:', b);
+        
+        // Validation
+        if (!b) {
+          console.error('❌ [payBooking] No booking found');
+          showToast('Không tìm thấy thông tin đặt phòng', 'danger');
+          return;
+        }
+        
+        console.log('🔵 [payBooking] Checking if can pay...');
+        console.log('🔵 [payBooking] Booking status:', b.status);
+        const canPay = canPayBooking(b);
+        console.log('🔵 [payBooking] canPayBooking result:', canPay);
+        if (!canPay) {
+          console.warn('⚠️ [payBooking] Cannot pay booking - status:', b.status);
+          showToast('Đặt phòng này không thể thanh toán. Vui lòng kiểm tra trạng thái.', 'warning');
+          return;
+        }
+        
+        console.log('🔵 [payBooking] Getting amount...');
+        console.log('🔵 [payBooking] estimatedTotalAmount:', b?.estimatedTotalAmount);
+        console.log('🔵 [payBooking] totalAmount:', b?.totalAmount);
+        console.log('🔵 [payBooking] Full booking object:', JSON.stringify(b, null, 2));
+        
+        // Try to get amount from various fields
+        let amount = Number(b?.estimatedTotalAmount ?? b?.totalAmount ?? b?.amount ?? b?.totalPrice ?? 0);
+        
+        // Trust backend amount - Database đã được sửa về giá đúng (5,000 VND)
+        // Không cần correction nữa
+        console.log('✅ [payBooking] Using amount from backend:', amount);
+        
+        // If amount is 0 or invalid, try to calculate from dates and room price
+        if (amount <= 0 && b?.checkInDate && b?.checkOutDate) {
+          console.log('🔵 [payBooking] Amount is 0, trying to calculate from dates...');
+          const checkin = new Date(b.checkInDate);
+          const checkout = new Date(b.checkOutDate);
+          const nights = Math.ceil((checkout - checkin) / (1000 * 60 * 60 * 24));
+          console.log('🔵 [payBooking] Nights calculated:', nights);
+          
+          // Try to get room price from booking or fetch booking detail
+          const roomPrice = Number(b?.roomPrice ?? b?.pricePerNight ?? b?.room?.pricePerNight ?? b?.roomTypeNavigation?.pricePerNight ?? 0);
+          console.log('🔵 [payBooking] Room price:', roomPrice);
+          
+          if (nights > 0 && roomPrice > 0) {
+            amount = nights * roomPrice;
+            console.log('✅ [payBooking] Calculated amount from nights * price:', amount);
+          }
+        }
+        
+        // If still 0, fetch booking detail from API with Room included
+        if (amount <= 0) {
+          console.log('🔵 [payBooking] Amount still 0, fetching booking detail from API...');
+          try {
+            const token = localStorage.getItem('token');
+            const detailUrl = `${location.origin}/api/bookings/${bookingId}?_=${Date.now()}`;
+            const detailResp = await fetch(detailUrl, {
+              cache: 'no-store',
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            });
+            
+            if (detailResp.ok) {
+              const bookingDetail = await detailResp.json();
+              console.log('✅ [payBooking] Booking detail fetched:', bookingDetail);
+              amount = Number(bookingDetail?.estimatedTotalAmount ?? bookingDetail?.totalAmount ?? bookingDetail?.amount ?? 0);
+              
+              // Trust backend amount - Database đã được sửa về giá đúng (5,000 VND)
+              // Không cần correction nữa
+              console.log('✅ [payBooking] Amount from API:', amount);
+              
+              // If still 0, try to calculate from Room
+              if (amount <= 0 && bookingDetail?.checkInDate && bookingDetail?.checkOutDate) {
+                const checkin = new Date(bookingDetail.checkInDate);
+                const checkout = new Date(bookingDetail.checkOutDate);
+                const nights = Math.ceil((checkout - checkin) / (1000 * 60 * 60 * 24));
+                console.log('🔵 [payBooking] Nights from detail:', nights);
+                
+                // Try multiple ways to get room price
+                let roomPrice = 0;
+                if (bookingDetail?.room?.pricePerNight) {
+                  roomPrice = Number(bookingDetail.room.pricePerNight);
+                  console.log('✅ [payBooking] Room price from room.pricePerNight:', roomPrice);
+                } else if (bookingDetail?.room?.roomTypeNavigation?.pricePerNight) {
+                  roomPrice = Number(bookingDetail.room.roomTypeNavigation.pricePerNight);
+                  console.log('✅ [payBooking] Room price from roomTypeNavigation.pricePerNight:', roomPrice);
+                } else if (bookingDetail?.pricePerNight) {
+                  roomPrice = Number(bookingDetail.pricePerNight);
+                  console.log('✅ [payBooking] Room price from bookingDetail.pricePerNight:', roomPrice);
+                } else {
+                  // Try to fetch room by RequestedRoomType
+                  console.log('🔵 [payBooking] No room price found, trying to fetch by requestedRoomType...');
+                  const requestedType = bookingDetail?.requestedRoomType || b?.requestedRoomType;
+                  if (requestedType) {
+                    try {
+                      const roomsResp = await fetch(`${location.origin}/api/rooms?roomTypeId=${bookingDetail?.roomTypeId || ''}&_=${Date.now()}`, {cache: 'no-store'});
+                      if (roomsResp.ok) {
+                        const rooms = await roomsResp.json();
+                        const matchingRoom = Array.isArray(rooms) ? rooms.find(r => 
+                          r.roomTypeName === requestedType || 
+                          r.roomType === requestedType ||
+                          r.typeName === requestedType
+                        ) : null;
+                        if (matchingRoom?.pricePerNight) {
+                          roomPrice = Number(matchingRoom.pricePerNight);
+                          console.log('✅ [payBooking] Room price from API search:', roomPrice);
+                        }
+                      }
+                    } catch(e) {
+                      console.error('❌ [payBooking] Error fetching rooms:', e);
+                    }
+                  }
+                }
+                
+                if (nights > 0 && roomPrice > 0) {
+                  amount = nights * roomPrice;
+                  console.log('✅ [payBooking] Calculated amount from nights * price:', amount, `(${nights} nights × ${roomPrice} VND)`);
+                } else {
+                  console.warn('⚠️ [payBooking] Cannot calculate: nights=', nights, 'roomPrice=', roomPrice);
+                }
+              }
+              
+              // Update booking object
+              if (amount > 0) {
+                b.estimatedTotalAmount = amount;
+                console.log('✅ [payBooking] Updated booking object with amount');
+              }
+            } else {
+              console.error('❌ [payBooking] Failed to fetch booking detail:', detailResp.status, detailResp.statusText);
+            }
+          } catch(e) {
+            console.error('❌ [payBooking] Error fetching booking detail:', e);
+          }
+        }
+        
+        console.log('🔵 [payBooking] Final calculated amount:', amount);
+        if (amount <= 0) {
+          console.error('❌ [payBooking] Invalid amount after all attempts:', amount);
+          showToast('Không thể xác định số tiền thanh toán. Vui lòng liên hệ quản trị viên.', 'danger');
+          return;
+        }
+        console.log('✅ [payBooking] Validation passed, amount:', amount);
+        
+        // Update booking object with corrected amount
+        if (b) {
+          b.estimatedTotalAmount = amount;
+          console.log('✅ [payBooking] Updated booking object with corrected amount:', amount);
+        }
+        
+        const bookingCode = b.bookingCode || `BKG${bookingId}`;
+        const info = `BOOKING-${bookingId}`;
+        
+        // CRITICAL: Ensure amount is not multiplied by 100
+        // VietQR expects amount in VND (e.g., 5000 for 5,000 VND, NOT 500000)
+        const qrAmount = Math.round(amount); // Ensure integer, no decimals
+        console.log('💰 [payBooking] Final amount for QR:', qrAmount, 'VND (formatted:', vnd(qrAmount), ')');
+        console.log('💰 [payBooking] Amount breakdown:', {
+          original: amount,
+          rounded: qrAmount,
+          formatted: vnd(qrAmount),
+          bookingId: bookingId
+        });
+        
+        // Add cache buster to force QR regeneration
+        const cacheBuster = `&_t=${Date.now()}`;
+        // VietQR format: https://img.vietqr.io/image/{BANK_CODE}-{ACCOUNT}-compact.png?amount={amount}&addInfo={info}&accountName={name}
+        // Thử format không encode phần đầu để tránh double encoding
+        const imgUrl = `https://img.vietqr.io/image/${BANK_CODE}-${BANK_ACCOUNT}-compact.png?amount=${qrAmount}&addInfo=${encodeURIComponent(info)}&accountName=${encodeURIComponent(BANK_ACCOUNT_NAME)}${cacheBuster}`;
+        console.log('🔗 [payBooking] QR URL (with cache buster):', imgUrl);
+        
+        console.log('🔵 [payBooking] Updating modal content...');
+        console.log('🔵 [payBooking] Amount:', amount);
+        console.log('🔵 [payBooking] Booking Code:', bookingCode);
+        console.log('🔵 [payBooking] QR Image URL:', imgUrl);
+        
+        // Update modal content
+        const el2 = document.getElementById('plCode2');
+        if (el2) {
+          el2.textContent = bookingCode;
+          console.log('✅ [payBooking] Booking code updated');
+        } else {
+          console.warn('⚠️ [payBooking] plCode2 element not found');
+        }
+        
+        const amountEl = document.getElementById('plAmount');
+        if (amountEl) {
+          amountEl.textContent = vnd(amount);
+          console.log('✅ [payBooking] Amount updated:', vnd(amount));
+        }
+        
+        const bankNameEl = document.getElementById('plBankName');
+        if (bankNameEl) bankNameEl.textContent = 'MBBank';
+        
+        const bankAccEl = document.getElementById('plBankAcc');
+        if (bankAccEl) bankAccEl.textContent = BANK_ACCOUNT;
+        
+        const bankAccNameEl = document.getElementById('plBankAccName');
+        if (bankAccNameEl) bankAccNameEl.textContent = BANK_ACCOUNT_NAME;
+        
+        // Update QR image - simplified approach
+        const imgEl = document.getElementById('plVqrImg');
+        if (imgEl) {
+          // Set basic styles
+          imgEl.style.display = 'block';
+          imgEl.style.visibility = 'visible';
+          imgEl.style.maxWidth = '100%';
+          imgEl.alt = `VietQR - ${bookingCode}`;
+          
+          // Clear previous error handlers
+          imgEl.onload = null;
+          imgEl.onerror = null;
+          
+          // Set QR image URL with cache buster
+          imgEl.src = imgUrl;
+          
+          // Simple error handler
+          imgEl.onerror = () => {
+            console.warn('⚠️ [payBooking] QR Image failed to load, trying fallback URL');
+            // Fallback: try without encoding account name
+            const fallbackUrl = `https://img.vietqr.io/image/${BANK_CODE}-${BANK_ACCOUNT}-compact.png?amount=${qrAmount}&addInfo=${encodeURIComponent(info)}&accountName=${BANK_ACCOUNT_NAME}${cacheBuster}`;
+            imgEl.src = fallbackUrl;
+          };
+          
+          imgEl.onload = () => {
+            console.log('✅ [payBooking] QR Image loaded successfully');
+          };
+        }
+        
+        // Check if booking is already Paid before showing payment modal
+        if (b.status === 'Paid') {
+          showToast('Đặt phòng này đã được thanh toán!', 'success');
+          return;
+        }
+        
+        // Set default payment method to BankTransfer (QR) and ensure QR section is visible
+        const paymentMethodSelect = document.getElementById('plPaymentMethod');
+        if (paymentMethodSelect) {
+          paymentMethodSelect.value = 'BankTransfer';
+          // Trigger change event to show QR immediately
+          paymentMethodSelect.dispatchEvent(new Event('change'));
+        } else {
+          // Fallback: ensure QR section is visible
+          const bankSection = document.getElementById('plBankSection');
+          if (bankSection) bankSection.style.display = 'block';
+          const cashSection = document.getElementById('plCashSection');
+          if (cashSection) cashSection.style.display = 'none';
+        }
+        
+        /* OLD CODE - Commented out (using simplePaymentModal instead)
+        console.log('🔵 [payBooking] Showing modal...');
+        plModal.show();
+        console.log('✅ [payBooking] Modal shown with QR code');
+        */
+        
+        // Hiển thị nút Test Payment nếu localhost hoặc development
+        const testBtn = document.getElementById('plTestPaymentBtn');
+        if (testBtn) {
+          const isLocalhost = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+          testBtn.style.display = isLocalhost ? 'block' : 'none';
+          testBtn.setAttribute('data-booking-id', bookingId);
+        }
+        
+        // Tạo payment session và kết nối WebSocket
+        await startPaymentWebSocket(bookingId, amount);
+      } catch(e) {
+        console.error('❌ [payBooking] Error:', e);
+        showToast('Lỗi khi mở form thanh toán: ' + e.message, 'danger');
+      }
+    };
+
+    // Handle payment method change - show QR immediately when QR is selected
+    const plPaymentMethodSelect = document.getElementById('plPaymentMethod');
+    if (plPaymentMethodSelect) {
+      plPaymentMethodSelect.addEventListener('change', function() {
+        const method = this.value;
+        const bankSection = document.getElementById('plBankSection');
+        const cashSection = document.getElementById('plCashSection');
+        
+        console.log('🔵 [PaymentMethod] Changed to:', method);
+        
+        if (method === 'BankTransfer') {
+          // Show QR section
+          if (bankSection) bankSection.style.display = 'block';
+          if (cashSection) cashSection.style.display = 'none';
+          
+          // If we have booking data, show QR immediately
+          if (payingId) {
+            const bList = window._bookings || [];
+            const b = bList.find(x => String(x.bookingId) === String(payingId));
+            if (b) {
+              // Calculate amount if needed
+              let amount = Number(b?.estimatedTotalAmount ?? b?.totalAmount ?? 0);
+              if (amount <= 0 && b.checkInDate && b.checkOutDate) {
+                const nights = Math.ceil((new Date(b.checkOutDate) - new Date(b.checkInDate)) / (1000 * 60 * 60 * 24));
+                const roomPrice = Number(b?.room?.pricePerNight ?? b?.pricePerNight ?? 0);
+                if (nights > 0 && roomPrice > 0) {
+                  amount = nights * roomPrice;
+                }
+              }
+              
+              // Trust backend amount - Database đã được sửa về giá đúng (5,000 VND)
+              // Không cần correction nữa
+              console.log('✅ [PaymentMethod] Using amount from backend:', amount);
+              
+              if (amount > 0) {
+                const bookingCode = b.bookingCode || `BKG${payingId}`;
+                const info = `BOOKING-${payingId}`;
+                const qrAmount = Math.round(amount);
+                const cacheBuster = `&_t=${Date.now()}`;
+                const imgUrl = `https://img.vietqr.io/image/${BANK_CODE}-${BANK_ACCOUNT}-compact.png?amount=${qrAmount}&addInfo=${encodeURIComponent(info)}&accountName=${encodeURIComponent(BANK_ACCOUNT_NAME)}${cacheBuster}`;
+                
+                const imgEl = document.getElementById('plVqrImg');
+                if (imgEl) {
+                  imgEl.style.display = 'block';
+                  imgEl.src = imgUrl;
+                }
+              }
+            }
+          }
+        } else if (method === 'Cash') {
+          // Show cash section
+          if (bankSection) bankSection.style.display = 'none';
+          if (cashSection) cashSection.style.display = 'block';
+        }
+      });
+    }
+    
+    // Copy payment content helper (if button exists)
+    (document.getElementById('plCopyBtn')||{addEventListener:()=>{}}).addEventListener('click', async ()=>{
+      try{
+        const text = `BOOKING-${payingId}`;
+        await navigator.clipboard.writeText(text);
+        const msg = document.getElementById('plCopyMsg');
+        if(msg){ msg.style.display = 'inline'; setTimeout(()=>msg.style.display='none', 1500); }
+      }catch(_){ /* ignore */ }
+    });
+
+    // Polling interval để kiểm tra trạng thái thanh toán tự động
+    // paymentPollingInterval is defined in simple-payment.js
+    
+    // Hàm kiểm tra trạng thái booking (trả về full booking object)
+    async function checkBookingPaymentStatus(bookingId) {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          console.warn('⚠️ [checkBookingPaymentStatus] No token found');
+          return null;
+        }
+        
+        const url = `${location.origin}/api/bookings/${bookingId}?_=${Date.now()}`;
+        const resp = await fetch(url, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          cache: 'no-store'
+        });
+        
+        if (!resp.ok) {
+          if (resp.status === 401) {
+            console.warn('⚠️ [checkBookingPaymentStatus] Token expired or invalid');
+            // Có thể redirect về login
+            return null;
+          }
+          return null;
+        }
+        
+        const booking = await resp.json();
+        return booking?.status || null; // Trả về status string
+      } catch(e) {
+        console.error('❌ [checkBookingPaymentStatus] Error:', e);
+        return null;
+      }
+    }
+    
+    /**
+     * Bắt đầu WebSocket connection cho payment
+     */
+    async function startPaymentWebSocket(bookingId, amount) {
+      try {
+        // Disconnect old connection if any
+        if (paymentWebSocketManager) {
+          paymentWebSocketManager.disconnect();
+        }
+
+        // Tạo WebSocket manager mới
+        paymentWebSocketManager = new PaymentWebSocketManager();
+
+        // Hiển thị loading states
+        const waitingMsg = document.getElementById('plWaitingMessage');
+        const waitingText = document.getElementById('plWaitingText');
+        const timerEl = document.getElementById('plTimer');
+        
+        if (waitingMsg) waitingMsg.style.display = 'block';
+        if (waitingText) waitingText.textContent = 'Đang kết nối...';
+        if (timerEl) timerEl.style.display = 'block';
+
+        // Tạo session và kết nối
+        const sessionId = await paymentWebSocketManager.createSessionAndConnect(
+          bookingId,
+          amount,
+          // onStatusChange callback
+          async (data) => {
+            console.log('📨 [PaymentStatus] Status changed:', data);
+            handlePaymentStatusChange(data, bookingId);
+          },
+          // onError callback
+          (error) => {
+            console.error('❌ [PaymentWebSocket] Error:', error);
+            // Nếu lỗi 401, có thể token hết hạn
+            if (error.message && error.message.includes('Unauthorized')) {
+              showToast('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.', 'warning');
+            } else {
+              showToast('Lỗi kết nối: ' + error.message, 'danger');
+            }
+            // Fallback to polling
+            startPaymentPolling(bookingId);
+          }
+        );
+
+        if (waitingText) waitingText.textContent = 'Đang chờ thanh toán...';
+        console.log('✅ [PaymentWebSocket] Started for session:', sessionId);
+        
+        // Join booking group as fallback (nếu WebSocket đã kết nối)
+        if (paymentWebSocketManager && paymentWebSocketManager.connection) {
+          try {
+            await paymentWebSocketManager.connection.invoke('JoinBookingGroup', bookingId);
+            console.log('✅ [PaymentWebSocket] Joined booking group:', bookingId);
+          } catch (e) {
+            console.warn('⚠️ [PaymentWebSocket] Could not join booking group:', e);
+          }
+        }
+        
+        // Bắt đầu polling như một backup để check booking status trực tiếp
+        // (vì VietQR không có webhook tự động)
+        startPaymentPolling(bookingId);
+
+      } catch (error) {
+        console.error('❌ [PaymentWebSocket] Failed to start:', error);
+        // Nếu lỗi 401, có thể token hết hạn
+        if (error.message && error.message.includes('Unauthorized')) {
+          showToast('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.', 'warning');
+        } else {
+          showToast('Lỗi khởi tạo thanh toán: ' + error.message, 'danger');
+        }
+        // Fallback to polling
+        startPaymentPolling(bookingId);
+      }
+    }
+
+    /**
+     * Xử lý khi payment thành công (dùng chung cho cả SignalR và polling)
+     */
+    function handlePaymentSuccess(bookingId) {
+      const waitingMsg = document.getElementById('plWaitingMessage');
+      const paidMsg = document.getElementById('plPaidMessage');
+      const failedMsg = document.getElementById('plFailedMessage');
+      const expiredMsg = document.getElementById('plExpiredMessage');
+      const timerEl = document.getElementById('plTimer');
+      const qrImg = document.getElementById('plVqrImg');
+      const bankSection = document.getElementById('plBankSection');
+      
+      // Ẩn tất cả messages và elements khác
+      if (waitingMsg) waitingMsg.style.display = 'none';
+      if (failedMsg) failedMsg.style.display = 'none';
+      if (expiredMsg) expiredMsg.style.display = 'none';
+      if (timerEl) timerEl.style.display = 'none';
+      
+      // Hiển thị thông báo thành công
+      if (paidMsg) {
+        paidMsg.style.display = 'block';
+        const paidText = paidMsg.querySelector('.text-success') || paidMsg;
+        if (paidText) {
+          paidText.textContent = '✅ Thanh toán thành công!';
+        }
+      }
+      
+      // Ẩn QR code và bank section
+      if (qrImg) {
+        qrImg.style.display = 'none';
+      }
+      if (bankSection) {
+        bankSection.style.display = 'none';
+      }
+      
+      // Hiển thị toast và đóng modal sau 2 giây
+      showToast('✅ Thanh toán thành công! Trạng thái đã được cập nhật.', 'success');
+      
+      setTimeout(() => {
+        // Using simplePaymentModal instead
+        const modal = bootstrap.Modal.getInstance(document.getElementById('simplePaymentModal'));
+        if (modal) modal.hide();
+        loadBookings();
+      }, 2000);
+      
+      // Clear polling booking ID
+      currentPollingBookingId = null;
+    }
+
+    /**
+     * Xử lý khi payment status thay đổi
+     */
+    async function handlePaymentStatusChange(data, bookingId) {
+      const status = data.status?.toLowerCase();
+      const waitingMsg = document.getElementById('plWaitingMessage');
+      const paidMsg = document.getElementById('plPaidMessage');
+      const failedMsg = document.getElementById('plFailedMessage');
+      const expiredMsg = document.getElementById('plExpiredMessage');
+      const timerEl = document.getElementById('plTimer');
+      const qrImg = document.getElementById('plVqrImg');
+
+      // Ẩn tất cả messages
+      if (waitingMsg) waitingMsg.style.display = 'none';
+      if (paidMsg) paidMsg.style.display = 'none';
+      if (failedMsg) failedMsg.style.display = 'none';
+      if (expiredMsg) expiredMsg.style.display = 'none';
+      if (timerEl) timerEl.style.display = 'none';
+
+      if (status === 'paid') {
+        // Thanh toán thành công - dùng hàm chung
+        handlePaymentSuccess(bookingId);
+
+      } else if (status === 'failed') {
+        // Thanh toán thất bại
+        if (failedMsg) {
+          failedMsg.style.display = 'block';
+          failedMsg.textContent = `❌ Thanh toán thất bại${data.errorMessage ? ': ' + data.errorMessage : ''}`;
+        }
+        if (qrImg) qrImg.style.display = 'none';
+        showToast('❌ Thanh toán thất bại', 'danger');
+
+      } else if (status === 'expired') {
+        // QR hết hạn
+        if (expiredMsg) expiredMsg.style.display = 'block';
+        if (qrImg) qrImg.style.display = 'none';
+        showToast('⏰ QR đã hết hạn. Vui lòng tạo lại.', 'warning');
+
+        // Có thể thêm nút "Tạo QR mới" ở đây
+        const timerValue = document.getElementById('plTimerValue');
+        if (timerValue) timerValue.textContent = '00:00';
+
+      } else if (status === 'cancelled') {
+        // Đã hủy
+        if (expiredMsg) {
+          expiredMsg.style.display = 'block';
+          expiredMsg.textContent = '❌ Đã hủy thanh toán';
+        }
+        if (qrImg) qrImg.style.display = 'none';
+        showToast('Đã hủy thanh toán', 'warning');
+      }
+    }
+
+    // Hàm test payment (chỉ dùng cho development)
+    async function testPayment() {
+      const testBtn = document.getElementById('plTestPaymentBtn');
+      const bookingId = testBtn ? parseInt(testBtn.getAttribute('data-booking-id') || '0') : 0;
+      
+      if (!bookingId) {
+        showToast('Không tìm thấy booking ID', 'warning');
+        return;
+      }
+      
+      const confirm = await showConfirm('Test Payment', 'Bạn có chắc muốn simulate thanh toán thành công cho booking này?', 'Xác nhận', 'Hủy');
+      if (!confirm) return;
+      
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          showToast('Vui lòng đăng nhập lại', 'warning');
+          return;
+        }
+        
+        showToast('Đang xử lý test payment...', 'info');
+        
+        const resp = await fetch(`${location.origin}/api/payment/test/${bookingId}`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (!resp.ok) {
+          const error = await resp.json().catch(() => ({ message: 'Lỗi test payment' }));
+          throw new Error(error.message || 'Lỗi test payment');
+        }
+        
+        const result = await resp.json();
+        showToast('✅ Test payment thành công! Đang cập nhật...', 'success');
+        
+        // Polling sẽ tự động detect status = "Paid" và update UI
+        // Hoặc đợi một chút rồi reload
+        setTimeout(() => {
+          loadBookings();
+        }, 1000);
+        
+      } catch(e) {
+        console.error('❌ [testPayment] Error:', e);
+        showToast('Lỗi: ' + e.message, 'danger');
+      }
+    }
+    
+    // Fallback: Bắt đầu polling khi modal mở (nếu WebSocket không khả dụng)
+    // Lưu bookingId đang được poll để có thể check lại sau
+    let currentPollingBookingId = null;
+    
+    function startPaymentPolling(bookingId) {
+      // Dừng polling cũ nếu có (using simple-payment.js)
+      if (window.paymentPollingInterval) {
+        clearInterval(window.paymentPollingInterval);
+        window.paymentPollingInterval = null;
+      }
+      
+      currentPollingBookingId = bookingId;
+      console.log('🔄 [startPaymentPolling] Starting payment polling for booking:', bookingId);
+      
+      // Hiển thị thông báo đang chờ
+      const waitingMsg = document.getElementById('plWaitingMessage');
+      const paidMsg = document.getElementById('plPaidMessage');
+      if (waitingMsg) waitingMsg.style.display = 'block';
+      if (paidMsg) paidMsg.style.display = 'none';
+      
+      // Bắt đầu polling mỗi 3 giây (tăng frequency để detect nhanh hơn)
+      window.paymentPollingInterval = setInterval(async () => {
+        const status = await checkBookingPaymentStatus(bookingId);
+        console.log('🔍 [PaymentPolling] Current status:', status, 'for booking:', bookingId);
+        
+        if (status === 'Paid') {
+          console.log('✅ [PaymentPolling] Payment detected! Stopping polling and updating UI...');
+          
+          // Dừng polling
+          if (window.paymentPollingInterval) {
+            clearInterval(window.paymentPollingInterval);
+            window.paymentPollingInterval = null;
+          }
+          
+          // Dừng WebSocket nếu có
+          if (paymentWebSocketManager) {
+            paymentWebSocketManager.disconnect();
+            paymentWebSocketManager = null;
+          }
+          
+          // Ẩn tất cả messages trước
+          if (waitingMsg) waitingMsg.style.display = 'none';
+          const failedMsg = document.getElementById('plFailedMessage');
+          const expiredMsg = document.getElementById('plExpiredMessage');
+          const timerEl = document.getElementById('plTimer');
+          if (failedMsg) failedMsg.style.display = 'none';
+          if (expiredMsg) expiredMsg.style.display = 'none';
+          if (timerEl) timerEl.style.display = 'none';
+          
+          // Hiển thị thông báo thành công
+          if (paidMsg) {
+            paidMsg.style.display = 'block';
+            // Cập nhật nội dung thông báo
+            const paidText = paidMsg.querySelector('.text-success') || paidMsg;
+            if (paidText) {
+              paidText.textContent = '✅ Thanh toán thành công!';
+            }
+          }
+          
+          // Ẩn QR code và bank section
+          const qrImg = document.getElementById('plVqrImg');
+          const bankSection = document.getElementById('plBankSection');
+          if (qrImg) {
+            qrImg.style.display = 'none';
+          }
+          if (bankSection) {
+            bankSection.style.display = 'none';
+          }
+          
+          // Hiển thị thông báo và đóng modal sau 2 giây
+          showToast('✅ Thanh toán thành công! Trạng thái đã được cập nhật.', 'success');
+          
+          setTimeout(() => {
+            // Using simplePaymentModal instead
+            const modal = bootstrap.Modal.getInstance(document.getElementById('simplePaymentModal'));
+            if (modal) modal.hide();
+            // Reload bookings để hiển thị trạng thái mới
+            loadBookings();
+          }, 2000);
+        }
+      }, 3000); // Kiểm tra mỗi 3 giây
+      
+      // Dừng polling sau 5 phút (300 giây) để tránh polling vô hạn
+      setTimeout(() => {
+        if (window.paymentPollingInterval) {
+          console.log('⏰ [PaymentPolling] Timeout reached, stopping polling');
+          clearInterval(window.paymentPollingInterval);
+          window.paymentPollingInterval = null;
+          if (waitingMsg) waitingMsg.style.display = 'none';
+        }
+      }, 300000); // 5 phút
+    }
+    
+    // Dừng WebSocket/Polling khi modal đóng
+    const plModalElement = document.getElementById('payListModal');
+    if (plModalElement) {
+      plModalElement.addEventListener('hidden.bs.modal', () => {
+        // Disconnect WebSocket
+        if (paymentWebSocketManager) {
+          console.log('🛑 [PaymentWebSocket] Modal closed, disconnecting');
+          paymentWebSocketManager.disconnect();
+          paymentWebSocketManager = null;
+        }
+        
+        // KHÔNG dừng polling khi modal đóng - để tiếp tục check trong background
+        // Polling sẽ tự dừng khi booking đã Paid hoặc timeout
+        console.log('ℹ️ [PaymentPolling] Modal closed, but polling continues in background for booking:', currentPollingBookingId);
+        
+        // Reset UI
+        const waitingMsg = document.getElementById('plWaitingMessage');
+        const paidMsg = document.getElementById('plPaidMessage');
+        const failedMsg = document.getElementById('plFailedMessage');
+        const expiredMsg = document.getElementById('plExpiredMessage');
+        const timerEl = document.getElementById('plTimer');
+        
+        if (waitingMsg) waitingMsg.style.display = 'none';
+        if (paidMsg) paidMsg.style.display = 'none';
+        if (failedMsg) failedMsg.style.display = 'none';
+        if (expiredMsg) expiredMsg.style.display = 'none';
+        if (timerEl) timerEl.style.display = 'none';
+      });
+    }
+
+
+    loadBookings();
+    // Auto-refresh dữ liệu mỗi 10 giây để detect payment nhanh hơn (giảm từ 60s xuống 10s)
+    setInterval(() => {
+      console.log('🔄 [Auto-refresh] Reloading bookings...');
+      loadBookings();
+    }, 10000); // 10 giây thay vì 60 giây để detect payment nhanh hơn
+  </script>
+</body>
+</html>
+

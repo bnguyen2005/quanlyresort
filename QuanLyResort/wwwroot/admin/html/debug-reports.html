@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Reports</title>
+</head>
+<body>
+    <h1>Debug Reports Page</h1>
+    <div id="results"></div>
+    
+    <script src="../../../js/api.js"></script>
+    <script>
+        console.log('=== DEBUG REPORTS ===');
+        
+        // Test 1: Check api.js loading
+        console.log('1. apiGet defined:', typeof apiGet !== 'undefined');
+        console.log('2. formatCurrency defined:', typeof formatCurrency !== 'undefined');
+        console.log('3. logout defined:', typeof logout !== 'undefined');
+        
+        // Test 2: Check authentication
+        const token = localStorage.getItem('token');
+        const user = localStorage.getItem('user');
+        console.log('4. Token exists:', !!token);
+        console.log('5. User exists:', !!user);
+        
+        // Test 3: Try API call
+        if (typeof apiGet !== 'undefined') {
+            console.log('6. Testing API call...');
+            apiGet('/reports/daily-occupancy').then(data => {
+                console.log('7. API call successful:', data);
+                document.getElementById('results').innerHTML = '✅ All tests passed!';
+            }).catch(error => {
+                console.error('8. API call failed:', error);
+                document.getElementById('results').innerHTML = '❌ API call failed: ' + error.message;
+            });
+        } else {
+            console.error('9. apiGet not defined');
+            document.getElementById('results').innerHTML = '❌ apiGet not defined';
+        }
+    </script>
+</body>
+</html>

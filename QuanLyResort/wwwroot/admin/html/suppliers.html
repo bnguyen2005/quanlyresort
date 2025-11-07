@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="vi" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default" data-assets-path="../assets/" data-template="vertical-menu-template-free">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quản lý Nhà cung cấp</title>
+  <link rel="icon" type="image/x-icon" href="../assets/img/favicon/favicon.ico" />
+  <link rel="stylesheet" href="../assets/vendor/fonts/boxicons.css" />
+  <link rel="stylesheet" href="../assets/vendor/css/core.css" />
+  <link rel="stylesheet" href="../assets/vendor/css/theme-default.css" />
+  <link rel="stylesheet" href="../assets/css/demo.css" />
+  <link rel="stylesheet" href="../assets/css/fix-scrollbar.css" />
+  <link rel="stylesheet" href="../assets/css/admin-custom-theme.css" />
+  <link rel="stylesheet" href="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" />
+</head>
+<body>
+  <div class="layout-wrapper layout-content-navbar">
+    <div class="layout-container">
+      <div id="common-menu"></div>
+      <script src="../js/load-menu.js"></script>
+      <script>
+        document.addEventListener('DOMContentLoaded', function() { loadCommonMenu(); });
+      </script>
+      <div class="layout-page">
+        <nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme" id="layout-navbar"></nav>
+        <div class="content-wrapper">
+          <div class="container-xxl flex-grow-1 container-p-y">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <div class="d-flex align-items-center gap-3">
+                <div>
+                  <h4 class="fw-bold mb-0">🏭 Nhà cung cấp</h4>
+                  <p class="text-muted mb-0">Quản lý danh sách nhà cung cấp</p>
+                </div>
+                <div class="form-check form-switch ms-3">
+                  <input class="form-check-input" type="checkbox" id="showInactiveSwitch">
+                  <label class="form-check-label" for="showInactiveSwitch">Hiển thị đã ẩn</label>
+                </div>
+              </div>
+              <button class="btn btn-primary" onclick="openCreateModal()"><i class="bx bx-plus me-1"></i> Thêm</button>
+            </div>
+
+            <div class="card">
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table id="suppliersTable" class="table table-striped">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Tên NCC</th>
+                        <th>Liên hệ</th>
+                        <th>Điện thoại</th>
+                        <th>Email</th>
+                        <th>Địa chỉ</th>
+                        <th>SP đang cung cấp</th>
+                        <th>Trạng thái</th>
+                        <th>Hành động</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div class="position-fixed top-0 end-0 p-3" style="z-index:1080">
+    <div id="toastContainer"></div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="supplierModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalTitle">Thêm nhà cung cấp</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="supplierForm">
+            <input type="hidden" id="supplierId" />
+            <div class="mb-3">
+              <label class="form-label" for="supplierName">Tên nhà cung cấp *</label>
+              <input type="text" class="form-control" id="supplierName" required />
+            </div>
+            <div class="mb-3">
+              <label class="form-label" for="contactPerson">Người liên hệ</label>
+              <input type="text" class="form-control" id="contactPerson" />
+            </div>
+            <div class="mb-3">
+              <label class="form-label" for="phone">Điện thoại</label>
+              <input type="text" class="form-control" id="phone" />
+            </div>
+            <div class="mb-3">
+              <label class="form-label" for="email">Email</label>
+              <input type="email" class="form-control" id="email" />
+            </div>
+            <div class="mb-3">
+              <label class="form-label" for="address">Địa chỉ</label>
+              <textarea class="form-control" id="address"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+          <button type="button" class="btn btn-primary" onclick="saveSupplier()">Lưu</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../assets/vendor/libs/jquery/jquery.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+  <script src="../assets/vendor/js/menu.js"></script>
+  <script src="../assets/vendor/js/helpers.js"></script>
+  <script src="../assets/js/config.js"></script>
+  <script src="../assets/js/main.js"></script>
+  <script src="../../js/api.js"></script>
+  <script>
+    // API_BASE đến từ ../js/api.js để đồng bộ với trang khác
+    let table;
+    let editingId = null;
+
+    // Dùng toast toàn cục từ api.js
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const sw = document.getElementById('showInactiveSwitch');
+      sw?.addEventListener('change', () => loadSuppliers());
+      loadSuppliers();
+
+      // A11y: focus vào input đầu tiên khi mở modal, trả focus về nút Thêm khi đóng
+      document.getElementById('supplierModal')?.addEventListener('shown.bs.modal', () => {
+        document.getElementById('supplierName')?.focus();
+      });
+      document.getElementById('supplierModal')?.addEventListener('hidden.bs.modal', () => {
+        const addBtn = Array.from(document.querySelectorAll('button')).find(b => b.textContent?.includes('Thêm'));
+        (addBtn || document.body).focus();
+      });
+    });
+
+    async function loadSuppliers() {
+      try {
+        const token = localStorage.getItem('token');
+        showPageLoading('Đang tải nhà cung cấp...');
+        const includeInactive = document.getElementById('showInactiveSwitch')?.checked ? 'true' : 'false';
+        const url = `${API_BASE}/suppliers?includeInactive=${includeInactive}&_=${Date.now()}`;
+        const resp = await fetch(url, { headers: token? { 'Authorization': `Bearer ${token}` } : {}, cache: 'no-store' });
+        if (!resp.ok) throw new Error('Không tải được danh sách NCC');
+        const data = await resp.json();
+        const tbody = document.querySelector('#suppliersTable tbody');
+        tbody.innerHTML = data.map(s => `
+          <tr>
+            <td>${s.supplierId}</td>
+            <td><strong>${s.supplierName}</strong></td>
+            <td>${s.contactPerson || '-'}</td>
+            <td>${s.phone || '-'}</td>
+            <td>${s.email || '-'}</td>
+            <td>${s.address || '-'}</td>
+            <td>${s.itemCount}</td>
+            <td>${s.isActive ? '<span class="badge bg-success">Hoạt động</span>' : '<span class="badge bg-secondary">Ẩn</span>'}</td>
+            <td>
+              <div class="btn-group">
+                <button class="btn btn-sm btn-warning" aria-label="Sửa nhà cung cấp" onclick="openEditModal(${s.supplierId})"><i class="bx bx-edit" aria-hidden="true"></i></button>
+                <button class="btn btn-sm btn-outline-secondary" aria-label="Bật/Tắt nhà cung cấp" onclick="toggleSupplier(${s.supplierId})"><i class="bx bx-refresh" aria-hidden="true"></i></button>
+                <button class="btn btn-sm btn-outline-danger" aria-label="Xóa (ẩn) nhà cung cấp" onclick="deleteSupplier(${s.supplierId})"><i class="bx bx-trash" aria-hidden="true"></i></button>
+              </div>
+            </td>
+          </tr>`).join('');
+        if (table) table.destroy();
+        table = $('#suppliersTable').DataTable({
+          order: [[1,'asc']],
+          language: { url: '../local-plugins/datatables/i18n/vi.json' },
+          responsive: true
+        });
+      } catch (e) {
+        console.error(e);
+        showToast('Lỗi tải danh sách NCC', 'danger');
+      } finally { hidePageLoading(); }
+    }
+
+    function renderSupplierRow(s) {
+      return `
+        <tr data-id="${s.supplierId}">
+          <td>${s.supplierId}</td>
+          <td><strong>${s.supplierName}</strong></td>
+          <td>${s.contactPerson || '-'}</td>
+          <td>${s.phone || '-'}</td>
+          <td>${s.email || '-'}</td>
+          <td>${s.address || '-'}</td>
+          <td>${s.itemCount ?? '-'}</td>
+          <td>${s.isActive ? '<span class="badge bg-success">Hoạt động</span>' : '<span class="badge bg-secondary">Ẩn</span>'}</td>
+          <td>
+            <div class="btn-group">
+              <button class="btn btn-sm btn-warning" onclick="openEditModal(${s.supplierId})"><i class="bx bx-edit"></i></button>
+              <button class="btn btn-sm btn-outline-secondary" onclick="toggleSupplier(${s.supplierId})"><i class="bx bx-refresh"></i></button>
+              <button class="btn btn-sm btn-outline-danger" onclick="deleteSupplier(${s.supplierId})"><i class="bx bx-trash"></i></button>
+            </div>
+          </td>
+        </tr>`;
+    }
+
+    function getRowById(id) {
+      const rows = document.querySelectorAll('#suppliersTable tbody tr');
+      for (const r of rows) {
+        const cell = r.querySelector('td');
+        if (cell && Number(cell.textContent) === Number(id)) return r;
+      }
+      return null;
+    }
+
+    async function refreshRow(id) {
+      try {
+        const token = localStorage.getItem('token');
+        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+        const resp = await fetch(`${API_BASE}/suppliers/${id}?_=${Date.now()}`, { headers, cache: 'no-store' });
+        if (!resp.ok) return;
+        const s = await resp.json();
+        const existing = getRowById(id);
+        if (existing) {
+          existing.outerHTML = renderSupplierRow(s);
+          if (table) table.rows().invalidate().draw(false);
+        } else {
+          const tbody = document.querySelector('#suppliersTable tbody');
+          const tmp = document.createElement('tbody');
+          tmp.innerHTML = renderSupplierRow(s);
+          const newRow = tmp.firstElementChild;
+          if (table) {
+            table.row.add(newRow).draw(false);
+          } else {
+            tbody.insertBefore(newRow, tbody.firstChild);
+          }
+        }
+      } catch (_) { /* ignore */ }
+    }
+
+    function openCreateModal() {
+      editingId = null;
+      document.getElementById('modalTitle').textContent = 'Thêm nhà cung cấp';
+      document.getElementById('supplierForm').reset();
+      new bootstrap.Modal(document.getElementById('supplierModal')).show();
+    }
+
+    async function openEditModal(id) {
+      try {
+        const token = localStorage.getItem('token');
+        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+        const resp = await fetch(`${API_BASE}/suppliers/${id}?_=${Date.now()}`, { headers, cache: 'no-store' });
+        if (!resp.ok) throw new Error('Không tải được NCC');
+        const s = await resp.json();
+        editingId = s.supplierId;
+        document.getElementById('modalTitle').textContent = 'Sửa nhà cung cấp';
+        document.getElementById('supplierId').value = s.supplierId;
+        document.getElementById('supplierName').value = s.supplierName || '';
+        document.getElementById('contactPerson').value = s.contactPerson || '';
+        document.getElementById('phone').value = s.phone || '';
+        document.getElementById('email').value = s.email || '';
+        document.getElementById('address').value = s.address || '';
+        new bootstrap.Modal(document.getElementById('supplierModal')).show();
+      } catch (e) {
+        showToast('Lỗi tải NCC', 'danger');
+      }
+    }
+
+    async function saveSupplier() {
+      try {
+        const token = localStorage.getItem('token');
+        const dto = {
+          supplierName: document.getElementById('supplierName').value.trim(),
+          contactPerson: document.getElementById('contactPerson').value.trim() || null,
+          phone: document.getElementById('phone').value.trim() || null,
+          email: document.getElementById('email').value.trim() || null,
+          address: document.getElementById('address').value.trim() || null
+        };
+        if (!dto.supplierName) { showToast('Tên nhà cung cấp bắt buộc', 'warning'); return; }
+        const url = editingId ? `${API_BASE}/suppliers/${editingId}` : `${API_BASE}/suppliers`;
+        const method = editingId ? 'PUT' : 'POST';
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+        const saveBtn = document.querySelector('#supplierModal .btn.btn-primary');
+        setButtonLoading(saveBtn, true, 'Đang lưu...');
+        const resp = await fetch(url, { method, headers, body: JSON.stringify(dto) });
+        if (!resp.ok) { const err = await resp.json().catch(()=>({})); throw new Error(err.message || 'Lưu thất bại'); }
+        bootstrap.Modal.getInstance(document.getElementById('supplierModal')).hide();
+        showToast(editingId ? 'Cập nhật thành công' : 'Tạo thành công', 'success');
+        if (editingId) {
+          await refreshRow(editingId);
+        } else {
+          const resJson = await resp.json().catch(()=>null);
+          const newId = resJson?.supplierId;
+          if (newId) await refreshRow(newId); else await loadSuppliers();
+        }
+      } catch (e) { showToast('Lỗi: ' + e.message, 'danger'); }
+      finally {
+        const saveBtn = document.querySelector('#supplierModal .btn.btn-primary');
+        setButtonLoading(saveBtn, false);
+      }
+    }
+
+    async function deleteSupplier(id) {
+      const ok = await showConfirm('Xóa nhà cung cấp', 'Bạn có chắc muốn xóa (ẩn) nhà cung cấp này?','Xóa','Hủy');
+      if (!ok) return;
+      try {
+        const token = localStorage.getItem('token');
+        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+        const resp = await fetch(`${API_BASE}/suppliers/${id}`, { method: 'DELETE', headers });
+        if (!resp.ok) { const err = await resp.json().catch(()=>({})); throw new Error(err.message || 'Xóa thất bại'); }
+        showToast('Đã ẩn nhà cung cấp', 'success');
+        const showInactive = document.getElementById('showInactiveSwitch')?.checked;
+        if (showInactive) {
+          await refreshRow(id);
+        } else {
+          const row = getRowById(id);
+          if (table && row) { table.row(row).remove().draw(false); }
+        }
+      } catch (e) { showToast('Lỗi: ' + e.message, 'danger'); }
+    }
+
+    async function toggleSupplier(id) {
+      try {
+        const token = localStorage.getItem('token');
+        const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+        const resp = await fetch(`${API_BASE}/suppliers/${id}/toggle-active`, { method: 'PATCH', headers });
+        if (!resp.ok) { const err = await resp.json().catch(()=>({})); throw new Error(err.message || 'Cập nhật trạng thái thất bại'); }
+        showToast('Đã cập nhật trạng thái', 'success');
+        await refreshRow(id);
+      } catch (e) { showToast('Lỗi: ' + e.message, 'danger'); }
+    }
+  </script>
+</body>
+</html>
+
+

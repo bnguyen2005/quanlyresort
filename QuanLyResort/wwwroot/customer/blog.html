@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <title>Blog | Resort Deluxe</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    
+    <link href="https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Playfair+Display:400,400i,700,700i" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/open-iconic-bootstrap.min.css">
+    <link rel="stylesheet" href="css/animate.css">
+    <link rel="stylesheet" href="css/owl.carousel.min.css">
+    <link rel="stylesheet" href="css/owl.theme.default.min.css">
+    <link rel="stylesheet" href="css/magnific-popup.css">
+    <link rel="stylesheet" href="css/aos.css">
+    <link rel="stylesheet" href="css/ionicons.min.css">
+    <link rel="stylesheet" href="css/bootstrap-datepicker.css">
+    <link rel="stylesheet" href="css/jquery.timepicker.css">
+    <link rel="stylesheet" href="css/flaticon.css">
+    <link rel="stylesheet" href="css/icomoon.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="/css/tokens.css">
+    <link rel="stylesheet" href="/css/globals.css">
+    <link rel="stylesheet" href="/css/grid.css">
+    <link rel="stylesheet" href="/css/components/navbar.css">
+    
+    <!-- Navbar Auth Styles -->
+    <link rel="stylesheet" href="css/navbar-auth.css">
+    
+    <style>
+    :root { --container: 1140px; --brand: #c8a97e; --text: #1a1a1a; --muted: #6b7280; --bg: #f8f9fa; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; font-family: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: var(--text); background: #fff; }
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+
+    /* Simple container */
+    .container { width: 100%; max-width: var(--container); margin: 0 auto; padding: 0 20px; }
+
+    /* ========== HERO SECTION ========== */
+    .hero {
+      background-image: url('images/bg_1.jpg');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      background-repeat: no-repeat;
+      padding: 120px 0 80px;
+      color: #fff;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 40px;
+      min-height: 420px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .hero .container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      width: 100%;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(135deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 100%);
+      z-index: 0;
+    }
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      text-align: center;
+    }
+    .hero h1 {
+      font-size: 48px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: #ffffff;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+    .hero p {
+      font-size: 20px;
+      color: #ffffff;
+      opacity: 0.95;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    
+    @media (max-width: 768px) {
+      .hero {
+        padding: 100px 0 60px;
+        margin-bottom: 40px;
+        background-attachment: scroll;
+        min-height: 360px;
+      }
+      .hero h1 {
+        font-size: 36px;
+      }
+    }
+    
+    /* ========== SECTIONS ========== */
+    .section {
+      display: block;
+      visibility: visible;
+      opacity: 1;
+      position: relative;
+      padding: 60px 0;
+      width: 100%;
+      margin: 0;
+    }
+    .bg-light { background-color: var(--bg); }
+    
+    /* ========== BLOG INTRO SECTION ========== */
+    .intro { text-align: center; max-width: 820px; margin: 0 auto; }
+    .intro .subheading { color: var(--brand); font-size: 0.9rem; letter-spacing: 2px; text-transform: uppercase; display: block; margin-bottom: 10px; }
+    .intro h2 { font-size: 2rem; font-weight: 700; margin: 0 0 12px; }
+    .intro p { color: #666; font-size: 1.05rem; line-height: 1.8; margin: 0 auto 0; }
+    
+    /* ========== CARDS HELPERS ========== */
+    .cards { display: grid; grid-template-columns: repeat(3, minmax(260px, 1fr)); gap: 24px; justify-items: stretch; align-items: stretch; }
+    .card { background: #fff; border-radius: 16px; box-shadow: 0 5px 20px rgba(0,0,0,.08); padding: 24px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
+    .card .emoji { font-size: 40px; margin-bottom: 8px; }
+    .intro-col { width: 100%; }
+    @media (max-width: 992px) { .cards { grid-template-columns: repeat(2, minmax(240px, 1fr)); } }
+    @media (max-width: 640px) { .cards { grid-template-columns: 1fr; } }
+    
+    /* ========== BLOG ENTRIES GRID ========== */
+    .posts {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 24px;
+    }
+    .post { grid-column: span 4; display: flex; }
+    @media (max-width: 992px) { .post { grid-column: span 6; } }
+    @media (max-width: 640px) { .post { grid-column: span 12; } }
+
+    .blog-entry {
+      margin: 0;
+      background: #fff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+    
+    .blog-entry:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
+    /* ========== HERO SECTION ========== */
+    .rooms-hero {
+      background-image: url('images/bg_1.jpg');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      background-repeat: no-repeat;
+      padding: 140px 0 100px;
+      color: #fff;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 60px;
+      min-height: 500px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .rooms-hero .container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      width: 100%;
+    }
+    .rooms-hero::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(135deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 100%);
+      z-index: 0;
+    }
+    .rooms-hero-content {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      text-align: center;
+    }
+    .rooms-hero h1 {
+      font-size: 48px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: #ffffff;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+    .rooms-hero p {
+      font-size: 20px;
+      color: #ffffff;
+      opacity: 0.95;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    
+    @media (max-width: 768px) {
+      .rooms-hero {
+        padding: 100px 0 60px;
+        margin-bottom: 40px;
+        background-attachment: scroll;
+        min-height: 400px;
+      }
+      .rooms-hero h1 {
+        font-size: 36px;
+      }
+    }
+    
+    /* ========== SECTIONS ========== */
+    .ftco-section {
+      display: block;
+      visibility: visible;
+      opacity: 1;
+      position: relative;
+      padding: 60px 0;
+      width: 100%;
+      margin: 0;
+    }
+    .bg-light {
+      background-color: #f8f9fa;
+    }
+    
+    /* ========== BLOG INTRO SECTION ========== */
+    .blog-intro-section {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      margin: 0 auto;
+    }
+    
+    
+    /* ========== BLOG ENTRIES GRID ========== */
+    .blog-entries-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 24px;
+      margin: 0;
+      padding: 0;
+      width: 100%;
+    }
+    
+    .blog-entry {
+      margin-bottom: 0;
+      background: #fff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      width: 100%;
+    }
+    
+    .blog-entry:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
+    
+    .blog-entry .block-20 {
+      display: block;
+      height: 250px;
+      background-size: cover;
+      background-position: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .blog-entry .block-20::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.3) 100%);
+      transition: opacity 0.3s ease;
+    }
+    
+    .blog-entry:hover .block-20::after {
+      opacity: 0.7;
+    }
+    
+    .blog-entry .text {
+      padding: 25px;
+      display: block;
+    }
+    
+    .blog-entry .heading {
+      margin: 0 0 15px 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+      line-height: 1.5;
+    }
+    
+    .blog-entry .heading a {
+      color: #1a1a1a;
+      text-decoration: none;
+      transition: color 0.3s ease;
+      display: block;
+    }
+    
+    .blog-entry .heading a:hover {
+      color: #c8a97e;
+    }
+    
+    .blog-entry .meta {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      font-size: 0.875rem;
+      color: #6b7280;
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid #e5e7eb;
+    }
+    
+    .blog-entry .meta a {
+      color: #6b7280;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: color 0.3s ease;
+    }
+    
+    .blog-entry .meta a:hover {
+      color: #c8a97e;
+    }
+    
+    /* Responsive grid handled above */
+    
+    /* ========== PAGINATION ========== */
+    .block-27 {
+      display: flex;
+      justify-content: center;
+    }
+    
+    .block-27 ul {
+      display: flex;
+      gap: 10px;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .block-27 ul li a,
+    .block-27 ul li span {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      background: #fff;
+      color: #1a1a1a;
+      text-decoration: none;
+      border: 1px solid #e5e7eb;
+      transition: all 0.3s ease;
+    }
+    
+    .block-27 ul li.active span {
+      background: #c8a97e;
+      color: #fff;
+      border-color: #c8a97e;
+    }
+    
+    .block-27 ul li a:hover {
+      background: #c8a97e;
+      color: #fff;
+      border-color: #c8a97e;
+    }
+    
+    /* ========== FOOTER ========== */
+    .footer { background: #111; color: #ccc; padding: 48px 0 24px; margin-top: 40px; }
+    .footer .grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 24px; }
+    .footer .col { grid-column: span 3; }
+    .footer h3 { color: #fff; margin: 0 0 12px; font-size: 18px; }
+    .footer p, .footer a, .footer li { color: #b9bcc2; font-size: 14px; }
+    .footer ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+    .footer a:hover { color: #fff; }
+    .footer .brand { color: #fff; }
+    .footer .brand .logo { background: var(--brand); }
+    .footer .bottom { text-align: center; border-top: 1px solid #222; margin-top: 28px; padding-top: 18px; font-size: 13px; color: #9aa0a6; }
+    @media (max-width: 992px) { .footer .col { grid-column: span 6; } }
+    @media (max-width: 640px) { .footer .col { grid-column: span 12; } }
+    </style>
+  </head>
+  <body>
+
+    <!-- Header placeholder - will be loaded by load-header.js -->
+    <div id="header-placeholder"></div>
+    
+    <!-- Load header component -->
+    <script src="js/load-header.js"></script>
+
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="container">
+        <div class="hero-content">
+          <h1>Blog</h1>
+          <p>Chia sẻ trải nghiệm và cập nhật mới nhất từ Resort Deluxe</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Blog Introduction Section -->
+    <section class="section bg-light">
+      <div class="container">
+        <div class="intro">
+          <span class="subheading">Tin tức & Sự kiện</span>
+          <h2>Khám phá những câu chuyện từ Resort Deluxe</h2>
+          <p>Chúng tôi chia sẻ những trải nghiệm độc đáo, bí quyết du lịch, sự kiện đặc biệt và câu chuyện thú vị từ khách hàng. Hãy khám phá để có thêm cảm hứng cho kỳ nghỉ tuyệt vời của bạn.</p>
+        </div>
+        <div class="cards" style="margin-top: 28px;">
+          <div class="card intro-col">
+            <div class="emoji">📰</div>
+            <h4 style="margin: 0 0 6px; font-size: 18px;">Tin tức mới nhất</h4>
+            <p style="margin: 0; color: var(--muted);">Cập nhật thông tin dịch vụ, sự kiện và ưu đãi.</p>
+          </div>
+          <div class="card intro-col">
+            <div class="emoji">✈️</div>
+            <h4 style="margin: 0 0 6px; font-size: 18px;">Bí quyết du lịch</h4>
+            <p style="margin: 0; color: var(--muted);">Kinh nghiệm, lịch trình và mẹo cho kỳ nghỉ trọn vẹn.</p>
+          </div>
+          <div class="card intro-col">
+            <div class="emoji">💬</div>
+            <h4 style="margin: 0 0 6px; font-size: 18px;">Câu chuyện khách hàng</h4>
+            <p style="margin: 0; color: var(--muted);">Chia sẻ trải nghiệm thực tế từ khách hàng.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Blog Entries Section -->
+    <section class="section">
+      <div class="container">
+        <div class="posts">
+          <div class="post">
+            <div class="blog-entry">
+              <a href="blog-single.html" class="block-20" style="background-image: url('images/image_1.jpg');">
+              </a>
+              <div class="text">
+                <h3 class="heading mt-3"><a href="blog-single.html">Trải nghiệm nghỉ dưỡng đỉnh cao tại Resort Deluxe</a></h3>
+                <p style="color: #666; font-size: 0.95rem; line-height: 1.6; margin-bottom: 15px;">Khám phá những dịch vụ độc quyền và không gian nghỉ dưỡng sang trọng nhất, được thiết kế để mang lại sự thư thái và trải nghiệm đáng nhớ cho mọi khách hàng.</p>
+                <div class="meta mb-3">
+                  <div><a href="#">06/12/2024</a></div>
+                  <div><a href="#">Admin</a></div>
+                  <div><a href="#" class="meta-chat">12 bình luận</a></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="post">
+            <div class="blog-entry">
+              <a href="blog-single.html" class="block-20" style="background-image: url('images/image_2.jpg');">
+              </a>
+              <div class="text">
+                <h3 class="heading mt-3"><a href="blog-single.html">Gợi ý lịch trình 3 ngày 2 đêm thư giãn</a></h3>
+                <p style="color: #666; font-size: 0.95rem; line-height: 1.6; margin-bottom: 15px;">Lên kế hoạch cho kỳ nghỉ hoàn hảo với lịch trình chi tiết bao gồm các hoạt động thú vị, điểm tham quan và trải nghiệm ẩm thực đặc sắc tại khu vực.</p>
+                <div class="meta mb-3">
+                  <div><a href="#">03/12/2024</a></div>
+                  <div><a href="#">Admin</a></div>
+                  <div><a href="#" class="meta-chat">8 bình luận</a></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="post">
+            <div class="blog-entry">
+              <a href="blog-single.html" class="block-20" style="background-image: url('images/image_3.jpg');">
+              </a>
+              <div class="text">
+                <h3 class="heading mt-3"><a href="blog-single.html">Ẩm thực tinh tế giữa không gian sang trọng</a></h3>
+                <p style="color: #666; font-size: 0.95rem; line-height: 1.6; margin-bottom: 15px;">Thưởng thức các món ăn đặc sắc được chế biến từ nguyên liệu tươi ngon, kết hợp giữa hương vị truyền thống và hiện đại tại nhà hàng của chúng tôi.</p>
+                <div class="meta mb-3">
+                  <div><a href="#">28/11/2024</a></div>
+                  <div><a href="#">Admin</a></div>
+                  <div><a href="#" class="meta-chat">15 bình luận</a></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="post">
+            <div class="blog-entry">
+              <a href="blog-single.html" class="block-20" style="background-image: url('images/image_4.jpg');">
+              </a>
+              <div class="text">
+                <h3 class="heading mt-3"><a href="blog-single.html">5 trải nghiệm không thể bỏ lỡ</a></h3>
+                <p style="color: #666; font-size: 0.95rem; line-height: 1.6; margin-bottom: 15px;">Từ spa thư giãn đến các hoạt động ngoài trời, khám phá 5 trải nghiệm độc đáo nhất mà bạn nhất định phải thử khi đến Resort Deluxe.</p>
+                <div class="meta mb-3">
+                  <div><a href="#">25/11/2024</a></div>
+                  <div><a href="#">Admin</a></div>
+                  <div><a href="#" class="meta-chat">20 bình luận</a></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="post">
+            <div class="blog-entry">
+              <a href="blog-single.html" class="block-20" style="background-image: url('images/image_5.jpg');">
+              </a>
+              <div class="text">
+                <h3 class="heading mt-3"><a href="blog-single.html">Mùa ưu đãi chào Hè</a></h3>
+                <p style="color: #666; font-size: 0.95rem; line-height: 1.6; margin-bottom: 15px;">Đón chào mùa hè với những ưu đãi đặc biệt: giảm giá phòng, combo dịch vụ và nhiều quà tặng hấp dẫn cho các gói nghỉ dưỡng tại Resort Deluxe.</p>
+                <div class="meta mb-3">
+                  <div><a href="#">20/11/2024</a></div>
+                  <div><a href="#">Admin</a></div>
+                  <div><a href="#" class="meta-chat">18 bình luận</a></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="post">
+            <div class="blog-entry">
+              <a href="blog-single.html" class="block-20" style="background-image: url('images/image_6.jpg');">
+              </a>
+              <div class="text">
+                <h3 class="heading mt-3"><a href="blog-single.html">Bí kíp săn phòng giá tốt</a></h3>
+                <p style="color: #666; font-size: 0.95rem; line-height: 1.6; margin-bottom: 15px;">Những mẹo nhỏ giúp bạn đặt phòng với mức giá tốt nhất, lựa chọn thời điểm phù hợp và tận dụng các chương trình khuyến mãi của chúng tôi.</p>
+                <div class="meta mb-3">
+                  <div><a href="#">15/11/2024</a></div>
+                  <div><a href="#">Admin</a></div>
+                  <div><a href="#" class="meta-chat">25 bình luận</a></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="post">
+            <div class="blog-entry">
+              <a href="blog-single.html" class="block-20" style="background-image: url('images/image_7.jpg');">
+              </a>
+              <div class="text">
+                <h3 class="heading mt-3"><a href="blog-single.html">Hướng dẫn đi lại và đưa đón</a></h3>
+                <p style="color: #666; font-size: 0.95rem; line-height: 1.6; margin-bottom: 15px;">Thông tin chi tiết về các phương tiện đi lại, dịch vụ đưa đón sân bay và những cách thuận tiện nhất để đến với Resort Deluxe.</p>
+                <div class="meta mb-3">
+                  <div><a href="#">10/11/2024</a></div>
+                  <div><a href="#">Admin</a></div>
+                  <div><a href="#" class="meta-chat">10 bình luận</a></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="post">
+            <div class="blog-entry">
+              <a href="blog-single.html" class="block-20" style="background-image: url('images/image_8.jpg');">
+              </a>
+              <div class="text">
+                <h3 class="heading mt-3"><a href="blog-single.html">Không gian Spa & Thư giãn</a></h3>
+                <p style="color: #666; font-size: 0.95rem; line-height: 1.6; margin-bottom: 15px;">Khám phá không gian spa đẳng cấp với các liệu trình chăm sóc sức khỏe và làm đẹp chuyên nghiệp, mang lại sự thư thái hoàn toàn.</p>
+                <div class="meta mb-3">
+                  <div><a href="#">05/11/2024</a></div>
+                  <div><a href="#">Admin</a></div>
+                  <div><a href="#" class="meta-chat">14 bình luận</a></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top: 28px;" class="pagination">
+          <div class="block-27">
+              <ul>
+                <li><a href="#">&lt;</a></li>
+                <li class="active"><span>1</span></li>
+                <li><a href="#">2</a></li>
+                <li><a href="#">3</a></li>
+                <li><a href="#">4</a></li>
+                <li><a href="#">5</a></li>
+                <li><a href="#">&gt;</a></li>
+              </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+    <footer class="footer">
+      <div class="container">
+        <div class="grid">
+          <div class="col">
+            <div class="brand"><span class="logo"></span><span>Resort Deluxe</span></div>
+            <p>Khu nghỉ dưỡng cao cấp với đầy đủ tiện nghi hiện đại, phục vụ chu đáo và không gian tuyệt đẹp.</p>
+          </div>
+          <div class="col">
+            <h3>Liên kết hữu ích</h3>
+            <ul>
+              <li><a href="blog.html">Blog</a></li>
+              <li><a href="rooms.html">Phòng nghỉ</a></li>
+              <li><a href="restaurant.html">Nhà hàng</a></li>
+              <li><a href="about.html">Giới thiệu</a></li>
+            </ul>
+          </div>
+          <div class="col">
+            <h3>Thông tin</h3>
+            <ul>
+              <li><a href="about.html">Về chúng tôi</a></li>
+              <li><a href="contact.html">Liên hệ</a></li>
+              <li><a href="#">Dịch vụ</a></li>
+              <li><a href="#">Chính sách</a></li>
+            </ul>
+          </div>
+          <div class="col">
+            <h3>Có câu hỏi?</h3>
+            <ul>
+              <li>123 Đường Resort, Quận 1, TP. Hồ Chí Minh</li>
+              <li><a href="tel:+842812345678">+84 28 1234 5678</a></li>
+              <li><a href="mailto:info@resortdeluxe.vn">info@resortdeluxe.vn</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="bottom">© <span id="y"></span> RESORT DELUXE</div>
+      </div>
+    </footer>
+    
+
+  <script>
+    // Footer year
+    document.getElementById('y').textContent = new Date().getFullYear();
+  </script>
+  
+  <!-- Navbar Authentication Handler -->
+  <script src="../js/api.js"></script>
+  <script src="js/navbar-auth.js"></script>
+    
+  </body>
+</html>

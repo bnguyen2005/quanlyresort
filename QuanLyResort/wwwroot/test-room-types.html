@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Test Room Types API</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        .success { color: green; }
+        .error { color: red; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #4CAF50; color: white; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Room Types API</h1>
+    <button onclick="testAPI()">🔄 Test API</button>
+    <div id="result"></div>
+    
+    <script>
+        async function testAPI() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>⏳ Đang test...</p>';
+            
+            try {
+                console.log('Calling API...');
+                const response = await fetch('http://localhost:5130/api/room-types');
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`API returned ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Data:', data);
+                
+                resultDiv.innerHTML = `
+                    <p class="success">✅ API hoạt động tốt!</p>
+                    <p><strong>Số loại phòng:</strong> ${data.length}</p>
+                    <table>
+                        <tr>
+                            <th>ID</th>
+                            <th>Mã</th>
+                            <th>Tên</th>
+                            <th>Giá</th>
+                            <th>Sức chứa</th>
+                            <th>Trạng thái</th>
+                        </tr>
+                        ${data.map(rt => `
+                            <tr>
+                                <td>${rt.roomTypeId}</td>
+                                <td>${rt.typeCode}</td>
+                                <td>${rt.typeName}</td>
+                                <td>${rt.basePrice.toLocaleString('vi-VN')} VNĐ</td>
+                                <td>${rt.maxOccupancy} người</td>
+                                <td>${rt.isActive ? '✅ Hoạt động' : '❌ Ngừng'}</td>
+                            </tr>
+                        `).join('')}
+                    </table>
+                `;
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `
+                    <p class="error">❌ Lỗi: ${error.message}</p>
+                    <p>Kiểm tra Console (F12) để xem chi tiết.</p>
+                `;
+            }
+        }
+        
+        // Auto test khi load trang
+        window.addEventListener('load', () => {
+            setTimeout(testAPI, 500);
+        });
+    </script>
+</body>
+</html>
+

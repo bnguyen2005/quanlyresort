@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <title>Đăng Nhập - Resort Management</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    
+    <!-- Cache Control - Ngăn trình duyệt cache trang này -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <!-- Additional cache busting -->
+    <script>
+      // Force browser to not use cached version
+      if (window.performance && performance.navigation.type === performance.navigation.TYPE_BACK_FORWARD) {
+        console.log('🔄 Detected back/forward navigation - forcing reload');
+        window.location.reload(true);
+      }
+    </script>
+    
+    <link href="https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Playfair+Display:400,400i,700,700i" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/open-iconic-bootstrap.min.css">
+    <link rel="stylesheet" href="css/animate.css">
+    <link rel="stylesheet" href="css/owl.carousel.min.css">
+    <link rel="stylesheet" href="css/owl.theme.default.min.css">
+    <link rel="stylesheet" href="css/magnific-popup.css">
+    <link rel="stylesheet" href="css/aos.css">
+    <link rel="stylesheet" href="css/ionicons.min.css">
+    <link rel="stylesheet" href="css/bootstrap-datepicker.css">
+    <link rel="stylesheet" href="css/jquery.timepicker.css">
+    <link rel="stylesheet" href="css/flaticon.css">
+    <link rel="stylesheet" href="css/icomoon.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/globals.css">
+  <link rel="stylesheet" href="/css/grid.css">
+    
+    <style>
+      body {
+        font-family: 'Poppins', sans-serif;
+        padding-top: 0;
+        overflow-x: hidden;
+        background: #f8f9fa;
+      }
+      
+      /* Modern Hero Section - Same as other pages */
+      .login-hero {
+        background-image: url('images/bg_1.jpg');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+        padding: 140px 0 100px;
+        color: #fff;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 60px;
+        min-height: 500px;
+        display: flex;
+        align-items: center;
+      }
+      .login-hero::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: linear-gradient(135deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 100%);
+        z-index: 0;
+      }
+      .login-hero::after {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+        opacity: 0.3;
+        z-index: 1;
+      }
+      .login-hero-content {
+        position: relative;
+        z-index: 2;
+        animation: slideUp 0.8s ease;
+        width: 100%;
+      }
+      .login-hero h1 {
+        font-size: 48px;
+        font-weight: 700;
+        margin-bottom: 20px;
+        color: #ffffff !important;
+        text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        animation: fadeInDown 1s ease;
+      }
+      .login-hero p {
+        font-size: 20px;
+        color: #ffffff !important;
+        opacity: 0.95;
+        text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        animation: fadeInUp 1.2s ease;
+      }
+      
+      @keyframes fadeInDown {
+        from {
+          opacity: 0;
+          transform: translateY(-30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(50px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      
+      .login-section {
+        padding: 60px 0 100px;
+        min-height: auto;
+      }
+      .login-card {
+        background: #fff;
+        padding: 50px;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        margin-top: -70px;
+        position: relative;
+        z-index: 10;
+        animation: slideUp 0.8s ease;
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .login-card h2 {
+        font-size: 32px;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 10px;
+      }
+      .login-card .subtitle {
+        color: #666;
+        font-size: 15px;
+        margin-bottom: 30px;
+      }
+      .form-group {
+        margin-bottom: 25px;
+      }
+      .form-group label {
+        font-weight: 600;
+        color: #374151;
+        font-size: 14px;
+        margin-bottom: 8px;
+        display: block;
+      }
+      .form-control {
+        height: 50px;
+        border-radius: 12px;
+        border: 2px solid #e5e7eb;
+        padding: 12px 18px;
+        font-size: 15px;
+        transition: all 0.3s ease;
+        background: #fff;
+      }
+      .form-control:focus {
+        border-color: #c8a97e;
+        box-shadow: 0 0 0 4px rgba(200, 169, 126, 0.1);
+        outline: none;
+      }
+      .form-check {
+        margin-bottom: 25px;
+      }
+      .form-check-input {
+        width: 18px;
+        height: 18px;
+        margin-top: 3px;
+        cursor: pointer;
+      }
+      .form-check-input:checked {
+        background-color: #c8a97e;
+        border-color: #c8a97e;
+      }
+      .form-check-label {
+        font-size: 14px;
+        color: #555;
+        cursor: pointer;
+        margin-left: 8px;
+      }
+      .btn-login {
+        background: linear-gradient(135deg, #c8a97e 0%, #b89968 100%);
+        color: #fff;
+        padding: 16px 30px;
+        border: none;
+        border-radius: 12px;
+        width: 100%;
+        font-weight: 600;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(200, 169, 126, 0.3);
+      }
+      .btn-login:hover {
+        background: linear-gradient(135deg, #b89968 0%, #c8a97e 100%);
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(200, 169, 126, 0.4);
+      }
+      .btn-login:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+      }
+      .alert {
+        border-radius: 12px;
+        padding: 15px 20px;
+        margin-bottom: 20px;
+        border: none;
+        font-size: 14px;
+      }
+      .alert-danger {
+        background: #fee;
+        color: #c33;
+        border-left: 4px solid #dc3545;
+      }
+      .alert-success {
+        background: #efe;
+        color: #28a745;
+        border-left: 4px solid #28a745;
+      }
+      .login-card .text-center a {
+        color: #c8a97e;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s;
+      }
+      .login-card .text-center a:hover {
+        color: #b89968;
+        text-decoration: underline;
+      }
+      
+      @media (max-width: 768px) {
+        .login-hero {
+          padding: 100px 0 60px;
+          min-height: 400px;
+        }
+        .login-hero h1 {
+          font-size: 32px;
+        }
+        .login-hero p {
+          font-size: 16px;
+        }
+        .login-card {
+          padding: 30px 20px;
+          margin-top: -50px;
+        }
+        .login-card h2 {
+          font-size: 24px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark ftco_navbar bg-dark ftco-navbar-light" id="ftco-navbar">
+      <div class="container">
+        <a class="navbar-brand" href="index.html">Resort</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav" aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="oi oi-menu"></span> Menu
+        </button>
+
+        <div class="collapse navbar-collapse" id="ftco-nav">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item"><a href="index.html" class="nav-link">Trang Chủ</a></li>
+            <li class="nav-item"><a href="rooms.html" class="nav-link">Phòng</a></li>
+            <li class="nav-item"><a href="restaurant.html" class="nav-link">Nhà Hàng</a></li>
+            <li class="nav-item"><a href="about.html" class="nav-link">Giới Thiệu</a></li>
+            <li class="nav-item"><a href="contact.html" class="nav-link">Liên Hệ</a></li>
+            <li class="nav-item active"><a href="login.html" class="nav-link">Đăng Nhập</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <!-- END nav -->
+
+    <!-- Hero Section -->
+    <section class="login-hero">
+      <div class="container">
+        <div class="login-hero-content">
+          <h1>🔐 Đăng Nhập</h1>
+          <p>Chào mừng bạn trở lại Resort Deluxe</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="login-section">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-md-6">
+            <div class="login-card">
+              <h2 class="text-center">Đăng Nhập Hệ Thống</h2>
+              <p class="text-center subtitle">Đăng nhập với tài khoản Admin hoặc Customer</p>
+              
+              
+              
+              <div id="errorMessage" class="alert alert-danger d-none" role="alert"></div>
+              <div id="successMessage" class="alert alert-success d-none" role="alert"></div>
+              
+              <form id="loginForm" onsubmit="return false;">
+                <div class="form-group">
+                  <label for="email">Email / Tên đăng nhập</label>
+                  <input type="text" class="form-control" id="email" placeholder="Nhập email hoặc username" required autocomplete="username">
+                </div>
+                
+                <div class="form-group">
+                  <label for="password">Mật Khẩu</label>
+                  <input type="password" class="form-control" id="password" placeholder="Nhập mật khẩu" required autocomplete="current-password">
+                </div>
+                
+                <div class="form-group form-check">
+                  <input type="checkbox" class="form-check-input" id="rememberMe">
+                  <label class="form-check-label" for="rememberMe">Ghi nhớ đăng nhập</label>
+                </div>
+                
+                <button type="button" class="btn btn-login" id="btnLogin">
+                  <span id="btnText">Đăng Nhập</span>
+                  <span id="btnSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                </button>
+              </form>
+              
+              <div class="text-center mt-4">
+                <p>Chưa có tài khoản? <a href="register.html" style="color: #c8a97e; font-weight: 600;">Đăng ký ngay</a></p>
+                <p style="font-size: 12px; color: #999; margin-top: 10px;">
+                  Vấn đề cache? <a href="#" onclick="clearAllCache(); return false;" style="color: #c8a97e;">Xóa cache & reload</a>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="ftco-footer ftco-bg-dark ftco-section">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-12 text-center">
+            <p>© 2025 Resort Management System. All rights reserved.</p>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- loader -->
+    <div id="ftco-loader" class="show fullscreen">
+      <svg class="circular" width="48px" height="48px">
+        <circle class="path-bg" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke="#eeeeee"/>
+        <circle class="path" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke-miterlimit="10" stroke="#F96D00"/>
+      </svg>
+    </div>
+
+    <script src="js/jquery.min.js"></script>
+    <script src="js/jquery-migrate-3.0.1.min.js"></script>
+    <script src="js/popper.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/jquery.easing.1.3.js"></script>
+    <script src="js/jquery.waypoints.min.js"></script>
+    <script src="js/jquery.stellar.min.js"></script>
+    <script src="js/owl.carousel.min.js"></script>
+    <script src="js/jquery.magnific-popup.min.js"></script>
+    <script src="js/aos.js"></script>
+    <script src="js/jquery.animateNumber.min.js"></script>
+    <script src="js/bootstrap-datepicker.js"></script>
+    <script src="js/scrollax.min.js"></script>
+    <script src="js/main.js"></script>
+    
+    <!-- Navbar Authentication Handler (chỉ để update navbar) -->
+    <script>
+      // Dynamic cache busting với timestamp
+      const timestamp = new Date().getTime();
+      const script = document.createElement('script');
+      script.src = `js/navbar-auth.js?v=${timestamp}`;
+      document.head.appendChild(script);
+      console.log('✅ navbar-auth.js loaded with cache buster:', timestamp);
+    </script>
+    
+    <!-- NEW SIMPLE LOGIN LOGIC - NO JQUERY CONFLICT -->
+    <script>
+      console.log('🚀 ===== LOGIN PAGE LOADED (NEW SIMPLE LOGIC) =====');
+      console.log('📍 URL:', window.location.href);
+      console.log('⏰ Time:', new Date().toLocaleTimeString());
+      console.log('🔄 Cache timestamp:', new Date().getTime());
+      
+      // Clear old cache data on page load
+      if (performance.navigation.type !== performance.navigation.TYPE_RELOAD) {
+        console.log('🧹 Fresh page load - clearing potential stale data');
+      }
+      
+      // Detect portal from URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const portal = urlParams.get('portal');
+      if (portal) {
+        console.log('🎯 Portal selected:', portal);
+      }
+      
+      // Auto-detect API base URL based on current origin
+      // If running on ngrok, use ngrok URL; otherwise use localhost
+      function getApiBaseUrl() {
+        const origin = window.location.origin;
+        // Check if running on ngrok
+        if (origin.includes('ngrok-free.app') || origin.includes('ngrok.io') || origin.includes('ngrok.app')) {
+          // Use ngrok URL for API
+          const apiUrl = `${origin}/api`;
+          console.log('🌐 Detected ngrok - Using API URL:', apiUrl);
+          return apiUrl;
+        } else if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+          // Use localhost for local development
+          const apiUrl = 'http://localhost:5130/api';
+          console.log('🏠 Detected localhost - Using API URL:', apiUrl);
+          return apiUrl;
+        } else {
+          // For production or other domains, use same origin
+          const apiUrl = `${origin}/api`;
+          console.log('🌍 Using same origin for API:', apiUrl);
+          return apiUrl;
+        }
+      }
+      
+      const API_BASE_URL = getApiBaseUrl();
+      
+      // API Call Helper
+      async function apiCall(endpoint, options = {}) {
+        const url = `${API_BASE_URL}${endpoint}`;
+        console.log('📡 API Call:', url);
+        
+        const response = await fetch(url, {
+          ...options,
+          headers: {
+            'Content-Type': 'application/json',
+            ...options.headers
+          }
+        });
+        
+        console.log('📨 Response status:', response.status);
+        const data = await response.json();
+        console.log('📦 Response data:', data);
+        
+        if (!response.ok) {
+          throw new Error(data.message || `HTTP ${response.status}`);
+        }
+        
+        return data;
+      }
+      
+      // Universal Login Function - TỰ ĐỘNG DETECT ROLE
+      async function universalLogin(email, password) {
+        console.log('🔐 ===== UNIVERSAL LOGIN STARTED =====');
+        console.log('📧 Email/Username:', email);
+        console.log('🎯 Portal hint from URL:', portal || 'none (auto-detect)');
+        
+        let lastError = null;
+        
+        // Strategy: Try both logins and let server decide
+        // Priority based on portal hint or email pattern
+        
+        const shouldTryAdminFirst = 
+          portal === 'admin' || 
+          email.includes('admin') || 
+          email.includes('business') || 
+          email.includes('manager') ||
+          email.includes('frontdesk') ||
+          email.includes('cashier') ||
+          email.includes('accounting') ||
+          email.includes('inventory');
+        
+        if (shouldTryAdminFirst) {
+          console.log('🔵 Strategy: Try ADMIN first (based on hint)');
+          
+          // Try admin/staff login first
+          try {
+            console.log('👨‍💼 Trying admin/staff login...');
+            const adminData = await apiCall('/auth/login', {
+              method: 'POST',
+              body: JSON.stringify({ email, password, role: 'Admin' })
+            });
+            
+            if (adminData && adminData.token) {
+              console.log('✅ Admin/staff login successful!');
+              return adminData;
+            }
+          } catch (adminError) {
+            console.log('❌ Admin/staff login failed:', adminError.message);
+            lastError = adminError;
+          }
+          
+          // Fallback: Try customer login
+          try {
+            console.log('👤 Fallback: Trying customer login...');
+            const customerData = await apiCall('/auth/customer-login', {
+              method: 'POST',
+              body: JSON.stringify({ email, password })
+            });
+            
+            if (customerData && customerData.token) {
+              console.log('✅ Customer login successful!');
+              return customerData;
+            }
+          } catch (customerError) {
+            console.log('❌ Customer login also failed:', customerError.message);
+            lastError = customerError;
+          }
+        } else {
+          console.log('🟣 Strategy: Try CUSTOMER first (based on hint)');
+          
+          // Try customer login first
+          try {
+            console.log('👤 Trying customer login...');
+            const customerData = await apiCall('/auth/customer-login', {
+              method: 'POST',
+              body: JSON.stringify({ email, password })
+            });
+            
+            if (customerData && customerData.token) {
+              console.log('✅ Customer login successful!');
+              return customerData;
+            }
+          } catch (customerError) {
+            console.log('❌ Customer login failed:', customerError.message);
+            lastError = customerError;
+          }
+          
+          // Fallback: Try admin login
+          try {
+            console.log('👨‍💼 Fallback: Trying admin/staff login...');
+            const adminData = await apiCall('/auth/login', {
+              method: 'POST',
+              body: JSON.stringify({ email, password, role: 'Admin' })
+            });
+            
+            if (adminData && adminData.token) {
+              console.log('✅ Admin/staff login successful!');
+              return adminData;
+            }
+          } catch (adminError) {
+            console.log('❌ Admin/staff login also failed:', adminError.message);
+            lastError = adminError;
+          }
+        }
+        
+        // Both failed
+        throw lastError || new Error('Đăng nhập thất bại');
+      }
+      
+      // Main Login Handler
+      async function handleLogin() {
+        console.log('🎯 ===== LOGIN BUTTON CLICKED =====');
+        
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        const btnLogin = document.getElementById('btnLogin');
+        const btnText = document.getElementById('btnText');
+        const btnSpinner = document.getElementById('btnSpinner');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        
+        console.log('📧 Email:', email);
+        console.log('🔑 Password:', password ? '***' : '(empty)');
+        
+        // Validation
+        if (!email || !password) {
+          errorMessage.textContent = 'Vui lòng nhập đầy đủ thông tin!';
+          errorMessage.classList.remove('d-none');
+          successMessage.classList.add('d-none');
+          return;
+        }
+        
+        // Hide messages
+        errorMessage.classList.add('d-none');
+        successMessage.classList.add('d-none');
+        
+        // Show loading
+        btnText.classList.add('d-none');
+        btnSpinner.classList.remove('d-none');
+        btnLogin.disabled = true;
+        
+        try {
+          const result = await universalLogin(email, password);
+          
+          console.log('🎉 Login result:', result);
+          console.log('🔍 result.token:', result?.token);
+          console.log('🔍 result.user:', result?.user);
+          
+          if (result && result.token) {
+            // Save to localStorage
+            console.log('💾 About to save token:', result.token.substring(0, 20) + '...');
+            localStorage.setItem('token', result.token); // Fixed: use 'token' not 'authToken'
+            localStorage.setItem('user', JSON.stringify(result.user));
+            console.log('✅ Token saved. Verify:', localStorage.getItem('token') ? 'SUCCESS' : 'FAILED');
+            
+            // Show success
+            successMessage.textContent = 'Đăng nhập thành công! Đang chuyển hướng...';
+            successMessage.classList.remove('d-none');
+            
+            // Dispatch event for navbar
+            window.dispatchEvent(new CustomEvent('userLoggedIn', { detail: result.user }));
+            
+            // Determine redirect URL based on role
+            const role = result.user?.role;
+            let redirectUrl;
+            
+            if (role === 'Admin' || role === 'Manager' || role === 'Business' || 
+                role === 'FrontDesk' || role === 'Cashier' || role === 'Accounting' || 
+                role === 'Inventory') {
+              redirectUrl = '/admin/html/index.html';
+            } else {
+              redirectUrl = '/customer/index.html';
+            }
+            
+            console.log('🎯 User role:', role);
+            console.log('🔄 Redirecting to:', redirectUrl);
+            
+            // Redirect after 1 second
+            setTimeout(() => {
+              console.log('🚀 Executing redirect...');
+              window.location.href = redirectUrl;
+            }, 1000);
+          } else {
+            throw new Error('Không nhận được token từ server');
+          }
+        } catch (error) {
+          console.error('❌ Login error:', error);
+          errorMessage.textContent = error.message || 'Email/mật khẩu không đúng';
+          errorMessage.classList.remove('d-none');
+          
+          // Reset loading
+          btnText.classList.remove('d-none');
+          btnSpinner.classList.add('d-none');
+          btnLogin.disabled = false;
+        }
+      }
+      
+      // Wait for DOM ready
+      window.addEventListener('DOMContentLoaded', function() {
+        console.log('✅ DOM Ready - Attaching event listeners');
+        
+        const btnLogin = document.getElementById('btnLogin');
+        const passwordInput = document.getElementById('password');
+        const emailInput = document.getElementById('email');
+        const infoBox = document.getElementById('infoBox');
+        
+        // Customize info box based on portal
+        if (portal === 'admin') {
+          infoBox.style.background = '#e3f2fd';
+          infoBox.style.borderLeftColor = '#2196F3';
+          infoBox.innerHTML = '<strong style="color: #2196F3;">👨‍💼 Admin Portal</strong><br>' +
+            'Email: <code style="background: white; padding: 2px 6px; border-radius: 3px;">admin@resort.test</code> hoặc Username: <code style="background: white; padding: 2px 6px; border-radius: 3px;">admin</code><br>' +
+            'Password: <code style="background: white; padding: 2px 6px; border-radius: 3px;">P@ssw0rd123</code>';
+          console.log('🎨 Styled for Admin portal');
+        } else if (portal === 'customer') {
+          infoBox.style.background = '#fce4ec';
+          infoBox.style.borderLeftColor = '#e91e63';
+          infoBox.innerHTML = '<strong style="color: #e91e63;">👤 Customer Portal</strong><br>' +
+            'Email: <code style="background: white; padding: 2px 6px; border-radius: 3px;">customer1@guest.test</code> hoặc Username: <code style="background: white; padding: 2px 6px; border-radius: 3px;">customer1</code><br>' +
+            'Password: <code style="background: white; padding: 2px 6px; border-radius: 3px;">Guest@123</code>';
+          console.log('🎨 Styled for Customer portal');
+        }
+        
+        // Button click - override completely
+        if (btnLogin) {
+          btnLogin.onclick = function(e) {
+            console.log('🖱️ Button clicked (onclick)');
+            e.preventDefault();
+            e.stopPropagation();
+            handleLogin();
+            return false;
+          };
+          console.log('✅ Button onclick attached');
+        }
+        
+        // Enter key on password
+        if (passwordInput) {
+          passwordInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+              console.log('⌨️ Enter pressed on password');
+              e.preventDefault();
+              handleLogin();
+            }
+          });
+        }
+        
+        // Enter key on email (focus password)
+        if (emailInput) {
+          emailInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+              console.log('⌨️ Enter pressed on email');
+              e.preventDefault();
+              passwordInput.focus();
+            }
+          });
+        }
+        
+        console.log('✅ Ready for login!');
+      });
+      
+      console.log('✅ ===== LOGIN SCRIPT LOADED SUCCESSFULLY =====');
+      
+      // Helper function to clear ALL cache
+      window.clearAllCache = async function() {
+        console.log('🧹 ===== CLEARING ALL CACHE =====');
+        
+        try {
+          // Clear localStorage
+          console.log('🗑️ Clearing localStorage...');
+          localStorage.clear();
+          
+          // Clear sessionStorage
+          console.log('🗑️ Clearing sessionStorage...');
+          sessionStorage.clear();
+          
+          // Clear Service Worker caches
+          if ('caches' in window) {
+            console.log('🗑️ Clearing Service Worker caches...');
+            const cacheNames = await caches.keys();
+            await Promise.all(cacheNames.map(name => {
+              console.log('  - Deleting cache:', name);
+              return caches.delete(name);
+            }));
+          }
+          
+          // Unregister service workers
+          if ('serviceWorker' in navigator) {
+            console.log('🗑️ Unregistering Service Workers...');
+            const registrations = await navigator.serviceWorker.getRegistrations();
+            await Promise.all(registrations.map(registration => {
+              console.log('  - Unregistering:', registration.scope);
+              return registration.unregister();
+            }));
+          }
+          
+          console.log('✅ All cache cleared!');
+          alert('✅ Đã xóa tất cả cache!\n\nTrang sẽ reload sau 1 giây...');
+          
+          // Force reload from server (not from cache)
+          setTimeout(() => {
+            window.location.reload(true);
+          }, 1000);
+          
+        } catch (error) {
+          console.error('❌ Error clearing cache:', error);
+          alert('❌ Có lỗi khi xóa cache: ' + error.message);
+        }
+      };
+      
+      console.log('✅ clearAllCache() function available globally');
+    </script>
+  </body>
+</html>
+

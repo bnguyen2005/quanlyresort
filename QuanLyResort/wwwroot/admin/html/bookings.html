@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="vi" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default" data-assets-path="../assets/" data-template="vertical-menu-template-free">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+  <title>Quản lý Đặt phòng - Resort Management</title>
+  <link rel="icon" type="image/x-icon" href="../assets/img/favicon/favicon.ico" />
+  <link rel="stylesheet" href="../assets/vendor/fonts/boxicons.css" />
+  <link rel="stylesheet" href="../assets/vendor/css/core.css" class="template-customizer-core-css" />
+  <link rel="stylesheet" href="../assets/vendor/css/theme-default.css" class="template-customizer-theme-css" />
+  <link rel="stylesheet" href="../assets/css/demo.css" />
+  <link rel="stylesheet" href="../assets/css/fix-scrollbar.css" />
+  <link rel="stylesheet" href="../assets/css/admin-custom-theme.css" />
+  <link rel="stylesheet" href="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+  <!-- DataTables -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
+</head>
+
+<body>
+  <div class="layout-wrapper layout-content-navbar">
+    <div class="layout-container">
+      
+      <!-- Menu - Load from common component -->
+      <div id="common-menu"></div>
+      <script>
+        // Load common menu with cache busting
+        (function() {
+          // Use timestamp to ALWAYS fetch fresh
+          const menuVersion = Date.now();
+          fetch('layout-menu.html?v=' + menuVersion)
+            .then(response => {
+              if (!response.ok) {
+                throw new Error('Failed to load menu: ' + response.status);
+              }
+              return response.text();
+            })
+            .then(html => {
+              const menuContainer = document.getElementById('common-menu');
+              if (menuContainer) {
+                menuContainer.innerHTML = html;
+                console.log('✅ Menu loaded successfully');
+              } else {
+                console.error('❌ Menu container not found');
+              }
+            })
+            .catch(error => {
+              console.error('❌ Error loading menu:', error);
+            });
+        })();
+      </script>
+      <!-- / Menu -->
+
+      <!-- Layout container -->
+      <div class="layout-page">
+        
+        <!-- Navbar -->
+        <nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme" id="layout-navbar">
+          <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
+            <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
+              <i class="bx bx-menu bx-sm"></i>
+            </a>
+          </div>
+
+          <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+            <div class="navbar-nav align-items-center">
+              <div class="nav-item d-flex align-items-center">
+                <h4 class="mb-0" id="pageTitle">📅 Quản lý Đặt phòng</h4>
+              </div>
+            </div>
+
+            <ul class="navbar-nav flex-row align-items-center ms-auto">
+              <!-- User -->
+              <li class="nav-item navbar-dropdown dropdown-user dropdown">
+                <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
+                  <div class="avatar avatar-online">
+                    <img src="../assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                  </div>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li>
+                    <a class="dropdown-item" href="#">
+                      <div class="d-flex">
+                        <div class="flex-shrink-0 me-3">
+                          <div class="avatar avatar-online">
+                            <img src="../assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                          </div>
+                        </div>
+                        <div class="flex-grow-1">
+                          <span class="fw-semibold d-block" id="userDisplayName">Admin</span>
+                          <small class="text-muted" id="userRole">Quản trị viên</small>
+                        </div>
+                      </div>
+                    </a>
+                  </li>
+                  <li>
+                    <div class="dropdown-divider"></div>
+                  </li>
+                  <li>
+                    <a class="dropdown-item" href="#">
+                      <i class="bx bx-user me-2"></i>
+                      <span class="align-middle">Hồ sơ của tôi</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item" href="#">
+                      <i class="bx bx-cog me-2"></i>
+                      <span class="align-middle">Cài đặt</span>
+                    </a>
+                  </li>
+                  <li>
+                    <div class="dropdown-divider"></div>
+                  </li>
+                  <li>
+                    <a class="dropdown-item" href="javascript:void(0);" id="logoutBtn">
+                      <i class="bx bx-power-off me-2"></i>
+                      <span class="align-middle">Đăng xuất</span>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+              <!--/ User -->
+            </ul>
+          </div>
+        </nav>
+        <!-- / Navbar -->
+
+        <!-- Content wrapper -->
+        <div class="content-wrapper">
+          <!-- Content -->
+          <div class="container-xxl flex-grow-1 container-p-y">
+            
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <div>
+                <h4 class="fw-bold py-3 mb-2">
+                  <span class="text-muted fw-light">Quản lý /</span> Đặt phòng
+                </h4>
+              </div>
+              <div>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBookingModal">
+                  <i class="bx bx-plus me-1"></i> Thêm Booking Mới
+                </button>
+              </div>
+            </div>
+
+            <!-- Alert Messages -->
+            <div id="alertContainer"></div>
+
+            <!-- Bookings Table Card -->
+            <div class="card">
+              <h5 class="card-header">Danh sách Đặt phòng</h5>
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table id="bookingsTable" class="table table-striped table-hover">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Khách hàng</th>
+                        <th>Phòng</th>
+                        <th>Check-in</th>
+                        <th>Check-out</th>
+                        <th>Số khách</th>
+                        <th>Trạng thái</th>
+                        <th>Tổng tiền</th>
+                        <th>Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <!-- Data will be loaded via JavaScript -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          <!-- / Content -->
+
+          <!-- Footer -->
+          <footer class="content-footer footer bg-footer-theme">
+            <div class="container-xxl d-flex flex-wrap justify-content-between py-2 flex-md-row flex-column">
+              <div class="mb-2 mb-md-0">
+                © 2025 Resort Management System
+              </div>
+            </div>
+          </footer>
+          <!-- / Footer -->
+
+          <div class="content-backdrop fade"></div>
+        </div>
+        <!-- Content wrapper -->
+      </div>
+      <!-- / Layout page -->
+    </div>
+
+    <!-- Overlay -->
+    <div class="layout-overlay layout-menu-toggle"></div>
+  </div>
+  <!-- / Layout wrapper -->
+
+  <!-- Add/Edit Booking Modal -->
+  <div class="modal fade" id="addBookingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalTitle">Thêm Booking Mới</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="bookingForm">
+          <div class="modal-body">
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="form-label" for="customerId">Khách hàng <span class="text-danger">*</span></label>
+                <select class="form-select" id="customerId" name="customerId" required>
+                  <option value="">-- Chọn khách hàng --</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="roomType">Loại phòng <span class="text-danger">*</span></label>
+                <select class="form-select" id="roomType" name="roomType" required>
+                  <option value="">-- Chọn loại phòng --</option>
+                  <option value="Standard">Standard</option>
+                  <option value="Deluxe">Deluxe</option>
+                  <option value="Suite">Suite</option>
+                  <option value="Villa">Villa</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="form-label" for="checkInDate">Ngày Check-in <span class="text-danger">*</span></label>
+                <input type="date" class="form-control" id="checkInDate" name="checkInDate" required />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="checkOutDate">Ngày Check-out <span class="text-danger">*</span></label>
+                <input type="date" class="form-control" id="checkOutDate" name="checkOutDate" required />
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="form-label" for="numberOfGuests">Số khách <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" id="numberOfGuests" name="numberOfGuests" min="1" value="1" required />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="source">Nguồn</label>
+                <select class="form-select" id="source" name="source">
+                  <option value="Direct">Direct</option>
+                  <option value="Online">Online</option>
+                  <option value="Phone">Phone</option>
+                  <option value="Email">Email</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="specialRequests">Yêu cầu đặc biệt</label>
+              <textarea class="form-control" id="specialRequests" name="specialRequests" rows="3"></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+            <button type="submit" class="btn btn-primary">Lưu</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- View Booking Details Modal -->
+  <div class="modal fade" id="viewBookingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Chi tiết Booking</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div id="bookingDetails">
+            <!-- Details will be loaded via JavaScript -->
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Core JS -->
+  <script src="../assets/vendor/libs/jquery/jquery.js"></script>
+  <script src="../assets/vendor/libs/popper/popper.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+  <script src="../assets/vendor/js/menu.js"></script>
+  <script src="../assets/vendor/js/helpers.js"></script>
+
+  <!-- DataTables -->
+  <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+
+  <!-- Main JS -->
+  <script src="../assets/js/main.js"></script>
+
+  <!-- API Helper -->
+  <script src="../js/api.js"></script>
+
+  <!-- Common Navbar -->
+  <script src="../js/common-navbar.js"></script>
+  <script>
+    // Initialize navbar and load user info
+    document.addEventListener('DOMContentLoaded', function() {
+      loadNavbarUserInfo();
+    });
+  </script>
+
+  <!-- Bookings JS -->
+  <script>
+    // Check authentication
+    checkCommonAuth(['Admin', 'Manager', 'FrontDesk', 'Cashier']);
+
+    let bookingsTable;
+    let customers = [];
+    
+    // Ensure functions are not already declared
+    if (typeof window.cancelBooking !== 'undefined') {
+      console.warn('⚠️ cancelBooking already exists, removing previous declaration');
+      delete window.cancelBooking;
+    }
+
+    // Initialize
+    $(document).ready(function() {
+      loadCustomers();
+      initBookingsTable();
+      
+      // Form submit
+      $('#bookingForm').on('submit', handleBookingFormSubmit);
+    });
+
+    // Initialize DataTable
+    function initBookingsTable() {
+      bookingsTable = $('#bookingsTable').DataTable({
+        ajax: {
+          url: (typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : 'http://localhost:5130/api') + '/bookings',
+          headers: {
+            'Authorization': 'Bearer ' + (localStorage.getItem('token') || localStorage.getItem('adminToken'))
+          },
+          dataSrc: '',
+          error: function(xhr, error, thrown) {
+            console.error('❌ Error loading bookings:', error, thrown);
+            console.error('Response:', xhr.responseText);
+            // Hiển thị thông báo lỗi cho user
+            if (xhr.status === 401) {
+              showAlert('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.', 'danger');
+            } else if (xhr.status === 403) {
+              showAlert('Bạn không có quyền truy cập danh sách đặt phòng.', 'danger');
+            } else {
+              showAlert('Lỗi khi tải danh sách đặt phòng: ' + (xhr.responseJSON?.message || error), 'danger');
+            }
+          }
+        },
+        columns: [
+          { data: 'bookingId' },
+          { 
+            data: null,
+            render: function(data, type, row) {
+              // Hiển thị thông tin khách hàng - ưu tiên từ Customer object, nếu không có thì từ booking fields
+              if (row.customer && row.customer.fullName) {
+                return row.customer.fullName + (row.customer.email ? ` (${row.customer.email})` : '');
+              } else if (row.customer && row.customer.email) {
+                return row.customer.email;
+              } else if (row.fullName || row.customerName) {
+                // Walk-in customer - thông tin được lưu trực tiếp trong booking
+                const name = row.fullName || row.customerName;
+                const email = row.email || row.customerEmail || '';
+                return name + (email ? ` (${email})` : '') + ' <span class="badge bg-secondary">Walk-in</span>';
+              } else {
+                return '<span class="text-muted">Khách vãng lai</span>';
+              }
+            }
+          },
+          { 
+            data: 'room',
+            render: function(data) {
+              return data ? data.roomNumber : 'Chưa gán';
+            }
+          },
+          {
+            data: 'checkInDate',
+            render: function(data) {
+              return data ? new Date(data).toLocaleDateString('vi-VN') : '';
+            }
+          },
+          {
+            data: 'checkOutDate',
+            render: function(data) {
+              return data ? new Date(data).toLocaleDateString('vi-VN') : '';
+            }
+          },
+          { data: 'numberOfGuests' },
+          { 
+            data: 'status',
+            render: function(data) {
+              const statusMap = {
+                'Pending': { text: 'Chờ xử lý', class: 'warning' },
+                'Confirmed': { text: 'Đã xác nhận', class: 'info' },
+                'Assigned': { text: 'Đã gán phòng', class: 'primary' },
+                'CheckedIn': { text: 'Đã nhận phòng', class: 'success' },
+                'CheckedOut': { text: 'Đã trả phòng', class: 'secondary' },
+                'Cancelled': { text: 'Đã hủy', class: 'danger' }
+              };
+              const status = statusMap[data] || { text: data, class: 'secondary' };
+              return `<span class="badge bg-${status.class}">${status.text}</span>`;
+            }
+          },
+          { 
+            data: 'totalAmount',
+            render: function(data) {
+              return data ? data.toLocaleString('vi-VN') + ' đ' : '0 đ';
+            }
+          },
+          {
+            data: null,
+            orderable: false,
+            render: function(data, type, row) {
+              return `
+                <button class="btn btn-sm btn-info" onclick="viewBooking(${row.bookingId})" title="Xem chi tiết">
+                  <i class="bx bx-show"></i>
+                </button>
+                <button class="btn btn-sm btn-warning" onclick="editBooking(${row.bookingId})" title="Sửa">
+                  <i class="bx bx-edit"></i>
+                </button>
+                ${row.status === 'Pending' || row.status === 'Confirmed' ? 
+                  `<button class="btn btn-sm btn-danger" onclick="cancelBooking(${row.bookingId})" title="Hủy">
+                    <i class="bx bx-x"></i>
+                  </button>` : ''}
+              `;
+            }
+          }
+        ],
+        order: [[0, 'desc']],
+        language: {
+          url: '/admin/local-plugins/datatables/i18n/vi.json'
+        }
+      });
+    }
+
+    // Load customers for dropdown
+    async function loadCustomers() {
+      try {
+        const response = await adminAPI('/customer-management/customers');
+        customers = response;
+        
+        const select = document.getElementById('customerId');
+        select.innerHTML = '<option value="">-- Chọn khách hàng --</option>';
+        
+        customers.forEach(customer => {
+          const option = document.createElement('option');
+          option.value = customer.customerId;
+          option.textContent = `${customer.fullName} - ${customer.email}`;
+          select.appendChild(option);
+        });
+      } catch (error) {
+        console.error('Error loading customers:', error);
+        showAlert('Không thể tải danh sách khách hàng', 'danger');
+      }
+    }
+
+    // Handle form submit
+    async function handleBookingFormSubmit(e) {
+      e.preventDefault();
+      
+      const formData = {
+        customerId: parseInt(document.getElementById('customerId').value),
+        requestedRoomType: document.getElementById('roomType').value,
+        checkInDate: document.getElementById('checkInDate').value,
+        checkOutDate: document.getElementById('checkOutDate').value,
+        numberOfGuests: parseInt(document.getElementById('numberOfGuests').value),
+        source: document.getElementById('source').value,
+        specialRequests: document.getElementById('specialRequests').value
+      };
+
+      try {
+        await adminAPI('/bookings', 'POST', formData);
+        showAlert('Thêm booking thành công!', 'success');
+        $('#addBookingModal').modal('hide');
+        $('#bookingForm')[0].reset();
+        bookingsTable.ajax.reload();
+      } catch (error) {
+        showAlert('Lỗi: ' + (error.message || 'Không thể thêm booking'), 'danger');
+      }
+    }
+
+    // View booking details
+    async function viewBooking(id) {
+      try {
+        const booking = await adminAPI(`/bookings/${id}`);
+        
+        // Hiển thị thông tin khách hàng - ưu tiên từ Customer object
+        const customerName = booking.customer?.fullName || booking.fullName || booking.customerName || 'N/A';
+        const customerEmail = booking.customer?.email || booking.email || booking.customerEmail || 'N/A';
+        const customerPhone = booking.customer?.phoneNumber || booking.phoneNumber || booking.customerPhone || 'N/A';
+        
+        const detailsHtml = `
+          <div class="row">
+            <div class="col-md-6">
+              <p><strong>Booking ID:</strong> ${booking.bookingId}</p>
+              <p><strong>Mã đặt phòng:</strong> ${booking.bookingCode || 'N/A'}</p>
+              <p><strong>Khách hàng:</strong> ${customerName}</p>
+              <p><strong>Email:</strong> ${customerEmail}</p>
+              <p><strong>Điện thoại:</strong> ${customerPhone}</p>
+            </div>
+            <div class="col-md-6">
+              <p><strong>Phòng:</strong> ${booking.room ? booking.room.roomNumber : 'Chưa gán'}</p>
+              <p><strong>Loại phòng yêu cầu:</strong> ${booking.requestedRoomType}</p>
+              <p><strong>Check-in:</strong> ${new Date(booking.checkInDate).toLocaleDateString('vi-VN')}</p>
+              <p><strong>Check-out:</strong> ${new Date(booking.checkOutDate).toLocaleDateString('vi-VN')}</p>
+            </div>
+          </div>
+          <hr>
+          <div class="row">
+            <div class="col-md-6">
+              <p><strong>Số khách:</strong> ${booking.numberOfGuests}</p>
+              <p><strong>Nguồn:</strong> ${booking.source}</p>
+              <p><strong>Trạng thái:</strong> <span class="badge bg-info">${booking.status}</span></p>
+            </div>
+            <div class="col-md-6">
+              <p><strong>Tổng tiền:</strong> ${booking.totalAmount?.toLocaleString('vi-VN')} đ</p>
+              <p><strong>Đã thanh toán:</strong> ${booking.paidAmount?.toLocaleString('vi-VN')} đ</p>
+            </div>
+          </div>
+          ${booking.specialRequests ? `
+            <hr>
+            <p><strong>Yêu cầu đặc biệt:</strong></p>
+            <p>${booking.specialRequests}</p>
+          ` : ''}
+        `;
+        
+        document.getElementById('bookingDetails').innerHTML = detailsHtml;
+        $('#viewBookingModal').modal('show');
+      } catch (error) {
+        showAlert('Lỗi: ' + (error.message || 'Không thể tải chi tiết booking'), 'danger');
+      }
+    }
+
+    // Edit booking (placeholder)
+    window.editBooking = function(id) {
+      alert('Chức năng sửa booking đang được phát triển');
+    }
+
+    // Cancel booking
+    window.cancelBooking = async function(id) {
+      if (!confirm('Bạn có chắc muốn hủy booking này?')) return;
+      
+      const reason = prompt('Lý do hủy:');
+      if (!reason) return;
+
+      try {
+        await adminAPI(`/bookings/${id}/cancel`, 'POST', { reason });
+        showAlert('Hủy booking thành công!', 'success');
+        bookingsTable.ajax.reload();
+      } catch (error) {
+        showAlert('Lỗi: ' + (error.message || 'Không thể hủy booking'), 'danger');
+      }
+    }
+
+    // Show alert
+    function showAlert(message, type) {
+      const alertHtml = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+          ${message}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      `;
+      document.getElementById('alertContainer').innerHTML = alertHtml;
+      
+      setTimeout(() => {
+        const alert = document.querySelector('#alertContainer .alert');
+        if (alert) alert.remove();
+      }, 5000);
+    }
+
+    // Logout function is handled by common-navbar.js
+    // No need to redeclare it here
+  </script>
+
+</body>
+</html>
+

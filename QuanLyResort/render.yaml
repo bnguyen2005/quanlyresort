@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: quanlyresort-api
+    env: dotnet
+    buildCommand: dotnet publish -c Release -o ./publish
+    startCommand: dotnet ./publish/QuanLyResort.dll
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ASPNETCORE_URLS
+        value: http://0.0.0.0:${{PORT}}
+      - key: PORT
+        value: 10000
+      # Database - Update với connection string thật của bạn
+      - key: ConnectionStrings__DefaultConnection
+        value: Server=(localdb)\\mssqllocaldb;Database=ResortManagementDb;Trusted_Connection=true;MultipleActiveResultSets=true
+      # JWT Settings
+      - key: JwtSettings__SecretKey
+        value: YourSuperSecretKeyForJWTTokenGeneration2025!@#$
+      - key: JwtSettings__Issuer
+        value: ResortManagementAPI
+      - key: JwtSettings__Audience
+        value: ResortManagementClient
+      - key: JwtSettings__ExpirationHours
+        value: 24
+      # PayOs Settings
+      - key: BankWebhook__PayOs__ClientId
+        value: c704495b-5984-4ad3-aa23-b2794a02aa83
+      - key: BankWebhook__PayOs__ApiKey
+        value: f6ea421b-a8b7-46b8-92be-209eb1a9b2fb
+      - key: BankWebhook__PayOs__ChecksumKey
+        value: 429890033cc6f1ca9696c91bb4abf499de9ac6132c64e335e46f4c87e6d95313
+      - key: BankWebhook__PayOs__SecretKey
+        value: 429890033cc6f1ca9696c91bb4abf499de9ac6132c64e335e46f4c87e6d95313
+      - key: BankWebhook__PayOs__VerifySignature
+        value: false
+      - key: BankWebhook__PayOs__WebhookUrl
+        value: https://quanlyresort-api.onrender.com/api/simplepayment/webhook
+

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Test Rooms Page Access</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background: #d4edda; }
+        .error { background: #f8d7da; }
+        .warning { background: #fff3cd; }
+        button { padding: 10px 20px; margin: 5px; }
+        .log { background: #f8f9fa; padding: 10px; margin: 10px 0; border-radius: 5px; font-family: monospace; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Test Rooms Page Access</h1>
+    
+    <div class="test-section">
+        <h3>1. Test Direct Access</h3>
+        <button onclick="testDirectAccess()">Test Direct Access</button>
+        <div id="directResult" class="log"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>2. Test API Access</h3>
+        <button onclick="testAPIAccess()">Test API Access</button>
+        <div id="apiResult" class="log"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>3. Test Service Worker</h3>
+        <button onclick="testServiceWorker()">Test Service Worker</button>
+        <div id="swResult" class="log"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>4. Test Navigation</h3>
+        <button onclick="testNavigation()">Test Navigation</button>
+        <div id="navResult" class="log"></div>
+    </div>
+
+    <script>
+        function log(elementId, message) {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            element.textContent += `[${timestamp}] ${message}\n`;
+        }
+        
+        async function testDirectAccess() {
+            log('directResult', 'Testing direct access to rooms.html...');
+            
+            try {
+                const response = await fetch('/admin/html/rooms.html', { cache: 'no-store' });
+                log('directResult', `Response status: ${response.status}`);
+                
+                if (response.ok) {
+                    const html = await response.text();
+                    log('directResult', `✅ HTML loaded: ${html.length} characters`);
+                    
+                    // Check if it contains expected content
+                    if (html.includes('Quản lý phòng')) {
+                        log('directResult', '✅ Contains expected content');
+                    } else {
+                        log('directResult', '⚠️ Missing expected content');
+                    }
+                } else {
+                    log('directResult', `❌ Failed to load: ${response.status} ${response.statusText}`);
+                }
+            } catch (error) {
+                log('directResult', `❌ Error: ${error.message}`);
+            }
+        }
+        
+        async function testAPIAccess() {
+            log('apiResult', 'Testing API access...');
+            
+            try {
+                const response = await fetch('/api/rooms', { cache: 'no-store' });
+                log('apiResult', `Response status: ${response.status}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log('apiResult', `✅ API loaded: ${data.length} rooms`);
+                } else {
+                    log('apiResult', `❌ API failed: ${response.status} ${response.statusText}`);
+                }
+            } catch (error) {
+                log('apiResult', `❌ API Error: ${error.message}`);
+            }
+        }
+        
+        function testServiceWorker() {
+            log('swResult', 'Testing Service Worker...');
+            
+            if ('serviceWorker' in navigator) {
+                log('swResult', '✅ Service Worker supported');
+                
+                navigator.serviceWorker.getRegistrations().then(registrations => {
+                    log('swResult', `Found ${registrations.length} service workers`);
+                    
+                    registrations.forEach((registration, index) => {
+                        log('swResult', `SW ${index + 1}: ${registration.scope}`);
+                    });
+                });
+            } else {
+                log('swResult', '❌ Service Worker not supported');
+            }
+        }
+        
+        function testNavigation() {
+            log('navResult', 'Testing navigation...');
+            
+            // Test if we can navigate to rooms page
+            const currentUrl = window.location.href;
+            log('navResult', `Current URL: ${currentUrl}`);
+            
+            const roomsUrl = '/admin/html/rooms.html';
+            log('navResult', `Target URL: ${roomsUrl}`);
+            
+            // Test if we can create a link
+            const link = document.createElement('a');
+            link.href = roomsUrl;
+            log('navResult', `Link href: ${link.href}`);
+            
+            // Test if we can navigate
+            log('navResult', 'Click button below to navigate to rooms page');
+        }
+        
+        // Auto-run tests on page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                testDirectAccess();
+                testAPIAccess();
+                testServiceWorker();
+                testNavigation();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

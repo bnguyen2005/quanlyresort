@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chi tiết đơn đặt món - Resort Deluxe</title>
+  
+  <!-- NO CACHE -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  
+  <!-- CSS -->
+  <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/open-iconic-bootstrap.min.css">
+  
+  <!-- Design System CSS -->
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/globals.css">
+  <link rel="stylesheet" href="/css/grid.css">
+  <link rel="stylesheet" href="/css/components/navbar.css">
+  <link rel="stylesheet" href="css/navbar-auth.css">
+</head>
+<body>
+  <!-- Header placeholder - will be loaded by load-header.js -->
+  <div id="header-placeholder"></div>
+  
+  <!-- Load header component -->
+  <script src="js/load-header.js"></script>
+  
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      padding-top: 0;
+      overflow-x: hidden;
+      background: #f8f9fa;
+    }
+    .ftco-navbar {
+      position: sticky !important;
+      top: 0 !important;
+      z-index: 1030 !important;
+      background-color: #1a1a1a !important;
+      width: 100% !important;
+      margin: 0 !important;
+    }
+  </style>
+
+  <!-- Hero Section -->
+  <section class="hero-wrap" style="background-image: url('images/bg_1.jpg');">
+    <div class="overlay"></div>
+    <div class="container">
+      <div class="row no-gutters slider-text d-flex align-itemd-end justify-content-center">
+        <div class="col-md-9 ftco-animate text-center d-flex align-items-end justify-content-center">
+          <div class="text">
+            <p class="breadcrumbs mb-2"><span class="mr-2"><a href="index.html">Trang chủ</a></span> <span>Chi tiết đơn đặt món</span></p>
+            <h1 class="mb-4 bread">Chi tiết đơn đặt món</h1>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Order Details Section -->
+  <section class="ftco-section ftco-degree-bg">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          
+          <!-- Loading State -->
+          <div id="loadingState" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="sr-only">Đang tải...</span>
+            </div>
+            <p class="mt-3">Đang tải thông tin đơn hàng...</p>
+          </div>
+
+          <!-- Error State -->
+          <div id="errorState" class="alert alert-danger" style="display: none;">
+            <h4 class="alert-heading">Lỗi!</h4>
+            <p id="errorMessage">Không thể tải thông tin đơn hàng.</p>
+            <hr>
+            <button class="btn btn-primary" onclick="location.reload()">Tải lại</button>
+            <a href="restaurant.html" class="btn btn-secondary">Quay lại nhà hàng</a>
+          </div>
+
+          <!-- Order Details Card -->
+          <div id="orderDetailsCard" class="card shadow-lg border-0" style="display: none; border-radius: 16px; overflow: hidden;">
+            
+            <!-- Header -->
+            <div class="card-header bg-gradient-primary text-white" style="background: linear-gradient(135deg, var(--color-primary-main, #C8A97E) 0%, var(--color-primary-dark, #B89968) 100%); padding: 2rem;">
+              <div class="row align-items-center">
+                <div class="col-md-8">
+                  <h2 class="mb-2" style="font-size: 28px; font-weight: 700;">
+                    <i class="icon-shopping-cart me-2"></i>
+                    Đơn đặt món <span id="orderNumber">#ORD0000000</span>
+                  </h2>
+                  <p class="mb-0" style="opacity: 0.9;" id="orderDate">Ngày đặt: --</p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                  <div id="statusBadge" class="badge badge-lg" style="font-size: 16px; padding: 0.75rem 1.5rem;">
+                    Chờ xử lý
+                  </div>
+                  <div id="paymentBadge" class="badge badge-lg mt-2" style="font-size: 14px; padding: 0.5rem 1rem;">
+                    Chưa thanh toán
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Body -->
+            <div class="card-body p-4">
+              
+              <!-- Customer Info -->
+              <div class="row mb-4">
+                <div class="col-md-6 mb-3">
+                  <div class="info-box p-3" style="background: #f8f9fa; border-radius: 8px;">
+                    <h5 class="mb-3" style="color: var(--color-primary-main, #C8A97E); font-weight: 600;">
+                      <i class="icon-user me-2"></i>Thông tin khách hàng
+                    </h5>
+                    <p class="mb-1"><strong>Tên:</strong> <span id="customerName">--</span></p>
+                    <p class="mb-1"><strong>Email:</strong> <span id="customerEmail">--</span></p>
+                    <p class="mb-0"><strong>Điện thoại:</strong> <span id="customerPhone">--</span></p>
+                  </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <div class="info-box p-3" style="background: #f8f9fa; border-radius: 8px;">
+                    <h5 class="mb-3" style="color: var(--color-primary-main, #C8A97E); font-weight: 600;">
+                      <i class="icon-location-pin me-2"></i>Thông tin giao hàng
+                    </h5>
+                    <p class="mb-1"><strong>Địa chỉ:</strong> <span id="deliveryAddress">--</span></p>
+                    <p class="mb-1"><strong>Thời gian mong muốn:</strong> <span id="deliveryTime">--</span></p>
+                    <p class="mb-0"><strong>Phương thức thanh toán:</strong> <span id="paymentMethod">--</span></p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Order Items -->
+              <div class="mb-4">
+                <h5 class="mb-3" style="color: var(--color-primary-main, #C8A97E); font-weight: 600;">
+                  <i class="icon-list me-2"></i>Danh sách món đã đặt
+                </h5>
+                <div class="table-responsive">
+                  <table class="table table-hover" id="orderItemsTable">
+                    <thead style="background: var(--color-primary-main, #C8A97E); color: white;">
+                      <tr>
+                        <th style="border: none;">Món ăn</th>
+                        <th style="border: none;" class="text-center">Đơn giá</th>
+                        <th style="border: none;" class="text-center">Số lượng</th>
+                        <th style="border: none;" class="text-end">Thành tiền</th>
+                      </tr>
+                    </thead>
+                    <tbody id="orderItemsBody">
+                      <!-- Items will be loaded here -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Special Requests -->
+              <div id="specialRequestsSection" class="mb-4" style="display: none;">
+                <div class="alert alert-info" style="border-radius: 8px;">
+                  <h6 class="mb-2"><i class="icon-info me-2"></i>Ghi chú đặc biệt:</h6>
+                  <p class="mb-0" id="specialRequests">--</p>
+                </div>
+              </div>
+
+              <!-- Total Amount -->
+              <div class="row">
+                <div class="col-md-6 offset-md-6">
+                  <div class="p-3" style="background: #f8f9fa; border-radius: 8px;">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                      <span class="text-muted">Tạm tính:</span>
+                      <span id="subTotal">0 ₫</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                      <span class="text-muted">VAT (10%):</span>
+                      <span id="vatAmount">0 ₫</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between align-items-center">
+                      <strong style="font-size: 20px;">Tổng tiền:</strong>
+                      <strong id="totalAmount" style="font-size: 24px; color: var(--color-primary-main, #C8A97E);">0 ₫</strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Footer Actions -->
+            <div class="card-footer bg-light p-4" style="border-top: 1px solid #dee2e6;">
+              <div class="row">
+                <div class="col-md-6 mb-2">
+                  <a href="restaurant.html" class="btn btn-outline-secondary w-100">
+                    <i class="icon-arrow-left me-2"></i>Quay lại nhà hàng
+                  </a>
+                </div>
+                <div class="col-md-6 mb-2">
+                  <button id="btnPayNow" class="btn btn-primary w-100" onclick="showPaymentModal()" style="display: none;">
+                    <i class="icon-credit-card me-2"></i>Thanh toán ngay
+                  </button>
+                  <button id="btnViewOrders" class="btn btn-primary w-100" onclick="window.location.href='restaurant.html#my-orders'" style="display: none;">
+                    <i class="icon-list me-2"></i>Xem tất cả đơn hàng
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Payment Modal -->
+  <div class="modal fade" id="paymentModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header" style="background: linear-gradient(135deg, var(--color-primary-main, #C8A97E) 0%, var(--color-primary-dark, #B89968) 100%); color: white;">
+          <h5 class="modal-title" style="font-size: 20px; font-weight: 600;">
+            <i class="icon-credit-card me-2"></i>Thanh toán đơn hàng
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="mb-3">
+            <label class="form-label" style="font-weight: 600;">Mã đơn hàng</label>
+            <input type="text" class="form-control" id="modalOrderNumber" readonly style="font-size: 18px; font-weight: 600;">
+          </div>
+          <div class="mb-3">
+            <label class="form-label" style="font-weight: 600;">Số tiền cần thanh toán</label>
+            <input type="text" class="form-control" id="modalTotalAmount" readonly style="font-size: 20px; font-weight: 700; color: var(--color-primary-main, #C8A97E);">
+          </div>
+          <div class="mb-3">
+            <label class="form-label" style="font-weight: 600;">Phương thức thanh toán</label>
+            <select id="paymentMethodSelect" class="form-select" style="font-size: 16px; padding: 0.75rem;">
+              <option value="QR">💳 Chuyển khoản QR (VietQR)</option>
+              <option value="Cash">💵 Thanh toán tại nhà hàng</option>
+              <option value="RoomCharge">🏨 Charge vào phòng (nếu có booking)</option>
+            </select>
+          </div>
+          
+          <!-- QR Code Section -->
+          <div id="qrSection" class="text-center p-4" style="background: #f8f9fa; border-radius: 8px; display: none;">
+            <h6 class="mb-3">Quét mã QR để thanh toán</h6>
+            <div id="qrCodeContainer" style="display: inline-block; padding: 1rem; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+              <img id="qrCodeImage" src="" alt="QR Code" style="max-width: 250px; height: auto;">
+            </div>
+            <div class="mt-3" style="font-size: 14px;">
+              <p class="mb-1"><strong>Ngân hàng:</strong> MBBank</p>
+              <p class="mb-1"><strong>STK:</strong> 0901329227</p>
+              <p class="mb-0"><strong>Chủ TK:</strong> Resort Deluxe</p>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+          <button type="button" class="btn btn-primary" id="confirmPaymentBtn" onclick="window.confirmPayment()">
+            <i class="icon-check me-2"></i>Xác nhận đã thanh toán
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="ftco-footer ftco-bg-dark ftco-section">
+    <div class="container">
+      <div class="row mb-5">
+        <div class="col-md">
+          <div class="ftco-footer-widget mb-4">
+            <h2 class="ftco-heading-2">RESORT DELUXE</h2>
+            <p>Khu nghỉ dưỡng cao cấp với đầy đủ tiện nghi hiện đại, phục vụ chu đáo và không gian tuyệt đẹp.</p>
+            <ul class="ftco-footer-social list-unstyled float-md-left float-lft mt-5">
+              <li class="ftco-animate"><a href="#"><span class="icon-twitter"></span></a></li>
+              <li class="ftco-animate"><a href="#"><span class="icon-facebook"></span></a></li>
+              <li class="ftco-animate"><a href="#"><span class="icon-instagram"></span></a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-md">
+          <div class="ftco-footer-widget mb-4 ml-md-5">
+            <h2 class="ftco-heading-2">Liên kết hữu ích</h2>
+            <ul class="list-unstyled">
+              <li><a href="blog.html" class="py-2 d-block">Blog</a></li>
+              <li><a href="rooms.html" class="py-2 d-block">Phòng</a></li>
+              <li><a href="restaurant.html" class="py-2 d-block">Nhà hàng</a></li>
+              <li><a href="#" class="py-2 d-block">Tiện ích</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-md">
+          <div class="ftco-footer-widget mb-4">
+            <h2 class="ftco-heading-2">Chính sách</h2>
+            <ul class="list-unstyled">
+              <li><a href="#" class="py-2 d-block">Tuyển dụng</a></li>
+              <li><a href="about.html" class="py-2 d-block">Về chúng tôi</a></li>
+              <li><a href="contact.html" class="py-2 d-block">Liên hệ</a></li>
+              <li><a href="#" class="py-2 d-block">Dịch vụ</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-md">
+          <div class="ftco-footer-widget mb-4">
+            <h2 class="ftco-heading-2">Bạn cần hỗ trợ?</h2>
+            <div class="block-23 mb-3">
+              <ul>
+                <li><span class="icon icon-map-marker"></span><span class="text">123 Đường Biển Xanh, Thành phố Biển, Việt Nam</span></li>
+                <li><a href="#"><span class="icon icon-phone"></span><span class="text">+84 901 329 227</span></a></li>
+                <li><a href="#"><span class="icon icon-envelope"></span><span class="text">support@resortdeluxe.vn</span></a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12 text-center">
+          <p><!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved | This template is made with <i class="icon-heart color-danger" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
+<!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. --></p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/jquery.min.js"></script>
+  <script src="js/jquery-migrate-3.0.1.min.js"></script>
+  <script src="js/popper.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js/jquery.easing.1.3.js"></script>
+  <script src="js/jquery.waypoints.min.js"></script>
+  <script src="js/jquery.stellar.min.js"></script>
+  <script src="js/owl.carousel.min.js"></script>
+  <script src="js/jquery.magnific-popup.min.js"></script>
+  <script src="js/aos.js"></script>
+  <script src="js/jquery.animateNumber.min.js"></script>
+  <script src="js/bootstrap-datepicker.js"></script>
+  <script src="js/jquery.timepicker.min.js"></script>
+  <script src="js/main.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="js/navbar-auth.js"></script>
+
+  <script>
+    // Get orderId from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const orderId = urlParams.get('orderId');
+    
+    if (!orderId) {
+      showError('Không tìm thấy mã đơn hàng. Vui lòng quay lại trang đặt món.');
+    } else {
+      loadOrderDetails(orderId);
+    }
+
+    async function loadOrderDetails(orderId) {
+      try {
+        console.log('[OrderDetails] Loading order:', orderId);
+        showPageLoading();
+        
+        const token = localStorage.getItem('token');
+        const headers = {
+          'Content-Type': 'application/json'
+        };
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        const response = await fetch(`${location.origin}/api/restaurant-orders/${orderId}`, {
+          method: 'GET',
+          headers: headers,
+          cache: 'no-store'
+        });
+
+        console.log('[OrderDetails] Response status:', response.status);
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            throw new Error('Vui lòng đăng nhập để xem chi tiết đơn hàng');
+          } else if (response.status === 404) {
+            throw new Error('Không tìm thấy đơn hàng');
+          } else {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.message || `Lỗi ${response.status}: ${response.statusText}`);
+          }
+        }
+
+        const order = await response.json();
+        console.log('[OrderDetails] Order loaded:', order);
+
+        // Hide loading, show order details
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('orderDetailsCard').style.display = 'block';
+        
+        renderOrderDetails(order);
+
+      } catch (error) {
+        console.error('[OrderDetails] Error:', error);
+        showError(error.message || 'Không thể tải thông tin đơn hàng');
+      } finally {
+        hidePageLoading();
+      }
+    }
+
+    function renderOrderDetails(order) {
+      // Order Number & Date
+      document.getElementById('orderNumber').textContent = order.orderNumber || `#${order.orderId}`;
+      if (order.createdAt) {
+        const date = new Date(order.createdAt);
+        document.getElementById('orderDate').textContent = `Ngày đặt: ${date.toLocaleString('vi-VN')}`;
+      }
+
+      // Status Badges
+      const statusBadge = document.getElementById('statusBadge');
+      const status = order.status || 'Pending';
+      statusBadge.className = `badge badge-lg ${getStatusClass(status)}`;
+      statusBadge.textContent = getStatusText(status);
+
+      const paymentBadge = document.getElementById('paymentBadge');
+      const paymentStatus = order.paymentStatus || 'Unpaid';
+      paymentBadge.className = `badge badge-lg ${getPaymentStatusClass(paymentStatus)}`;
+      paymentBadge.textContent = getPaymentStatusText(paymentStatus);
+
+      // Customer Info
+      if (order.customer) {
+        document.getElementById('customerName').textContent = order.customer.fullName || '--';
+        document.getElementById('customerEmail').textContent = order.customer.email || '--';
+        document.getElementById('customerPhone').textContent = order.customer.phoneNumber || '--';
+      } else {
+        document.getElementById('customerName').textContent = 'Khách vãng lai';
+        document.getElementById('customerEmail').textContent = '--';
+        document.getElementById('customerPhone').textContent = '--';
+      }
+
+      // Delivery Info
+      document.getElementById('deliveryAddress').textContent = order.deliveryAddress || 'Chưa có';
+      if (order.requestedDeliveryTime) {
+        const deliveryDate = new Date(order.requestedDeliveryTime);
+        document.getElementById('deliveryTime').textContent = deliveryDate.toLocaleString('vi-VN');
+      } else {
+        document.getElementById('deliveryTime').textContent = 'Không chỉ định';
+      }
+      document.getElementById('paymentMethod').textContent = getPaymentMethodText(order.paymentMethod || 'Cash');
+
+      // Order Items
+      const itemsBody = document.getElementById('orderItemsBody');
+      itemsBody.innerHTML = '';
+
+      if (order.orderItems && order.orderItems.length > 0) {
+        let subTotal = 0;
+        order.orderItems.forEach(item => {
+          const itemTotal = (item.unitPrice || 0) * (item.quantity || 0);
+          subTotal += itemTotal;
+          
+          const row = `
+            <tr>
+              <td>
+                <strong>${item.service?.serviceName || 'Món ăn'}</strong>
+                ${item.specialNote ? `<br><small class="text-muted">Ghi chú: ${item.specialNote}</small>` : ''}
+              </td>
+              <td class="text-center">${formatCurrency(item.unitPrice || 0)}</td>
+              <td class="text-center">${item.quantity || 0}</td>
+              <td class="text-end"><strong>${formatCurrency(itemTotal)}</strong></td>
+            </tr>
+          `;
+          itemsBody.innerHTML += row;
+        });
+      } else {
+        itemsBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Không có món nào</td></tr>';
+      }
+
+      // Calculate totals
+      const totalAmount = order.totalAmount || 0;
+      const vatRate = 0.10; // 10%
+      const subTotalCalc = totalAmount / (1 + vatRate);
+      const vatAmount = totalAmount - subTotalCalc;
+
+      document.getElementById('subTotal').textContent = formatCurrency(subTotalCalc);
+      document.getElementById('vatAmount').textContent = formatCurrency(vatAmount);
+      document.getElementById('totalAmount').textContent = formatCurrency(totalAmount);
+
+      // Special Requests
+      if (order.specialRequests) {
+        document.getElementById('specialRequests').textContent = order.specialRequests;
+        document.getElementById('specialRequestsSection').style.display = 'block';
+      }
+
+      // Payment Button - chỉ hiển thị nút thanh toán nếu chưa thanh toán
+      const btnPayNow = document.getElementById('btnPayNow');
+      const btnViewOrders = document.getElementById('btnViewOrders');
+      
+      console.log('[renderOrderDetails] Payment status:', paymentStatus, 'Order status:', status);
+      
+      // Chỉ hiển thị nút "Thanh toán" nếu:
+      // 1. Chưa thanh toán (Unpaid)
+      // 2. Status hợp lệ để thanh toán (Pending, Confirmed, Preparing, Ready)
+      // 3. Không phải đơn hàng đã hủy
+      const canPay = paymentStatus === 'Unpaid' && 
+                     (status === 'Pending' || status === 'Confirmed' || status === 'Preparing' || status === 'Ready') &&
+                     status !== 'Cancelled';
+      
+      if (canPay) {
+        btnPayNow.style.display = 'block';
+        btnViewOrders.style.display = 'none';
+      } else {
+        btnPayNow.style.display = 'none';
+        btnViewOrders.style.display = 'block';
+        
+        // Nếu đã thanh toán, hiển thị message
+        if (paymentStatus === 'Paid') {
+          console.log('[renderOrderDetails] Order already paid, hiding payment button');
+        }
+      }
+
+      // Store order data for payment
+      window.currentOrder = order;
+    }
+
+    function showPaymentModal() {
+      if (!window.currentOrder) {
+        alert('Không tìm thấy thông tin đơn hàng');
+        return;
+      }
+
+      const order = window.currentOrder;
+      document.getElementById('modalOrderNumber').value = order.orderNumber;
+      document.getElementById('modalTotalAmount').value = formatCurrency(order.totalAmount || 0);
+
+      // Show QR if QR payment method is selected
+      const paymentMethodSelect = document.getElementById('paymentMethodSelect');
+      paymentMethodSelect.value = order.paymentMethod || 'QR';
+      updatePaymentMethod();
+
+      // Use jQuery modal (Bootstrap 4) - more compatible
+      const modalEl = document.getElementById('paymentModal');
+      if (modalEl) {
+        try {
+          if (typeof $ !== 'undefined' && $.fn.modal) {
+            $(modalEl).modal('show');
+          } else if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            // Try Bootstrap 5
+            try {
+              const modal = new bootstrap.Modal(modalEl);
+              modal.show();
+            } catch (e) {
+              console.warn('[showPaymentModal] Bootstrap modal error:', e);
+              // Fallback: manual show
+              modalEl.classList.add('show');
+              modalEl.style.display = 'block';
+              document.body.classList.add('modal-open');
+              const backdrop = document.createElement('div');
+              backdrop.className = 'modal-backdrop fade show';
+              document.body.appendChild(backdrop);
+            }
+          } else {
+            // Fallback: manual show
+            modalEl.classList.add('show');
+            modalEl.style.display = 'block';
+            document.body.classList.add('modal-open');
+            const backdrop = document.createElement('div');
+            backdrop.className = 'modal-backdrop fade show';
+            document.body.appendChild(backdrop);
+          }
+        } catch (e) {
+          console.error('[showPaymentModal] Error showing modal:', e);
+        }
+      }
+    }
+
+    function updatePaymentMethod() {
+      const paymentMethod = document.getElementById('paymentMethodSelect').value;
+      const qrSection = document.getElementById('qrSection');
+      
+      if (paymentMethod === 'QR') {
+        generateQRCode();
+        qrSection.style.display = 'block';
+      } else {
+        qrSection.style.display = 'none';
+      }
+    }
+
+    // Add event listener for payment method change
+    document.addEventListener('DOMContentLoaded', () => {
+      const paymentMethodSelect = document.getElementById('paymentMethodSelect');
+      if (paymentMethodSelect) {
+        paymentMethodSelect.addEventListener('change', updatePaymentMethod);
+      }
+    });
+
+    function generateQRCode() {
+      if (!window.currentOrder) return;
+
+      const order = window.currentOrder;
+      const amount = order.totalAmount || 0;
+      const BANK_CODE = 'MB';
+      const BANK_ACCOUNT = '0901329227';
+      const BANK_ACCOUNT_NAME = 'Resort Deluxe';
+      const bookingInfo = `Thanh toan don hang ${order.orderNumber}`;
+
+      // Generate VietQR URL
+      const qrUrl = `https://img.vietqr.io/image/${BANK_CODE}-${BANK_ACCOUNT}-compact2.png?amount=${amount}&addInfo=${encodeURIComponent(bookingInfo)}&accountName=${encodeURIComponent(BANK_ACCOUNT_NAME)}`;
+      
+      const qrImg = document.getElementById('qrCodeImage');
+      qrImg.src = qrUrl;
+      qrImg.onerror = function() {
+        console.error('[QR] Failed to load QR code image');
+        qrImg.alt = 'Không thể tải mã QR';
+      };
+    }
+
+    async function confirmPayment() {
+      console.log('[confirmPayment] Function called');
+      
+      if (!window.currentOrder) {
+        console.error('[confirmPayment] No currentOrder found');
+        alert('Không tìm thấy thông tin đơn hàng');
+        return;
+      }
+
+      try {
+        const btn = document.getElementById('confirmPaymentBtn');
+        if (!btn) {
+          console.error('[confirmPayment] Confirm button not found');
+          alert('Không tìm thấy nút xác nhận');
+          return;
+        }
+        
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang xử lý...';
+
+        const orderId = window.currentOrder.orderId;
+        const paymentMethod = document.getElementById('paymentMethodSelect')?.value || 'Cash';
+        
+        console.log('[confirmPayment] OrderId:', orderId);
+        console.log('[confirmPayment] PaymentMethod:', paymentMethod);
+
+        const token = localStorage.getItem('token');
+        const headers = {
+          'Content-Type': 'application/json'
+        };
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+          console.log('[confirmPayment] Token present:', !!token);
+        } else {
+          console.warn('[confirmPayment] No token found');
+        }
+
+        const apiUrl = `${location.origin}/api/restaurant-orders/${orderId}/pay`;
+        console.log('[confirmPayment] Calling API:', apiUrl);
+        console.log('[confirmPayment] Request body:', { paymentMethod });
+
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: headers,
+          body: JSON.stringify({
+            paymentMethod: paymentMethod
+          })
+        });
+
+        console.log('[confirmPayment] Response status:', response.status, response.statusText);
+        console.log('[confirmPayment] Response ok:', response.ok);
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          console.error('[confirmPayment] Error response:', errorData);
+          
+          // Xử lý trường hợp đơn hàng đã được thanh toán - reload để cập nhật UI
+          if (response.status === 400 && errorData.message && 
+              (errorData.message.includes('đã được thanh toán') || errorData.message.includes('already paid'))) {
+            console.log('[confirmPayment] Order already paid, reloading order details...');
+            
+            // Close modal first - use jQuery modal (more compatible)
+            const modalEl = document.getElementById('paymentModal');
+            if (modalEl) {
+              try {
+                if (typeof $ !== 'undefined' && $.fn.modal) {
+                  $(modalEl).modal('hide');
+                } else if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                  // Try Bootstrap 5
+                  try {
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    if (modal) {
+                      modal.hide();
+                    } else {
+                      // Create new instance and hide
+                      const newModal = new bootstrap.Modal(modalEl);
+                      newModal.hide();
+                    }
+                  } catch (e) {
+                    console.warn('[confirmPayment] Bootstrap modal error:', e);
+                  }
+                } else {
+                  // Fallback: manual close
+                  modalEl.classList.remove('show');
+                  modalEl.style.display = 'none';
+                  document.body.classList.remove('modal-open');
+                  const backdrop = document.querySelector('.modal-backdrop');
+                  if (backdrop) backdrop.remove();
+                }
+              } catch (e) {
+                console.warn('[confirmPayment] Error closing modal:', e);
+              }
+            }
+            
+            // Show info message và reload
+            if (typeof showToast === 'function') {
+              showToast('Đơn hàng này đã được thanh toán. Đang cập nhật thông tin...', 'info');
+            }
+            
+            // Reload order details để cập nhật UI (ẩn nút thanh toán, hiển thị status "Đã thanh toán")
+            setTimeout(() => {
+              loadOrderDetails(orderId);
+            }, 500);
+            
+            // Reset button state before returning
+            const btn = document.getElementById('confirmPaymentBtn');
+            if (btn) {
+              btn.disabled = false;
+              btn.innerHTML = '<i class="icon-check me-2"></i>Xác nhận đã thanh toán';
+            }
+            
+            return; // Không throw error, chỉ reload - không chạy vào catch block
+          }
+          
+          if (response.status === 401) {
+            throw new Error('Vui lòng đăng nhập để thanh toán');
+          } else if (response.status === 403) {
+            throw new Error('Bạn không có quyền thanh toán đơn hàng này');
+          } else if (response.status === 404) {
+            throw new Error('Không tìm thấy đơn hàng');
+          } else {
+            throw new Error(errorData.message || `Lỗi ${response.status}: ${response.statusText}`);
+          }
+        }
+
+        const result = await response.json();
+        console.log('[confirmPayment] ✅ Payment confirmed:', result);
+
+        // Show success message
+        if (typeof showToast === 'function') {
+          showToast('Thanh toán thành công!', 'success');
+        } else {
+          alert('Thanh toán thành công!');
+        }
+
+        // Close modal - use jQuery modal first (more compatible)
+        const modalEl = document.getElementById('paymentModal');
+        if (modalEl) {
+          try {
+            if (typeof $ !== 'undefined' && $.fn.modal) {
+              $(modalEl).modal('hide');
+            } else if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+              // Try Bootstrap 5
+              try {
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                if (modal) {
+                  modal.hide();
+                } else {
+                  // Create new instance and hide
+                  const newModal = new bootstrap.Modal(modalEl);
+                  newModal.hide();
+                }
+              } catch (e) {
+                console.warn('[confirmPayment] Bootstrap modal error:', e);
+                // Fallback to manual close
+                modalEl.classList.remove('show');
+                modalEl.style.display = 'none';
+                document.body.classList.remove('modal-open');
+                const backdrop = document.querySelector('.modal-backdrop');
+                if (backdrop) backdrop.remove();
+              }
+            } else {
+              // Fallback: manual close
+              modalEl.classList.remove('show');
+              modalEl.style.display = 'none';
+              document.body.classList.remove('modal-open');
+              const backdrop = document.querySelector('.modal-backdrop');
+              if (backdrop) backdrop.remove();
+            }
+          } catch (e) {
+            console.warn('[confirmPayment] Error closing modal:', e);
+            // Final fallback
+            modalEl.classList.remove('show');
+            modalEl.style.display = 'none';
+            document.body.classList.remove('modal-open');
+            const backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) backdrop.remove();
+          }
+        }
+
+        // Reload order details after a short delay to update UI
+        setTimeout(() => {
+          console.log('[confirmPayment] Reloading order details to update UI...');
+          loadOrderDetails(orderId);
+        }, 1000);
+
+      } catch (error) {
+        console.error('[confirmPayment] ❌ Payment error:', error);
+        console.error('[confirmPayment] Error stack:', error.stack);
+        
+        if (typeof showToast === 'function') {
+          showToast('Lỗi khi thanh toán: ' + error.message, 'danger');
+        } else {
+          alert('Lỗi khi thanh toán: ' + error.message);
+        }
+      } finally {
+        const btn = document.getElementById('confirmPaymentBtn');
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="icon-check me-2"></i>Xác nhận đã thanh toán';
+        }
+      }
+    }
+    
+    // Make confirmPayment globally accessible
+    window.confirmPayment = confirmPayment;
+
+    function showError(message) {
+      document.getElementById('loadingState').style.display = 'none';
+      document.getElementById('errorState').style.display = 'block';
+      document.getElementById('errorMessage').textContent = message;
+    }
+
+    function formatCurrency(amount) {
+      return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount || 0);
+    }
+
+    function getStatusClass(status) {
+      const classes = {
+        'Pending': 'bg-warning',
+        'Confirmed': 'bg-info',
+        'Preparing': 'bg-primary',
+        'Ready': 'bg-success',
+        'Delivered': 'bg-secondary',
+        'Cancelled': 'bg-danger'
+      };
+      return classes[status] || 'bg-secondary';
+    }
+
+    function getStatusText(status) {
+      const texts = {
+        'Pending': 'Chờ xử lý',
+        'Confirmed': 'Đã xác nhận',
+        'Preparing': 'Đang chuẩn bị',
+        'Ready': 'Sẵn sàng',
+        'Delivered': 'Đã giao',
+        'Cancelled': 'Đã hủy'
+      };
+      return texts[status] || status;
+    }
+
+    function getPaymentStatusClass(status) {
+      const classes = {
+        'Unpaid': 'bg-danger',
+        'Paid': 'bg-success',
+        'Refunded': 'bg-warning'
+      };
+      return classes[status] || 'bg-secondary';
+    }
+
+    function getPaymentStatusText(status) {
+      const texts = {
+        'Unpaid': 'Chưa thanh toán',
+        'Paid': 'Đã thanh toán',
+        'Refunded': 'Đã hoàn tiền'
+      };
+      return texts[status] || status;
+    }
+
+    function getPaymentMethodText(method) {
+      const texts = {
+        'Cash': '💵 Thanh toán tại nhà hàng',
+        'QR': '💳 Chuyển khoản QR',
+        'RoomCharge': '🏨 Charge vào phòng'
+      };
+      return texts[method] || method;
+    }
+
+    // Helper functions from api.js if not available
+    if (typeof showPageLoading === 'undefined') {
+      function showPageLoading() {
+        // Loading already shown by loadingState
+      }
+    }
+    if (typeof hidePageLoading === 'undefined') {
+      function hidePageLoading() {
+        // Loading hidden when order details shown
+      }
+    }
+  </script>
+
+</body>
+</html>
+

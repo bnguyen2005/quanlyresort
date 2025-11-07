@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="vi" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default" data-assets-path="../assets/" data-template="vertical-menu-template-free">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+    
+    <!-- NO CACHE - Always fetch fresh -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    
+    <title>Audit Logs - Resort Management</title>
+    
+    <meta name="description" content="Quản lý Audit Logs - Resort Management System" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="../assets/img/favicon/favicon.ico" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet" />
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="../assets/vendor/fonts/boxicons.css" />
+
+    <!-- Core CSS -->
+    <link rel="stylesheet" href="../assets/vendor/css/core.css" class="template-customizer-core-css" />
+    <link rel="stylesheet" href="../assets/vendor/css/theme-default.css" class="template-customizer-theme-css" />
+    <link rel="stylesheet" href="../assets/css/demo.css" />
+    <link rel="stylesheet" href="../assets/css/fix-scrollbar.css" />
+    <link rel="stylesheet" href="../assets/css/admin-custom-theme.css" />
+
+    <!-- Vendors CSS -->
+    <link rel="stylesheet" href="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+    
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" />
+    
+    <!-- Helpers -->
+    <script src="../assets/vendor/js/helpers.js"></script>
+    <script src="../assets/js/config.js"></script>
+</head>
+
+<body>
+    <!-- Layout wrapper -->
+    <div class="layout-wrapper layout-content-navbar">
+        <div class="layout-container">
+            
+            <!-- Menu -->
+            <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+                <!-- Menu will be loaded here -->
+            </aside>
+            <!-- / Menu -->
+
+            <!-- Layout container -->
+            <div class="layout-page">
+                
+                <!-- Navbar -->
+                <nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme" id="layout-navbar">
+                    <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
+                        <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
+                            <i class="bx bx-menu bx-sm"></i>
+                        </a>
+                    </div>
+
+                    <div class="navbar-nav-right d-flex align-items-center" id="navbar-nav-right">
+                        <span class="fw-semibold d-block">Audit Logs</span>
+
+                        <ul class="navbar-nav flex-row align-items-center ms-auto">
+                            <!-- User -->
+                            <li class="nav-item navbar-dropdown dropdown-user dropdown">
+                                <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
+                                    <div class="avatar avatar-online">
+                                        <img src="../assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                                    </div>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <a class="dropdown-item" href="#">
+                                            <div class="d-flex">
+                                                <div class="flex-shrink-0 me-3">
+                                                    <div class="avatar avatar-online">
+                                                        <img src="../assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                                                    </div>
+                                                </div>
+                                                <div class="flex-grow-1">
+                                                    <span class="fw-semibold d-block" id="userFullName">Admin</span>
+                                                    <small class="text-muted" id="userRole">Administrator</small>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <div class="dropdown-divider"></div>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="#" id="logoutBtn">
+                                            <i class="bx bx-power-off me-2"></i>
+                                            <span class="align-middle">Đăng xuất</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <!--/ User -->
+                        </ul>
+                    </div>
+                </nav>
+                <!-- / Navbar -->
+
+                <!-- Content wrapper -->
+                <div class="content-wrapper">
+                    <!-- Content -->
+                    <div class="container-xxl flex-grow-1 container-p-y">
+                        
+                        <!-- Filter Card -->
+                        <div class="card mb-4">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    <i class="bx bx-filter-alt me-2"></i>Bộ lọc
+                                </h5>
+                                <button type="button" class="btn btn-sm btn-outline-primary" onclick="resetFilters()">
+                                    <i class="bx bx-reset"></i> Đặt lại
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-3">
+                                        <label class="form-label">Entity Type</label>
+                                        <select id="filterEntityName" class="form-select" onchange="loadAuditLogs()">
+                                            <option value="">Tất cả</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Action Type</label>
+                                        <select id="filterAction" class="form-select" onchange="loadAuditLogs()">
+                                            <option value="">Tất cả</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Từ ngày</label>
+                                        <input type="date" id="filterStartDate" class="form-control" onchange="loadAuditLogs()" />
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Đến ngày</label>
+                                        <input type="date" id="filterEndDate" class="form-control" onchange="loadAuditLogs()" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Statistics Cards -->
+                        <div class="row mb-4">
+                            <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="card-title d-flex align-items-start justify-content-between">
+                                            <div class="avatar flex-shrink-0">
+                                                <i class="bx bx-list-ul bx-md text-primary"></i>
+                                            </div>
+                                        </div>
+                                        <span class="fw-semibold d-block mb-1">Tổng Logs</span>
+                                        <h3 class="card-title mb-2" id="statTotalLogs">0</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="card-title d-flex align-items-start justify-content-between">
+                                            <div class="avatar flex-shrink-0">
+                                                <i class="bx bx-plus-circle bx-md text-success"></i>
+                                            </div>
+                                        </div>
+                                        <span class="fw-semibold d-block mb-1">Creates</span>
+                                        <h3 class="card-title mb-2" id="statCreates">0</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="card-title d-flex align-items-start justify-content-between">
+                                            <div class="avatar flex-shrink-0">
+                                                <i class="bx bx-edit bx-md text-warning"></i>
+                                            </div>
+                                        </div>
+                                        <span class="fw-semibold d-block mb-1">Updates</span>
+                                        <h3 class="card-title mb-2" id="statUpdates">0</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="card-title d-flex align-items-start justify-content-between">
+                                            <div class="avatar flex-shrink-0">
+                                                <i class="bx bx-trash bx-md text-danger"></i>
+                                            </div>
+                                        </div>
+                                        <span class="fw-semibold d-block mb-1">Deletes</span>
+                                        <h3 class="card-title mb-2" id="statDeletes">0</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Audit Logs Table -->
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    <i class="bx bx-history me-2"></i>Lịch sử hoạt động
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table id="auditLogsTable" class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Thời gian</th>
+                                                <th>Entity</th>
+                                                <th>Action</th>
+                                                <th>Người thực hiện</th>
+                                                <th>IP Address</th>
+                                                <th>Mô tả</th>
+                                                <th>Chi tiết</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Data will be loaded here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <!-- / Content -->
+
+                    <!-- Footer -->
+                    <footer class="content-footer footer bg-footer-theme">
+                        <div class="container-xxl d-flex flex-wrap justify-content-between py-2 flex-md-row flex-column">
+                            <div class="mb-2 mb-md-0">
+                                © 2025 Resort Management System
+                            </div>
+                        </div>
+                    </footer>
+                    <!-- / Footer -->
+
+                    <div class="content-backdrop fade"></div>
+                </div>
+                <!-- Content wrapper -->
+            </div>
+            <!-- / Layout page -->
+        </div>
+
+        <!-- Overlay -->
+        <div class="layout-overlay layout-menu-toggle"></div>
+    </div>
+    <!-- / Layout wrapper -->
+
+    <!-- Detail Modal -->
+    <div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Chi tiết Audit Log</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Entity:</strong> <span id="detailEntityName"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Entity ID:</strong> <span id="detailEntityId"></span>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Action:</strong> <span id="detailAction"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Performed By:</strong> <span id="detailPerformedBy"></span>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Timestamp:</strong> <span id="detailTimestamp"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>IP Address:</strong> <span id="detailIpAddress"></span>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <strong>User Agent:</strong><br>
+                            <small class="text-muted" id="detailUserAgent"></small>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <strong>Description:</strong><br>
+                            <p id="detailDescription"></p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Old Values:</strong>
+                            <pre id="detailOldValues" class="bg-light p-2 rounded" style="max-height: 200px; overflow-y: auto;"></pre>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>New Values:</strong>
+                            <pre id="detailNewValues" class="bg-light p-2 rounded" style="max-height: 200px; overflow-y: auto;"></pre>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core JS -->
+    <script src="../assets/vendor/libs/jquery/jquery.js"></script>
+    <script src="../assets/vendor/libs/popper/popper.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+    <script src="../assets/vendor/js/menu.js"></script>
+
+    <!-- DataTables -->
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+
+    <!-- Common scripts -->
+    <script src="../js/api.js"></script>
+    <script src="../js/common-navbar.js"></script>
+
+    <script>
+        // Load common menu with cache busting
+        (function() {
+            const menuVersion = Date.now();
+            fetch('/admin/html/layout-menu.html?v=' + menuVersion)
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('layout-menu').innerHTML = html;
+                    console.log('✅ Menu loaded successfully');
+                })
+                .catch(error => console.error('❌ Error loading menu:', error));
+        })();
+    </script>
+
+    <script>
+        const API_BASE = 'http://localhost:5130/api/audit-log';
+        let dataTable;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initAuditLogsPage();
+            loadEntityTypes();
+            loadActionTypes();
+            // Setup logout button
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', logout);
+            }
+            loadStatistics();
+            loadAuditLogs();
+        });
+
+        function initAuditLogsPage() {
+            console.log('🔵 [initAuditLogsPage] Checking auth...');
+            const token = localStorage.getItem('token');
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+
+            // Only Admin, Manager, Accounting can access
+            if (!['Admin', 'Manager', 'Accounting'].includes(user.role)) {
+                console.log('❌ Insufficient permissions:', user.role);
+                alert('Bạn không có quyền truy cập trang này!');
+                window.location.href = '/customer/index.html';
+                return;
+            }
+
+            console.log('✅ Auth OK, role:', user.role);
+            document.getElementById('userFullName').textContent = user.fullName || user.username;
+
+            const roleElement = document.getElementById('userRole');
+            if (roleElement && user.role) {
+                const roleNames = {
+                    'Admin': 'Quản trị viên',
+                    'Manager': 'Quản lý',
+                    'Accounting': 'Kế toán'
+                };
+                roleElement.textContent = roleNames[user.role] || user.role;
+            }
+        }
+
+        async function loadEntityTypes() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE}/entity-types`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const entities = await response.json();
+                    const select = document.getElementById('filterEntityName');
+                    entities.forEach(entity => {
+                        const option = document.createElement('option');
+                        option.value = entity;
+                        option.textContent = entity;
+                        select.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading entity types:', error);
+            }
+        }
+
+        async function loadActionTypes() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE}/action-types`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const actions = await response.json();
+                    const select = document.getElementById('filterAction');
+                    actions.forEach(action => {
+                        const option = document.createElement('option');
+                        option.value = action;
+                        option.textContent = action;
+                        select.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading action types:', error);
+            }
+        }
+
+        async function loadStatistics() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE}/entity-statistics`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const stats = await response.json();
+                    const totalCreates = stats.reduce((sum, s) => sum + s.creates, 0);
+                    const totalUpdates = stats.reduce((sum, s) => sum + s.updates, 0);
+                    const totalDeletes = stats.reduce((sum, s) => sum + s.deletes, 0);
+                    const totalLogs = stats.reduce((sum, s) => sum + s.totalActions, 0);
+
+                    document.getElementById('statTotalLogs').textContent = totalLogs;
+                    document.getElementById('statCreates').textContent = totalCreates;
+                    document.getElementById('statUpdates').textContent = totalUpdates;
+                    document.getElementById('statDeletes').textContent = totalDeletes;
+                }
+            } catch (error) {
+                console.error('Error loading statistics:', error);
+            }
+        }
+
+        async function loadAuditLogs() {
+            try {
+                const token = localStorage.getItem('token');
+                
+                // Build query string
+                const params = new URLSearchParams();
+                const entityName = document.getElementById('filterEntityName').value;
+                const action = document.getElementById('filterAction').value;
+                const startDate = document.getElementById('filterStartDate').value;
+                const endDate = document.getElementById('filterEndDate').value;
+
+                if (entityName) params.append('entityName', entityName);
+                if (action) params.append('action', action);
+                if (startDate) params.append('startDate', startDate);
+                if (endDate) params.append('endDate', endDate);
+                params.append('pageSize', '100');
+
+                const response = await fetch(`${API_BASE}?${params.toString()}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!response.ok) throw new Error('Failed to load audit logs');
+
+                const data = await response.json();
+                console.log('✅ Loaded audit logs:', data.logs.length);
+                console.log('🔍 First 3 logs:', data.logs.slice(0, 3));
+
+                if (dataTable) {
+                    console.log('🗑️ Destroying existing DataTable');
+                    dataTable.destroy();
+                }
+
+                const tbody = document.querySelector('#auditLogsTable tbody');
+                console.log('📋 Table tbody found:', !!tbody);
+                tbody.innerHTML = data.logs.map(log => {
+                    const timestamp = new Date(log.timestamp).toLocaleString('vi-VN');
+                    const actionBadge = getActionBadge(log.action);
+                    
+                    return `
+                        <tr>
+                            <td><small>${timestamp}</small></td>
+                            <td><span class="badge bg-info">${log.entityName}</span></td>
+                            <td>${actionBadge}</td>
+                            <td><strong>${log.performedBy || 'System'}</strong></td>
+                            <td><small>${log.ipAddress || '-'}</small></td>
+                            <td><small>${log.description || '-'}</small></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" onclick="viewDetail(${log.logId})">
+                                    <i class="bx bx-show"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+
+                console.log('📝 HTML generated, tbody length:', tbody.innerHTML.length);
+                console.log('🔧 Initializing DataTable...');
+
+                try {
+                    dataTable = $('#auditLogsTable').DataTable({
+                        language: { url: '/admin/local-plugins/datatables/i18n/vi.json' },
+                        pageLength: 25,
+                        order: [[0, 'desc']], // Mới nhất lên đầu (timestamp descending)
+                        columnDefs: [
+                            { 
+                                targets: 0, // Cột timestamp
+                                type: 'date',
+                                render: function(data, type, row) {
+                                    if (type === 'display') {
+                                        return data;
+                                    }
+                                    // For sorting, return timestamp
+                                    return new Date(data).getTime();
+                                }
+                            }
+                        ]
+                    });
+                    console.log('✅ DataTable initialized successfully');
+                } catch (error) {
+                    console.error('❌ DataTable initialization failed:', error);
+                }
+
+            } catch (error) {
+                console.error('❌ Error loading audit logs:', error);
+                alert('Lỗi khi tải audit logs: ' + error.message);
+            }
+        }
+
+        function getActionBadge(action) {
+            const badges = {
+                'Create': '<span class="badge bg-success">Create</span>',
+                'Update': '<span class="badge bg-warning">Update</span>',
+                'Delete': '<span class="badge bg-danger">Delete</span>',
+                'Login': '<span class="badge bg-primary">Login</span>'
+            };
+            return badges[action] || `<span class="badge bg-secondary">${action}</span>`;
+        }
+
+        async function viewDetail(logId) {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE}?pageSize=1000`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!response.ok) throw new Error('Failed to load log detail');
+
+                const data = await response.json();
+                const log = data.logs.find(l => l.logId === logId);
+                
+                if (!log) {
+                    alert('Không tìm thấy log!');
+                    return;
+                }
+
+                document.getElementById('detailEntityName').textContent = log.entityName;
+                document.getElementById('detailEntityId').textContent = log.entityId;
+                document.getElementById('detailAction').innerHTML = getActionBadge(log.action);
+                document.getElementById('detailPerformedBy').textContent = log.performedBy || 'System';
+                document.getElementById('detailTimestamp').textContent = new Date(log.timestamp).toLocaleString('vi-VN');
+                document.getElementById('detailIpAddress').textContent = log.ipAddress || 'N/A';
+                document.getElementById('detailUserAgent').textContent = log.userAgent || 'N/A';
+                document.getElementById('detailDescription').textContent = log.description || 'N/A';
+                
+                document.getElementById('detailOldValues').textContent = 
+                    log.oldValues ? JSON.stringify(JSON.parse(log.oldValues), null, 2) : 'N/A';
+                document.getElementById('detailNewValues').textContent = 
+                    log.newValues ? JSON.stringify(JSON.parse(log.newValues), null, 2) : 'N/A';
+
+                const modal = new bootstrap.Modal(document.getElementById('detailModal'));
+                modal.show();
+
+            } catch (error) {
+                console.error('Error viewing detail:', error);
+                alert('Lỗi khi xem chi tiết: ' + error.message);
+            }
+        }
+
+        function resetFilters() {
+            document.getElementById('filterEntityName').value = '';
+            document.getElementById('filterAction').value = '';
+            document.getElementById('filterStartDate').value = '';
+            document.getElementById('filterEndDate').value = '';
+            loadAuditLogs();
+        }
+    </script>
+</body>
+</html>
+

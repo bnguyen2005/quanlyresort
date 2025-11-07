@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏖️ Resort Management - Chọn Portal</title>
+    
+    <!-- Cache Control -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow: hidden;
+        }
+        
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.5;
+        }
+        
+        .bg-animation span {
+            position: absolute;
+            display: block;
+            width: 20px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.3);
+            animation: float 25s infinite;
+            bottom: -150px;
+            border-radius: 50%;
+        }
+        
+        .bg-animation span:nth-child(1) { left: 25%; width: 80px; height: 80px; animation-delay: 0s; }
+        .bg-animation span:nth-child(2) { left: 10%; width: 20px; height: 20px; animation-delay: 2s; animation-duration: 12s; }
+        .bg-animation span:nth-child(3) { left: 70%; width: 20px; height: 20px; animation-delay: 4s; }
+        .bg-animation span:nth-child(4) { left: 40%; width: 60px; height: 60px; animation-delay: 0s; animation-duration: 18s; }
+        .bg-animation span:nth-child(5) { left: 65%; width: 20px; height: 20px; animation-delay: 0s; }
+        .bg-animation span:nth-child(6) { left: 75%; width: 110px; height: 110px; animation-delay: 3s; }
+        .bg-animation span:nth-child(7) { left: 35%; width: 150px; height: 150px; animation-delay: 7s; }
+        .bg-animation span:nth-child(8) { left: 50%; width: 25px; height: 25px; animation-delay: 15s; animation-duration: 45s; }
+        .bg-animation span:nth-child(9) { left: 20%; width: 15px; height: 15px; animation-delay: 2s; animation-duration: 35s; }
+        .bg-animation span:nth-child(10) { left: 85%; width: 150px; height: 150px; animation-delay: 0s; animation-duration: 11s; }
+        
+        @keyframes float {
+            0% {
+                opacity: 1;
+                bottom: -150px;
+                transform: translateX(0) rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                bottom: 100%;
+                transform: translateX(-100px) rotate(720deg);
+            }
+        }
+        
+        .container {
+            background: white;
+            border-radius: 30px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.3);
+            max-width: 1000px;
+            width: 100%;
+            padding: 60px 40px;
+            animation: fadeInUp 0.8s ease-in-out;
+            position: relative;
+            z-index: 1;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        h1 {
+            color: #667eea;
+            font-size: 48px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 700;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 20px;
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        .portal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .portal-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 50px 40px;
+            text-align: center;
+            color: white;
+            text-decoration: none;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .portal-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .portal-card:hover::before {
+            left: 100%;
+        }
+        
+        .portal-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+        
+        .portal-card.admin {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        
+        .portal-card.customer {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        .portal-icon {
+            font-size: 80px;
+            margin-bottom: 25px;
+            display: block;
+            animation: bounce 2s ease-in-out infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .portal-title {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .portal-desc {
+            font-size: 16px;
+            opacity: 0.95;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .portal-features {
+            text-align: left;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.3);
+        }
+        
+        .portal-features li {
+            margin-bottom: 10px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .portal-features li::before {
+            content: '✓';
+            margin-right: 10px;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        .credentials {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 40px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .credentials h3 {
+            color: #d35400;
+            margin-bottom: 20px;
+            font-size: 24px;
+            text-align: center;
+        }
+        
+        .credentials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .credential-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .credential-item strong {
+            color: #667eea;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+        
+        .credential-item code {
+            background: #f0f0f0;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: #e83e8c;
+            font-size: 14px;
+            display: inline-block;
+            margin: 3px;
+        }
+        
+        .quick-links {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #f0f0f0;
+        }
+        
+        .quick-links a {
+            color: #667eea;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+        
+        .quick-links a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 40px 20px;
+            }
+            
+            h1 {
+                font-size: 36px;
+            }
+            
+            .portal-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .portal-icon {
+                font-size: 60px;
+            }
+            
+            .portal-title {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+    
+    <div class="container">
+        <h1>🏖️ Resort Management</h1>
+        <p class="subtitle">Chọn cổng đăng nhập của bạn</p>
+        
+        <div class="portal-grid">
+            <a href="/customer/login.html?portal=admin" class="portal-card admin">
+                <span class="portal-icon">👨‍💼</span>
+                <div class="portal-title">Admin Portal</div>
+                <div class="portal-desc">
+                    Dành cho quản trị viên và nhân viên resort
+                </div>
+                <ul class="portal-features">
+                    <li>Quản lý đặt phòng</li>
+                    <li>Quản lý khách hàng</li>
+                    <li>Quản lý nhân viên</li>
+                    <li>Báo cáo & thống kê</li>
+                    <li>Quản lý kho & tài chính</li>
+                </ul>
+            </a>
+            
+            <a href="/customer/login.html?portal=customer" class="portal-card customer">
+                <span class="portal-icon">👤</span>
+                <div class="portal-title">Customer Portal</div>
+                <div class="portal-desc">
+                    Dành cho khách hàng của resort
+                </div>
+                <ul class="portal-features">
+                    <li>Xem thông tin phòng</li>
+                    <li>Đặt phòng trực tuyến</li>
+                    <li>Xem lịch sử đặt phòng</li>
+                    <li>Quản lý thông tin cá nhân</li>
+                    <li>Liên hệ hỗ trợ</li>
+                </ul>
+            </a>
+        </div>
+        
+        <div class="credentials">
+            <h3>🔑 Thông Tin Đăng Nhập Demo</h3>
+            <div class="credentials-grid">
+                <div class="credential-item">
+                    <strong>👨‍💼 Admin:</strong>
+                    Email: <code>admin@resort.test</code> hoặc Username: <code>admin</code><br>
+                    Password: <code>P@ssw0rd123</code>
+                </div>
+                <div class="credential-item">
+                    <strong>👤 Customer:</strong>
+                    Email: <code>customer1@guest.test</code> hoặc Username: <code>customer1</code><br>
+                    Password: <code>Guest@123</code>
+                </div>
+            </div>
+        </div>
+        
+        <div class="quick-links">
+            <a href="/customer/index.html">🏠 Trang Chủ</a>
+            <a href="/customer/register.html">📝 Đăng Ký</a>
+            <a href="/swagger" target="_blank">📚 API Docs</a>
+            <a href="/THONG-TIN-DANG-NHAP.txt" target="_blank">📄 Hướng Dẫn</a>
+        </div>
+    </div>
+    
+    <script>
+        console.log('🏖️ Portal page loaded');
+        console.log('📍 URL:', window.location.href);
+        
+        // Auto detect role from query params
+        const urlParams = new URLSearchParams(window.location.search);
+        const portal = urlParams.get('portal');
+        
+        if (portal) {
+            console.log('🎯 Portal selected from URL:', portal);
+        }
+        
+        // Add click tracking
+        document.querySelectorAll('.portal-card').forEach(card => {
+            card.addEventListener('click', function(e) {
+                const portal = this.classList.contains('admin') ? 'admin' : 'customer';
+                console.log('✅ Selected portal:', portal);
+            });
+        });
+    </script>
+</body>
+</html>
+

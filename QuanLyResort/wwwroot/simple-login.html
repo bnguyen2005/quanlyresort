@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Nhập - Resort Management</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 400px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .message {
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .message.show {
+            display: block;
+        }
+        .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .accounts {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+        .accounts h3 {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .accounts p {
+            font-size: 12px;
+            color: #888;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1>🏨 Resort Login</h1>
+        
+        <div id="message" class="message"></div>
+        <div id="spinner" class="spinner"></div>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="text" id="email" value="admin@resort.test" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" value="P@ssw0rd123" required>
+            </div>
+            
+            <button type="submit" id="btnLogin">Đăng Nhập</button>
+        </form>
+        
+        <div class="accounts">
+            <h3>Tài khoản mẫu:</h3>
+            <p>📧 admin@resort.test | 🔑 P@ssw0rd123</p>
+            <p>📧 customer1@guest.test | 🔑 Guest@123</p>
+        </div>
+    </div>
+
+    <!-- Load API -->
+    <script src="customer/js/customer-api.js"></script>
+    
+    <script>
+        console.log('✅ Simple login page loaded');
+        
+        const form = document.getElementById('loginForm');
+        const btnLogin = document.getElementById('btnLogin');
+        const messageDiv = document.getElementById('message');
+        const spinner = document.getElementById('spinner');
+        
+        form.onsubmit = async function(e) {
+            e.preventDefault();
+            
+            console.log('🟡 Form submitted');
+            
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            
+            console.log('Email:', email);
+            console.log('Password length:', password.length);
+            
+            if (!email || !password) {
+                showMessage('Vui lòng nhập đầy đủ thông tin', 'error');
+                return;
+            }
+            
+            // Show loading
+            btnLogin.disabled = true;
+            btnLogin.textContent = 'Đang đăng nhập...';
+            spinner.style.display = 'block';
+            messageDiv.classList.remove('show');
+            
+            try {
+                console.log('🟢 Calling universalLogin...');
+                
+                if (typeof universalLogin !== 'function') {
+                    throw new Error('API chưa load. Vui lòng refresh trang.');
+                }
+                
+                const result = await universalLogin(email, password);
+                
+                console.log('✅ Login result:', result);
+                
+                if (result && result.token) {
+                    showMessage('✅ Đăng nhập thành công! Đang chuyển hướng...', 'success');
+                    
+                    setTimeout(() => {
+                        const redirectUrl = (result.user && result.user.role === 'Admin') 
+                            ? '/admin/html/index.html' 
+                            : '/customer/index.html';
+                        
+                        console.log('Redirecting to:', redirectUrl);
+                        window.location.href = redirectUrl;
+                    }, 1000);
+                } else {
+                    throw new Error('Không nhận được token từ server');
+                }
+            } catch (error) {
+                console.error('🔴 Error:', error);
+                showMessage('❌ ' + (error.message || 'Đăng nhập thất bại'), 'error');
+                btnLogin.disabled = false;
+                btnLogin.textContent = 'Đăng Nhập';
+                spinner.style.display = 'none';
+            }
+        };
+        
+        function showMessage(text, type) {
+            messageDiv.textContent = text;
+            messageDiv.className = 'message ' + type + ' show';
+        }
+        
+        console.log('✅ Login script ready');
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clear LocalStorage - Test Tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #c8a97e;
+            margin-bottom: 20px;
+        }
+        button {
+            background: #c8a97e;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: #b89968;
+        }
+        .info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #2196f3;
+        }
+        .success {
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #4caf50;
+            display: none;
+        }
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🧪 Test Tool - Clear LocalStorage</h1>
+        
+        <div class="info">
+            <strong>Current Storage Data:</strong>
+            <pre id="currentData">Loading...</pre>
+        </div>
+
+        <button onclick="clearAuth()">🗑️ Clear Auth Data</button>
+        <button onclick="clearAll()">🗑️ Clear All LocalStorage</button>
+        <button onclick="showData()">🔄 Refresh Display</button>
+        <button onclick="goToLogin()">🔐 Go To Login</button>
+
+        <div class="success" id="successMsg">
+            ✅ LocalStorage đã được xóa! Bây giờ bạn có thể test đăng nhập lại.
+        </div>
+    </div>
+
+    <script>
+        // Display current storage data
+        function showData() {
+            const data = {
+                authToken: localStorage.getItem('authToken'),
+                user: localStorage.getItem('user'),
+                resort_auth_token: localStorage.getItem('resort_auth_token'),
+                resort_user: localStorage.getItem('resort_user'),
+                allKeys: Object.keys(localStorage)
+            };
+            
+            document.getElementById('currentData').textContent = JSON.stringify(data, null, 2);
+        }
+
+        // Clear only auth-related data
+        function clearAuth() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('user');
+            localStorage.removeItem('resort_auth_token');
+            localStorage.removeItem('resort_user');
+            
+            showSuccess();
+            showData();
+        }
+
+        // Clear all localStorage
+        function clearAll() {
+            localStorage.clear();
+            showSuccess();
+            showData();
+        }
+
+        // Show success message
+        function showSuccess() {
+            const msg = document.getElementById('successMsg');
+            msg.style.display = 'block';
+            setTimeout(() => {
+                msg.style.display = 'none';
+            }, 3000);
+        }
+
+        // Go to login page
+        function goToLogin() {
+            window.location.href = '/customer/login.html';
+        }
+
+        // Initial load
+        showData();
+    </script>
+</body>
+</html>
+

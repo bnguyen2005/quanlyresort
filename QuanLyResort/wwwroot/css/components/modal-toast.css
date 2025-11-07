@@ -1,0 +1,9 @@
+@import url('../tokens.css');
+
+.modal-content { border-radius: var(--radius-lg); box-shadow: var(--shadow-md); }
+.toast { border-radius: var(--radius-md); box-shadow: var(--shadow-md); }
+.toast-success { background:#ecfdf5; color:#065f46; }
+.toast-danger { background:#fef2f2; color:#991b1b; }
+.toast-warning { background:#fffbeb; color:#92400e; }
+.toast-info { background:#eff6ff; color:#1e40af; }
+

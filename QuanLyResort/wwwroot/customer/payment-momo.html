@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MoMo - Thanh toán đơn đặt phòng</title>
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <style>
+    body{background:#f7f7f7;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
+    .wrap{max-width:720px;margin:40px auto;background:#fff;border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,.08)}
+    .header{background:linear-gradient(135deg,#a50064,#d81b60);color:#fff;padding:24px 28px;border-top-left-radius:16px;border-top-right-radius:16px}
+    .content{padding:28px}
+    .qr{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+    .qr img{max-width:220px;border-radius:12px;border:1px solid #eee}
+    .muted{color:#6c757d}
+  </style>
+  <script>
+    function getParam(name){ const u=new URL(location.href); return u.searchParams.get(name); }
+    async function confirmPaid(){
+      const bookingId = getParam('bookingId');
+      const ret = getParam('return') || `${location.origin}/customer/my-bookings.html`;
+      const token = localStorage.getItem('token');
+      if(!bookingId){ alert('Thiếu mã đơn'); return; }
+      try{
+        document.getElementById('payBtn').disabled = true;
+        document.getElementById('payBtn').textContent = 'Đang xác nhận...';
+        const resp = await fetch(`${location.origin}/api/bookings/${encodeURIComponent(bookingId)}/pay-online`,{
+          method:'POST',
+          headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},
+          body: JSON.stringify({ paymentMethod: 'MoMo' })
+        });
+        if(!resp.ok){ const t = await resp.text(); throw new Error(t||'Thanh toán thất bại'); }
+        // về trang trước
+        window.location.href = ret;
+      }catch(e){
+        alert('Lỗi: '+ e.message);
+      }finally{
+        document.getElementById('payBtn').disabled = false;
+        document.getElementById('payBtn').textContent = 'Xác nhận đã thanh toán';
+      }
+    }
+    document.addEventListener('DOMContentLoaded',()=>{
+      const id = getParam('bookingId')||'#';
+      document.getElementById('code1').textContent = id;
+      document.getElementById('code2').textContent = id;
+    });
+  </script>
+  <script>
+    // expose token helpers for this page
+  </script>
+</head>
+<body>
+  <div class="wrap">
+    <div class="header">
+      <h3 class="m-0">Thanh toán qua MoMo</h3>
+    </div>
+    <div class="content">
+      <p>Vui lòng mở ứng dụng MoMo để quét mã hoặc chuyển tiền.</p>
+      <div class="qr">
+        <img src="images/qrcode-momo-demo.png" alt="MoMo QR" onerror="this.style.display='none'">
+        <div>
+          <p class="mb-1"><strong>Nội dung chuyển khoản:</strong> <code>BOOKING-<span id="code1">#</span></code></p>
+          <p class="mb-1"><strong>Số tiền:</strong> Theo hóa đơn</p>
+          <p class="muted">Sau khi chuyển thành công, bấm nút bên dưới để xác nhận.</p>
+          <button id="payBtn" class="btn btn-primary" onclick="confirmPaid()">Xác nhận đã thanh toán</button>
+        </div>
+      </div>
+
+      <hr>
+      <p class="muted">Mã đơn: <strong>#<span id="code2">#</span></strong></p>
+      <a class="btn btn-link" href="my-bookings.html">Quay lại danh sách</a>
+    </div>
+  </div>
+  <script src="js/bootstrap.min.js"></script>
+</body>
+</html>
+
+

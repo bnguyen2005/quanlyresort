@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Debug Rooms Page</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .debug-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background: #d4edda; }
+        .error { background: #f8d7da; }
+        .warning { background: #fff3cd; }
+        button { padding: 10px 20px; margin: 5px; }
+        .log { background: #f8f9fa; padding: 10px; margin: 10px 0; border-radius: 5px; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Debug Rooms Page</h1>
+    
+    <div class="debug-section">
+        <h3>1. Kiểm tra API</h3>
+        <button onclick="testAPI()">Test API</button>
+        <div id="apiResult" class="log"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h3>2. Kiểm tra Authentication</h3>
+        <button onclick="checkAuth()">Check Auth</button>
+        <div id="authResult" class="log"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h3>3. Kiểm tra DataTables</h3>
+        <button onclick="testDataTables()">Test DataTables</button>
+        <div id="datatablesResult" class="log"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h3>4. Kiểm tra Console Logs</h3>
+        <button onclick="showConsoleLogs()">Show Console Logs</button>
+        <div id="consoleResult" class="log"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h3>5. Test Rooms Page Functions</h3>
+        <button onclick="testRoomsFunctions()">Test Functions</button>
+        <div id="functionsResult" class="log"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5130/api';
+        
+        function log(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            element.innerHTML += `[${timestamp}] ${message}\n`;
+        }
+        
+        async function testAPI() {
+            log('apiResult', 'Testing API endpoints...');
+            
+            try {
+                // Test rooms
+                const roomsResponse = await fetch(`${API_BASE}/rooms`);
+                const roomsData = await roomsResponse.json();
+                log('apiResult', `✅ /api/rooms: ${roomsResponse.status} - ${roomsData.length} rooms`);
+                
+                // Test room types
+                const roomTypesResponse = await fetch(`${API_BASE}/room-types`);
+                const roomTypesData = await roomTypesResponse.json();
+                log('apiResult', `✅ /api/room-types: ${roomTypesResponse.status} - ${roomTypesData.length} types`);
+                
+                // Test floors
+                const floorsResponse = await fetch(`${API_BASE}/rooms/floors`);
+                const floorsData = await floorsResponse.json();
+                log('apiResult', `✅ /api/rooms/floors: ${floorsResponse.status} - ${floorsData.length} floors`);
+                
+            } catch (error) {
+                log('apiResult', `❌ API Error: ${error.message}`);
+            }
+        }
+        
+        function checkAuth() {
+            log('authResult', 'Checking authentication...');
+            
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user');
+            
+            if (token) {
+                log('authResult', `✅ Token exists: ${token.substring(0, 20)}...`);
+            } else {
+                log('authResult', '❌ No token found');
+            }
+            
+            if (user) {
+                const userObj = JSON.parse(user);
+                log('authResult', `✅ User: ${userObj.username} (${userObj.role})`);
+            } else {
+                log('authResult', '❌ No user found');
+            }
+            
+            if (!token || !user) {
+                log('authResult', '⚠️ Need to login first');
+            }
+        }
+        
+        function testDataTables() {
+            log('datatablesResult', 'Testing DataTables...');
+            
+            if (typeof $ !== 'undefined') {
+                log('datatablesResult', '✅ jQuery loaded');
+                
+                if (typeof $.fn.DataTable !== 'undefined') {
+                    log('datatablesResult', '✅ DataTables loaded');
+                } else {
+                    log('datatablesResult', '❌ DataTables not loaded');
+                }
+            } else {
+                log('datatablesResult', '❌ jQuery not loaded');
+            }
+            
+            // Test if we can create a simple table
+            try {
+                const testTable = document.createElement('table');
+                testTable.id = 'testTable';
+                document.body.appendChild(testTable);
+                
+                if (typeof $ !== 'undefined' && typeof $.fn.DataTable !== 'undefined') {
+                    $('#testTable').DataTable({
+                        data: [['Test', 'Data']],
+                        columns: [{ title: 'Col1' }, { title: 'Col2' }]
+                    });
+                    log('datatablesResult', '✅ DataTables can create tables');
+                }
+            } catch (error) {
+                log('datatablesResult', `❌ DataTables error: ${error.message}`);
+            }
+        }
+        
+        function showConsoleLogs() {
+            log('consoleResult', 'Console logs will appear here...');
+            log('consoleResult', 'Open browser console (F12) to see detailed logs');
+        }
+        
+        async function testRoomsFunctions() {
+            log('functionsResult', 'Testing rooms page functions...');
+            
+            // Test if functions exist
+            if (typeof loadRooms === 'function') {
+                log('functionsResult', '✅ loadRooms function exists');
+            } else {
+                log('functionsResult', '❌ loadRooms function not found');
+            }
+            
+            if (typeof loadRoomTypes === 'function') {
+                log('functionsResult', '✅ loadRoomTypes function exists');
+            } else {
+                log('functionsResult', '❌ loadRoomTypes function not found');
+            }
+            
+            if (typeof loadStatistics === 'function') {
+                log('functionsResult', '✅ loadStatistics function exists');
+            } else {
+                log('functionsResult', '❌ loadStatistics function not found');
+            }
+            
+            // Test API_BASE
+            if (typeof API_BASE !== 'undefined') {
+                log('functionsResult', `✅ API_BASE: ${API_BASE}`);
+            } else {
+                log('functionsResult', '❌ API_BASE not defined');
+            }
+        }
+        
+        // Auto-run tests on page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                testAPI();
+                checkAuth();
+                testDataTables();
+                testRoomsFunctions();
+            }, 1000);
+        });
+        
+        // Capture console logs
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            log('consoleResult', `LOG: ${args.join(' ')}`);
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            log('consoleResult', `ERROR: ${args.join(' ')}`);
+        };
+        
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            log('consoleResult', `WARN: ${args.join(' ')}`);
+        };
+    </script>
+    
+    <!-- Load jQuery and DataTables -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Đặt phòng thành công | Resort Deluxe</title>
+  <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/globals.css">
+  <link rel="stylesheet" href="/css/grid.css">
+  <link rel="stylesheet" href="css/navbar-auth.css">
+  <link rel="stylesheet" href="css/open-iconic-bootstrap.min.css">
+  <link rel="stylesheet" href="/css/components/navbar.css">
+  <style>
+    body{font-family:'Poppins',sans-serif;padding-top:0;overflow-x:hidden;background:#f8f9fa}
+    .ftco-navbar{position:sticky!important;top:0!important;z-index:1030!important;background-color:#1a1a1a!important;transition:all 0.3s ease;width:100%!important;margin:0!important}
+    
+    /* Modern Hero Section - Same as other pages */
+    .success-hero {
+      background-image: url('images/bg_1.jpg');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      background-repeat: no-repeat;
+      padding: 140px 0 100px;
+      color: #fff;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 60px;
+      min-height: 500px;
+      display: flex;
+      align-items: center;
+    }
+    .success-hero::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(135deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 100%);
+      z-index: 0;
+    }
+    .success-hero::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+      opacity: 0.3;
+      z-index: 1;
+    }
+    .success-hero .container {
+      position: relative;
+      z-index: 2;
+    }
+    .success-hero h1 {
+      font-size: 48px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: #ffffff !important;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      animation: fadeInDown 1s ease;
+    }
+    .success-hero p {
+      font-size: 20px;
+      color: #ffffff !important;
+      opacity: 0.95;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      animation: fadeInUp 1.2s ease;
+    }
+    
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .success-icon{
+      width:140px;
+      height:140px;
+      background:#fff;
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      margin:0 auto 35px;
+      font-size:70px;
+      animation:successPulse 2s infinite;
+      box-shadow:0 15px 50px rgba(0,0,0,0.25);
+      position:relative;
+      z-index:1
+    }
+    .success-icon::after{
+      content:'';
+      position:absolute;
+      width:100%;
+      height:100%;
+      border-radius:50%;
+      border:3px solid rgba(200,169,126,0.3);
+      animation:ripple 2s infinite
+    }
+    
+    .booking-details-card{
+      background:#fff;
+      padding:50px;
+      border-radius:24px;
+      box-shadow:0 20px 60px rgba(0,0,0,0.12);
+      margin-top:-70px;
+      position:relative;
+      z-index:10;
+      animation:slideUp 0.8s ease;
+      max-width:900px;
+      margin-left:auto;
+      margin-right:auto
+    }
+    .detail-row{
+      display:flex;
+      align-items:center;
+      padding:20px 0;
+      border-bottom:2px solid #f0f0f0;
+      gap:20px
+    }
+    .detail-row:last-child{border-bottom:none}
+    .detail-icon{
+      width:50px;
+      height:50px;
+      background:linear-gradient(135deg,#c8a97e 0%,#b89968 100%);
+      border-radius:12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:24px;
+      flex-shrink:0;
+      box-shadow:0 4px 12px rgba(200,169,126,0.25)
+    }
+    .detail-content{
+      flex:1;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:20px
+    }
+    .detail-label{
+      color:#666;
+      font-weight:500;
+      font-size:15px
+    }
+    .detail-value{
+      color:#1a1a1a;
+      font-weight:700;
+      font-size:16px;
+      text-align:right
+    }
+    .detail-value.badge{
+      padding:8px 16px;
+      font-size:14px;
+      font-weight:600;
+      border-radius:8px
+    }
+    .detail-value.amount{
+      color:#c8a97e;
+      font-size:20px;
+      font-weight:700
+    }
+    
+    .action-buttons{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+      gap:15px;
+      margin-top:40px;
+      padding-top:30px;
+      border-top:2px solid #f0f0f0
+    }
+    .btn-action{
+      padding:16px 28px;
+      border-radius:12px;
+      font-weight:600;
+      font-size:16px;
+      transition:all 0.3s;
+      text-decoration:none;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      border:2px solid transparent
+    }
+    .btn-action:hover{
+      transform:translateY(-2px);
+      box-shadow:0 8px 20px rgba(0,0,0,0.15)
+    }
+    .btn-primary-action{
+      background:linear-gradient(135deg,#c8a97e 0%,#b89968 100%);
+      color:#fff;
+      border:none
+    }
+    .btn-primary-action:hover{
+      background:linear-gradient(135deg,#b89968 0%,#c8a97e 100%);
+      color:#fff
+    }
+    .btn-outline-action{
+      background:#fff;
+      color:#c8a97e;
+      border-color:#c8a97e
+    }
+    .btn-outline-action:hover{
+      background:#c8a97e;
+      color:#fff;
+      border-color:#c8a97e
+    }
+    
+    .special-requests-box{
+      background:#f8f9fa;
+      border-radius:12px;
+      padding:20px;
+      margin-top:10px;
+      border-left:4px solid #c8a97e
+    }
+    .special-requests-box pre{
+      margin:0;
+      font-family:'Poppins',sans-serif;
+      font-size:14px;
+      color:#555;
+      white-space:pre-wrap;
+      word-wrap:break-word
+    }
+    
+    .qr-payment-section{
+      background:linear-gradient(135deg,#f8f9fa 0%,#e9ecef 100%);
+      border:2px solid #c8a97e;
+      border-radius:20px;
+      padding:35px;
+      margin-top:30px;
+      text-align:center;
+      box-shadow:0 10px 30px rgba(200,169,126,0.15)
+    }
+    .qr-payment-section h5{
+      font-weight:700;
+      color:#1a1a1a;
+      margin-bottom:20px;
+      font-size:20px
+    }
+    .qr-payment-section .qr-code-wrapper{
+      background:#fff;
+      padding:25px;
+      border-radius:15px;
+      display:inline-block;
+      box-shadow:0 8px 25px rgba(0,0,0,0.1);
+      margin-bottom:20px
+    }
+    .qr-payment-section .qr-code-wrapper img{
+      width:280px;
+      height:280px;
+      border:4px solid #e9ecef;
+      border-radius:12px;
+      padding:15px;
+      background:#fff;
+      object-fit:contain;
+      display:block
+    }
+    .qr-payment-section .bank-info{
+      background:#fff;
+      padding:20px;
+      border-radius:12px;
+      margin-top:20px;
+      text-align:left;
+      font-size:15px;
+      line-height:1.8;
+      color:#555
+    }
+    .qr-payment-section .bank-info strong{
+      color:#1a1a1a;
+      font-weight:600
+    }
+    .qr-payment-section .qr-info{
+      background:#fff;
+      padding:12px 16px;
+      border-radius:8px;
+      margin-bottom:15px;
+      font-size:14px;
+      color:#666;
+      display:inline-block
+    }
+    .qr-payment-section .qr-info code{
+      background:#f8f9fa;
+      padding:4px 8px;
+      border-radius:6px;
+      font-size:13px;
+      color:#c8a97e;
+      font-weight:600;
+      font-family:'Courier New',monospace
+    }
+    
+    @keyframes successPulse{
+      0%,100%{transform:scale(1);box-shadow:0 15px 50px rgba(0,0,0,0.25)}
+      50%{transform:scale(1.05);box-shadow:0 20px 60px rgba(0,0,0,0.35)}
+    }
+    @keyframes ripple{
+      0%{transform:scale(1);opacity:1}
+      100%{transform:scale(1.3);opacity:0}
+    }
+    @keyframes slideUp{
+      from{opacity:0;transform:translateY(50px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+    
+    @media(max-width:768px){
+      .booking-details-card{padding:30px 20px;margin-top:-50px}
+      .detail-row{flex-direction:column;align-items:flex-start;gap:15px}
+      .detail-content{flex-direction:column;align-items:flex-start;width:100%}
+      .detail-value{text-align:left;width:100%}
+      .action-buttons{grid-template-columns:1fr}
+      .success-hero{
+        padding: 100px 0 60px;
+        min-height: 400px;
+      }
+      .success-hero h1 {
+        font-size: 32px;
+      }
+      .success-hero p {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header placeholder - will be loaded by load-header.js -->
+  <div id="header-placeholder"></div>
+  
+  <!-- Load header component -->
+  <script src="js/load-header.js"></script>
+
+  <div class="success-hero">
+    <div class="container">
+      <h1 class="display-4 mb-3" style="font-weight:700;font-size:48px;text-shadow:0 2px 10px rgba(0,0,0,0.2)">Đặt phòng thành công!</h1>
+      <p class="lead" style="font-size:20px;font-weight:400;opacity:0.95">Cảm ơn bạn đã chọn RESORT DELUXE. Chúng tôi đã ghi nhận yêu cầu đặt phòng của bạn.</p>
+    </div>
+  </div>
+
+  <div class="container mb-5">
+    <div class="booking-details-card">
+      <h3 class="mb-4 text-center" style="font-size:28px;font-weight:700;color:#1a1a1a;margin-bottom:35px">
+        📋 Thông tin đặt phòng
+      </h3>
+      <div id="bookingDetails">
+        <div class="text-center py-5">
+          <div class="spinner-border text-primary" role="status" style="width:3rem;height:3rem;border-width:4px">
+            <span class="sr-only">Loading...</span>
+          </div>
+          <p class="mt-4 text-muted" style="font-size:16px">Đang tải thông tin...</p>
+        </div>
+      </div>
+      
+      <div class="action-buttons">
+        <a href="my-bookings.html" class="btn btn-primary-action">
+          <span class="oi oi-list"></span> Xem đặt phòng của tôi
+        </a>
+        <a href="rooms.html" class="btn btn-outline-action">
+          <span class="oi oi-plus"></span> Đặt thêm phòng
+        </a>
+        <a href="index.html" class="btn btn-outline-action">
+          <span class="oi oi-home"></span> Về trang chủ
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <footer class="ftco-footer ftco-bg-dark ftco-section">
+    <div class="container">
+      <div class="row mb-5">
+        <div class="col-md">
+          <div class="ftco-footer-widget mb-4">
+            <h2 class="ftco-heading-2">RESORT DELUXE</h2>
+            <p>Khu nghỉ dưỡng cao cấp với đầy đủ tiện nghi hiện đại, phục vụ chu đáo và không gian tuyệt đẹp.</p>
+            <ul class="ftco-footer-social list-unstyled float-md-left float-lft mt-5">
+              <li class="ftco-animate"><a href="#"><span class="icon-twitter"></span></a></li>
+              <li class="ftco-animate"><a href="#"><span class="icon-facebook"></span></a></li>
+              <li class="ftco-animate"><a href="#"><span class="icon-instagram"></span></a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-md">
+          <div class="ftco-footer-widget mb-4 ml-md-5">
+            <h2 class="ftco-heading-2">Liên kết hữu ích</h2>
+            <ul class="list-unstyled">
+              <li><a href="blog.html" class="py-2 d-block">Blog</a></li>
+              <li><a href="rooms.html" class="py-2 d-block">Phòng nghỉ</a></li>
+              <li><a href="restaurant.html" class="py-2 d-block">Nhà hàng</a></li>
+              <li><a href="about.html" class="py-2 d-block">Giới thiệu</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-md">
+          <div class="ftco-footer-widget mb-4">
+            <h2 class="ftco-heading-2">Thông tin</h2>
+            <ul class="list-unstyled">
+              <li><a href="about.html" class="py-2 d-block">Về chúng tôi</a></li>
+              <li><a href="contact.html" class="py-2 d-block">Liên hệ</a></li>
+              <li><a href="#" class="py-2 d-block">Dịch vụ</a></li>
+              <li><a href="#" class="py-2 d-block">Chính sách</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-md">
+          <div class="ftco-footer-widget mb-4">
+            <h2 class="ftco-heading-2">Bạn cần hỗ trợ?</h2>
+            <div class="block-23 mb-3">
+              <ul>
+                <li><span class="icon icon-map-marker"></span><span class="text">123 Đường Biển Xanh, Thành phố Biển, Việt Nam</span></li>
+                <li><a href="#"><span class="icon icon-phone"></span><span class="text">+84 901 329 227</span></a></li>
+                <li><a href="#"><span class="icon icon-envelope"></span><span class="text">support@resortdeluxe.vn</span></a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12 text-center">
+          <p>Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved | Resort Deluxe</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/jquery.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js/popper.min.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="js/navbar-auth.js"></script>
+  <script src="js/coupons.js"></script>
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const bookingId = urlParams.get('bookingId');
+    
+    // Bank info for VietQR
+    const BANK_CODE = 'MB'; // MBBank
+    const BANK_ACCOUNT = '0901329227';
+    const BANK_ACCOUNT_NAME = 'Resort Deluxe';
+    
+    // Load room types cache for price calculation
+    // IMPORTANT: Always reload to get latest prices (admin may have updated)
+    async function loadRoomTypesCache() {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          console.warn('⚠️ [loadRoomTypesCache] No token, skipping');
+          return;
+        }
+        
+        // Force reload by adding timestamp and clearing cache
+        const roomTypesResp = await fetch(`${location.origin}/api/room-types?_=${Date.now()}`, {
+          cache: 'no-store',
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
+          }
+        });
+        
+        if (roomTypesResp.ok) {
+          const roomTypes = await roomTypesResp.json();
+          window._roomTypesCache = roomTypes;
+          console.log('✅ [loadRoomTypesCache] Room types cached:', roomTypes.length, 'types');
+          
+          // Log Standard Room price for debugging
+          const standardRoom = roomTypes.find(rt => 
+            rt.typeName?.toLowerCase().includes('standard') || 
+            rt.typeCode?.toLowerCase().includes('standard')
+          );
+          if (standardRoom) {
+            console.log('💰 [loadRoomTypesCache] Standard Room price from API:', {
+              typeName: standardRoom.typeName,
+              basePrice: standardRoom.basePrice,
+              formatted: vnd(standardRoom.basePrice)
+            });
+          }
+        } else {
+          console.warn('⚠️ [loadRoomTypesCache] Failed to load room types:', roomTypesResp.status);
+        }
+      } catch(e) {
+        console.warn('⚠️ [loadRoomTypesCache] Error:', e);
+      }
+    }
+    
+    // Load room types cache on page load (force reload to get latest prices)
+    loadRoomTypesCache();
+
+    function vnd(n) {
+      try {
+        // IMPORTANT: VND has no minor units (no cents), so we must set minimumFractionDigits: 0
+        // to prevent automatic division by 100
+        return new Intl.NumberFormat('vi-VN', {
+          style: 'currency', 
+          currency: 'VND',
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0
+        }).format(n || 0);
+      } catch(_) {
+        return (n || 0).toLocaleString('vi-VN') + ' ₫';
+      }
+    }
+    
+    // Function to generate and display QR code
+    async function displayQRCode(booking) {
+      try {
+        // Parse payment method from specialRequests
+        let paymentMethod = null;
+        if (booking.specialRequests) {
+          try {
+            const parsed = JSON.parse(booking.specialRequests);
+            if (typeof parsed === 'object' && parsed !== null) {
+              paymentMethod = parsed.paymentMethod || null;
+            }
+          } catch(_) {
+            // Not JSON, skip
+          }
+        }
+        
+        // Only show QR if payment method is BankTransfer
+        if (paymentMethod !== 'BankTransfer') {
+          return '';
+        }
+        
+        // Get base amount from backend - TRUST BACKEND VALUE
+        // Database đã được sửa về giá đúng (5,000 VND), không cần correction nữa
+        let baseAmount = Number(booking.estimatedTotalAmount || booking.totalAmount || 0);
+        console.log('🔍 [displayQRCode] Base amount from backend:', baseAmount);
+        console.log('🔍 [displayQRCode] Booking data:', {
+          estimatedTotalAmount: booking.estimatedTotalAmount,
+          totalAmount: booking.totalAmount,
+          room: booking.room,
+          roomTypeNavigation: booking.room?.roomTypeNavigation,
+          requestedRoomType: booking.requestedRoomType
+        });
+        
+        let couponCode = booking.couponCode || null;
+        
+        // Try to get couponCode from specialRequests
+        if (!couponCode && booking.specialRequests) {
+          try {
+            const parsed = JSON.parse(booking.specialRequests);
+            if (typeof parsed === 'object' && parsed !== null && parsed.couponCode) {
+              couponCode = parsed.couponCode;
+            }
+          } catch(_) {}
+        }
+        
+        // If amount is 0 or invalid, try to calculate from dates and room price
+        if (baseAmount <= 0 && booking.checkInDate && booking.checkOutDate) {
+          console.log('🔵 [displayQRCode] Amount is', baseAmount <= 0 ? '0' : 'too large', ', trying to calculate from dates...');
+          const checkin = new Date(booking.checkInDate);
+          const checkout = new Date(booking.checkOutDate);
+          const nights = Math.ceil((checkout - checkin) / (1000 * 60 * 60 * 24));
+          console.log('🔵 [displayQRCode] Nights calculated:', nights);
+          
+          // Try to get room price from various sources
+          // IMPORTANT: Prioritize BasePrice (used by backend) over pricePerNight
+          let roomPrice = 0;
+          
+          // Priority 1: From roomTypeNavigation.BasePrice (what backend uses)
+          if (booking.room?.roomTypeNavigation?.basePrice) {
+            roomPrice = Number(booking.room.roomTypeNavigation.basePrice);
+            console.log('🔵 [displayQRCode] Using roomTypeNavigation.basePrice:', roomPrice);
+            console.log('🔵 [displayQRCode] Full roomTypeNavigation data:', booking.room.roomTypeNavigation);
+          }
+          // Priority 2: From assigned room pricePerNight
+          else if (booking.room?.pricePerNight) {
+            roomPrice = Number(booking.room.pricePerNight);
+            console.log('🔵 [displayQRCode] Using room.pricePerNight:', roomPrice);
+          } else if (booking.room?.roomTypeNavigation?.pricePerNight) {
+            roomPrice = Number(booking.room.roomTypeNavigation.pricePerNight);
+            console.log('🔵 [displayQRCode] Using roomTypeNavigation.pricePerNight:', roomPrice);
+          }
+          // Priority 3: From booking directly
+          else if (booking.pricePerNight) {
+            roomPrice = Number(booking.pricePerNight);
+            console.log('🔵 [displayQRCode] Using booking.pricePerNight:', roomPrice);
+          } else if (booking.roomPrice) {
+            roomPrice = Number(booking.roomPrice);
+            console.log('🔵 [displayQRCode] Using booking.roomPrice:', roomPrice);
+          }
+          // Priority 4: Try to fetch from room types cache if available
+          else if (booking.requestedRoomType && window._roomTypesCache && Array.isArray(window._roomTypesCache)) {
+            const roomType = window._roomTypesCache.find(rt => 
+              rt.typeName?.toLowerCase() === booking.requestedRoomType?.toLowerCase() ||
+              rt.roomTypeName?.toLowerCase() === booking.requestedRoomType?.toLowerCase() ||
+              rt.typeCode?.toLowerCase() === booking.requestedRoomType?.toLowerCase()
+            );
+            if (roomType) {
+              console.log('🔵 [displayQRCode] Found room type in cache:', roomType);
+              if (roomType.basePrice) {
+                roomPrice = Number(roomType.basePrice);
+                console.log('🔵 [displayQRCode] Using roomTypesCache.basePrice:', roomPrice, 'for', booking.requestedRoomType);
+                console.log('🔵 [displayQRCode] Full roomType from cache:', roomType);
+              } else if (roomType.pricePerNight) {
+                roomPrice = Number(roomType.pricePerNight);
+                console.log('🔵 [displayQRCode] Using roomTypesCache.pricePerNight:', roomPrice, 'for', booking.requestedRoomType);
+              }
+            } else {
+              console.warn('⚠️ [displayQRCode] Room type not found in cache:', booking.requestedRoomType);
+              console.log('🔵 [displayQRCode] Available room types in cache:', window._roomTypesCache.map(rt => rt.typeName || rt.typeCode));
+            }
+          }
+          
+          // If we have nights and roomPrice, calculate
+          if (nights > 0 && roomPrice > 0) {
+            const calculatedAmount = nights * roomPrice;
+            console.log('🔵 [displayQRCode] Calculated amount from nights * price:', calculatedAmount, `(${nights} nights × ${roomPrice})`);
+            
+            // Use calculated amount if backend amount is 0
+            const backendAmount = Number(booking.estimatedTotalAmount || booking.totalAmount || 0);
+            if (backendAmount > 0) {
+              // Prefer backend amount (authoritative source)
+              baseAmount = backendAmount;
+              console.log('✅ [displayQRCode] Using backend estimatedTotalAmount:', baseAmount);
+            } else {
+              // Fallback to calculated if backend amount is 0
+              baseAmount = calculatedAmount;
+              console.log('✅ [displayQRCode] Using calculated amount (backend amount is 0):', baseAmount);
+            }
+          }
+        }
+        
+        // Apply coupon discount if exists
+        let amount = baseAmount;
+        if (couponCode && window.coupons && baseAmount > 0) {
+          try {
+            const coupon = await window.coupons.validateCoupon(couponCode);
+            const result = window.coupons.calculateDiscountedTotal(baseAmount, coupon);
+            amount = result.total;
+            console.log('✅ [displayQRCode] Applied coupon discount:', result.discount, 'Final amount:', amount);
+          } catch(e) {
+            // If validation fails, use estimatedTotalAmount from backend (already includes discount)
+            console.warn('⚠️ [displayQRCode] Could not validate coupon, using backend amount:', e);
+            const backendAmount = Number(booking.estimatedTotalAmount || booking.totalAmount || 0);
+            if (backendAmount > 0) {
+              amount = backendAmount;
+              console.log('✅ [displayQRCode] Using backend calculated amount:', amount);
+            }
+            // Otherwise keep baseAmount
+          }
+        } else {
+          // No coupon code, but check if backend already calculated discounted amount
+          const backendAmount = Number(booking.estimatedTotalAmount || booking.totalAmount || 0);
+          if (backendAmount > 0 && baseAmount > backendAmount) {
+            amount = backendAmount; // Backend may have applied discount already
+          }
+        }
+        
+        // If still 0, try to fetch booking detail from API
+        if (amount <= 0 && bookingId) {
+          console.log('🔵 [displayQRCode] Amount still 0, will fetch booking detail...');
+          // This will be handled asynchronously, return empty for now
+          fetchBookingDetailForQR();
+          return '';
+        }
+        
+        if (amount <= 0) {
+          console.warn('⚠️ [displayQRCode] Invalid amount after all attempts:', amount);
+          return '';
+        }
+        
+        // Generate booking info code
+        const bookingCode = booking.bookingCode || `BKG${bookingId || ''}`;
+        const bookingInfo = `BOOKING-${bookingCode}`;
+        
+        // Generate VietQR URL
+        // CRITICAL: Ensure amount is not multiplied by 100
+        // VietQR expects amount in VND (e.g., 5000 for 5,000 VND, NOT 500000)
+        const qrAmount = Math.round(amount); // Ensure integer, no decimals
+        console.log('💰 [displayQRCode] Final amount for QR:', qrAmount, 'VND (formatted:', vnd(qrAmount), ')');
+        console.log('💰 [displayQRCode] Amount breakdown:', {
+          original: amount,
+          rounded: qrAmount,
+          formatted: vnd(qrAmount),
+          bookingId: bookingId
+        });
+        
+        const qrUrl = `https://img.vietqr.io/image/${encodeURIComponent(BANK_CODE)}-${encodeURIComponent(BANK_ACCOUNT)}-compact.png?amount=${encodeURIComponent(qrAmount)}&addInfo=${encodeURIComponent(bookingInfo)}&accountName=${encodeURIComponent(BANK_ACCOUNT_NAME)}`;
+        console.log('🔗 [displayQRCode] QR URL:', qrUrl);
+        
+        return `
+          <div class="qr-payment-section">
+            <h5>💳 Thanh toán qua QR Code</h5>
+            <div class="qr-info">
+              Quét mã QR để chuyển khoản nhanh chóng. Nội dung: <code>${bookingInfo}</code>
+            </div>
+            <div class="qr-code-wrapper">
+              <img src="${qrUrl}" alt="VietQR - ${bookingInfo}" onerror="this.style.display='none';console.error('Failed to load QR code')">
+            </div>
+            <div class="bank-info">
+              <div class="mb-2"><strong>Ngân hàng:</strong> MBBank</div>
+              <div class="mb-2"><strong>Số tài khoản:</strong> ${BANK_ACCOUNT}</div>
+              <div class="mb-2"><strong>Chủ tài khoản:</strong> ${BANK_ACCOUNT_NAME}</div>
+              <div class="mb-0"><strong>Số tiền:</strong> <span style="color:#c8a97e;font-weight:700;font-size:18px">${vnd(amount)}</span></div>
+            </div>
+          </div>
+        `;
+      } catch(e) {
+        console.error('❌ [displayQRCode] Error:', e);
+        return '';
+      }
+    }
+    
+    // Fetch booking detail with room info for QR calculation
+    async function fetchBookingDetailForQR() {
+      if (!bookingId) return;
+      
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+        
+        const API_BOOKINGS = `${location.origin}/api/bookings/${bookingId}?_=${Date.now()}`;
+        const resp = await fetch(API_BOOKINGS, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          cache: 'no-store'
+        });
+        
+        if (!resp.ok) {
+          console.error('❌ [fetchBookingDetailForQR] Failed to fetch booking:', resp.status);
+          return;
+        }
+        
+        const bookingDetail = await resp.json();
+        console.log('✅ [fetchBookingDetailForQR] Booking detail fetched:', bookingDetail);
+        
+        // Calculate amount from detailed booking
+        let baseAmount = Number(bookingDetail.estimatedTotalAmount || bookingDetail.totalAmount || 0);
+        console.log('🔍 [fetchBookingDetailForQR] Initial baseAmount from backend:', baseAmount);
+        console.log('🔍 [fetchBookingDetailForQR] BookingDetail data:', {
+          estimatedTotalAmount: bookingDetail.estimatedTotalAmount,
+          totalAmount: bookingDetail.totalAmount,
+          room: bookingDetail.room,
+          roomTypeNavigation: bookingDetail.room?.roomTypeNavigation,
+          requestedRoomType: bookingDetail.requestedRoomType
+        });
+        
+        // CRITICAL: If backend amount seems suspiciously large (likely error), try to recalculate
+        if (baseAmount >= 1000000 && bookingDetail.requestedRoomType) {
+          console.warn('⚠️ [fetchBookingDetailForQR] Backend amount seems too large, will try to recalculate from room type');
+        }
+        
+        let couponCode = bookingDetail.couponCode || null;
+        
+        // Try to get couponCode from specialRequests
+        if (!couponCode && bookingDetail.specialRequests) {
+          try {
+            const parsed = JSON.parse(bookingDetail.specialRequests);
+            if (typeof parsed === 'object' && parsed !== null && parsed.couponCode) {
+              couponCode = parsed.couponCode;
+            }
+          } catch(_) {}
+        }
+        
+        // If amount is 0 or too large (likely error), try to calculate from dates and room price
+        const shouldRecalculate = baseAmount <= 0 || (baseAmount >= 1000000 && bookingDetail.checkInDate && bookingDetail.checkOutDate);
+        
+        if (shouldRecalculate && bookingDetail.checkInDate && bookingDetail.checkOutDate) {
+          console.log('🔵 [fetchBookingDetailForQR] Amount is', baseAmount <= 0 ? '0' : 'too large', ', trying to calculate from dates...');
+          const checkin = new Date(bookingDetail.checkInDate);
+          const checkout = new Date(bookingDetail.checkOutDate);
+          const nights = Math.ceil((checkout - checkin) / (1000 * 60 * 60 * 24));
+          
+          let roomPrice = 0;
+          // Priority 1: BasePrice (what backend uses)
+          if (bookingDetail.room?.roomTypeNavigation?.basePrice) {
+            roomPrice = Number(bookingDetail.room.roomTypeNavigation.basePrice);
+            console.log('🔵 [fetchBookingDetailForQR] Using roomTypeNavigation.basePrice:', roomPrice);
+          } else if (bookingDetail.room?.pricePerNight) {
+            roomPrice = Number(bookingDetail.room.pricePerNight);
+            console.log('🔵 [fetchBookingDetailForQR] Using room.pricePerNight:', roomPrice);
+          } else if (bookingDetail.room?.roomTypeNavigation?.pricePerNight) {
+            roomPrice = Number(bookingDetail.room.roomTypeNavigation.pricePerNight);
+            console.log('🔵 [fetchBookingDetailForQR] Using roomTypeNavigation.pricePerNight:', roomPrice);
+          } else if (bookingDetail.pricePerNight) {
+            roomPrice = Number(bookingDetail.pricePerNight);
+            console.log('🔵 [fetchBookingDetailForQR] Using bookingDetail.pricePerNight:', roomPrice);
+          }
+          // Priority 5: Try to fetch from room types cache if available
+          else if (bookingDetail.requestedRoomType && window._roomTypesCache && Array.isArray(window._roomTypesCache)) {
+            const roomType = window._roomTypesCache.find(rt => 
+              rt.typeName?.toLowerCase() === bookingDetail.requestedRoomType?.toLowerCase() ||
+              rt.roomTypeName?.toLowerCase() === bookingDetail.requestedRoomType?.toLowerCase() ||
+              rt.typeCode?.toLowerCase() === bookingDetail.requestedRoomType?.toLowerCase()
+            );
+            if (roomType) {
+              console.log('🔵 [fetchBookingDetailForQR] Found room type in cache:', roomType);
+              if (roomType.basePrice) {
+                roomPrice = Number(roomType.basePrice);
+                console.log('🔵 [fetchBookingDetailForQR] Using roomTypesCache.basePrice:', roomPrice, 'for', bookingDetail.requestedRoomType);
+                console.log('🔵 [fetchBookingDetailForQR] Full roomType from cache:', roomType);
+              } else if (roomType.pricePerNight) {
+                roomPrice = Number(roomType.pricePerNight);
+                console.log('🔵 [fetchBookingDetailForQR] Using roomTypesCache.pricePerNight:', roomPrice, 'for', bookingDetail.requestedRoomType);
+              }
+            } else {
+              console.warn('⚠️ [fetchBookingDetailForQR] Room type not found in cache:', bookingDetail.requestedRoomType);
+              console.log('🔵 [fetchBookingDetailForQR] Available room types in cache:', window._roomTypesCache.map(rt => rt.typeName || rt.typeCode));
+            }
+          }
+          
+          // If still no roomPrice and cache exists, reload cache and try again
+          if (roomPrice <= 0 && bookingDetail.requestedRoomType && window._roomTypesCache) {
+            console.log('🔄 [fetchBookingDetailForQR] Room price still 0, reloading cache...');
+            await loadRoomTypesCache();
+            
+            // Try again after reload
+            if (window._roomTypesCache && Array.isArray(window._roomTypesCache)) {
+              const roomType = window._roomTypesCache.find(rt => 
+                rt.typeName?.toLowerCase() === bookingDetail.requestedRoomType?.toLowerCase() ||
+                rt.roomTypeName?.toLowerCase() === bookingDetail.requestedRoomType?.toLowerCase() ||
+                rt.typeCode?.toLowerCase() === bookingDetail.requestedRoomType?.toLowerCase()
+              );
+              if (roomType?.basePrice) {
+                roomPrice = Number(roomType.basePrice);
+                console.log('✅ [fetchBookingDetailForQR] Got room price after reload:', roomPrice);
+              }
+            }
+          }
+          
+          if (nights > 0 && roomPrice > 0) {
+            const calculatedAmount = nights * roomPrice;
+            console.log('🔵 [fetchBookingDetailForQR] Calculated amount:', calculatedAmount, `(${nights} nights × ${roomPrice})`);
+            
+            // If backend amount is too large (>= 1M), use calculated amount
+            const backendAmount = Number(bookingDetail.estimatedTotalAmount || bookingDetail.totalAmount || 0);
+            if (backendAmount >= 1000000) {
+              console.error('❌ [fetchBookingDetailForQR] Backend amount is too large (>= 1M), using calculated amount!', {
+                backendAmount: backendAmount,
+                calculatedAmount: calculatedAmount,
+                roomPrice: roomPrice,
+                nights: nights,
+                requestedRoomType: bookingDetail.requestedRoomType
+              });
+              baseAmount = calculatedAmount;
+            } else if (backendAmount > 0) {
+              // CRITICAL CHECK: If backend amount seems wrong (too large), use calculated instead
+              if (backendAmount > calculatedAmount * 10 && calculatedAmount > 0) {
+                console.error('❌ [fetchBookingDetailForQR] Backend amount seems wrong (too large)!', {
+                  backendAmount: backendAmount,
+                  calculatedAmount: calculatedAmount,
+                  ratio: backendAmount / calculatedAmount,
+                  roomPrice: roomPrice,
+                  nights: nights
+                });
+                console.warn('⚠️ [fetchBookingDetailForQR] Using calculated amount instead of backend amount');
+                baseAmount = calculatedAmount;
+              } else {
+                baseAmount = backendAmount;
+                console.log('✅ [fetchBookingDetailForQR] Using backend estimatedTotalAmount:', baseAmount);
+                
+                // Warn if calculated differs significantly
+                if (Math.abs(calculatedAmount - backendAmount) > 100) {
+                  console.warn('⚠️ [fetchBookingDetailForQR] Calculated amount differs from backend. Calculated:', calculatedAmount, 'Backend:', backendAmount);
+                }
+              }
+            } else {
+              baseAmount = calculatedAmount;
+              console.log('✅ [fetchBookingDetailForQR] Using calculated amount (no backend amount):', baseAmount);
+            }
+          } else if (baseAmount >= 1000000) {
+            // If we can't calculate but backend amount is suspiciously large, try to divide by 100
+            const correctedAmount = baseAmount / 100;
+            console.warn('⚠️ [fetchBookingDetailForQR] Cannot calculate, but backend amount seems too large. Trying to correct by dividing by 100:', correctedAmount);
+            if (correctedAmount > 0 && correctedAmount < 1000000) {
+              baseAmount = Math.round(correctedAmount);
+              console.log('✅ [fetchBookingDetailForQR] Using corrected amount:', baseAmount);
+            }
+          }
+        }
+        
+        // Apply coupon discount if exists
+        let amount = baseAmount;
+        if (couponCode && window.coupons && baseAmount > 0) {
+          try {
+            const coupon = await window.coupons.validateCoupon(couponCode);
+            const result = window.coupons.calculateDiscountedTotal(baseAmount, coupon);
+            amount = result.total;
+          } catch(e) {
+            // If validation fails, use estimatedTotalAmount from backend (already includes discount)
+            console.warn('Could not validate coupon for QR, using backend amount:', e);
+            const backendAmount = Number(bookingDetail.estimatedTotalAmount || bookingDetail.totalAmount || 0);
+            if (backendAmount > 0) {
+              amount = backendAmount;
+            }
+          }
+        } else {
+          // No coupon code, but check if backend already calculated discounted amount
+          const backendAmount = Number(bookingDetail.estimatedTotalAmount || bookingDetail.totalAmount || 0);
+          if (backendAmount > 0 && baseAmount > backendAmount) {
+            amount = backendAmount; // Backend may have applied discount already
+          }
+        }
+        
+        // Check payment method
+        let paymentMethod = null;
+        if (bookingDetail.specialRequests) {
+          try {
+            const parsed = JSON.parse(bookingDetail.specialRequests);
+            if (typeof parsed === 'object' && parsed !== null) {
+              paymentMethod = parsed.paymentMethod || null;
+            }
+          } catch(_) {}
+        }
+        
+        if (paymentMethod === 'BankTransfer' && amount > 0) {
+          // Re-render with QR code
+          const bookingCode = bookingDetail.bookingCode || `BKG${bookingId}`;
+          const bookingInfo = `BOOKING-${bookingCode}`;
+          // CRITICAL: Ensure amount is not multiplied by 100
+          const qrAmount = Math.round(amount); // Ensure integer, no decimals
+          console.log('💰 [fetchBookingDetailForQR] Final amount for QR:', qrAmount, 'VND (formatted:', vnd(qrAmount), ')');
+          const qrUrl = `https://img.vietqr.io/image/${encodeURIComponent(BANK_CODE)}-${encodeURIComponent(BANK_ACCOUNT)}-compact.png?amount=${encodeURIComponent(qrAmount)}&addInfo=${encodeURIComponent(bookingInfo)}&accountName=${encodeURIComponent(BANK_ACCOUNT_NAME)}`;
+          console.log('🔗 [fetchBookingDetailForQR] QR URL:', qrUrl);
+          
+          // Insert QR section into booking details
+          const qrHtml = `
+            <div class="qr-payment-section">
+              <h5>💳 Thanh toán qua QR Code</h5>
+              <div class="qr-info">
+                Quét mã QR để chuyển khoản nhanh chóng. Nội dung: <code>${bookingInfo}</code>
+              </div>
+              <div class="qr-code-wrapper">
+                <img src="${qrUrl}" alt="VietQR - ${bookingInfo}" onerror="this.style.display='none';console.error('Failed to load QR code')">
+              </div>
+              <div class="bank-info">
+                <div class="mb-2"><strong>Ngân hàng:</strong> MBBank</div>
+                <div class="mb-2"><strong>Số tài khoản:</strong> ${BANK_ACCOUNT}</div>
+                <div class="mb-2"><strong>Chủ tài khoản:</strong> ${BANK_ACCOUNT_NAME}</div>
+                <div class="mb-0"><strong>Số tiền:</strong> <span style="color:#c8a97e;font-weight:700;font-size:18px">${vnd(amount)}</span></div>
+              </div>
+            </div>
+          `;
+          
+          // Append QR section to booking details
+          const bookingDetailsEl = document.getElementById('bookingDetails');
+          if (bookingDetailsEl) {
+            bookingDetailsEl.insertAdjacentHTML('beforeend', qrHtml);
+          }
+        }
+      } catch(e) {
+        console.error('❌ [fetchBookingDetailForQR] Error:', e);
+      }
+    }
+
+    async function loadBookingDetails() {
+      if (!bookingId) {
+        document.getElementById('bookingDetails').innerHTML = `
+          <div class="alert alert-warning" style="padding:25px;border-radius:12px;border-left:4px solid #ffc107">
+            <h5 style="font-weight:700;margin-bottom:15px">⚠️ Không tìm thấy mã đặt phòng</h5>
+            <p style="margin:0;font-size:15px">Vui lòng kiểm tra lại email hoặc liên hệ với chúng tôi qua số điện thoại: <strong>+84 901 329 227</strong></p>
+          </div>
+        `;
+        return;
+      }
+
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          document.getElementById('bookingDetails').innerHTML = `
+            <div class="alert alert-info" style="padding:25px;border-radius:12px;border-left:4px solid #0dcaf0">
+              <h5 style="font-weight:700;margin-bottom:15px">🔐 Vui lòng đăng nhập</h5>
+              <p style="margin:0;font-size:15px">Để xem chi tiết đặt phòng, vui lòng <a href="login.html" style="font-weight:600;color:#0dcaf0">đăng nhập</a>.</p>
+            </div>
+          `;
+          return;
+        }
+
+        const API_BOOKINGS = `${location.origin}/api/bookings/${bookingId}?_=${Date.now()}`;
+        const resp = await fetch(API_BOOKINGS, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          cache: 'no-store'
+        });
+
+        if (!resp.ok) {
+          throw new Error('Không thể tải thông tin đặt phòng');
+        }
+
+        const booking = await resp.json();
+        renderBookingDetails(booking);
+      } catch(e) {
+        console.error('Error loading booking:', e);
+        document.getElementById('bookingDetails').innerHTML = `
+          <div class="alert alert-success" style="padding:25px;border-radius:12px;border-left:4px solid #198754">
+            <h5 style="font-weight:700;margin-bottom:15px">✅ Đặt phòng đã được ghi nhận</h5>
+            <p style="margin-bottom:10px"><strong>Mã đặt phòng:</strong> <span style="color:#198754;font-size:18px">${bookingId}</span></p>
+            <p style="margin:0;font-size:15px">Chúng tôi sẽ liên hệ với bạn trong thời gian sớm nhất để xác nhận. Vui lòng kiểm tra email hoặc điện thoại của bạn.</p>
+          </div>
+        `;
+      }
+    }
+
+    async function renderBookingDetails(booking) {
+      const checkin = new Date(booking.checkInDate).toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      const checkout = new Date(booking.checkOutDate).toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      const bookingCode = booking.bookingCode || `BKG${bookingId}`;
+      const roomInfo = booking.room ? `${booking.room.roomNumber} - ${booking.room.roomTypeNavigation?.typeName || booking.requestedRoomType || 'N/A'}` : (booking.requestedRoomType || 'N/A');
+      
+      // Calculate base price and check for coupon
+      let baseAmount = Number(booking.estimatedTotalAmount || booking.totalAmount || 0);
+      let discount = 0;
+      let couponInfo = null;
+      let couponCode = booking.couponCode || null;
+      
+      // Try to get couponCode from specialRequests if not in booking
+      if (!couponCode && booking.specialRequests) {
+        try {
+          const parsed = JSON.parse(booking.specialRequests);
+          if (typeof parsed === 'object' && parsed !== null && parsed.couponCode) {
+            couponCode = parsed.couponCode;
+          }
+        } catch(_) {}
+      }
+      
+      // If we have couponCode, try to fetch coupon and calculate discount
+      // If validation fails (403), use estimatedTotalAmount from backend (already includes discount)
+      if (couponCode && window.coupons) {
+        try {
+          const coupon = await window.coupons.validateCoupon(couponCode);
+          couponInfo = coupon;
+          
+          // Calculate base amount if not available
+          // IMPORTANT: Use estimatedTotalAmount from backend as primary source
+          if (baseAmount <= 0 && booking.checkInDate && booking.checkOutDate) {
+            const nights = Math.ceil((new Date(booking.checkOutDate) - new Date(booking.checkInDate)) / (1000 * 60 * 60 * 24));
+            let roomPrice = 0;
+            
+            // Try to get room price - prioritize BasePrice over pricePerNight
+            if (booking.room?.roomTypeNavigation?.basePrice) {
+              roomPrice = Number(booking.room.roomTypeNavigation.basePrice);
+              console.log('🔵 [renderBookingDetails] Using roomTypeNavigation.basePrice:', roomPrice);
+            } else if (booking.room?.pricePerNight) {
+              roomPrice = Number(booking.room.pricePerNight);
+              console.log('🔵 [renderBookingDetails] Using room.pricePerNight:', roomPrice);
+            } else if (booking.room?.roomTypeNavigation?.pricePerNight) {
+              roomPrice = Number(booking.room.roomTypeNavigation.pricePerNight);
+              console.log('🔵 [renderBookingDetails] Using roomTypeNavigation.pricePerNight:', roomPrice);
+            }
+            
+            if (nights > 0 && roomPrice > 0) {
+              baseAmount = nights * roomPrice;
+              console.log('🔵 [renderBookingDetails] Calculated baseAmount:', baseAmount, `(${nights} nights × ${roomPrice})`);
+              
+              // If backend has estimatedTotalAmount, use it as authoritative source
+              const backendAmount = Number(booking.estimatedTotalAmount || booking.totalAmount || 0);
+              if (backendAmount > 0 && baseAmount !== backendAmount) {
+                console.warn('⚠️ [renderBookingDetails] Calculated amount differs from backend. Using backend amount:', backendAmount);
+                baseAmount = backendAmount;
+              }
+            }
+          }
+          
+          // Calculate discount
+          if (baseAmount > 0) {
+            const result = window.coupons.calculateDiscountedTotal(baseAmount, coupon);
+            discount = result.discount;
+          }
+        } catch(e) {
+          // If validation fails (403, 401, etc.), assume backend already calculated discount
+          // Use estimatedTotalAmount as final amount (it may already include discount)
+          console.warn('Could not validate coupon (using backend calculated amount):', e);
+          
+          // If baseAmount is 0, try to estimate from dates to show breakdown
+          // IMPORTANT: Use estimatedTotalAmount from backend as primary source
+          // Only recalculate if it's missing or invalid
+          if (baseAmount <= 0 && booking.checkInDate && booking.checkOutDate) {
+            const nights = Math.ceil((new Date(booking.checkOutDate) - new Date(booking.checkInDate)) / (1000 * 60 * 60 * 24));
+            let roomPrice = 0;
+            
+            // Try to get room price - prioritize BasePrice over pricePerNight
+            if (booking.room?.roomTypeNavigation?.basePrice) {
+              roomPrice = Number(booking.room.roomTypeNavigation.basePrice);
+              console.log('🔵 [renderBookingDetails] Using roomTypeNavigation.basePrice:', roomPrice);
+            } else if (booking.room?.pricePerNight) {
+              roomPrice = Number(booking.room.pricePerNight);
+              console.log('🔵 [renderBookingDetails] Using room.pricePerNight:', roomPrice);
+            } else if (booking.room?.roomTypeNavigation?.pricePerNight) {
+              roomPrice = Number(booking.room.roomTypeNavigation.pricePerNight);
+              console.log('🔵 [renderBookingDetails] Using roomTypeNavigation.pricePerNight:', roomPrice);
+            }
+            
+            if (nights > 0 && roomPrice > 0) {
+              baseAmount = nights * roomPrice;
+              console.log('🔵 [renderBookingDetails] Calculated baseAmount:', baseAmount, `(${nights} nights × ${roomPrice})`);
+              
+              // Estimate discount as difference between base and final
+              const finalAmount = Number(booking.estimatedTotalAmount || booking.totalAmount || 0);
+              if (finalAmount > 0 && baseAmount > finalAmount) {
+                discount = baseAmount - finalAmount;
+                couponInfo = { code: couponCode }; // Mark as applied but not validated
+              } else if (finalAmount > 0 && baseAmount !== finalAmount) {
+                // If calculated amount differs from backend, use backend amount (it's authoritative)
+                console.warn('⚠️ [renderBookingDetails] Calculated amount differs from backend. Using backend amount:', finalAmount);
+                baseAmount = finalAmount;
+              }
+            }
+          } else if (baseAmount > 0) {
+            // Calculate discount as difference
+            const finalAmount = Number(booking.estimatedTotalAmount || booking.totalAmount || 0);
+            if (finalAmount > 0 && baseAmount > finalAmount) {
+              discount = baseAmount - finalAmount;
+              couponInfo = { code: couponCode }; // Mark as applied but not validated
+            }
+          }
+        }
+      }
+      
+      let specialRequestsHtml = '';
+      if (booking.specialRequests) {
+        try {
+          const parsed = JSON.parse(booking.specialRequests);
+          if (typeof parsed === 'object' && parsed !== null) {
+            specialRequestsHtml = Object.entries(parsed).map(([key, value]) => {
+              // Skip couponCode from display
+              if (key === 'couponCode') return '';
+              const labels = {
+                guestName: 'Họ tên',
+                guestEmail: 'Email',
+                guestPhone: 'Số điện thoại',
+                nationality: 'Quốc tịch',
+                idCard: 'CMND/CCCD',
+                passport: 'Hộ chiếu',
+                address: 'Địa chỉ',
+                arrivalTime: 'Giờ đến',
+                flightNumber: 'Số chuyến bay',
+                paymentMethod: 'Phương thức thanh toán',
+                note: 'Ghi chú'
+              };
+              return `<div style="margin-bottom:8px"><strong>${labels[key] || key}:</strong> ${value || '-'}</div>`;
+            }).join('');
+          } else {
+            specialRequestsHtml = booking.specialRequests;
+          }
+        } catch(_) {
+          specialRequestsHtml = booking.specialRequests;
+        }
+      }
+      
+      // Generate QR code if payment method is BankTransfer
+      const qrCodeHtml = await displayQRCode(booking);
+      
+      // Build price breakdown HTML
+      let priceBreakdownHtml = '';
+      if (couponInfo && discount > 0 && baseAmount > 0) {
+        const finalAmount = baseAmount - discount;
+        priceBreakdownHtml = `
+        <div class="detail-row">
+          <div class="detail-icon">🎟️</div>
+          <div class="detail-content">
+            <span class="detail-label">Mã giảm giá</span>
+            <span class="detail-value"><strong style="color:#c8a97e">${couponCode}</strong></span>
+          </div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-icon">💵</div>
+          <div class="detail-content">
+            <span class="detail-label">Giá gốc</span>
+            <span class="detail-value" style="color:#6b7280;text-decoration:line-through">${vnd(baseAmount)}</span>
+          </div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-icon">💸</div>
+          <div class="detail-content">
+            <span class="detail-label">Giảm giá</span>
+            <span class="detail-value" style="color:#10b981;font-weight:700">-${vnd(discount)}</span>
+          </div>
+        </div>
+        `;
+      }
+      
+      document.getElementById('bookingDetails').innerHTML = `
+        <div class="detail-row">
+          <div class="detail-icon">🎫</div>
+          <div class="detail-content">
+            <span class="detail-label">Mã đặt phòng</span>
+            <span class="detail-value">${bookingCode}</span>
+          </div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-icon">📊</div>
+          <div class="detail-content">
+            <span class="detail-label">Trạng thái</span>
+            <span class="detail-value"><span class="badge bg-${getStatusColor(booking.status)}">${getStatusText(booking.status)}</span></span>
+          </div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-icon">📅</div>
+          <div class="detail-content">
+            <span class="detail-label">Ngày nhận phòng</span>
+            <span class="detail-value">${checkin}</span>
+          </div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-icon">📅</div>
+          <div class="detail-content">
+            <span class="detail-label">Ngày trả phòng</span>
+            <span class="detail-value">${checkout}</span>
+          </div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-icon">👥</div>
+          <div class="detail-content">
+            <span class="detail-label">Số khách</span>
+            <span class="detail-value">${booking.numberOfGuests || '-'} khách</span>
+          </div>
+        </div>
+        <div class="detail-row">
+          <div class="detail-icon">🏨</div>
+          <div class="detail-content">
+            <span class="detail-label">Phòng</span>
+            <span class="detail-value">${roomInfo}</span>
+          </div>
+        </div>
+        ${priceBreakdownHtml}
+        <div class="detail-row">
+          <div class="detail-icon">💰</div>
+          <div class="detail-content">
+            <span class="detail-label">${couponInfo && discount > 0 ? 'Tổng tiền sau giảm giá' : 'Tổng tiền'}</span>
+            <span class="detail-value amount">${vnd(couponInfo && discount > 0 ? (baseAmount - discount) : (booking.estimatedTotalAmount || booking.totalAmount || 0))}</span>
+          </div>
+        </div>
+        ${specialRequestsHtml ? `
+        <div class="detail-row" style="flex-direction:column;align-items:flex-start">
+          <div style="display:flex;align-items:center;gap:15px;margin-bottom:15px;width:100%">
+            <div class="detail-icon">📝</div>
+            <span class="detail-label">Thông tin khách hàng & Yêu cầu đặc biệt</span>
+          </div>
+          <div class="special-requests-box" style="width:100%;margin-left:70px">
+            ${specialRequestsHtml}
+          </div>
+        </div>
+        ` : ''}
+        ${qrCodeHtml}
+      `;
+      
+      // Update action buttons to include booking details link if bookingId exists
+      const actionButtons = document.querySelector('.action-buttons');
+      if (bookingId && actionButtons) {
+        actionButtons.innerHTML = `
+          <a href="booking-details.html?id=${bookingId}" class="btn btn-primary-action">
+            <span class="oi oi-eye"></span> Xem chi tiết
+          </a>
+          <a href="my-bookings.html" class="btn btn-outline-action">
+            <span class="oi oi-list"></span> Đặt phòng của tôi
+          </a>
+          <a href="rooms.html" class="btn btn-outline-action">
+            <span class="oi oi-plus"></span> Đặt thêm phòng
+          </a>
+          <a href="index.html" class="btn btn-outline-action">
+            <span class="oi oi-home"></span> Về trang chủ
+          </a>
+        `;
+      }
+    }
+
+    function getStatusColor(status) {
+      const colors = {
+        'Pending': 'warning',
+        'Confirmed': 'info',
+        'Paid': 'success',
+        'Assigned': 'primary',
+        'CheckedIn': 'success',
+        'CheckedOut': 'secondary',
+        'Cancelled': 'danger'
+      };
+      return colors[status] || 'secondary';
+    }
+
+    function getStatusText(status) {
+      const texts = {
+        'Pending': 'Chờ xác nhận',
+        'Confirmed': 'Đã xác nhận',
+        'Paid': 'Đã thanh toán',
+        'Assigned': 'Đã phân phòng',
+        'CheckedIn': 'Đã nhận phòng',
+        'CheckedOut': 'Đã trả phòng',
+        'Cancelled': 'Đã hủy'
+      };
+      return texts[status] || status;
+    }
+
+    // Load on page load
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', loadBookingDetails);
+    } else {
+      loadBookingDetails();
+    }
+
+    // Also load on pageshow (back/forward navigation)
+    window.addEventListener('pageshow', function(event) {
+      if (event.persisted || (performance.navigation && performance.navigation.type === 2)) {
+        loadBookingDetails();
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <title>Giới thiệu | Resort Deluxe</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    
+    <link href="https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Playfair+Display:400,400i,700,700i" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/open-iconic-bootstrap.min.css">
+    <link rel="stylesheet" href="css/animate.css">
+    <link rel="stylesheet" href="css/owl.carousel.min.css">
+    <link rel="stylesheet" href="css/owl.theme.default.min.css">
+    <link rel="stylesheet" href="css/magnific-popup.css">
+    <link rel="stylesheet" href="css/aos.css">
+    <link rel="stylesheet" href="css/ionicons.min.css">
+    <link rel="stylesheet" href="css/bootstrap-datepicker.css">
+    <link rel="stylesheet" href="css/jquery.timepicker.css">
+    <link rel="stylesheet" href="css/flaticon.css">
+    <link rel="stylesheet" href="css/icomoon.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="/css/tokens.css">
+    <link rel="stylesheet" href="/css/globals.css">
+    <link rel="stylesheet" href="/css/grid.css">
+    <link rel="stylesheet" href="/css/components/navbar.css">
+    <link rel="stylesheet" href="css/navbar-auth.css">
+    
+    <style>
+    /* ========== HERO SECTION ========== */
+    .rooms-hero {
+      background-image: url('images/bg_1.jpg');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      background-repeat: no-repeat;
+      padding: 140px 0 100px;
+      color: #fff;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 60px;
+      min-height: 500px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .rooms-hero .container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      width: 100%;
+    }
+    .rooms-hero::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(135deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 100%);
+      z-index: 0;
+    }
+    .rooms-hero-content {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      text-align: center;
+    }
+    .rooms-hero h1 {
+      font-size: 48px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: #ffffff;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+    .rooms-hero p {
+      font-size: 20px;
+      color: #ffffff;
+      opacity: 0.95;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    
+    @media (max-width: 768px) {
+      .rooms-hero {
+        padding: 100px 0 60px;
+        margin-bottom: 40px;
+        background-attachment: scroll;
+        min-height: 400px;
+      }
+      .rooms-hero h1 {
+        font-size: 36px;
+      }
+    }
+    
+    /* ========== SECTIONS ========== */
+    .ftco-section {
+      display: block;
+      visibility: visible;
+      opacity: 1;
+      position: relative;
+      padding: 60px 0;
+      width: 100%;
+      margin: 0;
+    }
+    
+    .ftco-counter {
+      padding: 80px 0;
+      position: relative;
+      background-size: cover;
+      background-position: center;
+    }
+    .ftco-counter::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 0;
+    }
+    .ftco-counter .container {
+      position: relative;
+      z-index: 1;
+    }
+    .ftco-counter .number {
+      font-size: 48px;
+      font-weight: 700;
+      color: #fff;
+      display: block;
+    }
+    .ftco-counter span {
+      display: block;
+      color: #fff;
+      font-size: 16px;
+      margin-top: 10px;
+    }
+    
+    .ftc-no-pb { padding-bottom: 0; }
+    .ftc-no-pt { padding-top: 0; }
+    .bg-light { background-color: #f8f9fa; }
+    
+    /* ========== CONTAINER & LAYOUT ========== */
+    .container {
+      width: 100%;
+      max-width: 1170px;
+      margin-left: auto;
+      margin-right: auto;
+      padding-left: 15px;
+      padding-right: 15px;
+      box-sizing: border-box;
+    }
+    
+    .container-fluid {
+      width: 100%;
+      padding-left: 0;
+      padding-right: 0;
+      box-sizing: border-box;
+    }
+    
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      margin-right: -15px;
+      margin-left: -15px;
+      box-sizing: border-box;
+    }
+    
+    .row.no-gutters {
+      margin-right: 0;
+      margin-left: 0;
+    }
+    
+    .row.no-gutters > [class*="col-"] {
+      padding-right: 0;
+      padding-left: 0;
+    }
+    
+    .row.justify-content-center {
+      justify-content: center;
+    }
+    
+    [class*="col-"] {
+      position: relative;
+      padding-right: 15px;
+      padding-left: 15px;
+      box-sizing: border-box;
+    }
+    
+    /* ========== TEXT & TYPOGRAPHY ========== */
+    .heading-section {
+      display: block;
+    }
+    .heading-section h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: #1a1a1a;
+    }
+    .heading-section .subheading {
+      font-size: 0.875rem;
+      color: #c8a97e;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      display: block;
+    }
+    .heading-section.text-center,
+    .heading-section.text-center h2,
+    .heading-section.text-center .subheading {
+      text-align: center;
+    }
+    
+    .wrap-about {
+      padding-left: 0;
+      padding-right: 0;
+      width: 100%;
+    }
+    
+    /* ========== COMPONENTS ========== */
+    .block-6, .block-18, .media, .media-body, .testimony-wrap {
+      display: block;
+    }
+    
+    .flaticon-reception-bell,
+    .flaticon-serving-dish,
+    .flaticon-car,
+    .flaticon-spa,
+    .flaticon-skyline,
+    .flaticon-heart,
+    .flaticon-leaf,
+    .flaticon-location-pin,
+    .flaticon-shield {
+      font-size: 48px;
+      color: #c8a97e;
+      display: inline-block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      font-family: 'Flaticon' !important;
+    }
+    
+    /* Ensure flaticon icons display correctly */
+    [class*="flaticon-"]:before {
+      display: inline-block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+    
+    .instagram {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      padding: 80px 0 !important;
+      width: 100% !important;
+      position: relative !important;
+    }
+    
+    .instagram .container-fluid {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      width: 100% !important;
+    }
+    
+    .instagram .row {
+      display: flex !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+    
+    .instagram [class*="col-"] {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+    
+    .instagram .ftco-animate {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      transform: none !important;
+    }
+    
+    .insta-img {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      height: 250px !important;
+      width: 100% !important;
+      min-height: 250px !important;
+      background-size: cover !important;
+      background-position: center !important;
+      background-repeat: no-repeat !important;
+      position: relative !important;
+      overflow: hidden !important;
+      text-decoration: none !important;
+    }
+    
+    .insta-img[style*="background-image"] {
+      background-image: inherit !important;
+    }
+    
+    .insta-img:hover {
+      opacity: 0.9 !important;
+    }
+    
+    .insta-img .icon {
+      position: absolute !important;
+      top: 50% !important;
+      left: 50% !important;
+      transform: translate(-50%, -50%) !important;
+      z-index: 2 !important;
+      opacity: 0 !important;
+      transition: opacity 0.3s ease !important;
+      color: #fff !important;
+      font-size: 30px !important;
+    }
+    
+    .insta-img:hover .icon {
+      opacity: 1 !important;
+    }
+    
+    .insta-img::before {
+      content: '' !important;
+      position: absolute !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      background: rgba(0, 0, 0, 0.3) !important;
+      opacity: 0 !important;
+      transition: opacity 0.3s ease !important;
+      z-index: 1 !important;
+    }
+    
+    .insta-img:hover::before {
+      opacity: 1 !important;
+    }
+    
+    /* ========== LOADER ========== */
+    #ftco-loader {
+      display: none !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
+      z-index: -9999 !important;
+      pointer-events: none !important;
+    }
+    
+    /* ========== ANIMATIONS ========== */
+    * {
+      animation: none !important;
+    }
+    
+    .ftco-animate,
+    [data-aos],
+    .aos-init,
+    .aos-animate {
+      opacity: 1 !important;
+      visibility: visible !important;
+      transform: none !important;
+    }
+    
+    /* Force Flaticon icons to display */
+    .icon [class*="flaticon-"],
+    [class*="flaticon-"] {
+      font-family: 'Flaticon' !important;
+      font-style: normal !important;
+      font-weight: normal !important;
+      font-variant: normal !important;
+      text-transform: none !important;
+      line-height: 1 !important;
+      -webkit-font-smoothing: antialiased !important;
+      -moz-osx-font-smoothing: grayscale !important;
+      display: inline-block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+    
+    .icon [class*="flaticon-"]:before,
+    [class*="flaticon-"]:before {
+      display: inline-block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+    
+    /* ========== BODY/HTML ========== */
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      overflow-x: hidden;
+      position: relative;
+    }
+    </style>
+  </head>
+  <body>
+
+    <!-- Header placeholder - will be loaded by load-header.js -->
+    <div id="header-placeholder"></div>
+    
+    <!-- Load header component -->
+    <script src="js/load-header.js"></script>
+    
+    <!-- Hero Section -->
+    <section class="rooms-hero">
+      <div class="container">
+        <div class="rooms-hero-content">
+          <h1 style="color: #ffffff !important;">Giới thiệu</h1>
+          <p style="color: #ffffff !important;">Khám phá câu chuyện về Resort Deluxe</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Counter Section -->
+    <section class="ftco-section ftco-counter img" id="section-counter" style="background-image: url(images/bg_2.jpg);">
+    	<div class="container">
+    		<div class="row justify-content-center">
+          <div class="col-md-10">
+            <div class="row">
+              <div class="col-md-3 d-flex justify-content-center counter-wrap ftco-animate">
+                <div class="block-18 text-center">
+                  <div class="text">
+                    <strong class="number" data-number="10000">0</strong>
+                    <span>Khách hàng hài lòng</span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3 d-flex justify-content-center counter-wrap ftco-animate">
+                <div class="block-18 text-center">
+                  <div class="text">
+                    <strong class="number" data-number="3000">0</strong>
+                    <span>Phòng</span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3 d-flex justify-content-center counter-wrap ftco-animate">
+                <div class="block-18 text-center">
+                  <div class="text">
+                    <strong class="number" data-number="1000">0</strong>
+                    <span>Nhân viên</span>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3 d-flex justify-content-center counter-wrap ftco-animate">
+                <div class="block-18 text-center">
+                  <div class="text">
+                    <strong class="number" data-number="100">0</strong>
+                    <span>Điểm đến</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+    	</div>
+    </section>
+
+    <!-- About Section -->
+    <section class="ftco-section ftc-no-pb ftc-no-pt">
+			<div class="container">
+				<div class="row align-items-center">
+					<div class="col-md-5 p-md-5 img img-2 img-3 d-flex justify-content-center align-items-center" style="background-image: url(images/bg_2.jpg); border-radius: 16px; min-height: 450px; box-shadow: 0 10px 40px rgba(0,0,0,0.15);">
+						<a href="https://vimeo.com/45830194" class="icon popup-vimeo d-flex justify-content-center align-items-center">
+							<span class="icon-play"></span>
+						</a>
+					</div>
+					<div class="col-md-7 py-5 wrap-about pb-md-5 ftco-animate">
+	          <div class="heading-section heading-section-wo-line pt-md-5 pl-md-5 mb-5">
+	          	<div class="ml-md-0">
+		          	<span class="subheading">Chào mừng đến Resort Deluxe</span>
+		            <h2 class="mb-4">Chào Mừng Đến Resort Của Chúng Tôi</h2>
+	            </div>
+	          </div>
+              <div class="pb-md-5">
+                <p>Resort Deluxe mang đến trải nghiệm nghỉ dưỡng đẳng cấp với hệ thống phòng tiện nghi, ẩm thực tinh tế và dịch vụ chuẩn 5 sao, phù hợp cho kỳ nghỉ của gia đình, cặp đôi hay chuyến công tác.</p>
+                <p>Với tầm nhìn hướng biển và không gian xanh mát, chúng tôi cam kết mang lại sự thư thái, riêng tư và thoải mái tuyệt đối cho mọi khách hàng. Tọa lạc tại một trong những vị trí đẹp nhất ven biển, Resort Deluxe là điểm đến lý tưởng cho những ai tìm kiếm sự bình yên và trải nghiệm dịch vụ đẳng cấp thế giới.</p>
+                <p>Mỗi chi tiết tại Resort Deluxe đều được chăm chút tỉ mỉ, từ kiến trúc độc đáo kết hợp giữa hiện đại và truyền thống, đến những dịch vụ cá nhân hóa giúp mỗi khách hàng có được kỳ nghỉ hoàn hảo nhất.</p>
+							<ul class="ftco-social d-flex mt-4">
+                <li class="ftco-animate"><a href="#"><span class="icon-twitter"></span></a></li>
+                <li class="ftco-animate"><a href="#"><span class="icon-facebook"></span></a></li>
+                <li class="ftco-animate"><a href="#"><span class="icon-google-plus"></span></a></li>
+                <li class="ftco-animate"><a href="#"><span class="icon-instagram"></span></a></li>
+              </ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+    <!-- Vision & Mission Section -->
+    <section class="ftco-section bg-light">
+      <div class="container">
+        <div class="row justify-content-center mb-5">
+          <div class="col-md-7 heading-section text-center ftco-animate">
+            <span class="subheading">Tầm nhìn & Sứ mệnh</span>
+            <h2 class="mb-4">Cam kết của chúng tôi</h2>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6 mb-4 ftco-animate">
+            <div class="media block-6 d-block text-center p-5" style="background: #fff; border-radius: 16px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); height: 100%;">
+              <div class="icon d-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px; margin: 0 auto; background: linear-gradient(135deg, #c8a97e 0%, #b89968 100%); border-radius: 50%; display: flex !important; visibility: visible !important;">
+                <span style="font-size: 40px; color: #fff; display: inline-block !important; visibility: visible !important; opacity: 1 !important;">🏆</span>
+              </div>
+              <div class="media-body">
+                <h3 class="heading mb-3">Tầm nhìn</h3>
+                <p>Trở thành resort hàng đầu tại khu vực với tiêu chuẩn dịch vụ quốc tế, là điểm đến được lựa chọn hàng đầu cho du khách trong nước và quốc tế. Chúng tôi hướng đến việc tạo ra những trải nghiệm đáng nhớ và phát triển bền vững cùng cộng đồng địa phương.</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 mb-4 ftco-animate">
+            <div class="media block-6 d-block text-center p-5" style="background: #fff; border-radius: 16px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); height: 100%;">
+              <div class="icon d-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px; margin: 0 auto; background: linear-gradient(135deg, #c8a97e 0%, #b89968 100%); border-radius: 50%; display: flex !important; visibility: visible !important;">
+                <span style="font-size: 40px; color: #fff; display: inline-block !important; visibility: visible !important; opacity: 1 !important;">🎯</span>
+              </div>
+              <div class="media-body">
+                <h3 class="heading mb-3">Sứ mệnh</h3>
+                <p>Mang đến trải nghiệm nghỉ dưỡng xuất sắc với dịch vụ tận tâm, môi trường thân thiện và không gian sang trọng. Chúng tôi cam kết đặt khách hàng làm trung tâm, luôn lắng nghe và đáp ứng mọi nhu cầu để mỗi kỳ nghỉ đều trở nên đáng nhớ và trọn vẹn.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Core Values Section -->
+    <section class="ftco-section">
+      <div class="container">
+        <div class="row justify-content-center mb-5">
+          <div class="col-md-7 heading-section text-center ftco-animate">
+            <span class="subheading">Giá trị cốt lõi</span>
+            <h2 class="mb-4">Những điều chúng tôi tin tưởng</h2>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-4 mb-4 ftco-animate">
+            <div class="text-center p-4" style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-radius: 16px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); height: 100%;">
+              <div class="icon d-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px; margin: 0 auto; background: #c8a97e; border-radius: 12px; display: flex !important; visibility: visible !important;">
+                <i class="flaticon-reception-bell" style="font-size: 36px; color: #fff; display: inline-block !important; visibility: visible !important; opacity: 1 !important;"></i>
+              </div>
+              <h4 class="mb-3">Chất lượng dịch vụ</h4>
+              <p>Luôn đặt chất lượng lên hàng đầu, từ phòng nghỉ đến ẩm thực, đảm bảo mọi trải nghiệm đều đạt tiêu chuẩn cao nhất.</p>
+            </div>
+          </div>
+          <div class="col-md-4 mb-4 ftco-animate">
+            <div class="text-center p-4" style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-radius: 16px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); height: 100%;">
+              <div class="icon d-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px; margin: 0 auto; background: #c8a97e; border-radius: 12px; display: flex !important; visibility: visible !important;">
+                <span style="font-size: 36px; color: #fff; display: inline-block !important; visibility: visible !important; opacity: 1 !important;">❤️</span>
+              </div>
+              <h4 class="mb-3">Sự tận tâm</h4>
+              <p>Đội ngũ nhân viên chuyên nghiệp, tận tâm phục vụ với sự nhiệt tình và thấu hiểu để đáp ứng mọi nhu cầu của khách hàng.</p>
+            </div>
+          </div>
+          <div class="col-md-4 mb-4 ftco-animate">
+            <div class="text-center p-4" style="background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%); border-radius: 16px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); height: 100%;">
+              <div class="icon d-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px; margin: 0 auto; background: #c8a97e; border-radius: 12px; display: flex !important; visibility: visible !important;">
+                <span style="font-size: 36px; color: #fff; display: inline-block !important; visibility: visible !important; opacity: 1 !important;">🌱</span>
+              </div>
+              <h4 class="mb-3">Bền vững môi trường</h4>
+              <p>Cam kết phát triển bền vững, bảo vệ môi trường và tạo ra giá trị tích cực cho cộng đồng địa phương.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Why Choose Us Section -->
+    <section class="ftco-section bg-light">
+      <div class="container">
+        <div class="row justify-content-center mb-5">
+          <div class="col-md-7 heading-section text-center ftco-animate">
+            <span class="subheading">Tại sao chọn chúng tôi</span>
+            <h2 class="mb-4">Những lợi ích độc quyền</h2>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6 col-lg-3 ftco-animate">
+            <div class="block-6 services text-center">
+              <div class="icon d-flex align-items-center justify-content-center"><span class="flaticon-reception-bell"></span></div>
+              <div class="media-body">
+                <h3 class="heading">Dịch vụ 24/7</h3>
+                <p>Đội ngũ nhân viên sẵn sàng phục vụ bạn mọi lúc, mọi nơi, đảm bảo mọi nhu cầu được đáp ứng nhanh chóng.</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-3 ftco-animate">
+            <div class="block-6 services text-center">
+              <div class="icon d-flex align-items-center justify-content-center"><span class="flaticon-serving-dish"></span></div>
+              <div class="media-body">
+                <h3 class="heading">Ẩm thực đẳng cấp</h3>
+                <p>Thực đơn đa dạng với các món ăn được chế biến từ nguyên liệu tươi ngon, đáp ứng mọi khẩu vị.</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-3 ftco-animate">
+            <div class="block-6 services text-center">
+              <div class="icon d-flex align-items-center justify-content-center"><span class="flaticon-car"></span></div>
+              <div class="media-body">
+                <h3 class="heading">Đưa đón miễn phí</h3>
+                <p>Dịch vụ đưa đón sân bay và các điểm tham quan tiện lợi, giúp bạn di chuyển dễ dàng.</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 col-lg-3 ftco-animate">
+            <div class="block-6 services text-center">
+              <div class="icon d-flex align-items-center justify-content-center"><span class="flaticon-spa"></span></div>
+              <div class="media-body">
+                <h3 class="heading">Spa & Wellness</h3>
+                <p>Không gian spa thư giãn với các liệu trình chăm sóc sức khỏe và làm đẹp chuyên nghiệp.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Reviews Section -->
+    <section class="ftco-section">
+      <div class="container">
+        <div class="row justify-content-center mb-5">
+          <div class="col-md-7 heading-section text-center ftco-animate">
+            <span class="subheading">Đánh giá từ khách hàng</span>
+            <h2 class="mb-4">Những gì khách hàng nói về chúng tôi</h2>
+          </div>
+        </div>
+        <div class="row" id="aboutReviews">
+          <!-- Reviews will be loaded here -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Instagram Section -->
+    <section class="instagram" style="display: block !important; visibility: visible !important; opacity: 1 !important; padding: 80px 0 !important;">
+      <div class="container-fluid" style="display: block !important; visibility: visible !important; width: 100% !important; padding: 0 !important;">
+        <div class="row no-gutters" style="display: flex !important; visibility: visible !important; margin: 0 !important;">
+          <div class="col-sm-12 col-md-4 col-lg-3 ftco-animate" style="display: block !important; visibility: visible !important; opacity: 1 !important; padding: 0 !important; flex: 0 0 25%; max-width: 25%;">
+            <a href="images/insta-1.jpg" class="insta-img image-popup" style="display: block !important; visibility: visible !important; opacity: 1 !important; height: 250px !important; width: 100% !important; background-image: url('images/insta-1.jpg') !important; background-size: cover !important; background-position: center !important;">
+              <div class="icon d-flex justify-content-center" style="position: absolute !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important;">
+                <span class="icon-instagram align-self-center" style="color: #fff !important; font-size: 30px !important;"></span>
+              </div>
+            </a>
+          </div>
+          <div class="col-sm-12 col-md-4 col-lg-3 ftco-animate" style="display: block !important; visibility: visible !important; opacity: 1 !important; padding: 0 !important; flex: 0 0 25%; max-width: 25%;">
+            <a href="images/insta-2.jpg" class="insta-img image-popup" style="display: block !important; visibility: visible !important; opacity: 1 !important; height: 250px !important; width: 100% !important; background-image: url('images/insta-2.jpg') !important; background-size: cover !important; background-position: center !important;">
+              <div class="icon d-flex justify-content-center" style="position: absolute !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important;">
+                <span class="icon-instagram align-self-center" style="color: #fff !important; font-size: 30px !important;"></span>
+              </div>
+            </a>
+          </div>
+          <div class="col-sm-12 col-md-4 col-lg-3 ftco-animate" style="display: block !important; visibility: visible !important; opacity: 1 !important; padding: 0 !important; flex: 0 0 25%; max-width: 25%;">
+            <a href="images/insta-3.jpg" class="insta-img image-popup" style="display: block !important; visibility: visible !important; opacity: 1 !important; height: 250px !important; width: 100% !important; background-image: url('images/insta-3.jpg') !important; background-size: cover !important; background-position: center !important;">
+              <div class="icon d-flex justify-content-center" style="position: absolute !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important;">
+                <span class="icon-instagram align-self-center" style="color: #fff !important; font-size: 30px !important;"></span>
+              </div>
+            </a>
+          </div>
+          <div class="col-sm-12 col-md-4 col-lg-3 ftco-animate" style="display: block !important; visibility: visible !important; opacity: 1 !important; padding: 0 !important; flex: 0 0 25%; max-width: 25%;">
+            <a href="images/insta-4.jpg" class="insta-img image-popup" style="display: block !important; visibility: visible !important; opacity: 1 !important; height: 250px !important; width: 100% !important; background-image: url('images/insta-4.jpg') !important; background-size: cover !important; background-position: center !important;">
+              <div class="icon d-flex justify-content-center" style="position: absolute !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important;">
+                <span class="icon-instagram align-self-center" style="color: #fff !important; font-size: 30px !important;"></span>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="ftco-footer ftco-bg-dark ftco-section mt-5">
+      <div class="container">
+        <div class="row mb-5">
+          <div class="col-md">
+            <div class="ftco-footer-widget mb-4">
+              <h2 class="ftco-heading-2">RESORT DELUXE</h2>
+              <p>Khu nghỉ dưỡng cao cấp với đầy đủ tiện nghi hiện đại, phục vụ chu đáo và không gian tuyệt đẹp.</p>
+              <ul class="ftco-footer-social list-unstyled float-md-left float-lft mt-5">
+                <li class="ftco-animate"><a href="#"><span class="icon-twitter"></span></a></li>
+                <li class="ftco-animate"><a href="#"><span class="icon-facebook"></span></a></li>
+                <li class="ftco-animate"><a href="#"><span class="icon-instagram"></span></a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-md">
+            <div class="ftco-footer-widget mb-4 ml-md-5">
+              <h2 class="ftco-heading-2">Liên kết hữu ích</h2>
+              <ul class="list-unstyled">
+                <li><a href="blog.html" class="py-2 d-block">Blog</a></li>
+                <li><a href="rooms.html" class="py-2 d-block">Phòng nghỉ</a></li>
+                <li><a href="restaurant.html" class="py-2 d-block">Nhà hàng</a></li>
+                <li><a href="about.html" class="py-2 d-block">Giới thiệu</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-md">
+             <div class="ftco-footer-widget mb-4">
+              <h2 class="ftco-heading-2">Thông tin</h2>
+              <ul class="list-unstyled">
+                <li><a href="about.html" class="py-2 d-block">Về chúng tôi</a></li>
+                <li><a href="contact.html" class="py-2 d-block">Liên hệ</a></li>
+                <li><a href="#" class="py-2 d-block">Dịch vụ</a></li>
+                <li><a href="#" class="py-2 d-block">Chính sách</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-md">
+            <div class="ftco-footer-widget mb-4">
+              <h2 class="ftco-heading-2">Có câu hỏi?</h2>
+            	<div class="block-23 mb-3">
+	              <ul>
+                <li><span class="icon icon-map-marker"></span><span class="text">123 Đường Resort, Quận 1, TP. Hồ Chí Minh</span></li>
+                <li><a href="#"><span class="icon icon-phone"></span><span class="text">+84 28 1234 5678</span></a></li>
+                <li><a href="#"><span class="icon icon-envelope"></span><span class="text">info@resortdeluxe.vn</span></a></li>
+	              </ul>
+	            </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12 text-center">
+            <p>
+              Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved | RESORT DELUXE
+            </p>
+          </div>
+        </div>
+      </div>
+    </footer>
+    
+  
+  <!-- loader - PERMANENTLY HIDDEN -->
+  <div id="ftco-loader" style="display: none !important; opacity: 0 !important; visibility: hidden !important; z-index: -9999 !important; position: fixed !important; pointer-events: none !important; background: transparent !important; width: 0 !important; height: 0 !important;"><svg class="circular" width="0" height="0"><circle class="path-bg" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke="#eeeeee"/><circle class="path" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke-miterlimit="10" stroke="#F96D00"/></svg></div>
+  
+  <script src="js/jquery.min.js"></script>
+  <script src="js/jquery-migrate-3.0.1.min.js"></script>
+  <script src="js/popper.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js/jquery.easing.1.3.js"></script>
+  <script src="js/jquery.waypoints.min.js"></script>
+  <script>
+    // Override Stellar before it loads
+    if (typeof jQuery !== 'undefined') {
+      jQuery.fn.stellar = function() { return this; };
+      window.Stellar = { init: function() {} };
+    }
+  </script>
+  <script src="js/owl.carousel.min.js"></script>
+  <script src="js/jquery.magnific-popup.min.js"></script>
+  <script src="js/aos.js"></script>
+  <script src="js/jquery.animateNumber.min.js"></script>
+  <script src="js/bootstrap-datepicker.js"></script>
+  <script>
+    // Disable some animation libraries
+    (function() {
+      window.AOS = { init: function() {}, refresh: function() {} };
+      if (typeof jQuery !== 'undefined') {
+        jQuery.fn.Scrollax = function() { return this; };
+      }
+    })();
+  </script>
+  
+  <!-- Navbar Authentication Handler -->
+  <script src="../js/api.js"></script>
+  <script src="js/navbar-auth.js"></script>
+  
+  <script>
+    // Counter animation
+    (function() {
+      var counterAnimated = false;
+      
+      function animateCounter() {
+        if (counterAnimated) return;
+        counterAnimated = true;
+        
+        if (typeof jQuery === 'undefined') {
+          console.warn('jQuery not loaded');
+          return;
+        }
+        
+        jQuery('.ftco-counter .number').each(function() {
+          var $this = jQuery(this);
+          var countTo = parseInt($this.attr('data-number')) || 0;
+          var current = parseInt($this.text()) || 0;
+          
+          if (countTo > 0) {
+            jQuery({
+              Counter: current
+            }).animate({
+              Counter: countTo
+            }, {
+              duration: 2000,
+              easing: 'swing',
+              step: function() {
+                $this.text(Math.floor(this.Counter));
+              },
+              complete: function() {
+                $this.text(countTo);
+              }
+            });
+          }
+        });
+      }
+      
+      // Use Intersection Observer to trigger when counter section is visible
+      if ('IntersectionObserver' in window) {
+        var observer = new IntersectionObserver(function(entries) {
+          entries.forEach(function(entry) {
+            if (entry.isIntersecting && entry.intersectionRatio > 0.3) {
+              animateCounter();
+              observer.unobserve(entry.target);
+            }
+          });
+        }, {
+          threshold: 0.3
+        });
+        
+        document.addEventListener('DOMContentLoaded', function() {
+          var counterSection = document.querySelector('.ftco-counter');
+          if (counterSection) {
+            observer.observe(counterSection);
+          }
+        });
+      } else {
+        // Fallback: animate on load
+        document.addEventListener('DOMContentLoaded', function() {
+          setTimeout(animateCounter, 1000);
+        });
+      }
+    })();
+  </script>
+  
+  <script>
+    // Function to load reviews preview
+    async function loadAboutReviews() {
+      try {
+        const url = `${location.origin}/api/reviews?limit=3&_=${Date.now()}`;
+        const resp = await fetch(url, { cache: 'no-store' });
+        
+        if (!resp.ok) {
+          throw new Error(`HTTP ${resp.status}`);
+        }
+        
+        const data = await resp.json();
+        const reviews = (data.reviews || []).slice(0, 3);
+        const container = document.getElementById('aboutReviews');
+        
+        if (!container) return;
+        
+        if (reviews.length === 0) {
+          container.innerHTML = '<div class="col-12 text-center text-muted py-4"><p>Chưa có đánh giá nào</p></div>';
+          return;
+        }
+        
+        container.innerHTML = reviews.map(review => `
+          <div class="col-md-4 ftco-animate mb-4">
+            <div class="testimony-wrap py-4 pb-5" style="background:#fff;padding:30px;border-radius:15px;box-shadow:0 5px 20px rgba(0,0,0,0.08);height:100%">
+              <div class="user-img mb-4" style="background-image:url('images/person_1.jpg');width:80px;height:80px;border-radius:50%;margin:0 auto;background-size:cover"></div>
+              <div class="text text-center">
+                <p class="mb-4" style="color:#666;line-height:1.8;font-style:italic">"${(review.comment || '').length > 120 ? (review.comment || '').substring(0, 120) + '...' : (review.comment || '')}"</p>
+                <div class="star-rating mb-3">
+                  ${Array.from({length: 5}, (_, i) => 
+                    `<span style="color:${i < (review.rating || 0) ? '#fbbf24' : '#e5e7eb'}">★</span>`
+                  ).join('')}
+                </div>
+                <p class="name" style="font-weight:600;color:#1a1a1a;margin:0">${review.customerName || 'Khách hàng'}</p>
+                <span class="position" style="color:#999;font-size:14px">${review.createdAt ? new Date(review.createdAt).toLocaleDateString('vi-VN') : ''}</span>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      } catch (e) {
+        console.error('[AboutReviews] Load failed:', e);
+        const container = document.getElementById('aboutReviews');
+        if (container) {
+          container.innerHTML = '<div class="col-12 text-center text-danger py-4"><p>Lỗi khi tải đánh giá</p></div>';
+        }
+      }
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      loadAboutReviews();
+    });
+    
+    window.addEventListener('pageshow', function(event) {
+      loadAboutReviews();
+    });
+  </script>
+    
+  </body>
+</html>

@@ -1,0 +1,236 @@
+/**
+ * Fix Scrollbar và Logout Issues
+ * Áp dụng cho tất cả trang admin
+ */
+
+/* Fix scrollbar cho menu sidebar */
+#layout-menu {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  height: calc(100vh - 4rem) !important;
+}
+
+/* Fix scrollbar cho content */
+.layout-container {
+  height: 100vh !important;
+  overflow: hidden !important;
+}
+
+.content-wrapper {
+  overflow-y: auto !important;
+  height: calc(100vh - 4rem) !important;
+  max-height: calc(100vh - 4rem) !important;
+}
+
+/* Fix pointer-events cho logout button */
+.dropdown-user a {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
+/* Đảm bảo modal không block interactions */
+.modal-backdrop {
+  z-index: 1040 !important;
+}
+
+/* Fix Bootstrap modal issue */
+body.modal-open {
+  overflow: hidden !important;
+}
+
+/* Đảm bảo scrollbar hiển thị */
+.layout-page {
+  overflow-y: auto !important;
+}
+
+/* Fix cho menu-inner */
+.menu-inner {
+  overflow-y: auto !important;
+  max-height: calc(100vh - 15rem) !important;
+}
+
+/* Fix z-index cho logout dropdown */
+.navbar-dropdown {
+  z-index: 9999 !important;
+}
+
+.dropdown-menu-end {
+  z-index: 9999 !important;
+}
+
+/* CRITICAL: Fix overlay blocking all buttons */
+.layout-overlay {
+  pointer-events: none !important;
+  /* Overlay chỉ nên có pointer-events khi menu expanded và trên mobile */
+}
+
+/* Chỉ cho phép pointer-events khi overlay thực sự hiển thị (menu expanded) */
+.layout-menu-expanded .layout-overlay {
+  pointer-events: auto !important;
+}
+
+/* Overlay không được chặn khi menu không expanded */
+body:not(.layout-menu-expanded) .layout-overlay {
+  pointer-events: none !important;
+  display: none !important;
+}
+
+/* Ensure all interactive elements are clickable and above overlay */
+button:not(:disabled), 
+.btn:not(:disabled), 
+a.btn,
+a:not(.disabled),
+input[type="button"]:not(:disabled),
+input[type="submit"]:not(:disabled),
+.dropdown-toggle:not(:disabled),
+.dropdown-item:not(.disabled),
+.nav-link:not(:disabled),
+[onclick]:not([style*="pointer-events: none"]),
+[data-bs-toggle]:not([style*="pointer-events: none"]),
+table button,
+table .btn,
+.card .btn,
+.modal button,
+.modal .btn {
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 15 !important;
+  cursor: pointer !important;
+}
+
+/* Navbar và dropdown phải có z-index cao hơn overlay */
+.navbar,
+.layout-navbar {
+  position: relative;
+  z-index: 1110 !important;
+}
+
+.dropdown-menu {
+  position: relative;
+  z-index: 1111 !important;
+}
+
+/* Dropdown user menu phải cao hơn tất cả */
+.navbar-dropdown.dropdown-user {
+  z-index: 10000 !important;
+  position: relative !important;
+}
+
+.navbar-dropdown.dropdown-user .dropdown-menu {
+  z-index: 10001 !important;
+  position: absolute !important;
+}
+
+/* CRITICAL: Ensure dropdown items are clickable */
+.dropdown-menu,
+.dropdown-menu.show {
+  pointer-events: auto !important;
+  z-index: 10001 !important;
+}
+
+.dropdown-item,
+.dropdown-item:hover,
+.dropdown-item:focus,
+.dropdown-item:active {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  z-index: 10002 !important;
+  position: relative;
+}
+
+/* Đặc biệt fix cho logout button - dùng class để tránh selector phức tạp */
+#logoutBtn,
+[onclick*="commonLogout"],
+[onclick*="logout"],
+.dropdown-item[href*="logout"],
+.logout-button {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  z-index: 10003 !important;
+  position: relative;
+}
+
+/* Fix parent li của logout */
+.dropdown-menu li {
+  pointer-events: auto !important;
+}
+
+.dropdown-menu li a.dropdown-item {
+  pointer-events: auto !important;
+}
+
+/* Đảm bảo content wrapper không bị chặn */
+.content-wrapper,
+.layout-page {
+  position: relative;
+  z-index: 1 !important;
+}
+
+/* Tables và cards trong content */
+.content-wrapper table,
+.content-wrapper .card,
+.content-wrapper .btn,
+.content-wrapper button {
+  position: relative;
+  z-index: 2 !important;
+}
+
+/* Fix Perfect Scrollbar */
+.ps {
+  position: relative;
+  overflow: hidden;
+}
+
+.ps__rail-y {
+  opacity: 0.6 !important;
+}
+
+.ps__thumb-y {
+  cursor: pointer;
+}
+
+/* Additional fix: Ensure overlay doesn't block when not needed */
+@media (min-width: 1200px) {
+  /* On desktop, overlay should never block */
+  .layout-overlay {
+    pointer-events: none !important;
+    display: none !important;
+  }
+}
+
+/* Force all clickable elements to be above overlay */
+*[role="button"],
+button:not(:disabled),
+button[type="button"]:not(:disabled),
+button[type="submit"]:not(:disabled),
+.btn:not(:disabled),
+.btn-primary:not(:disabled),
+.btn-secondary:not(:disabled),
+.btn-success:not(:disabled),
+.btn-danger:not(:disabled),
+.btn-warning:not(:disabled),
+.btn-info:not(:disabled),
+.btn-light:not(:disabled),
+.btn-dark:not(:disabled),
+.table .btn:not(:disabled),
+.action-buttons .btn:not(:disabled),
+.modal-footer .btn:not(:disabled),
+a.btn,
+a[href]:not([href="#"]):not([href="javascript:void(0)"]),
+.dropdown-toggle,
+.dropdown-item,
+table a,
+.card a {
+  position: relative;
+  z-index: 20 !important;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
+/* Đặc biệt: đảm bảo DataTables buttons có thể click */
+.dataTables_wrapper .btn,
+.dataTables_wrapper button,
+.dataTables_wrapper .dt-button {
+  z-index: 25 !important;
+  pointer-events: auto !important;
+}

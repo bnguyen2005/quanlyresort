@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <title>Đăng Ký - Resort Management</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    
+    <link href="https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Playfair+Display:400,400i,700,700i" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/open-iconic-bootstrap.min.css">
+    <link rel="stylesheet" href="css/animate.css">
+    <link rel="stylesheet" href="css/owl.carousel.min.css">
+    <link rel="stylesheet" href="css/owl.theme.default.min.css">
+    <link rel="stylesheet" href="css/magnific-popup.css">
+    <link rel="stylesheet" href="css/aos.css">
+    <link rel="stylesheet" href="css/ionicons.min.css">
+    <link rel="stylesheet" href="css/bootstrap-datepicker.css">
+    <link rel="stylesheet" href="css/jquery.timepicker.css">
+    <link rel="stylesheet" href="css/flaticon.css">
+    <link rel="stylesheet" href="css/icomoon.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/globals.css">
+  <link rel="stylesheet" href="/css/grid.css">
+    
+    <style>
+      body {
+        font-family: 'Poppins', sans-serif;
+        padding-top: 0;
+        overflow-x: hidden;
+        background: #f8f9fa;
+      }
+      
+      /* Modern Hero Section - Same as other pages */
+      .register-hero {
+        background-image: url('images/bg_1.jpg');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+        padding: 140px 0 100px;
+        color: #fff;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 60px;
+        min-height: 500px;
+        display: flex;
+        align-items: center;
+      }
+      .register-hero::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: linear-gradient(135deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 100%);
+        z-index: 0;
+      }
+      .register-hero::after {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+        opacity: 0.3;
+        z-index: 1;
+      }
+      .register-hero-content {
+        position: relative;
+        z-index: 2;
+        animation: slideUp 0.8s ease;
+        width: 100%;
+      }
+      .register-hero h1 {
+        font-size: 48px;
+        font-weight: 700;
+        margin-bottom: 20px;
+        color: #ffffff !important;
+        text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        animation: fadeInDown 1s ease;
+      }
+      .register-hero p {
+        font-size: 20px;
+        color: #ffffff !important;
+        opacity: 0.95;
+        text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        animation: fadeInUp 1.2s ease;
+      }
+      
+      @keyframes fadeInDown {
+        from {
+          opacity: 0;
+          transform: translateY(-30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(50px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      
+      .register-section {
+        padding: 60px 0 100px;
+        min-height: auto;
+      }
+      .register-card {
+        background: #fff;
+        padding: 50px;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        margin-top: -70px;
+        position: relative;
+        z-index: 10;
+        animation: slideUp 0.8s ease;
+        max-width: 700px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .register-card h2 {
+        font-size: 32px;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 10px;
+      }
+      .form-group {
+        margin-bottom: 25px;
+      }
+      .form-group label {
+        font-weight: 600;
+        color: #374151;
+        font-size: 14px;
+        margin-bottom: 8px;
+        display: block;
+      }
+      .form-control {
+        height: 50px;
+        border-radius: 12px;
+        border: 2px solid #e5e7eb;
+        padding: 12px 18px;
+        font-size: 15px;
+        transition: all 0.3s ease;
+        background: #fff;
+      }
+      .form-control:focus {
+        border-color: #c8a97e;
+        box-shadow: 0 0 0 4px rgba(200, 169, 126, 0.1);
+        outline: none;
+      }
+      .form-check {
+        margin-bottom: 25px;
+      }
+      .form-check-input {
+        width: 18px;
+        height: 18px;
+        margin-top: 3px;
+        cursor: pointer;
+      }
+      .form-check-input:checked {
+        background-color: #c8a97e;
+        border-color: #c8a97e;
+      }
+      .form-check-label {
+        font-size: 14px;
+        color: #555;
+        cursor: pointer;
+        margin-left: 8px;
+      }
+      .btn-register {
+        background: linear-gradient(135deg, #c8a97e 0%, #b89968 100%);
+        color: #fff;
+        padding: 16px 30px;
+        border: none;
+        border-radius: 12px;
+        width: 100%;
+        font-weight: 600;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(200, 169, 126, 0.3);
+      }
+      .btn-register:hover {
+        background: linear-gradient(135deg, #b89968 0%, #c8a97e 100%);
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(200, 169, 126, 0.4);
+      }
+      .btn-register:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+      }
+      .alert {
+        border-radius: 12px;
+        padding: 15px 20px;
+        margin-bottom: 20px;
+        border: none;
+        font-size: 14px;
+      }
+      .alert-danger {
+        background: #fee;
+        color: #c33;
+        border-left: 4px solid #dc3545;
+      }
+      .alert-success {
+        background: #efe;
+        color: #28a745;
+        border-left: 4px solid #28a745;
+      }
+      .register-card .text-center a {
+        color: #c8a97e;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s;
+      }
+      .register-card .text-center a:hover {
+        color: #b89968;
+        text-decoration: underline;
+      }
+      
+      @media (max-width: 768px) {
+        .register-hero {
+          padding: 100px 0 60px;
+          min-height: 400px;
+        }
+        .register-hero h1 {
+          font-size: 32px;
+        }
+        .register-hero p {
+          font-size: 16px;
+        }
+        .register-card {
+          padding: 30px 20px;
+          margin-top: -50px;
+        }
+        .register-card h2 {
+          font-size: 24px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark ftco_navbar bg-dark ftco-navbar-light" id="ftco-navbar">
+      <div class="container">
+        <a class="navbar-brand" href="index.html">Resort</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav" aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="oi oi-menu"></span> Menu
+        </button>
+
+        <div class="collapse navbar-collapse" id="ftco-nav">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item"><a href="index.html" class="nav-link">Trang Chủ</a></li>
+            <li class="nav-item"><a href="rooms.html" class="nav-link">Phòng</a></li>
+            <li class="nav-item"><a href="restaurant.html" class="nav-link">Nhà Hàng</a></li>
+            <li class="nav-item"><a href="about.html" class="nav-link">Giới Thiệu</a></li>
+            <li class="nav-item"><a href="contact.html" class="nav-link">Liên Hệ</a></li>
+            <li class="nav-item active"><a href="register.html" class="nav-link">Đăng Ký</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <!-- END nav -->
+
+    <!-- Hero Section -->
+    <section class="register-hero">
+      <div class="container">
+        <div class="register-hero-content">
+          <h1>✨ Đăng Ký</h1>
+          <p>Tham gia cùng chúng tôi để có những trải nghiệm tuyệt vời</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="register-section">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-md-8">
+            <div class="register-card">
+              <h2 class="text-center">Đăng Ký Tài Khoản</h2>
+              
+              <div id="errorMessage" class="alert alert-danger d-none" role="alert"></div>
+              <div id="successMessage" class="alert alert-success d-none" role="alert"></div>
+              
+              <form id="registerForm">
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="fullName">Họ và Tên</label>
+                      <input type="text" class="form-control" id="fullName" placeholder="Nhập họ và tên" required>
+                    </div>
+                  </div>
+                  
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="email">Email</label>
+                      <input type="email" class="form-control" id="email" placeholder="Nhập email" required>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="form-group">
+                  <label for="phoneNumber">Số Điện Thoại</label>
+                  <input type="tel" class="form-control" id="phoneNumber" placeholder="Nhập số điện thoại" required>
+                </div>
+                
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="password">Mật Khẩu</label>
+                      <input type="password" class="form-control" id="password" placeholder="Nhập mật khẩu" required>
+                    </div>
+                  </div>
+                  
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="confirmPassword">Xác Nhận Mật Khẩu</label>
+                      <input type="password" class="form-control" id="confirmPassword" placeholder="Nhập lại mật khẩu" required>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="form-group form-check">
+                  <input type="checkbox" class="form-check-input" id="agreeTerms" required>
+                  <label class="form-check-label" for="agreeTerms">Tôi đồng ý với các điều khoản và điều kiện</label>
+                </div>
+                
+                <button type="submit" class="btn btn-register" id="btnRegister">
+                  <span id="btnText">Đăng Ký</span>
+                  <span id="btnSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                </button>
+              </form>
+              
+              <div class="text-center mt-4">
+                <p>Đã có tài khoản? <a href="login.html" style="color: #c8a97e; font-weight: 600;">Đăng nhập ngay</a></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="ftco-footer ftco-bg-dark ftco-section">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-12 text-center">
+            <p>© 2025 Resort Management System. All rights reserved.</p>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- loader -->
+    <div id="ftco-loader" class="show fullscreen">
+      <svg class="circular" width="48px" height="48px">
+        <circle class="path-bg" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke="#eeeeee"/>
+        <circle class="path" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke-miterlimit="10" stroke="#F96D00"/>
+      </svg>
+    </div>
+
+    <script src="js/jquery.min.js"></script>
+    <script src="js/jquery-migrate-3.0.1.min.js"></script>
+    <script src="js/popper.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/jquery.easing.1.3.js"></script>
+    <script src="js/jquery.waypoints.min.js"></script>
+    <script src="js/jquery.stellar.min.js"></script>
+    <script src="js/owl.carousel.min.js"></script>
+    <script src="js/jquery.magnific-popup.min.js"></script>
+    <script src="js/aos.js"></script>
+    <script src="js/jquery.animateNumber.min.js"></script>
+    <script src="js/bootstrap-datepicker.js"></script>
+    <script src="js/scrollax.min.js"></script>
+    <script src="js/main.js"></script>
+    
+    <!-- API Helper -->
+    <script src="js/customer-api.js"></script>
+    <!-- Navbar Authentication Handler -->
+    <script src="js/navbar-auth.js"></script>
+    <!-- Register Logic -->
+    <script src="js/customer-register.js"></script>
+  </body>
+</html>
+

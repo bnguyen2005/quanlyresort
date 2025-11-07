@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="vi" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default" data-assets-path="../assets/" data-template="vertical-menu-template-free">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+  <title>Quản lý Loại phòng - Resort Management</title>
+  
+  <!-- NO CACHE -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  
+  <link rel="icon" type="image/x-icon" href="../assets/img/favicon/favicon.ico" />
+  <link rel="stylesheet" href="../assets/vendor/fonts/boxicons.css" />
+  <link rel="stylesheet" href="../assets/vendor/css/core.css" class="template-customizer-core-css" />
+  <link rel="stylesheet" href="../assets/vendor/css/theme-default.css" class="template-customizer-theme-css" />
+  <link rel="stylesheet" href="../assets/css/demo.css" />
+  <link rel="stylesheet" href="../assets/css/fix-scrollbar.css" />
+  <link rel="stylesheet" href="../assets/css/admin-custom-theme.css" />
+  <link rel="stylesheet" href="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" />
+  <script src="../assets/vendor/js/helpers.js"></script>
+</head>
+
+<body>
+  <div class="layout-wrapper layout-content-navbar">
+    <div class="layout-container">
+      
+      <!-- Menu - Load from common component -->
+      <div id="common-menu"></div>
+      <script>
+        (function() {
+          const menuVersion = Date.now();
+          fetch('layout-menu.html?v=' + menuVersion)
+            .then(response => response.text())
+            .then(html => {
+              document.getElementById('common-menu').innerHTML = html;
+            })
+            .catch(error => console.error('Error loading menu:', error));
+        })();
+      </script>
+
+      <!-- Layout container -->
+      <div class="layout-page">
+        
+        <!-- Navbar -->
+        <nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme" id="layout-navbar">
+          <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
+            <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
+              <i class="bx bx-menu bx-sm"></i>
+            </a>
+          </div>
+
+          <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+            <div class="navbar-nav align-items-center">
+              <div class="nav-item d-flex align-items-center">
+                <h4 class="mb-0">🏨 Quản lý Loại phòng</h4>
+              </div>
+            </div>
+
+            <ul class="navbar-nav flex-row align-items-center ms-auto">
+              <li class="nav-item navbar-dropdown dropdown-user dropdown">
+                <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
+                  <div class="avatar avatar-online">
+                    <img src="../assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                  </div>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li>
+                    <a class="dropdown-item" href="#">
+                      <div class="d-flex">
+                        <div class="flex-shrink-0 me-3">
+                          <div class="avatar avatar-online">
+                            <img src="../assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                          </div>
+                        </div>
+                        <div class="flex-grow-1">
+                          <span class="fw-semibold d-block" id="userFullName">Admin</span>
+                          <small class="text-muted" id="userRole">Administrator</small>
+                        </div>
+                      </div>
+                    </a>
+                  </li>
+                  <li><div class="dropdown-divider"></div></li>
+                  <li>
+                    <a class="dropdown-item" href="../html/index.html">
+                      <i class="bx bx-home-circle me-2"></i>
+                      <span class="align-middle">Dashboard</span>
+                    </a>
+                  </li>
+                  <li><div class="dropdown-divider"></div></li>
+                  <li>
+                    <a class="dropdown-item" href="javascript:void(0);" id="logoutBtn">
+                      <i class="bx bx-power-off me-2"></i>
+                      <span class="align-middle">Đăng xuất</span>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </nav>
+        <!-- / Navbar -->
+
+        <!-- Content wrapper -->
+        <div class="content-wrapper">
+          <div class="container-xxl flex-grow-1 container-p-y">
+            
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <div>
+                <h4 class="fw-bold mb-0">📋 Danh sách Loại phòng</h4>
+                <p class="text-muted mb-0">Quản lý các loại phòng trong hệ thống</p>
+              </div>
+              <button type="button" class="btn btn-primary" onclick="openCreateModal()">
+                <i class="bx bx-plus me-1"></i> Thêm Loại phòng mới
+              </button>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="row mb-4">
+              <div class="col-md-3 col-6 mb-4">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="card-title d-flex align-items-start justify-content-between">
+                      <div class="avatar flex-shrink-0">
+                        <span class="avatar-initial rounded bg-label-primary"><i class="bx bx-home-alt"></i></span>
+                      </div>
+                    </div>
+                    <span class="fw-semibold d-block mb-1">Tổng loại</span>
+                    <h3 class="card-title mb-2" id="totalRoomTypes">0</h3>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3 col-6 mb-4">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="card-title d-flex align-items-start justify-content-between">
+                      <div class="avatar flex-shrink-0">
+                        <span class="avatar-initial rounded bg-label-success"><i class="bx bx-check-circle"></i></span>
+                      </div>
+                    </div>
+                    <span class="fw-semibold d-block mb-1">Đang bán</span>
+                    <h3 class="card-title mb-2" id="activeRoomTypes">0</h3>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3 col-6 mb-4">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="card-title d-flex align-items-start justify-content-between">
+                      <div class="avatar flex-shrink-0">
+                        <span class="avatar-initial rounded bg-label-info"><i class="bx bx-door-open"></i></span>
+                      </div>
+                    </div>
+                    <span class="fw-semibold d-block mb-1">Tổng phòng</span>
+                    <h3 class="card-title mb-2" id="totalRooms">0</h3>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3 col-6 mb-4">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="card-title d-flex align-items-start justify-content-between">
+                      <div class="avatar flex-shrink-0">
+                        <span class="avatar-initial rounded bg-label-warning"><i class="bx bx-dollar"></i></span>
+                      </div>
+                    </div>
+                    <span class="fw-semibold d-block mb-1">Giá TB</span>
+                    <h3 class="card-title mb-2" id="avgPrice">0đ</h3>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Room Types Table -->
+            <div class="card">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Danh sách</h5>
+              </div>
+              <div class="card-body">
+                <div class="table-responsive text-nowrap">
+                  <table id="roomTypesTable" class="table table-hover">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Mã</th>
+                        <th>Tên loại phòng</th>
+                        <th>Giá cơ bản</th>
+                        <th>Sức chứa</th>
+                        <th>Trạng thái</th>
+                        <th>Hành động</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          <!-- / Content -->
+
+          <footer class="content-footer footer bg-footer-theme">
+            <div class="container-xxl d-flex flex-wrap justify-content-between py-2 flex-md-row flex-column">
+              <div class="mb-2 mb-md-0">
+                © <script>document.write(new Date().getFullYear());</script> Resort Management System
+              </div>
+            </div>
+          </footer>
+
+          <div class="content-backdrop fade"></div>
+        </div>
+        <!-- / Content wrapper -->
+      </div>
+      <!-- / Layout page -->
+    </div>
+
+    <div class="layout-overlay layout-menu-toggle"></div>
+  </div>
+  <!-- Toast container -->
+  <div class="position-fixed top-0 end-0 p-3" style="z-index:1080">
+    <div id="toastContainer"></div>
+  </div>
+
+  <!-- Room Type Modal -->
+  <div class="modal fade" id="roomTypeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalTitle">Thêm Loại phòng mới</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="roomTypeForm">
+            <input type="hidden" id="roomTypeId">
+            
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Tên loại phòng <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="typeName" required>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Mã loại <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="typeCode" required>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Mô tả</label>
+              <textarea class="form-control" id="description" rows="2"></textarea>
+            </div>
+
+            <div class="row">
+              <div class="col-md-4 mb-3">
+                <label class="form-label">Giá cơ bản (VNĐ) <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" id="basePrice" required>
+              </div>
+              <div class="col-md-4 mb-3">
+                <label class="form-label">Sức chứa tiêu chuẩn <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" id="standardOccupancy" required>
+              </div>
+              <div class="col-md-4 mb-3">
+                <label class="form-label">Sức chứa tối đa <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" id="maxOccupancy" required>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-4 mb-3">
+                <label class="form-label">Phụ phí/người thêm</label>
+                <input type="number" class="form-control" id="extraPersonCharge">
+              </div>
+              <div class="col-md-4 mb-3">
+                <label class="form-label">Diện tích (m²)</label>
+                <input type="number" class="form-control" id="roomSize">
+              </div>
+              <div class="col-md-4 mb-3">
+                <label class="form-label">Loại giường</label>
+                <input type="text" class="form-control" id="bedType">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Tiện nghi (phân cách bởi dấu phẩy)</label>
+              <input type="text" class="form-control" id="amenities">
+            </div>
+
+            <div class="mb-3 form-check">
+              <input type="checkbox" class="form-check-input" id="isActive" checked>
+              <label class="form-check-label">Hoạt động</label>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Thứ tự hiển thị</label>
+              <input type="number" class="form-control" id="displayOrder" value="0">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+          <button type="button" class="btn btn-primary" onclick="saveRoomType()">Lưu</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Core JS -->
+  <script src="../assets/vendor/libs/jquery/jquery.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+  <script src="../assets/vendor/js/menu.js"></script>
+  <script src="../assets/js/main.js"></script>
+  <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+  <script src="../js/api.js"></script>
+
+  <script>
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toastContainer');
+      const wrapper = document.createElement('div');
+      wrapper.className = `toast align-items-center text-bg-${type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'danger'} border-0`;
+      wrapper.setAttribute('role', 'alert');
+      wrapper.setAttribute('aria-live', 'assertive');
+      wrapper.setAttribute('aria-atomic', 'true');
+      wrapper.innerHTML = `
+        <div class="d-flex">
+          <div class="toast-body">${message}</div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>`;
+      container.appendChild(wrapper);
+      const toast = new bootstrap.Toast(wrapper, { delay: 2500 });
+      toast.show();
+      wrapper.addEventListener('hidden.bs.toast', () => wrapper.remove());
+    }
+    const API_BASE = 'http://localhost:5130/api';
+    let dataTable;
+    let editingRoomTypeId = null;
+
+    document.addEventListener('DOMContentLoaded', function() {
+      initRoomTypePage();
+      loadRoomTypes();
+      loadStatistics();
+      // Setup logout button
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', logout);
+      }
+    });
+
+    function initRoomTypePage() {
+      const token = localStorage.getItem('token');
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+
+      if (user.role !== 'Admin' && user.role !== 'Manager') {
+        alert('Bạn không có quyền truy cập trang này!');
+        window.location.href = '/customer/index.html';
+        return;
+      }
+
+      document.getElementById('userFullName').textContent = user.fullName || user.username;
+      const roleNames = {
+        'Admin': 'Quản trị viên',
+        'Manager': 'Quản lý'
+      };
+      document.getElementById('userRole').textContent = roleNames[user.role] || user.role;
+    }
+
+    async function loadStatistics() {
+      console.log('🔵 [loadStatistics] Starting...');
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_BASE}/room-types/statistics`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        console.log('🔵 [loadStatistics] Response status:', response.status);
+        
+        if (!response.ok) {
+          throw new Error(`API returned ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('✅ [loadStatistics] Data:', data);
+        
+        // Tính tổng phòng và giá trung bình từ roomTypes array
+        const totalRooms = data.roomTypes.reduce((sum, rt) => sum + rt.totalRooms, 0);
+        const avgPrice = data.roomTypes.length > 0 
+          ? (data.roomTypes.reduce((sum, rt) => sum + rt.basePrice, 0) / data.roomTypes.length)
+          : 0;
+
+        document.getElementById('totalRoomTypes').textContent = data.totalRoomTypes;
+        document.getElementById('activeRoomTypes').textContent = data.activeRoomTypes;
+        document.getElementById('totalRooms').textContent = totalRooms;
+        document.getElementById('avgPrice').textContent = Math.round(avgPrice).toLocaleString('vi-VN') + 'đ';
+        
+      } catch (error) {
+        console.error('❌ [loadStatistics] Error:', error);
+        // Fallback: set to 0 if API fails
+        document.getElementById('totalRoomTypes').textContent = '0';
+        document.getElementById('activeRoomTypes').textContent = '0';
+        document.getElementById('totalRooms').textContent = '0';
+        document.getElementById('avgPrice').textContent = '0đ';
+      }
+    }
+
+    async function loadRoomTypes() {
+      console.log('🔵 [loadRoomTypes] Starting...');
+      try {
+        const token = localStorage.getItem('token');
+        console.log('🔵 Token:', token ? 'exists' : 'NULL');
+        
+        const response = await fetch(`${API_BASE}/room-types`, {
+          headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+        });
+
+        console.log('🔵 Response status:', response.status);
+
+        if (!response.ok) {
+          throw new Error('Failed to load room types');
+        }
+
+        const roomTypes = await response.json();
+        console.log('✅ Room types loaded:', roomTypes.length);
+        
+        if (dataTable) {
+          dataTable.destroy();
+        }
+
+        const tbody = document.querySelector('#roomTypesTable tbody');
+        tbody.innerHTML = roomTypes.map(rt => `
+          <tr>
+            <td>${rt.roomTypeId}</td>
+            <td><span class="badge bg-label-primary">${rt.typeCode}</span></td>
+            <td><strong>${rt.typeName}</strong></td>
+            <td>${formatCurrency(rt.basePrice)}</td>
+            <td>${rt.maxOccupancy} người</td>
+            <td>
+              ${rt.isActive 
+                ? '<span class="badge bg-success">Hoạt động</span>' 
+                : '<span class="badge bg-danger">Ngừng</span>'}
+            </td>
+            <td>
+              <div class="dropdown">
+                <button type="button" class="btn btn-sm btn-icon dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                  <i class="bx bx-dots-vertical-rounded"></i>
+                </button>
+                <div class="dropdown-menu">
+                  <a class="dropdown-item" href="javascript:void(0);" onclick="editRoomType(${rt.roomTypeId})">
+                    <i class="bx bx-edit-alt me-1"></i> Sửa
+                  </a>
+                  <a class="dropdown-item" href="javascript:void(0);" onclick="toggleRoomTypeStatus(${rt.roomTypeId}, ${rt.isActive})">
+                    <i class="bx ${rt.isActive ? 'bx-lock' : 'bx-lock-open'} me-1"></i> 
+                    ${rt.isActive ? 'Ngừng bán' : 'Mở bán'}
+                  </a>
+                  <div class="dropdown-divider"></div>
+                  <a class="dropdown-item text-danger" href="javascript:void(0);" onclick="deleteRoomType(${rt.roomTypeId})">
+                    <i class="bx bx-trash me-1"></i> Xóa
+                  </a>
+                </div>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+
+        dataTable = $('#roomTypesTable').DataTable({
+          language: { url: '/admin/local-plugins/datatables/i18n/vi.json' },
+          pageLength: 10,
+          order: [[0, 'asc']]
+        });
+
+      } catch (error) {
+        console.error('❌ Error loading room types:', error);
+        showToast('Lỗi khi tải danh sách loại phòng: ' + error.message, 'danger');
+      }
+    }
+
+    // formatCurrency() đã được định nghĩa trong api.js
+
+    // Open create modal - Global function
+    window.openCreateModal = function() {
+      console.log('🔵 openCreateModal called');
+      console.log('🔍 Bootstrap available:', typeof bootstrap !== 'undefined');
+      
+      editingRoomTypeId = null;
+      document.getElementById('modalTitle').textContent = 'Thêm loại phòng mới';
+      document.getElementById('roomTypeForm').reset();
+      document.getElementById('isActive').checked = true;
+      document.getElementById('displayOrder').value = '0';
+      
+      try {
+        const modalElement = document.getElementById('roomTypeModal');
+        console.log('🔍 Modal element found:', !!modalElement);
+        
+        if (typeof bootstrap !== 'undefined') {
+          const modal = new bootstrap.Modal(modalElement);
+          console.log('✅ Modal instance created');
+          modal.show();
+          console.log('✅ Modal show() called');
+        } else {
+          console.error('❌ Bootstrap not available');
+        }
+      } catch (error) {
+        console.error('❌ Error opening modal:', error);
+      }
+    };
+
+    // Edit room type - Global function
+    window.editRoomType = async function(id) {
+      console.log('🔵 editRoomType called with id:', id);
+      console.log('🔍 Bootstrap available:', typeof bootstrap !== 'undefined');
+      
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_BASE}/room-types/${id}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) throw new Error('Failed to load room type');
+
+        const data = await response.json();
+        const rt = data.roomType || data;
+
+        editingRoomTypeId = rt.roomTypeId;
+        document.getElementById('modalTitle').textContent = 'Sửa Loại phòng';
+        document.getElementById('roomTypeId').value = rt.roomTypeId;
+        document.getElementById('typeName').value = rt.typeName;
+        document.getElementById('typeCode').value = rt.typeCode;
+        document.getElementById('description').value = rt.description || '';
+        document.getElementById('basePrice').value = rt.basePrice;
+        document.getElementById('standardOccupancy').value = rt.standardOccupancy;
+        document.getElementById('maxOccupancy').value = rt.maxOccupancy;
+        document.getElementById('extraPersonCharge').value = rt.extraPersonCharge || '';
+        document.getElementById('roomSize').value = rt.roomSize || '';
+        document.getElementById('bedType').value = rt.bedType || '';
+        document.getElementById('amenities').value = rt.amenities || '';
+        document.getElementById('isActive').checked = rt.isActive;
+        document.getElementById('displayOrder').value = rt.displayOrder || 0;
+
+        new bootstrap.Modal(document.getElementById('roomTypeModal')).show();
+      } catch (error) {
+        console.error('Error loading room type:', error);
+        showToast('Lỗi khi tải thông tin loại phòng: ' + error.message, 'danger');
+      }
+    }
+
+    // Save room type - Global function
+    window.saveRoomType = async function() {
+      const token = localStorage.getItem('token');
+      const roomType = {
+        roomTypeId: editingRoomTypeId || 0,
+        typeName: document.getElementById('typeName').value,
+        typeCode: document.getElementById('typeCode').value,
+        description: document.getElementById('description').value,
+        basePrice: parseFloat(document.getElementById('basePrice').value),
+        standardOccupancy: parseInt(document.getElementById('standardOccupancy').value),
+        maxOccupancy: parseInt(document.getElementById('maxOccupancy').value),
+        extraPersonCharge: parseFloat(document.getElementById('extraPersonCharge').value) || null,
+        roomSize: parseInt(document.getElementById('roomSize').value) || null,
+        bedType: document.getElementById('bedType').value || null,
+        amenities: document.getElementById('amenities').value || null,
+        isActive: document.getElementById('isActive').checked,
+        displayOrder: parseInt(document.getElementById('displayOrder').value) || 0
+      };
+
+      try {
+        const url = editingRoomTypeId 
+          ? `${API_BASE}/room-types/${editingRoomTypeId}`
+          : `${API_BASE}/room-types`;
+        
+        const saveBtn = Array.from(document.querySelectorAll('#roomTypeModal .btn-primary'))[0];
+        if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Đang lưu...'; }
+
+        const response = await fetch(url, {
+          method: editingRoomTypeId ? 'PUT' : 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(roomType)
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to save room type');
+        }
+
+        showToast(editingRoomTypeId ? 'Cập nhật thành công!' : 'Thêm mới thành công!', 'success');
+        bootstrap.Modal.getInstance(document.getElementById('roomTypeModal')).hide();
+        loadRoomTypes();
+        loadStatistics();
+      } catch (error) {
+        console.error('Error saving room type:', error);
+        showToast('Lỗi: ' + error.message, 'danger');
+      } finally {
+        const saveBtn = Array.from(document.querySelectorAll('#roomTypeModal .btn-primary'))[0];
+        if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Lưu'; }
+      }
+    }
+
+    // Toggle room type status - Global function
+    window.toggleRoomTypeStatus = async function(id, currentStatus) {
+      if (!confirm(`Bạn có chắc muốn ${currentStatus ? 'ngừng bán' : 'mở bán'} loại phòng này?`)) return;
+
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_BASE}/room-types/${id}/toggle-active`, {
+          method: 'PATCH',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) throw new Error('Failed to toggle status');
+        showToast('Cập nhật trạng thái thành công!', 'success');
+        loadRoomTypes();
+        loadStatistics();
+      } catch (error) {
+        console.error('Error toggling status:', error);
+        showToast('Lỗi: ' + error.message, 'danger');
+      }
+    }
+
+    // Delete room type - Global function
+    window.deleteRoomType = async function(id) {
+      if (!confirm('Bạn có chắc chắn muốn xóa mềm loại phòng này? Loại phòng sẽ được ẩn khỏi danh sách nhưng vẫn giữ nguyên dữ liệu.')) return;
+
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_BASE}/room-types/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          console.log('✅ Soft delete result:', result);
+          showToast(`${result.message}`, 'success');
+          await loadRoomTypes(); // Reload data
+          await loadStatistics(); // Reload stats
+        } else {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to delete room type');
+        }
+      } catch (error) {
+        console.error('Error deleting room type:', error);
+        showToast('Lỗi: ' + error.message, 'danger');
+      }
+    }
+
+    // logout() đã được định nghĩa trong api.js
+  </script>
+    <script>
+      // Defensive initializer for dropdowns in case bootstrap loads after DOMContentLoaded.
+      (function() {
+        function initDropdowns() {
+          if (window.bootstrap && typeof bootstrap.Dropdown === 'function') {
+            Array.from(document.querySelectorAll('.dropdown-toggle')).forEach(function(el){
+              try { new bootstrap.Dropdown(el); } catch (e) { /* ignore */ }
+            });
+            return true;
+          }
+          return false;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+          if (!initDropdowns()) {
+            var waited = 0;
+            var iv = setInterval(function() {
+              waited += 100;
+              if (initDropdowns() || waited > 3000) clearInterval(iv);
+            }, 100);
+          }
+        });
+      })();
+    </script>
+</body>
+</html>

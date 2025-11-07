@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Cache - Resort Management</title>
+    <!-- NO CACHE -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #667eea; }
+        .status { padding: 10px; border-radius: 5px; margin: 10px 0; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #e7f3ff; color: #004085; }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 16px;
+        }
+        button:hover { background: #5568d3; }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        pre {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Cache & Login</h1>
+        
+        <div class="info status">
+            <strong>📅 Thời gian load:</strong> <span id="loadTime"></span><br>
+            <strong>🔄 Version:</strong> <code id="version"></code>
+        </div>
+        
+        <h3>🧹 Cache Control</h3>
+        <button onclick="testCache()">Test Cache Status</button>
+        <button onclick="clearCache()">Clear All Cache</button>
+        <button onclick="location.reload(true)">Hard Reload</button>
+        
+        <h3>🔐 Quick Login Test</h3>
+        <div>
+            <input type="text" id="email" placeholder="Email/Username" value="admin@resort.test" style="padding: 8px; width: 250px; margin: 5px;">
+            <input type="password" id="password" placeholder="Password" value="P@ssw0rd123" style="padding: 8px; width: 250px; margin: 5px;">
+            <button onclick="testLogin()">Test Login</button>
+        </div>
+        
+        <h3>📊 Status</h3>
+        <div id="status"></div>
+        
+        <h3>📝 Console Logs</h3>
+        <button onclick="copyLogs()">Copy Console Logs</button>
+        <pre id="logs" style="max-height: 300px; overflow-y: auto;"></pre>
+        
+        <h3>🔗 Quick Links</h3>
+        <a href="/customer/login.html" style="color: #667eea; margin-right: 15px;">→ Login Page</a>
+        <a href="/portal.html" style="color: #667eea; margin-right: 15px;">→ Portal</a>
+        <a href="/welcome.html" style="color: #667eea;">→ Welcome</a>
+    </div>
+    
+    <script>
+        const version = new Date().getTime();
+        const API_BASE_URL = 'http://localhost:5130/api';
+        const logs = [];
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logMessage = `[${timestamp}] ${message}`;
+            logs.push(logMessage);
+            console.log(logMessage);
+            
+            const logsElement = document.getElementById('logs');
+            logsElement.textContent = logs.join('\n');
+            logsElement.scrollTop = logsElement.scrollHeight;
+            
+            showStatus(message, type);
+        }
+        
+        function showStatus(message, type = 'info') {
+            const status = document.getElementById('status');
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info';
+            status.innerHTML = `<div class="${className} status">${message}</div>` + status.innerHTML;
+        }
+        
+        document.getElementById('loadTime').textContent = new Date().toLocaleString();
+        document.getElementById('version').textContent = version;
+        
+        log('✅ Page loaded successfully');
+        log(`🔄 Version: ${version}`);
+        
+        async function testCache() {
+            log('🧪 Testing cache status...');
+            
+            // Check localStorage
+            const localStorageItems = Object.keys(localStorage).length;
+            log(`📦 localStorage items: ${localStorageItems}`);
+            
+            // Check sessionStorage
+            const sessionStorageItems = Object.keys(sessionStorage).length;
+            log(`📦 sessionStorage items: ${sessionStorageItems}`);
+            
+            // Check Service Worker caches
+            if ('caches' in window) {
+                const cacheNames = await caches.keys();
+                log(`💾 Service Worker caches: ${cacheNames.length}`);
+                cacheNames.forEach(name => log(`  - ${name}`));
+            }
+            
+            // Check Service Workers
+            if ('serviceWorker' in navigator) {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                log(`🔧 Service Workers: ${registrations.length}`);
+                registrations.forEach(reg => log(`  - ${reg.scope}`));
+            }
+            
+            showStatus('✅ Cache test completed', 'success');
+        }
+        
+        async function clearCache() {
+            log('🧹 Clearing all cache...');
+            
+            try {
+                localStorage.clear();
+                log('✅ localStorage cleared');
+                
+                sessionStorage.clear();
+                log('✅ sessionStorage cleared');
+                
+                if ('caches' in window) {
+                    const cacheNames = await caches.keys();
+                    await Promise.all(cacheNames.map(name => caches.delete(name)));
+                    log(`✅ Deleted ${cacheNames.length} cache(s)`);
+                }
+                
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    await Promise.all(registrations.map(reg => reg.unregister()));
+                    log(`✅ Unregistered ${registrations.length} service worker(s)`);
+                }
+                
+                showStatus('✅ All cache cleared! Reloading...', 'success');
+                
+                setTimeout(() => {
+                    window.location.reload(true);
+                }, 1500);
+                
+            } catch (error) {
+                log(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            log(`🔐 Testing login for: ${email}`);
+            
+            try {
+                // Try admin login
+                log('👨‍💼 Trying admin login...');
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password, role: 'Admin' })
+                });
+                
+                log(`📨 Response status: ${response.status}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`✅ Login successful!`);
+                    log(`👤 User: ${data.user.fullName}`);
+                    log(`🎯 Role: ${data.user.role}`);
+                    log(`🔑 Token: ${data.token.substring(0, 30)}...`);
+                    showStatus('✅ Login successful!', 'success');
+                } else {
+                    const error = await response.json();
+                    log(`❌ Login failed: ${error.message}`, 'error');
+                }
+            } catch (error) {
+                log(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+        
+        function copyLogs() {
+            const logsText = logs.join('\n');
+            navigator.clipboard.writeText(logsText).then(() => {
+                showStatus('📋 Logs copied to clipboard!', 'success');
+            });
+        }
+        
+        // Auto test on load
+        setTimeout(() => testCache(), 500);
+    </script>
+</body>
+</html>
+

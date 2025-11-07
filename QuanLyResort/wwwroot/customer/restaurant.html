@@ -1,0 +1,1940 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <title>Nhà hàng | Resort Deluxe</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    
+    <link href="https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Playfair+Display:400,400i,700,700i" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/open-iconic-bootstrap.min.css">
+    <link rel="stylesheet" href="css/animate.css">
+    
+    <link rel="stylesheet" href="css/owl.carousel.min.css">
+    <link rel="stylesheet" href="css/owl.theme.default.min.css">
+    <link rel="stylesheet" href="css/magnific-popup.css">
+
+    <link rel="stylesheet" href="css/aos.css">
+
+    <link rel="stylesheet" href="css/ionicons.min.css">
+
+    <link rel="stylesheet" href="css/bootstrap-datepicker.css">
+
+    
+    <link rel="stylesheet" href="css/flaticon.css">
+    <link rel="stylesheet" href="css/icomoon.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/globals.css">
+  <link rel="stylesheet" href="/css/grid.css">
+  <link rel="stylesheet" href="/css/components/navbar.css">
+    
+    <!-- Navbar Auth Styles -->
+    <link rel="stylesheet" href="css/navbar-auth.css">
+  
+  <!-- Local typography tune-up for Vietnamese -->
+  <style>
+    /* Modern Hero Section - Same as rooms.html */
+    .rooms-hero {
+      background-image: url('images/bg_1.jpg');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      background-repeat: no-repeat;
+      padding: 140px 0 100px;
+      color: #fff;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 60px;
+      min-height: 500px;
+      display: flex;
+      align-items: center;
+    }
+    .rooms-hero::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(135deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 100%);
+      z-index: 0;
+    }
+    .rooms-hero::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+      opacity: 0.3;
+      z-index: 1;
+    }
+    .rooms-hero-content {
+      position: relative;
+      z-index: 2;
+      animation: slideUp 0.8s ease;
+      width: 100%;
+    }
+    .rooms-hero h1 {
+      font-size: 48px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: #ffffff !important;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      animation: fadeInDown 1s ease;
+    }
+    .rooms-hero p {
+      font-size: 20px;
+      color: #ffffff !important;
+      opacity: 0.95;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      animation: fadeInUp 1.2s ease;
+    }
+    
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .rooms-hero {
+        padding: 100px 0 60px;
+        margin-bottom: 40px;
+        background-attachment: scroll;
+        min-height: 400px;
+      }
+      .rooms-hero h1 {
+        font-size: 36px;
+      }
+    }
+    
+    /* Headings: rõ ràng, không viết hoa toàn bộ, khoảng cách dễ đọc */
+    h1, h2, h3 { 
+      font-family: var(--font-heading, 'Poppins', sans-serif);
+      letter-spacing: 0;
+      text-transform: none;
+    }
+    .bread { font-weight: 600; }
+    .heading-section .subheading { 
+      color: var(--color-primary-dark, #B89968);
+      font-weight: 600;
+    }
+    .heading-section h2 { 
+      line-height: var(--lh-snug, 1.35);
+      margin-bottom: var(--space-16, 16px);
+    }
+    /* Nội dung mô tả dùng màu trung tính */
+    .wrap-about p, .desc p { 
+      color: var(--color-muted, #6B7280);
+      line-height: var(--lh-normal, 1.6);
+    }
+    /* Mục món ăn: nhấn mạnh tên và giá */
+    .pricing-entry .text h3 span { 
+      font-weight: 600;
+    }
+    .pricing-entry .price { 
+      color: var(--color-primary-main, #C8A97E);
+      font-weight: 700;
+    }
+    
+    /* Modern Restaurant Page Styles */
+    /* Modern Filter Section - Vertical Sidebar */
+    .filter-section-modern {
+      background: #fff;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      position: sticky;
+      top: 100px;
+      height: fit-content;
+      max-height: calc(100vh - 120px);
+      overflow-y: auto;
+      border: 1px solid #e5e7eb;
+    }
+    
+    .filter-header {
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #f0f0f0;
+    }
+    
+    .filter-header h3 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .filter-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .filter-group label {
+      font-weight: 600;
+      color: #374151;
+      font-size: 14px;
+      margin-bottom: 0;
+    }
+    
+    .filter-group .form-control,
+    .filter-group .form-select {
+      padding: 10px 15px;
+      border-radius: 10px;
+      border: 2px solid #e5e7eb;
+      font-size: 14px;
+      transition: all 0.3s ease;
+      background: #fff;
+    }
+    
+    .filter-group .form-control:focus,
+    .filter-group .form-select:focus {
+      outline: none;
+      border-color: #c8a97e;
+      box-shadow: 0 0 0 3px rgba(200,169,126,0.1);
+    }
+    
+    .search-box {
+      position: relative;
+    }
+    
+    .search-box i {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #6b7280;
+      font-size: 16px;
+      z-index: 2;
+    }
+    
+    .search-box input {
+      padding-left: 40px;
+      border-radius: 10px;
+      border: 2px solid #e5e7eb;
+      transition: all 0.3s ease;
+      width: 100%;
+    }
+    
+    .search-box input:focus {
+      border-color: #c8a97e;
+      box-shadow: 0 0 0 3px rgba(200,169,126,0.1);
+      outline: none;
+    }
+    
+    .results-header {
+      margin-bottom: 25px;
+    }
+    
+    .results-header h3 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin: 0;
+    }
+    
+    @media (max-width: 991px) {
+      .filter-section-modern {
+        position: relative;
+        top: 0;
+        margin-bottom: 30px;
+        max-height: none;
+      }
+    }
+    
+    /* Features Section - Ensure visibility */
+    .ftco-section.bg-light {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      padding: 80px 0 !important;
+    }
+    
+    .ftco-section.bg-light .container {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+    
+    .ftco-section.bg-light .row {
+      display: flex !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+    
+    .ftco-section.bg-light .text-center {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+    
+    .ftco-section.bg-light h2,
+    .ftco-section.bg-light h4,
+    .ftco-section.bg-light p {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      color: #1a1a1a !important;
+    }
+    
+    .ftco-section.bg-light .subheading {
+      display: inline-block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+    
+    /* Features Section Hover Effects */
+    .ftco-section.bg-light .text-center:hover {
+      transform: translateY(-5px) !important;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.12) !important;
+    }
+    
+    /* Enhanced Menu Cards */
+    .menu-card {
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .menu-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(200,169,126,0.05) 0%, rgba(184,153,104,0.1) 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 0;
+    }
+    
+    .menu-card:hover::before {
+      opacity: 1;
+    }
+    
+    .menu-card:hover {
+      transform: translateY(-8px) scale(1.02) !important;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.15) !important;
+    }
+    
+    .menu-card-image {
+      transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    
+    .menu-card:hover .menu-card-image {
+      transform: scale(1.15);
+    }
+    
+    /* Quick View Button */
+    .menu-card-quick-view {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      background: rgba(255,255,255,0.95);
+      color: #c8a97e;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      z-index: 10;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    
+    .menu-card:hover .menu-card-quick-view {
+      transform: translate(-50%, -50%) scale(1);
+    }
+    
+    .menu-card-quick-view:hover {
+      background: #c8a97e;
+      color: #fff;
+      transform: translate(-50%, -50%) scale(1.1);
+    }
+    
+    /* About Section Improvements */
+    .ftco-section.ftc-no-pb.ftc-no-pt {
+      padding: 80px 0;
+    }
+    
+    .wrap-about {
+      padding-left: 30px;
+      padding-right: 30px;
+    }
+    
+    /* Ensure text is visible */
+    .wrap-about {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+    
+    .wrap-about .heading-section {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+    
+    .wrap-about .pb-md-4 {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+    
+    .wrap-about p {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      color: #4b5563 !important;
+    }
+    
+    .wrap-about .subheading {
+      display: inline-block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      color: #c8a97e !important;
+    }
+    
+    .wrap-about h2 {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      color: #1a1a1a !important;
+    }
+    
+    .wrap-about .ml-md-0 {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
+    
+    .img.img-2.img-3 {
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      transition: transform 0.3s ease;
+      position: relative;
+    }
+    
+    .img.img-2.img-3:hover {
+      transform: scale(1.02);
+    }
+    
+    .img.img-2.img-3 .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 1;
+    }
+    
+    @media (max-width: 768px) {
+      .wrap-about {
+        padding-left: 0;
+        padding-right: 0;
+        margin-top: 30px;
+      }
+      
+      .img.img-2.img-3 {
+        min-height: 300px !important;
+      }
+      
+      .heading-section h2 {
+        font-size: 28px !important;
+      }
+      
+      .ftco-section.ftc-no-pb.ftc-no-pt {
+        padding: 50px 0;
+      }
+    }
+    
+    /* FORCE GRID LAYOUT FOR RESTAURANT MENU */
+    #restaurantMenuList {
+      display: flex !important;
+      flex-wrap: wrap !important;
+      margin-left: -12px !important;
+      margin-right: -12px !important;
+    }
+    #restaurantMenuList > [class*="col-"] {
+      display: block !important;
+      width: 100% !important;
+      padding-left: 12px !important;
+      padding-right: 12px !important;
+      flex: 0 0 auto !important;
+    }
+    /* Small screens (≥576px): 2 columns */
+    @media (min-width: 576px) {
+      #restaurantMenuList > .col-sm-6 {
+        width: 50% !important;
+      }
+    }
+    /* Medium screens (≥768px): 2 columns */
+    @media (min-width: 768px) {
+      #restaurantMenuList > .col-md-6 {
+        width: 50% !important;
+      }
+    }
+    /* Large screens (≥992px): 3 columns */
+    @media (min-width: 992px) {
+      #restaurantMenuList > .col-lg-4 {
+        width: 33.333333% !important;
+      }
+      #restaurantMenuList > .col-md-6 {
+        width: 50% !important;
+      }
+    }
+    /* Ensure menu cards don't stretch full width */
+    #restaurantMenuList .menu-card {
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+    }
+  </style>
+  </head>
+  <body>
+
+    <!-- Header placeholder - will be loaded by load-header.js -->
+    <div id="header-placeholder"></div>
+    
+    <!-- Load header component -->
+    <script src="js/load-header.js"></script>
+
+    <section class="rooms-hero">
+      <div class="container">
+        <div class="rooms-hero-content">
+          <h1 style="color: #ffffff !important;">Nhà hàng</h1>
+          <p style="color: #ffffff !important;">Đẳng cấp dịch vụ, đậm đà hương vị</p>
+        </div>
+      </div>
+    </section>
+		
+		<section class="ftco-section ftc-no-pb ftc-no-pt">
+			<div class="container">
+				<div class="row align-items-center">
+					<div class="col-md-6 p-md-5 img img-2 img-3 d-flex justify-content-center align-items-center" style="background-image: url(images/bg_1.jpg); min-height: 450px; border-radius: 16px; background-size: cover; background-position: center; position: relative;">
+						<div class="overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, rgba(200,169,126,0.1) 0%, rgba(0,0,0,0.2) 100%); border-radius: 16px;"></div>
+					</div>
+					<div class="col-md-6 py-5 wrap-about pb-md-5 ftco-animate" style="display: block !important; visibility: visible !important; opacity: 1 !important; position: relative !important; z-index: 1 !important;">
+	          <div class="heading-section heading-section-wo-line pt-md-4 mb-4" style="display: block !important; visibility: visible !important; opacity: 1 !important;">
+	          	<div class="ml-md-0" style="display: block !important; visibility: visible !important; opacity: 1 !important;">
+                  <span class="subheading" style="color: #c8a97e !important; font-weight: 600; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; display: inline-block !important; visibility: visible !important; opacity: 1 !important;">Trải nghiệm ẩm thực</span>
+                    <h2 class="mb-3" style="font-size: 36px; font-weight: 700; color: #1a1a1a !important; line-height: 1.2; display: block !important; visibility: visible !important; opacity: 1 !important; margin-top: 10px;">Đẳng cấp dịch vụ, đậm đà hương vị</h2>
+	            </div>
+	          </div>
+	          <div class="pb-md-4" style="display: block !important; visibility: visible !important; opacity: 1 !important;">
+              <p style="font-size: 16px; line-height: 1.8; color: #4b5563 !important; margin-bottom: 20px; display: block !important; visibility: visible !important; opacity: 1 !important;">Khám phá không gian ẩm thực cao cấp với thực đơn phong phú, được chế biến từ những nguyên liệu tươi ngon nhất và công thức độc đáo. Đội ngũ đầu bếp giàu kinh nghiệm của chúng tôi luôn tận tâm tạo ra những món ăn đặc sắc, kết hợp giữa hương vị truyền thống và nét hiện đại.</p>
+              <p style="font-size: 16px; line-height: 1.8; color: #4b5563 !important; margin-bottom: 20px; display: block !important; visibility: visible !important; opacity: 1 !important;">Cho dù là bữa sáng nhẹ nhàng hay bữa tối lãng mạn, chúng tôi cam kết mang đến những khoảnh khắc tuyệt vời cho thực khách. Mỗi món ăn được chăm chút từng chi tiết, đảm bảo chất lượng và hương vị hoàn hảo. Không gian ấm cúng, sang trọng sẽ giúp bạn thư giãn và tận hưởng trọn vẹn trải nghiệm ẩm thực.</p>
+              <p style="font-size: 16px; line-height: 1.8; color: #4b5563 !important; margin-bottom: 20px; display: block !important; visibility: visible !important; opacity: 1 !important;">Nhà hàng và quầy bar của chúng tôi phục vụ 24/7, luôn sẵn sàng đáp ứng mọi nhu cầu của bạn. Từ những món ăn địa phương đặc sắc đến các món quốc tế đa dạng, chúng tôi có thể phục vụ bữa ăn theo yêu cầu đặc biệt hoặc tổ chức các sự kiện riêng tư.</p>
+              <p style="font-size: 16px; line-height: 1.8; color: #4b5563 !important; margin-bottom: 0; display: block !important; visibility: visible !important; opacity: 1 !important;">Đặt bàn trước hoặc đặt món mang về - chúng tôi sẽ mang đến cho bạn dịch vụ tốt nhất với giá cả hợp lý và chất lượng không đổi.</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+    <!-- Features Section -->
+    <section class="ftco-section bg-light" style="padding: 80px 0; display: block !important; visibility: visible !important; opacity: 1 !important; background-color: #f8f9fa !important;">
+      <div class="container" style="display: block !important; visibility: visible !important; opacity: 1 !important;">
+        <div class="row justify-content-center mb-5" style="display: flex !important; visibility: visible !important; opacity: 1 !important;">
+          <div class="col-md-7 heading-section text-center ftco-animate" style="display: block !important; visibility: visible !important; opacity: 1 !important;">
+            <span class="subheading" style="color: #c8a97e !important; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; display: inline-block !important; visibility: visible !important; opacity: 1 !important;">Ưu điểm nổi bật</span>
+            <h2 class="mb-4" style="font-size: 36px; font-weight: 700; color: #1a1a1a !important; display: block !important; visibility: visible !important; opacity: 1 !important; margin-top: 10px;">Tại sao chọn nhà hàng của chúng tôi?</h2>
+          </div>
+        </div>
+        <div class="row" style="display: flex !important; visibility: visible !important; opacity: 1 !important;">
+          <div class="col-md-4 mb-4 ftco-animate" style="display: block !important; visibility: visible !important; opacity: 1 !important;">
+            <div class="text-center p-4" style="background: #fff; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); height: 100%; transition: transform 0.3s ease; display: block !important; visibility: visible !important; opacity: 1 !important;">
+              <div class="icon d-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px; margin: 0 auto; background: linear-gradient(135deg, #c8a97e 0%, #b89968 100%); border-radius: 50%; display: flex !important; visibility: visible !important; opacity: 1 !important;">
+                <span style="font-size: 36px; color: #fff; display: inline-block !important; visibility: visible !important; opacity: 1 !important;">🍽️</span>
+              </div>
+              <h4 class="mb-3" style="font-size: 20px; font-weight: 700; color: #1a1a1a !important; display: block !important; visibility: visible !important; opacity: 1 !important;">Nguyên liệu tươi ngon</h4>
+              <p style="font-size: 15px; line-height: 1.7; color: #6b7280 !important; display: block !important; visibility: visible !important; opacity: 1 !important;">Chúng tôi chọn lọc kỹ càng các nguyên liệu tươi ngon nhất từ các nhà cung cấp uy tín, đảm bảo chất lượng và an toàn thực phẩm cho mỗi món ăn.</p>
+            </div>
+          </div>
+          <div class="col-md-4 mb-4 ftco-animate">
+            <div class="text-center p-4" style="background: #fff; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); height: 100%; transition: transform 0.3s ease;">
+              <div class="icon d-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px; margin: 0 auto; background: linear-gradient(135deg, #c8a97e 0%, #b89968 100%); border-radius: 50%;">
+                <span style="font-size: 36px; color: #fff;">👨‍🍳</span>
+              </div>
+              <h4 class="mb-3" style="font-size: 20px; font-weight: 700; color: #1a1a1a;">Đầu bếp chuyên nghiệp</h4>
+              <p style="font-size: 15px; line-height: 1.7; color: #6b7280;">Đội ngũ đầu bếp giàu kinh nghiệm với nhiều năm trong nghề, luôn tận tâm tạo ra những món ăn ngon miệng và đẹp mắt.</p>
+            </div>
+          </div>
+          <div class="col-md-4 mb-4 ftco-animate">
+            <div class="text-center p-4" style="background: #fff; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); height: 100%; transition: transform 0.3s ease;">
+              <div class="icon d-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px; margin: 0 auto; background: linear-gradient(135deg, #c8a97e 0%, #b89968 100%); border-radius: 50%;">
+                <span style="font-size: 36px; color: #fff;">⏰</span>
+              </div>
+              <h4 class="mb-3" style="font-size: 20px; font-weight: 700; color: #1a1a1a;">Phục vụ 24/7</h4>
+              <p style="font-size: 15px; line-height: 1.7; color: #6b7280;">Nhà hàng mở cửa 24/7, sẵn sàng phục vụ bạn bất cứ lúc nào. Từ bữa sáng sớm đến bữa đêm muộn, chúng tôi luôn có mặt.</p>
+            </div>
+          </div>
+        </div>
+        <div class="row mt-4">
+          <div class="col-md-4 mb-4 ftco-animate">
+            <div class="text-center p-4" style="background: #fff; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); height: 100%; transition: transform 0.3s ease;">
+              <div class="icon d-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px; margin: 0 auto; background: linear-gradient(135deg, #c8a97e 0%, #b89968 100%); border-radius: 50%;">
+                <span style="font-size: 36px; color: #fff;">🎉</span>
+              </div>
+              <h4 class="mb-3" style="font-size: 20px; font-weight: 700; color: #1a1a1a;">Sự kiện đặc biệt</h4>
+              <p style="font-size: 15px; line-height: 1.7; color: #6b7280;">Tổ chức các sự kiện như tiệc sinh nhật, kỷ niệm, hội nghị với thực đơn tùy chỉnh và không gian sang trọng phù hợp.</p>
+            </div>
+          </div>
+          <div class="col-md-4 mb-4 ftco-animate">
+            <div class="text-center p-4" style="background: #fff; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); height: 100%; transition: transform 0.3s ease;">
+              <div class="icon d-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px; margin: 0 auto; background: linear-gradient(135deg, #c8a97e 0%, #b89968 100%); border-radius: 50%;">
+                <span style="font-size: 36px; color: #fff;">🚚</span>
+              </div>
+              <h4 class="mb-3" style="font-size: 20px; font-weight: 700; color: #1a1a1a;">Giao hàng tận nơi</h4>
+              <p style="font-size: 15px; line-height: 1.7; color: #6b7280;">Dịch vụ giao hàng tận nơi nhanh chóng, đảm bảo món ăn còn nóng hổi và thơm ngon khi đến tay khách hàng.</p>
+            </div>
+          </div>
+          <div class="col-md-4 mb-4 ftco-animate">
+            <div class="text-center p-4" style="background: #fff; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); height: 100%; transition: transform 0.3s ease;">
+              <div class="icon d-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px; margin: 0 auto; background: linear-gradient(135deg, #c8a97e 0%, #b89968 100%); border-radius: 50%;">
+                <span style="font-size: 36px; color: #fff;">💳</span>
+              </div>
+              <h4 class="mb-3" style="font-size: 20px; font-weight: 700; color: #1a1a1a;">Thanh toán linh hoạt</h4>
+              <p style="font-size: 15px; line-height: 1.7; color: #6b7280;">Chấp nhận nhiều hình thức thanh toán: tiền mặt, thẻ, chuyển khoản. Quy trình thanh toán nhanh chóng và an toàn.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+		<section class="ftco-section" style="padding: 60px 0;">
+			<div class="container">
+				<div class="row justify-content-center mb-5 pb-3">
+          <div class="col-md-10 heading-section text-center ftco-animate">
+            <span class="subheading" style="color: #c8a97e; font-size: 14px; text-transform: uppercase; letter-spacing: 2px;">Khám phá thực đơn</span>
+            <h2 class="mb-3" style="font-size: 36px; font-weight: 700; color: #1a1a1a;">Thực Đơn Đa Dạng</h2>
+            <p class="text-muted" style="font-size: 16px; line-height: 1.8; max-width: 700px; margin: 0 auto;">Trải nghiệm hương vị đặc biệt với những món ăn được chế biến tinh tế từ nguyên liệu tươi ngon nhất, mang đến cho bạn những bữa ăn đáng nhớ.</p>
+          </div>
+        </div>
+        
+        <div class="row">
+          <!-- Main Content - Menu Items -->
+          <div class="col-lg-9 col-md-8">
+            <!-- Results Header -->
+            <div class="results-header mb-4" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+              <div>
+                <h3 style="font-size: 24px; font-weight: 700; color: #1a1a1a; margin: 0;">Tất cả món ăn</h3>
+                <p id="menuResultsCount" style="color: #6b7280; font-size: 14px; margin: 5px 0 0 0;">Đang tải...</p>
+              </div>
+            </div>
+            
+            <!-- Menu Items Grid -->
+            <div id="restaurantMenuList" style="display: flex; flex-wrap: wrap; margin-left: -12px; margin-right: -12px;">
+              <!-- Menu items will be loaded dynamically from API -->
+              <div class="col-12 text-center py-5" style="width: 100%; padding-left: 12px; padding-right: 12px;">
+                <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                  <span class="sr-only">Đang tải menu...</span>
+                </div>
+                <p class="mt-3 text-muted">Đang tải thực đơn từ hệ thống...</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Sidebar - Filters -->
+          <div class="col-lg-3 col-md-4">
+            <div class="filter-section-modern">
+              <div class="filter-header">
+                <h3>Bộ lọc</h3>
+              </div>
+              
+              <div class="filter-grid">
+                <!-- Search -->
+                <div class="filter-group">
+                  <label for="menuSearch">🔍 Tìm kiếm</label>
+                  <div class="search-box">
+                    <i class="icon-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #6b7280; z-index: 2;"></i>
+                    <input type="text" id="menuSearch" class="form-control" placeholder="Tên món ăn..." style="padding-left: 40px;">
+                  </div>
+                </div>
+                
+                <!-- Category Filter -->
+                <div class="filter-group">
+                  <label for="menuCategory">📂 Danh mục</label>
+                  <select id="menuCategory" class="form-select">
+                    <option value="">Tất cả danh mục</option>
+                    <option value="appetizer">🍤 Khai vị</option>
+                    <option value="main">🍽️ Món chính</option>
+                    <option value="dessert">🍰 Tráng miệng</option>
+                    <option value="drink">🥤 Đồ uống</option>
+                  </select>
+                </div>
+                
+                <!-- Sort -->
+                <div class="filter-group">
+                  <label for="menuSort">📊 Sắp xếp</label>
+                  <select id="menuSort" class="form-select">
+                    <option value="default">Mặc định</option>
+                    <option value="price-asc">Giá: Thấp → Cao</option>
+                    <option value="price-desc">Giá: Cao → Thấp</option>
+                    <option value="name-asc">Tên: A → Z</option>
+                    <option value="name-desc">Tên: Z → A</option>
+                    <option value="popular">Phổ biến nhất</option>
+                  </select>
+                </div>
+                
+                <!-- Reset Button -->
+                <div class="filter-group">
+                  <button id="resetFilters" class="btn btn-outline-secondary w-100" style="margin-top: 10px;">
+                    <i class="icon-refresh"></i> Đặt lại
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Shopping Cart Floating Button -->
+        <div id="cartFloatingBtn" style="position: fixed; bottom: 30px; right: 30px; z-index: 1000; display: none;">
+          <button type="button" class="btn btn-primary btn-lg rounded-circle shadow-lg" style="width: 60px; height: 60px; position: relative;" onclick="showCartModal()">
+            <i class="icon-shopping-cart" style="font-size: 24px;"></i>
+            <span id="cartBadge" class="badge bg-danger position-absolute top-0 start-100 translate-middle" style="display: none;">0</span>
+          </button>
+        </div>
+			</div>
+		</section>
+
+    <!-- Reservation/Contact Section -->
+    <section class="ftco-section" style="padding: 80px 0; background: linear-gradient(135deg, rgba(200,169,126,0.05) 0%, rgba(184,153,104,0.1) 100%);">
+      <div class="container">
+        <div class="row align-items-center">
+          <div class="col-md-6 mb-4 mb-md-0">
+            <div class="heading-section">
+              <span class="subheading" style="color: #c8a97e; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; display: block; margin-bottom: 10px;">Đặt bàn ngay</span>
+              <h2 class="mb-4" style="font-size: 36px; font-weight: 700; color: #1a1a1a; line-height: 1.2;">Bạn có câu hỏi hoặc muốn đặt bàn?</h2>
+              <p style="font-size: 16px; line-height: 1.8; color: #6b7280; margin-bottom: 25px;">Liên hệ với chúng tôi ngay hôm nay để được tư vấn và đặt bàn. Đội ngũ nhân viên thân thiện của chúng tôi luôn sẵn sàng phục vụ bạn.</p>
+              <div class="mb-4">
+                <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                  <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #c8a97e 0%, #b89968 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                    <span style="font-size: 24px; color: #fff;">📞</span>
+                  </div>
+                  <div>
+                    <strong style="color: #1a1a1a; font-size: 16px;">Hotline</strong>
+                    <p style="color: #6b7280; margin: 0; font-size: 15px;">+84 901 329 227</p>
+                  </div>
+                </div>
+                <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                  <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #c8a97e 0%, #b89968 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                    <span style="font-size: 24px; color: #fff;">📧</span>
+                  </div>
+                  <div>
+                    <strong style="color: #1a1a1a; font-size: 16px;">Email</strong>
+                    <p style="color: #6b7280; margin: 0; font-size: 15px;">restaurant@resortdeluxe.vn</p>
+                  </div>
+                </div>
+                <div style="display: flex; align-items: center;">
+                  <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #c8a97e 0%, #b89968 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                    <span style="font-size: 24px; color: #fff;">📍</span>
+                  </div>
+                  <div>
+                    <strong style="color: #1a1a1a; font-size: 16px;">Địa chỉ</strong>
+                    <p style="color: #6b7280; margin: 0; font-size: 15px;">123 Đường Biển Xanh, Thành phố Biển, Việt Nam</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div style="background: #fff; padding: 40px; border-radius: 20px; box-shadow: 0 8px 30px rgba(0,0,0,0.1);">
+              <h3 style="font-size: 24px; font-weight: 700; color: #1a1a1a; margin-bottom: 25px;">Gửi tin nhắn cho chúng tôi</h3>
+              <form>
+                <div class="mb-3">
+                  <input type="text" class="form-control" placeholder="Họ và tên" style="padding: 12px 15px; border-radius: 10px; border: 2px solid #e5e7eb; font-size: 15px;">
+                </div>
+                <div class="mb-3">
+                  <input type="email" class="form-control" placeholder="Email của bạn" style="padding: 12px 15px; border-radius: 10px; border: 2px solid #e5e7eb; font-size: 15px;">
+                </div>
+                <div class="mb-3">
+                  <input type="tel" class="form-control" placeholder="Số điện thoại" style="padding: 12px 15px; border-radius: 10px; border: 2px solid #e5e7eb; font-size: 15px;">
+                </div>
+                <div class="mb-3">
+                  <textarea class="form-control" rows="4" placeholder="Nội dung tin nhắn" style="padding: 12px 15px; border-radius: 10px; border: 2px solid #e5e7eb; font-size: 15px; resize: none;"></textarea>
+                </div>
+                <button type="submit" class="btn w-100" style="background: linear-gradient(135deg, #c8a97e 0%, #b89968 100%); color: #fff; padding: 14px; border-radius: 10px; font-size: 16px; font-weight: 600; border: none; transition: all 0.3s ease;">
+                  Gửi tin nhắn
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="ftco-footer ftco-bg-dark ftco-section" style="margin-top: 60px;">
+      <div class="container">
+        <div class="row mb-5">
+          <div class="col-md">
+            <div class="ftco-footer-widget mb-4">
+              <h2 class="ftco-heading-2">RESORT DELUXE</h2>
+              <p>Khu nghỉ dưỡng cao cấp với đầy đủ tiện nghi hiện đại, phục vụ chu đáo và không gian tuyệt đẹp.</p>
+              <ul class="ftco-footer-social list-unstyled float-md-left float-lft mt-5">
+                <li class="ftco-animate"><a href="#"><span class="icon-twitter"></span></a></li>
+                <li class="ftco-animate"><a href="#"><span class="icon-facebook"></span></a></li>
+                <li class="ftco-animate"><a href="#"><span class="icon-instagram"></span></a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-md">
+            <div class="ftco-footer-widget mb-4 ml-md-5">
+              <h2 class="ftco-heading-2">Liên kết hữu ích</h2>
+              <ul class="list-unstyled">
+                <li><a href="#" class="py-2 d-block">Blog</a></li>
+                <li><a href="#" class="py-2 d-block">Phòng</a></li>
+                <li><a href="#" class="py-2 d-block">Tiện ích</a></li>
+                <li><a href="#" class="py-2 d-block">Thẻ quà tặng</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-md">
+             <div class="ftco-footer-widget mb-4">
+              <h2 class="ftco-heading-2">Chính sách</h2>
+              <ul class="list-unstyled">
+                <li><a href="#" class="py-2 d-block">Tuyển dụng</a></li>
+                <li><a href="#" class="py-2 d-block">Về chúng tôi</a></li>
+                <li><a href="#" class="py-2 d-block">Liên hệ</a></li>
+                <li><a href="#" class="py-2 d-block">Dịch vụ</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-md">
+            <div class="ftco-footer-widget mb-4">
+              <h2 class="ftco-heading-2">Bạn cần hỗ trợ?</h2>
+            	<div class="block-23 mb-3">
+	              <ul>
+                <li><span class="icon icon-map-marker"></span><span class="text">123 Đường Biển Xanh, Thành phố Biển, Việt Nam</span></li>
+                <li><a href="#"><span class="icon icon-phone"></span><span class="text">+84 901 329 227</span></a></li>
+                <li><a href="#"><span class="icon icon-envelope"></span><span class="text">support@resortdeluxe.vn</span></a></li>
+	              </ul>
+	            </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12 text-center">
+            <p style="color: #9ca3af; margin: 0; padding: 20px 0;">
+              Copyright &copy; <script>document.write(new Date().getFullYear());</script> Resort Deluxe. All rights reserved.
+            </p>
+          </div>
+        </div>
+      </div>
+    </footer>
+    
+  
+
+  <!-- loader -->
+  <div id="ftco-loader" class="show fullscreen"><svg class="circular" width="48px" height="48px"><circle class="path-bg" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke="#eeeeee"/><circle class="path" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke-miterlimit="10" stroke="#F96D00"/></svg></div>
+
+
+  <script src="js/jquery.min.js"></script>
+  <script src="js/jquery-migrate-3.0.1.min.js"></script>
+  <script src="js/popper.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js/jquery.easing.1.3.js"></script>
+  <script src="js/jquery.waypoints.min.js"></script>
+  <script src="js/jquery.stellar.min.js"></script>
+  <script src="js/owl.carousel.min.js"></script>
+  <script src="js/jquery.magnific-popup.min.js"></script>
+  <script src="js/aos.js"></script>
+  <script src="js/jquery.animateNumber.min.js"></script>
+  <script src="js/bootstrap-datepicker.js"></script>
+  <script src="js/scrollax.min.js"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBVWaKrjvy3MaE7SQ74_uJiULgl1JY0H2s&sensor=false"></script>
+  <script src="js/google-map.js"></script>
+  <script src="js/main.js"></script>
+  
+  <!-- Navbar Authentication Handler -->
+  <script src="js/navbar-auth.js"></script>
+  
+  <!-- Restaurant menu loader -->
+  <script>
+    // Global variables for menu management
+    let allMenuItems = [];
+    let filteredMenuItems = [];
+    
+    // Debounce function for search
+    function debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    }
+    
+    async function loadRestaurantMenu(){
+      const container = document.getElementById('restaurantMenuList');
+      if(!container){ 
+        console.warn('[Restaurant] Menu container not found');
+        return; 
+      }
+      
+      // Show loading state
+      container.innerHTML = `
+        <div class="col-12 text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Đang tải menu...</span>
+          </div>
+          <p class="mt-3 text-muted">Đang tải menu từ hệ thống...</p>
+        </div>`;
+      
+      const url = `${location.origin}/api/services/restaurant/menu?_=${Date.now()}`;
+      console.log('[Restaurant] Fetching menu from:', url);
+      
+      try{
+        const resp = await fetch(url, { 
+          cache: 'no-store',
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+        console.log('[Restaurant] Response status:', resp.status, resp.statusText);
+        
+        if(!resp.ok){
+          const errorText = await resp.text();
+          console.error('[Restaurant] Failed to load menu:', resp.status, errorText);
+          container.innerHTML = `
+            <div class="col-12 text-center text-danger py-5">
+              <p><strong>Không thể tải menu</strong></p>
+              <p class="text-muted">Vui lòng thử lại sau hoặc liên hệ bộ phận hỗ trợ.</p>
+            </div>`;
+          return; 
+        }
+        
+        let data;
+        try {
+          data = await resp.json();
+        } catch (jsonErr) {
+          const textData = await resp.text();
+          console.error('[Restaurant] JSON parse error. Response text:', textData);
+          throw new Error('Invalid JSON response: ' + textData.substring(0, 100));
+        }
+        
+        console.log('[Restaurant] API Response data:', data);
+        
+        const items = Array.isArray(data) ? data : (data.items || data.menuItems || []);
+        
+        if(items.length === 0){
+          console.warn('[Restaurant] No menu items found in response:', data);
+          container.innerHTML = `
+            <div class="col-12 text-center text-muted py-5">
+              <p><strong>Menu đang được cập nhật...</strong></p>
+              <p class="small">Hiện tại chưa có món ăn nào trong menu. Vui lòng quay lại sau.</p>
+            </div>`;
+          return;
+        }
+        
+        console.log(`[Restaurant] ✅ Found ${items.length} menu items:`, items);
+        
+        // Store all items for filtering/sorting
+        allMenuItems = items;
+        
+        // Apply initial filters and sorting
+        applyFiltersAndSort();
+        
+        // Format price to VND
+        const formatVND = (v) => {
+          const num = Number(v || 0);
+          if (num === 0) return 'Liên hệ';
+          return new Intl.NumberFormat('vi-VN').format(num) + ' ₫';
+        };
+        
+        // Menu rendering is now handled by renderMenuItems function below
+        
+        // Render menu items directly into the row (no nested columns)
+        // The makeItemHTML already includes col-md-6, so just append directly
+        renderMenuItems(filteredMenuItems);
+        console.log('[Restaurant] Menu rendered successfully with', filteredMenuItems.length, 'items');
+        
+        // Force display and grid layout
+        container.style.display = 'flex';
+        container.style.flexWrap = 'wrap';
+        container.style.visibility = 'visible';
+        container.style.opacity = '1';
+        container.style.marginLeft = '-12px';
+        container.style.marginRight = '-12px';
+        
+        // Force all column children to use flexbox properly
+        setTimeout(() => {
+          const columns = container.querySelectorAll('[class*="col-"]');
+          columns.forEach(col => {
+            if (col instanceof HTMLElement) {
+              col.style.display = 'block';
+              col.style.boxSizing = 'border-box';
+              const winWidth = window.innerWidth;
+              if (winWidth >= 992) {
+                // Large: 3 columns (33.333%)
+                col.style.width = '33.333333%';
+              } else if (winWidth >= 768) {
+                // Medium: 2 columns (50%)
+                col.style.width = '50%';
+              } else if (winWidth >= 576) {
+                // Small: 2 columns (50%)
+                col.style.width = '50%';
+              } else {
+                // Mobile: 1 column (100%)
+                col.style.width = '100%';
+              }
+            }
+          });
+        }, 100);
+        
+        // Verify DOM was updated (optional check - not critical)
+        setTimeout(() => {
+          // Check for menu cards or any children in container
+          const renderedItems = container.querySelectorAll('.menu-card, .pricing-entry, [class*="col-"]');
+          const childrenCount = container.children.length;
+          
+          console.log('[Restaurant] DOM check - found', renderedItems.length, 'rendered menu items');
+          console.log('[Restaurant] Container children count:', childrenCount);
+          
+          // Only warn if container has no children at all (empty state)
+          if (childrenCount === 0 && filteredMenuItems.length > 0) {
+            console.warn('[Restaurant] ⚠️ WARNING: Container has no children but items were rendered!');
+            console.warn('[Restaurant] Container HTML length:', container.innerHTML.length);
+            console.warn('[Restaurant] Container innerHTML preview:', container.innerHTML.substring(0, 200));
+          } else if (renderedItems.length > 0 || childrenCount > 0) {
+            // Menu items are present - ensure visibility
+            renderedItems.forEach((item, idx) => {
+              if (item instanceof HTMLElement) {
+                item.style.display = item.style.display || 'block';
+                item.style.visibility = 'visible';
+                item.style.opacity = '1';
+              }
+            });
+            
+            // Also ensure all direct children are visible
+            Array.from(container.children).forEach((child, idx) => {
+              if (child instanceof HTMLElement) {
+                child.style.display = child.style.display || 'block';
+                child.style.visibility = 'visible';
+                child.style.opacity = '1';
+              }
+            });
+            
+            console.log('[Restaurant] ✅ Menu items are visible in DOM');
+          }
+        }, 300);
+        
+        // Trigger animations if available
+        if (typeof AOS !== 'undefined') {
+          AOS.refresh();
+        }
+        
+        // Trigger jQuery animations if available
+        if (typeof $ !== 'undefined' && $.fn.addClass) {
+          $(container).find('.ftco-animate').each(function() {
+            $(this).addClass('fadeInUp');
+          });
+        }
+      }catch(err){
+        console.error('[Restaurant] Error loading menu:', err);
+        container.innerHTML = `
+          <div class="col-12 text-center text-danger py-5">
+            <p><strong>Lỗi khi tải menu</strong></p>
+            <p class="text-muted">${err.message || 'Vui lòng tải lại trang hoặc liên hệ hỗ trợ.'}</p>
+          </div>`;
+      }
+    }
+    
+    // Load menu on page load and navigation (with pageshow for back/forward cache)
+    function initMenuLoader() {
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadRestaurantMenu);
+      } else {
+        loadRestaurantMenu();
+      }
+      
+      // Reload on pageshow (handles back/forward navigation)
+      window.addEventListener('pageshow', function(event) {
+        if (event.persisted || (performance.navigation && performance.navigation.type === 2)) {
+          loadRestaurantMenu();
+        }
+      });
+    }
+    
+    initMenuLoader();
+    
+    // Shopping Cart Management
+    let shoppingCart = [];
+    
+    // Load cart from localStorage
+    function loadCart() {
+      try {
+        const saved = localStorage.getItem('restaurantCart');
+        if (saved) {
+          shoppingCart = JSON.parse(saved);
+          updateCartUI();
+        }
+      } catch (e) {
+        console.error('[Cart] Error loading cart:', e);
+        shoppingCart = [];
+      }
+    }
+    
+    // Save cart to localStorage
+    function saveCart() {
+      try {
+        localStorage.setItem('restaurantCart', JSON.stringify(shoppingCart));
+        updateCartUI();
+      } catch (e) {
+        console.error('[Cart] Error saving cart:', e);
+      }
+    }
+    
+    // Update cart UI (badge, floating button)
+    function updateCartUI() {
+      const totalItems = shoppingCart.reduce((sum, item) => sum + item.quantity, 0);
+      const cartBadge = document.getElementById('cartBadge');
+      const cartBtn = document.getElementById('cartFloatingBtn');
+      
+      console.log('[Cart] Updating UI - Total items:', totalItems, 'Cart:', shoppingCart);
+      
+      if (cartBadge) {
+        if (totalItems > 0) {
+          cartBadge.textContent = totalItems;
+          cartBadge.style.display = 'block';
+        } else {
+          cartBadge.style.display = 'none';
+        }
+      }
+      
+      if (cartBtn) {
+        // Always show cart button if it exists (even if empty, user can click to see empty cart message)
+        cartBtn.style.display = 'block';
+        console.log('[Cart] ✅ Cart button displayed');
+      } else {
+        console.warn('[Cart] ⚠️ Cart button element not found!');
+      }
+    }
+    
+    // Adjust quantity for a menu item
+    window.adjustQuantity = function(serviceId, delta) {
+      const qtyEl = document.getElementById(`qty-${serviceId}`);
+      if (!qtyEl) return;
+      
+      let currentQty = parseInt(qtyEl.textContent) || 0;
+      const newQty = currentQty + delta;
+      
+      // Không cho phép quantity < 0
+      if (newQty < 0) {
+        if (typeof showToast === 'function') {
+          showToast('Số lượng không thể nhỏ hơn 0', 'warning');
+        }
+        return;
+      }
+      
+      currentQty = Math.max(0, newQty);
+      qtyEl.textContent = currentQty;
+      
+      // Update cart if quantity > 0
+      if (currentQty > 0) {
+        const existingIndex = shoppingCart.findIndex(item => item.serviceId === serviceId);
+        if (existingIndex >= 0) {
+          shoppingCart[existingIndex].quantity = currentQty;
+        }
+        // Nếu chưa có trong cart, chỉ cập nhật số lượng hiển thị, chưa thêm vào cart
+        // Phải click "Thêm vào giỏ" để thêm vào cart
+      } else {
+        // Remove from cart if quantity is 0
+        shoppingCart = shoppingCart.filter(item => item.serviceId !== serviceId);
+        saveCart();
+        updateCartUI();
+      }
+    };
+    
+    // Add to cart
+    window.addToCart = function(serviceId, serviceName, price) {
+      console.log('[addToCart] Called with:', { serviceId, serviceName, price });
+      
+      const qtyEl = document.getElementById(`qty-${serviceId}`);
+      const quantity = parseInt(qtyEl?.textContent) || 0;
+      
+      console.log('[addToCart] Quantity from element:', quantity, 'Element:', qtyEl);
+      
+      // Không cho phép thêm vào giỏ nếu số lượng = 0
+      if (quantity <= 0) {
+        const message = 'Không thể thêm vào giỏ: Số lượng phải lớn hơn 0. Vui lòng chọn số lượng bằng nút + trước khi thêm vào giỏ.';
+        console.warn('[addToCart] ⚠️ Quantity is 0, cannot add to cart');
+        if (typeof showToast === 'function') {
+          showToast(message, 'warning');
+        } else {
+          alert(message);
+        }
+        return;
+      }
+      
+      const existingIndex = shoppingCart.findIndex(item => item.serviceId === serviceId);
+      if (existingIndex >= 0) {
+        // Nếu đã có trong cart, cập nhật số lượng
+        shoppingCart[existingIndex].quantity = quantity;
+        console.log('[addToCart] ✅ Updated existing item in cart:', shoppingCart[existingIndex]);
+        if (typeof showToast === 'function') {
+          showToast(`Đã cập nhật số lượng ${serviceName} trong giỏ hàng`, 'success');
+        } else {
+          alert(`Đã cập nhật số lượng ${serviceName} trong giỏ hàng`);
+        }
+      } else {
+        // Thêm mới vào cart
+        const newItem = {
+          serviceId: serviceId,
+          serviceName: serviceName,
+          price: price,
+          quantity: quantity
+        };
+        shoppingCart.push(newItem);
+        console.log('[addToCart] ✅ Added new item to cart:', newItem);
+        if (typeof showToast === 'function') {
+          showToast(`Đã thêm ${serviceName} vào giỏ hàng (${quantity} phần)`, 'success');
+        } else {
+          alert(`Đã thêm ${serviceName} vào giỏ hàng (${quantity} phần)`);
+        }
+      }
+      
+      saveCart();
+      updateCartUI();
+      
+      // Reset quantity display
+      if (qtyEl) {
+        qtyEl.textContent = '0';
+        console.log('[addToCart] ✅ Reset quantity display to 0');
+      }
+      
+      console.log('[addToCart] ✅ Cart after adding:', shoppingCart);
+    };
+    
+    // Show cart modal
+    window.showCartModal = function() {
+      const modal = document.getElementById('cartModal');
+      if (!modal) {
+        createCartModal();
+        updateCartModalContent();
+        new bootstrap.Modal(document.getElementById('cartModal')).show();
+      } else {
+        updateCartModalContent();
+        new bootstrap.Modal(modal).show();
+      }
+    };
+    
+    // Create cart modal HTML
+    function createCartModal() {
+      const modalHTML = `
+        <div class="modal fade" id="cartModal" tabindex="-1">
+          <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">🛒 Giỏ hàng của bạn</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              </div>
+              <div class="modal-body">
+                <div id="cartItemsList"></div>
+                <div class="cart-summary mt-4 pt-3 border-top">
+                  <div class="d-flex justify-content-between align-items-center mb-3">
+                    <strong style="font-size: 18px;">Tổng tiền:</strong>
+                    <strong id="cartTotal" style="font-size: 20px; color: var(--color-primary-main, #C8A97E);">0 ₫</strong>
+                  </div>
+                </div>
+                <div id="orderForm" class="mt-4">
+                  <h6 class="mb-3">Thông tin đặt món</h6>
+                  <div class="mb-3">
+                    <label class="form-label">Địa chỉ giao hàng (Số phòng hoặc địa chỉ)</label>
+                    <input type="text" id="orderDeliveryAddress" class="form-control" placeholder="VD: Phòng 101 hoặc Nhà hàng">
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Thời gian mong muốn nhận món (tùy chọn)</label>
+                    <input type="datetime-local" id="orderDeliveryTime" class="form-control">
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Ghi chú đặc biệt (tùy chọn)</label>
+                    <textarea id="orderSpecialRequests" class="form-control" rows="2" placeholder="VD: Không cay, không hành..."></textarea>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Phương thức thanh toán</label>
+                    <select id="orderPaymentMethod" class="form-select">
+                      <option value="Cash">💵 Thanh toán tại nhà hàng</option>
+                      <option value="QR">💳 Chuyển khoản QR</option>
+                      <option value="RoomCharge">🏨 Charge vào phòng (nếu có booking)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="submitOrder()" id="submitOrderBtn">
+                  <i class="icon-check"></i> Đặt món ngay
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.insertAdjacentHTML('beforeend', modalHTML);
+    }
+    
+    // Update cart modal content
+    function updateCartModalContent() {
+      const cartItemsList = document.getElementById('cartItemsList');
+      const cartTotal = document.getElementById('cartTotal');
+      
+      if (!cartItemsList) return;
+      
+      if (shoppingCart.length === 0) {
+        cartItemsList.innerHTML = '<p class="text-center text-muted py-4">Giỏ hàng trống</p>';
+        if (cartTotal) cartTotal.textContent = '0 ₫';
+        return;
+      }
+      
+      const formatVND = (v) => {
+        const num = Number(v || 0);
+        return new Intl.NumberFormat('vi-VN').format(num) + ' ₫';
+      };
+      
+      let html = '<div class="list-group">';
+      let total = 0;
+      
+      shoppingCart.forEach((item, index) => {
+        const itemTotal = item.price * item.quantity;
+        total += itemTotal;
+        
+        html += `
+          <div class="list-group-item">
+            <div class="d-flex justify-content-between align-items-start">
+              <div class="flex-grow-1">
+                <h6 class="mb-1">${item.serviceName}</h6>
+                <small class="text-muted">${formatVND(item.price)} / phần</small>
+              </div>
+              <div class="d-flex align-items-center gap-3">
+                <div class="quantity-control" style="display: flex; align-items: center; gap: 0.5rem;">
+                  <button type="button" class="btn btn-sm btn-outline-secondary" onclick="updateCartItem(${item.serviceId}, ${item.quantity - 1})">−</button>
+                  <span style="min-width: 40px; text-align: center; font-weight: 600;">${item.quantity}</span>
+                  <button type="button" class="btn btn-sm btn-outline-secondary" onclick="updateCartItem(${item.serviceId}, ${item.quantity + 1})">+</button>
+                </div>
+                <div style="min-width: 100px; text-align: right;">
+                  <strong>${formatVND(itemTotal)}</strong>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeCartItem(${item.serviceId})">
+                  <i class="icon-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      
+      html += '</div>';
+      cartItemsList.innerHTML = html;
+      
+      if (cartTotal) {
+        cartTotal.textContent = formatVND(total);
+      }
+    }
+    
+    // Update cart item quantity
+    window.updateCartItem = function(serviceId, newQuantity) {
+      // Không cho phép set quantity = 0, nếu = 0 thì xóa khỏi cart
+      if (newQuantity <= 0) {
+        removeCartItem(serviceId);
+        if (typeof showToast === 'function') {
+          showToast('Đã xóa món khỏi giỏ hàng (số lượng phải lớn hơn 0)', 'info');
+        }
+        return;
+      }
+      
+      const item = shoppingCart.find(i => i.serviceId === serviceId);
+      if (item) {
+        item.quantity = newQuantity;
+        saveCart();
+        updateCartModalContent();
+        
+        // Update quantity display on menu
+        const qtyEl = document.getElementById(`qty-${serviceId}`);
+        if (qtyEl) qtyEl.textContent = newQuantity;
+      }
+    };
+    
+    // Remove item from cart
+    window.removeCartItem = function(serviceId) {
+      shoppingCart = shoppingCart.filter(item => item.serviceId !== serviceId);
+      saveCart();
+      updateCartModalContent();
+      updateCartUI();
+      
+      // Reset quantity display on menu
+      const qtyEl = document.getElementById(`qty-${serviceId}`);
+      if (qtyEl) qtyEl.textContent = '0';
+    };
+    
+    // Submit order
+    window.submitOrder = async function() {
+      // Validate: Lọc các item có quantity <= 0
+      const validCartItems = shoppingCart.filter(item => item.quantity > 0);
+      
+      if (validCartItems.length === 0) {
+        if (typeof showToast === 'function') {
+          showToast('Không thể đặt hàng: Tất cả món đều có số lượng bằng 0. Vui lòng chọn số lượng lớn hơn 0.', 'warning');
+        } else {
+          alert('Không thể đặt hàng: Tất cả món đều có số lượng bằng 0. Vui lòng chọn số lượng lớn hơn 0.');
+        }
+        return;
+      }
+      
+      // Kiểm tra nếu có item có quantity <= 0 trong cart
+      const invalidItems = shoppingCart.filter(item => item.quantity <= 0);
+      if (invalidItems.length > 0) {
+        console.warn('[submitOrder] Removing invalid items with quantity <= 0:', invalidItems);
+        // Tự động loại bỏ các item không hợp lệ
+        shoppingCart = validCartItems;
+        saveCart();
+        updateCartModalContent();
+        updateCartUI();
+      }
+      
+      if (shoppingCart.length === 0) {
+        if (typeof showToast === 'function') {
+          showToast('Giỏ hàng trống', 'warning');
+        } else {
+          alert('Giỏ hàng trống');
+        }
+        return;
+      }
+      
+      try {
+        const submitBtn = document.getElementById('submitOrderBtn');
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Đang xử lý...';
+        }
+        
+        // Get customer ID from token if logged in
+        let customerId = null;
+        try {
+          const token = localStorage.getItem('token');
+          if (token) {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            // Try multiple ways to get CustomerId from JWT payload
+            customerId = payload.CustomerId 
+              || payload.customerId 
+              || payload['CustomerId']
+              || payload['customerId']
+              || (payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'] && parseInt(payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier']))
+              || null;
+            
+            if (customerId) {
+              customerId = parseInt(customerId);
+              console.log('[Order] ✅ CustomerId found in token:', customerId);
+            } else {
+              console.log('[Order] ⚠️ CustomerId not found in token payload. Payload keys:', Object.keys(payload));
+              console.log('[Order] Full payload:', payload);
+            }
+          } else {
+            console.log('[Order] ℹ️ No token found - proceeding as walk-in customer');
+          }
+        } catch (e) {
+          console.warn('[Order] ⚠️ Error parsing token:', e);
+          console.log('[Order] ℹ️ Proceeding as walk-in customer (no CustomerId required)');
+        }
+        
+        // Map cart items to order items - chỉ lấy items có quantity > 0 (đảm bảo an toàn)
+        const orderItems = shoppingCart
+          .filter(item => item.quantity > 0) // Double-check: lọc lại items hợp lệ
+          .map(item => ({
+            serviceId: item.serviceId,
+            quantity: item.quantity,
+            specialNote: ''
+          }));
+        
+        if (orderItems.length === 0) {
+          throw new Error('Không có món nào hợp lệ để đặt hàng. Tất cả món đều có số lượng bằng 0.');
+        }
+        
+        // Validate delivery address (required for ordering)
+        const deliveryAddress = document.getElementById('orderDeliveryAddress')?.value?.trim() || '';
+        if (!deliveryAddress) {
+          const message = 'Vui lòng nhập địa chỉ giao hàng (VD: Phòng 101 hoặc Nhà hàng)';
+          if (typeof showToast === 'function') {
+            showToast(message, 'warning');
+          } else {
+            alert(message);
+          }
+          document.getElementById('orderDeliveryAddress')?.focus();
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="icon-check"></i> Đặt món ngay';
+          }
+          return;
+        }
+        
+        const orderData = {
+          customerId: customerId,
+          deliveryAddress: deliveryAddress,
+          requestedDeliveryTime: document.getElementById('orderDeliveryTime')?.value ? new Date(document.getElementById('orderDeliveryTime').value).toISOString() : null,
+          specialRequests: document.getElementById('orderSpecialRequests')?.value || '',
+          paymentMethod: document.getElementById('orderPaymentMethod')?.value || 'Cash',
+          items: orderItems
+        };
+        
+        console.log('[Order] 📦 Submitting order:', orderData);
+        console.log('[Order] 📦 Full order data:', JSON.stringify(orderData, null, 2));
+        console.log('[Order] 📦 API URL:', `${location.origin}/api/restaurant-orders`);
+        console.log('[Order] 📦 Token present:', !!localStorage.getItem('token'));
+        console.log('[Order] 📦 Order items count:', orderItems.length);
+        console.log('[Order] 📦 Order items:', orderItems);
+        
+        const response = await fetch(`${location.origin}/api/restaurant-orders`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+          },
+          body: JSON.stringify(orderData)
+        });
+        
+        console.log('[Order] Response status:', response.status, response.statusText);
+        console.log('[Order] Response ok:', response.ok);
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+          console.error('[Order] ❌ Error response:', errorData);
+          throw new Error(errorData.message || 'Lỗi khi đặt món');
+        }
+        
+        const order = await response.json();
+        console.log('[Order] ✅ Order created successfully:', order);
+        console.log('[Order] Order details:', {
+          orderId: order.orderId,
+          orderNumber: order.orderNumber,
+          totalAmount: order.totalAmount,
+          itemsCount: order.orderItems?.length || 0
+        });
+        
+        // Clear cart
+        shoppingCart = [];
+        saveCart();
+        updateCartUI();
+        
+        // Close modal
+        try {
+          const modalEl = document.getElementById('cartModal');
+          if (modalEl) {
+            // Try Bootstrap 5
+            if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+              const modal = bootstrap.Modal.getInstance(modalEl);
+              if (modal) {
+                modal.hide();
+              } else {
+                // Create new instance if needed
+                const newModal = new bootstrap.Modal(modalEl);
+                newModal.hide();
+              }
+            }
+            // Fallback: remove modal backdrop manually
+            const backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) backdrop.remove();
+            modalEl.classList.remove('show');
+            modalEl.style.display = 'none';
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+          }
+        } catch (modalError) {
+          console.warn('[Order] Error closing modal:', modalError);
+        }
+        
+        // Show success message
+        if (typeof showToast === 'function') {
+          showToast(`Đặt món thành công! Mã đơn: ${order.orderNumber}`, 'success');
+        } else {
+          alert(`Đặt món thành công! Mã đơn: ${order.orderNumber}`);
+        }
+        
+        // Redirect to order details or show order info
+        setTimeout(() => {
+          if (confirm(`Đơn hàng ${order.orderNumber} đã được tạo thành công!\n\nBạn có muốn xem chi tiết đơn hàng không?`)) {
+            // Can navigate to order details page if exists
+            window.location.href = `order-details.html?orderId=${order.orderId}`;
+          }
+        }, 500);
+        
+      } catch (error) {
+        console.error('[Order] Error:', error);
+        if (typeof showToast === 'function') {
+          showToast('Lỗi khi đặt món: ' + error.message, 'danger');
+        } else {
+          alert('Lỗi khi đặt món: ' + error.message);
+        }
+      } finally {
+        const submitBtn = document.getElementById('submitOrderBtn');
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="icon-check"></i> Đặt món ngay';
+        }
+      }
+    };
+    
+    // Initialize cart on page load
+    loadCart();
+    
+    // Ensure cart button is visible after page load
+    setTimeout(() => {
+      updateCartUI();
+      console.log('[Restaurant] ✅ Cart initialized, UI updated');
+    }, 500);
+    
+    // Filter and Sort Functions
+    function applyFiltersAndSort() {
+      let filtered = [...allMenuItems];
+      
+      // Filter by search term
+      const searchTerm = document.getElementById('menuSearch')?.value.toLowerCase().trim() || '';
+      if (searchTerm) {
+        filtered = filtered.filter(item => {
+          const name = (item.serviceName || item.name || '').toLowerCase();
+          const desc = (item.description || item.desc || '').toLowerCase();
+          return name.includes(searchTerm) || desc.includes(searchTerm);
+        });
+      }
+      
+      // Filter by category (if we have category data)
+      const category = document.getElementById('menuCategory')?.value || '';
+      if (category) {
+        // This would need to match your category field in the API
+        // For now, we'll skip category filtering if the field doesn't exist
+        // filtered = filtered.filter(item => item.category === category);
+      }
+      
+      // Apply sorting
+      const sortBy = document.getElementById('menuSort')?.value || 'default';
+      filtered = applySorting(filtered, sortBy);
+      
+      filteredMenuItems = filtered;
+      
+      // Update results count
+      updateMenuResultsCount(filtered.length);
+      
+      // Re-render menu
+      renderMenuItems(filtered);
+    }
+    
+    function applySorting(items, sortBy) {
+      const sorted = [...items];
+      
+      switch (sortBy) {
+        case 'price-asc':
+          sorted.sort((a, b) => {
+            const priceA = a.price || 0;
+            const priceB = b.price || 0;
+            return priceA - priceB;
+          });
+          break;
+        case 'price-desc':
+          sorted.sort((a, b) => {
+            const priceA = a.price || 0;
+            const priceB = b.price || 0;
+            return priceB - priceA;
+          });
+          break;
+        case 'name-asc':
+          sorted.sort((a, b) => {
+            const nameA = (a.serviceName || a.name || '').toLowerCase();
+            const nameB = (b.serviceName || b.name || '').toLowerCase();
+            return nameA.localeCompare(nameB);
+          });
+          break;
+        case 'name-desc':
+          sorted.sort((a, b) => {
+            const nameA = (a.serviceName || a.name || '').toLowerCase();
+            const nameB = (b.serviceName || b.name || '').toLowerCase();
+            return nameB.localeCompare(nameA);
+          });
+          break;
+        case 'popular':
+          // Sort by price descending as a proxy for popularity
+          // You can replace this with actual popularity data from API
+          sorted.sort((a, b) => {
+            const priceA = a.price || 0;
+            const priceB = b.price || 0;
+            return priceB - priceA;
+          });
+          break;
+        default:
+          // Keep original order
+          break;
+      }
+      
+      return sorted;
+    }
+    
+    function updateMenuResultsCount(count) {
+      const countEl = document.getElementById('menuResultsCount');
+      if (countEl) {
+        if (count === 0) {
+          countEl.textContent = 'Không tìm thấy món nào';
+          countEl.style.color = '#ef4444';
+        } else if (count === 1) {
+          countEl.textContent = `Hiển thị 1 món ăn`;
+          countEl.style.color = '#6b7280';
+        } else {
+          countEl.textContent = `Hiển thị ${count} món ăn`;
+          countEl.style.color = '#6b7280';
+        }
+      }
+    }
+    
+    function renderMenuItems(items) {
+      const container = document.getElementById('restaurantMenuList');
+      if (!container) return;
+      
+      if (!Array.isArray(items) || items.length === 0) {
+        container.innerHTML = `
+          <div class="col-12 text-center py-5">
+            <div class="empty-state">
+              <div style="font-size: 60px; margin-bottom: 20px;">🍽️</div>
+              <h4>Không tìm thấy món nào</h4>
+              <p class="text-muted">Vui lòng thử lại với từ khóa hoặc bộ lọc khác</p>
+            </div>
+          </div>
+        `;
+        return;
+      }
+      
+      // Format price to VND
+      const formatVND = (v) => {
+        const num = Number(v || 0);
+        if (num === 0) return 'Liên hệ';
+        return new Intl.NumberFormat('vi-VN').format(num) + ' ₫';
+      };
+      
+      const menuImages = ['menu-1.jpg', 'menu-2.jpg', 'menu-3.jpg', 'menu-4.jpg', 
+                           'menu-5.jpg', 'menu-6.jpg', 'menu-7.jpg', 'menu-8.jpg'];
+      
+      let html = '';
+      items.forEach((item, index) => {
+        const name = item.serviceName || item.name || 'Món ăn';
+        const price = formatVND(item.price || 0);
+        const desc = item.description || item.desc || 'Món ngon được chế biến tinh tế';
+        const unit = item.unit ? ` / ${item.unit}` : '';
+        
+        let img;
+        if (item.imageUrl && item.imageUrl.trim().length > 0) {
+          img = item.imageUrl.startsWith('/') ? item.imageUrl : `/${item.imageUrl}`;
+        } else {
+          const imgIndex = index % menuImages.length;
+          img = `images/${menuImages[imgIndex]}`;
+        }
+        
+        html += `
+          <div class="col-lg-4 col-md-6 col-sm-6 mb-4" style="display: block !important; visibility: visible !important; opacity: 1 !important; box-sizing: border-box; padding-left: 12px; padding-right: 12px; margin-bottom: 16px; flex: 0 0 auto;">
+            <div class="menu-card ftco-animate" style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: transform 0.3s, box-shadow 0.3s; height: 100%; display: flex !important; flex-direction: column; visibility: visible !important; opacity: 1 !important; position: relative; z-index: 1;">
+              <div class="menu-card-image" style="width: 100%; height: 200px; background-image: url(${img}); background-size: cover; background-position: center; position: relative; overflow: hidden;">
+                <button class="menu-card-quick-view" onclick="showQuickView(${item.serviceId}, event)" title="Xem nhanh">
+                  <i class="icon-eye"></i>
+                </button>
+                <div style="position: absolute; top: 12px; right: 12px; background: var(--color-primary-main, #C8A97E); color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 14px; font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+                  ${price}${unit}
+                </div>
+              </div>
+              <div class="menu-card-content" style="padding: 1.25rem; flex: 1; display: flex; flex-direction: column;">
+                <h3 class="menu-card-title" style="margin: 0 0 0.75rem 0; font-size: 20px; font-weight: 600; color: var(--color-text-primary, #1F2937); line-height: 1.3;">
+                  ${name}
+                </h3>
+                <p class="menu-card-desc" style="margin: 0 0 1rem 0; color: var(--color-muted, #6B7280); font-size: 14px; line-height: 1.6; flex: 1;">
+                  ${desc}
+                </p>
+                <div class="menu-actions" style="display: flex; gap: 0.5rem; align-items: center; margin-top: auto;">
+                  <div class="quantity-control" style="display: flex; align-items: center; gap: 0.5rem; border: 1px solid var(--color-line, #E5E7EB); border-radius: 6px; padding: 0.25rem 0.5rem; background: #F9FAFB;">
+                    <button type="button" class="btn-qty btn-qty-minus" onclick="adjustQuantity(${item.serviceId}, -1)" style="background: none; border: none; font-size: 18px; cursor: pointer; color: var(--color-primary-main, #C8A97E); padding: 0 0.5rem; line-height: 1;">−</button>
+                    <span id="qty-${item.serviceId}" class="quantity-display" style="min-width: 30px; text-align: center; font-weight: 600; color: var(--color-text-primary, #1F2937);">0</span>
+                    <button type="button" class="btn-qty btn-qty-plus" onclick="adjustQuantity(${item.serviceId}, 1)" style="background: none; border: none; font-size: 18px; cursor: pointer; color: var(--color-primary-main, #C8A97E); padding: 0 0.5rem; line-height: 1;">+</button>
+                  </div>
+                  <button type="button" class="btn-add-to-cart" onclick="addToCart(${item.serviceId}, '${name.replace(/'/g, "\\'")}', ${item.price})" style="flex: 1; background: var(--color-primary-main, #C8A97E); color: white; border: none; border-radius: 6px; padding: 0.625rem 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; white-space: nowrap;" onmouseover="this.style.background='var(--color-primary-dark, #B89968)'; this.style.transform='scale(1.02)'" onmouseout="this.style.background='var(--color-primary-main, #C8A97E)'; this.style.transform='scale(1)'">
+                    <span style="font-size: 14px;">Thêm vào giỏ</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      
+      container.innerHTML = html;
+      
+      console.log('[renderMenuItems] ✅ Rendered', items.length, 'items. HTML length:', html.length);
+      
+      // Force display and grid layout
+      container.style.display = 'flex';
+      container.style.flexWrap = 'wrap';
+      container.style.visibility = 'visible';
+      container.style.opacity = '1';
+      container.style.marginLeft = '-12px';
+      container.style.marginRight = '-12px';
+      
+      // Force display of all child elements immediately
+      requestAnimationFrame(() => {
+        const children = Array.from(container.children);
+        console.log('[renderMenuItems] Container children count after render:', children.length);
+        
+        children.forEach((child, idx) => {
+          if (child instanceof HTMLElement) {
+            // Ensure all Bootstrap column classes are visible
+            child.style.display = 'block';
+            child.style.visibility = 'visible';
+            child.style.opacity = '1';
+            child.style.boxSizing = 'border-box';
+            
+            // Find menu-card inside and ensure it's visible
+            const menuCard = child.querySelector('.menu-card');
+            if (menuCard instanceof HTMLElement) {
+              menuCard.style.display = 'flex';
+              menuCard.style.visibility = 'visible';
+              menuCard.style.opacity = '1';
+            }
+          }
+        });
+        
+        // Verify menu cards are visible
+        const menuCards = container.querySelectorAll('.menu-card');
+        console.log('[renderMenuItems] ✅ Found', menuCards.length, 'menu cards in DOM');
+        console.log('[renderMenuItems] ✅ Forced display for', children.length, 'children');
+      });
+    }
+    
+    // Quick View Modal
+    window.showQuickView = function(serviceId, event) {
+      if (event) event.stopPropagation();
+      
+      const item = allMenuItems.find(m => m.serviceId === serviceId);
+      if (!item) return;
+      
+      const formatVND = (v) => {
+        const num = Number(v || 0);
+        if (num === 0) return 'Liên hệ';
+        return new Intl.NumberFormat('vi-VN').format(num) + ' ₫';
+      };
+      
+      const modalHTML = `
+        <div class="modal fade" id="quickViewModal" tabindex="-1">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: 16px; overflow: hidden;">
+              <div class="modal-header" style="background: linear-gradient(135deg, #c8a97e 0%, #b89968 100%); color: white; border: none;">
+                <h5 class="modal-title">${item.serviceName || item.name || 'Món ăn'}</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+              </div>
+              <div class="modal-body p-4">
+                <div class="row">
+                  <div class="col-md-5 mb-3 mb-md-0">
+                    <img src="${item.imageUrl || 'images/menu-1.jpg'}" alt="${item.serviceName}" style="width: 100%; border-radius: 12px; object-fit: cover; height: 250px;">
+                  </div>
+                  <div class="col-md-7">
+                    <h4 class="mb-3">${item.serviceName || item.name}</h4>
+                    <p class="text-muted mb-3">${item.description || item.desc || 'Món ngon được chế biến tinh tế'}</p>
+                    <div class="mb-3">
+                      <strong style="font-size: 24px; color: #c8a97e;">${formatVND(item.price)}</strong>
+                      ${item.unit ? `<span class="text-muted">/ ${item.unit}</span>` : ''}
+                    </div>
+                    <div class="quantity-control d-flex align-items-center gap-3 mb-3">
+                      <label style="margin: 0; font-weight: 600;">Số lượng:</label>
+                      <div class="d-flex align-items-center gap-2 border rounded p-2" style="border-color: #e5e7eb !important;">
+                        <button type="button" class="btn btn-sm" onclick="adjustQuantity(${item.serviceId}, -1); updateQuickViewQty(${item.serviceId});">−</button>
+                        <span id="quickViewQty-${item.serviceId}" style="min-width: 40px; text-align: center; font-weight: 600;">0</span>
+                        <button type="button" class="btn btn-sm" onclick="adjustQuantity(${item.serviceId}, 1); updateQuickViewQty(${item.serviceId});">+</button>
+                      </div>
+                    </div>
+                    <button type="button" class="btn btn-primary w-100" onclick="addToCart(${item.serviceId}, '${(item.serviceName || item.name).replace(/'/g, "\\'")}', ${item.price}); updateQuickViewQty(${item.serviceId});" style="background: #c8a97e; border: none;">
+                      <i class="icon-shopping-cart"></i> Thêm vào giỏ hàng
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      // Remove existing modal if any
+      const existingModal = document.getElementById('quickViewModal');
+      if (existingModal) existingModal.remove();
+      
+      document.body.insertAdjacentHTML('beforeend', modalHTML);
+      
+      // Show modal
+      const modalEl = document.getElementById('quickViewModal');
+      if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+        
+        // Update quantity on modal show
+        updateQuickViewQty(serviceId);
+      }
+    };
+    
+    function updateQuickViewQty(serviceId) {
+      const qtyEl = document.getElementById(`qty-${serviceId}`);
+      const quickViewQtyEl = document.getElementById(`quickViewQty-${serviceId}`);
+      const currentQty = parseInt(qtyEl?.textContent) || 0;
+      if (quickViewQtyEl) quickViewQtyEl.textContent = currentQty;
+    }
+    
+    // Event Listeners
+    document.getElementById('menuSearch')?.addEventListener('input', debounce(applyFiltersAndSort, 300));
+    document.getElementById('menuCategory')?.addEventListener('change', applyFiltersAndSort);
+    document.getElementById('menuSort')?.addEventListener('change', applyFiltersAndSort);
+    document.getElementById('resetFilters')?.addEventListener('click', () => {
+      document.getElementById('menuSearch').value = '';
+      document.getElementById('menuCategory').value = '';
+      document.getElementById('menuSort').value = 'default';
+      applyFiltersAndSort();
+    });
+  </script>
+  
+  <!-- Include api.js for toast notifications if available -->
+  <script src="../js/api.js"></script>
+    
+  </body>
+</html>

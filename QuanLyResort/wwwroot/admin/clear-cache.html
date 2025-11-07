@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clear Cache - Admin Panel</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+    }
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+    }
+    .section {
+      margin: 20px 0;
+      padding: 20px;
+      background: #f9f9f9;
+      border-left: 4px solid #4CAF50;
+      border-radius: 4px;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    button.danger {
+      background: #f44336;
+    }
+    button.danger:hover {
+      background: #da190b;
+    }
+    button.info {
+      background: #2196F3;
+    }
+    button.info:hover {
+      background: #0b7dda;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      background: #e8f5e9;
+      border-radius: 4px;
+      display: none;
+    }
+    .result.error {
+      background: #ffebee;
+    }
+    .result.show {
+      display: block;
+    }
+    .code {
+      background: #263238;
+      color: #aed581;
+      padding: 15px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      margin: 10px 0;
+      overflow-x: auto;
+    }
+    .checklist {
+      list-style: none;
+      padding: 0;
+    }
+    .checklist li {
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+    }
+    .checklist li:before {
+      content: '✅ ';
+      margin-right: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧹 Clear Cache - Admin Panel</h1>
+    <p class="subtitle">Giải quyết vấn đề cache khi menu không cập nhật</p>
+
+    <div class="section">
+      <h3>📋 Hướng dẫn:</h3>
+      <ul class="checklist">
+        <li>Click "Clear All Cache" để xóa toàn bộ cache</li>
+        <li>Unregister Service Worker (nếu có)</li>
+        <li>Hard reload page (Ctrl+Shift+R)</li>
+        <li>Sau đó F5 bình thường sẽ work</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <h3>🔧 Actions:</h3>
+      
+      <button onclick="clearAllCache()" class="danger">
+        🗑️ Clear All Cache
+      </button>
+
+      <button onclick="unregisterServiceWorker()" class="info">
+        ⚙️ Unregister Service Worker
+      </button>
+
+      <button onclick="hardReload()" class="info">
+        🔄 Hard Reload
+      </button>
+
+      <button onclick="clearAndReload()">
+        ✨ Clear All & Reload
+      </button>
+
+      <div id="result" class="result"></div>
+    </div>
+
+    <div class="section">
+      <h3>📊 Current Status:</h3>
+      <div id="status"></div>
+    </div>
+
+    <div class="section">
+      <h3>💡 Manual DevTools Method:</h3>
+      <ol>
+        <li>Mở DevTools (F12)</li>
+        <li>Application tab → Storage</li>
+        <li>Clear site data</li>
+        <li>Service Workers → Unregister</li>
+        <li>Ctrl+Shift+R</li>
+      </ol>
+    </div>
+  </div>
+
+  <script>
+    // Show current status
+    async function showStatus() {
+      const statusDiv = document.getElementById('status');
+      let html = '<div class="code">';
+      
+      // Check localStorage
+      const lsCount = localStorage.length;
+      html += `📦 LocalStorage items: ${lsCount}<br>`;
+      
+      // Check sessionStorage
+      const ssCount = sessionStorage.length;
+      html += `📦 SessionStorage items: ${ssCount}<br>`;
+      
+      // Check Service Worker
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        html += `⚙️ Service Workers: ${registrations.length}<br>`;
+        registrations.forEach((reg, i) => {
+          html += `  - Worker ${i + 1}: ${reg.active ? 'Active' : 'Inactive'}<br>`;
+        });
+      } else {
+        html += `⚙️ Service Worker: Not supported<br>`;
+      }
+      
+      // Check Cache Storage
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        html += `💾 Cache Storage: ${cacheNames.length} caches<br>`;
+        cacheNames.forEach(name => {
+          html += `  - ${name}<br>`;
+        });
+      }
+      
+      html += '</div>';
+      statusDiv.innerHTML = html;
+    }
+
+    // Clear all cache
+    async function clearAllCache() {
+      showResult('Đang xóa cache...', false);
+      
+      try {
+        let cleared = [];
+        
+        // Clear localStorage
+        localStorage.clear();
+        cleared.push('✅ LocalStorage cleared');
+        
+        // Clear sessionStorage
+        sessionStorage.clear();
+        cleared.push('✅ SessionStorage cleared');
+        
+        // Clear Cache Storage
+        if ('caches' in window) {
+          const cacheNames = await caches.keys();
+          for (const name of cacheNames) {
+            await caches.delete(name);
+            cleared.push(`✅ Cache deleted: ${name}`);
+          }
+        }
+        
+        showResult('Cache đã được xóa!<br>' + cleared.join('<br>'), false);
+        await showStatus();
+        
+      } catch (error) {
+        showResult('Lỗi: ' + error.message, true);
+      }
+    }
+
+    // Unregister Service Worker
+    async function unregisterServiceWorker() {
+      showResult('Đang unregister service worker...', false);
+      
+      try {
+        if ('serviceWorker' in navigator) {
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          
+          if (registrations.length === 0) {
+            showResult('Không có Service Worker nào đang chạy', false);
+            return;
+          }
+          
+          let unregistered = [];
+          for (const registration of registrations) {
+            await registration.unregister();
+            unregistered.push('✅ Unregistered: ' + registration.scope);
+          }
+          
+          showResult('Service Worker đã được unregister!<br>' + unregistered.join('<br>'), false);
+          await showStatus();
+          
+        } else {
+          showResult('Service Worker không được hỗ trợ', true);
+        }
+      } catch (error) {
+        showResult('Lỗi: ' + error.message, true);
+      }
+    }
+
+    // Hard reload
+    function hardReload() {
+      location.reload(true);
+    }
+
+    // Clear all and reload
+    async function clearAndReload() {
+      await clearAllCache();
+      await unregisterServiceWorker();
+      
+      showResult('Cache đã xóa! Đang reload...', false);
+      
+      setTimeout(() => {
+        location.reload(true);
+      }, 1000);
+    }
+
+    // Show result message
+    function showResult(message, isError) {
+      const resultDiv = document.getElementById('result');
+      resultDiv.innerHTML = message;
+      resultDiv.className = 'result show';
+      if (isError) {
+        resultDiv.classList.add('error');
+      }
+    }
+
+    // Initialize
+    showStatus();
+  </script>
+</body>
+</html>
+

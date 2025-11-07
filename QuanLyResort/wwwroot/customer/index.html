@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Resort Management - Quản Lý Resort</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="theme-color" content="#c8a97e">
+    <meta name="description" content="Hệ thống quản lý resort - Đặt phòng trực tuyến">
+    <link rel="manifest" href="/manifest.json?v=2">
+    
+    <link href="https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Playfair+Display:400,400i,700,700i" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/open-iconic-bootstrap.min.css">
+    <link rel="stylesheet" href="css/animate.css">
+    
+    <link rel="stylesheet" href="css/owl.carousel.min.css">
+    <link rel="stylesheet" href="css/owl.theme.default.min.css">
+    <link rel="stylesheet" href="css/magnific-popup.css">
+
+    <link rel="stylesheet" href="css/aos.css">
+
+    <link rel="stylesheet" href="css/ionicons.min.css">
+
+    <link rel="stylesheet" href="css/bootstrap-datepicker.css">
+    <link rel="stylesheet" href="css/jquery.timepicker.css">
+
+    
+    <link rel="stylesheet" href="css/flaticon.css">
+    <link rel="stylesheet" href="css/icomoon.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/globals.css">
+  <link rel="stylesheet" href="/css/grid.css">
+  <link rel="stylesheet" href="/css/components/navbar.css">
+  <style>
+    /* Fix booking form input sizes */
+    .ftco-booking .booking-form .form-control,
+    .ftco-booking .booking-form select.form-control {
+      min-height: 50px !important;
+      padding: 12px 15px !important;
+      font-size: 16px !important;
+      width: 100% !important;
+      white-space: nowrap !important;
+      overflow: visible !important;
+    }
+    .ftco-booking .booking-form .select-wrap {
+      min-height: 50px !important;
+      width: 100% !important;
+    }
+    .ftco-booking .booking-form .select-wrap select {
+      min-height: 50px !important;
+      padding-right: 40px !important;
+      width: 100% !important;
+    }
+    .ftco-booking .booking-form label {
+      font-size: 14px !important;
+      font-weight: 600 !important;
+      margin-bottom: 8px !important;
+      display: block !important;
+      white-space: normal !important;
+      word-wrap: break-word !important;
+    }
+    .ftco-booking .booking-form .wrap {
+      width: 100% !important;
+      min-width: 150px !important;
+    }
+    .ftco-booking .booking-form .form-group {
+      min-width: 0 !important;
+      flex: 1 1 auto !important;
+    }
+    .ftco-booking .booking-form .form-field {
+      width: 100% !important;
+    }
+    @media (max-width: 768px) {
+      .ftco-booking .booking-form .form-group {
+        margin-bottom: 15px !important;
+      }
+      .ftco-booking .booking-form .col-md,
+      .ftco-booking .booking-form .col-md-3 {
+        margin-bottom: 15px !important;
+      }
+    }
+  </style>
+    
+    <!-- Navbar Auth Styles -->
+    <link rel="stylesheet" href="css/navbar-auth.css">
+  </head>
+  <body>
+
+    <!-- Header placeholder - will be loaded by load-header.js -->
+    <div id="header-placeholder"></div>
+    
+    <!-- Load header component -->
+    <script src="js/load-header.js"></script>
+
+    <section class="home-slider owl-carousel">
+      <div class="slider-item" style="background-image:url(images/bg_1.jpg);">
+      	<div class="overlay"></div>
+        <div class="container">
+          <div class="row no-gutters slider-text align-items-center justify-content-center">
+          <div class="col-md-12 ftco-animate text-center">
+          	<div class="text mb-5 pb-3">
+                    <h1 class="mb-3">Chào mừng đến Resort Deluxe</h1>
+                    <h2>Khu nghỉ dưỡng &amp; Khách sạn</h2>
+            </div>
+          </div>
+        </div>
+        </div>
+      </div>
+
+      <div class="slider-item" style="background-image:url(images/bg_2.jpg);">
+      	<div class="overlay"></div>
+        <div class="container">
+          <div class="row no-gutters slider-text align-items-center justify-content-center">
+          <div class="col-md-12 ftco-animate text-center">
+          	<div class="text mb-5 pb-3">
+                    <h1 class="mb-3">Trải nghiệm nghỉ dưỡng đẳng cấp</h1>
+                    <h2>Đồng hành cùng chúng tôi</h2>
+            </div>
+          </div>
+        </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="ftco-booking">
+    	<div class="container">
+    		<div class="row">
+    			<div class="col-lg-12">
+    				<form action="#" class="booking-form">
+	        		<div class="row">
+	        			<div class="col-md-3 d-flex">
+	        				<div class="form-group p-4 align-self-stretch d-flex align-items-end">
+	        					<div class="wrap">
+                    <label for="#">Ngày nhận phòng</label>
+                    <input type="text" class="form-control checkin_date" placeholder="Chọn ngày nhận phòng">
+			    					</div>
+			    				</div>
+	        			</div>
+	        			<div class="col-md-3 d-flex">
+	        				<div class="form-group p-4 align-self-stretch d-flex align-items-end">
+	        					<div class="wrap">
+                    <label for="#">Ngày trả phòng</label>
+                    <input type="text" class="form-control checkout_date" placeholder="Chọn ngày trả phòng">
+			    				</div>
+			    				</div>
+	        			</div>
+	        			<div class="col-md d-flex">
+	        				<div class="form-group p-4 align-self-stretch d-flex align-items-end">
+	        					<div class="wrap">
+                      <label for="#">Loại phòng</label>
+			      					<div class="form-field">
+			        					<div class="select-wrap">
+			                    <div class="icon"><span class="ion-ios-arrow-down"></span></div>
+                        <select name="" id="" class="form-control">
+                          <option value="">Suite</option>
+                          <option value="">Phòng Gia Đình</option>
+                          <option value="">Phòng Deluxe</option>
+                          <option value="">Phòng Classic</option>
+                          <option value="">Phòng Superior</option>
+                          <option value="">Phòng Hạng Sang</option>
+			                    </select>
+			                  </div>
+				              </div>
+				            </div>
+		              </div>
+	        			</div>
+	        			<div class="col-md d-flex">
+	        				<div class="form-group p-4 align-self-stretch d-flex align-items-end">
+	        					<div class="wrap">
+                      <label for="#">Khách</label>
+			      					<div class="form-field">
+			        					<div class="select-wrap">
+			                    <div class="icon"><span class="ion-ios-arrow-down"></span></div>
+                        <select name="" id="" class="form-control">
+                          <option value="">1 người lớn</option>
+                          <option value="">2 người lớn</option>
+                          <option value="">3 người lớn</option>
+                          <option value="">4 người lớn</option>
+                          <option value="">5 người lớn</option>
+                          <option value="">6 người lớn</option>
+			                    </select>
+			                  </div>
+				              </div>
+				            </div>
+		              </div>
+	        			</div>
+	        			<div class="col-md d-flex">
+	        				<div class="form-group d-flex align-self-stretch">
+              <input type="submit" value="Kiểm tra phòng trống" class="btn btn-primary py-3 px-4 align-self-stretch">
+			            </div>
+	        			</div>
+	        		</div>
+	        	</form>
+	    		</div>
+    		</div>
+    	</div>
+    </section>
+
+
+    <section class="ftco-section ftc-no-pb ftc-no-pt">
+			<div class="container">
+				<div class="row">
+					<div class="col-md-5 p-md-5 img img-2 d-flex justify-content-center align-items-center" style="background-image: url(images/bg_2.jpg);">
+						<a href="https://vimeo.com/45830194" class="icon popup-vimeo d-flex justify-content-center align-items-center">
+							<span class="icon-play"></span>
+						</a>
+					</div>
+					<div class="col-md-7 py-5 wrap-about pb-md-5 ftco-animate">
+	          <div class="heading-section heading-section-wo-line pt-md-5 pl-md-5 mb-5">
+              <div class="ml-md-0">
+                  <span class="subheading">Chào mừng đến Deluxe Hotel</span>
+                    <h2 class="mb-4">Chào mừng đến khách sạn của chúng tôi</h2>
+                </div>
+	          </div>
+	          <div class="pb-md-5">
+              <p>Tận hưởng không gian nghỉ dưỡng thanh bình với dịch vụ tận tâm, tiện nghi hiện đại và phong cách thiết kế sang trọng. Chúng tôi luôn sẵn sàng để mang đến cho bạn một kỳ nghỉ trọn vẹn.</p>
+              <p>Từ phòng nghỉ tiện nghi đến ẩm thực tinh tế, mỗi trải nghiệm tại Resort Deluxe đều được chăm chút tỉ mỉ để bạn luôn cảm thấy thư thái và hài lòng.</p>
+							<ul class="ftco-social d-flex">
+                <li class="ftco-animate"><a href="#"><span class="icon-twitter"></span></a></li>
+                <li class="ftco-animate"><a href="#"><span class="icon-facebook"></span></a></li>
+                <li class="ftco-animate"><a href="#"><span class="icon-google-plus"></span></a></li>
+                <li class="ftco-animate"><a href="#"><span class="icon-instagram"></span></a></li>
+              </ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<section class="ftco-section">
+      <div class="container">
+        <div class="row d-flex">
+          <div class="col-md-3 d-flex align-self-stretch ftco-animate">
+            <div class="media block-6 services py-4 d-block text-center">
+              <div class="d-flex justify-content-center">
+              	<div class="icon d-flex align-items-center justify-content-center">
+              		<span class="flaticon-reception-bell"></span>
+              	</div>
+              </div>
+              <div class="media-body p-2 mt-2">
+                <h3 class="heading mb-3">Lễ tân 24/7</h3>
+                <p>Hỗ trợ bạn mọi lúc trong suốt kỳ nghỉ tại resort.</p>
+              </div>
+            </div>      
+          </div>
+          <div class="col-md-3 d-flex align-self-stretch ftco-animate">
+            <div class="media block-6 services py-4 d-block text-center">
+              <div class="d-flex justify-content-center">
+              	<div class="icon d-flex align-items-center justify-content-center">
+              		<span class="flaticon-serving-dish"></span>
+              	</div>
+              </div>
+              <div class="media-body p-2 mt-2">
+                <h3 class="heading mb-3">Nhà hàng & Bar</h3>
+                <p>Thưởng thức ẩm thực tinh tế và không gian sang trọng.</p>
+              </div>
+            </div>    
+          </div>
+          <div class="col-md-3 d-flex align-sel Searchf-stretch ftco-animate">
+            <div class="media block-6 services py-4 d-block text-center">
+              <div class="d-flex justify-content-center">
+              	<div class="icon d-flex align-items-center justify-content-center">
+              		<span class="flaticon-car"></span>
+              	</div>
+              </div>
+              <div class="media-body p-2 mt-2">
+                <h3 class="heading mb-3">Dịch vụ đưa đón</h3>
+                <p>Đưa đón sân bay và tham quan theo yêu cầu.</p>
+              </div>
+            </div>      
+          </div>
+          <div class="col-md-3 d-flex align-self-stretch ftco-animate">
+            <div class="media block-6 services py-4 d-block text-center">
+              <div class="d-flex justify-content-center">
+              	<div class="icon d-flex align-items-center justify-content-center">
+              		<span class="flaticon-spa"></span>
+              	</div>
+              </div>
+              <div class="media-body p-2 mt-2">
+                <h3 class="heading mb-3">Spa & Thư giãn</h3>
+                <p>Liệu trình chăm sóc sức khoẻ và làm đẹp chuyên nghiệp.</p>
+              </div>
+            </div>      
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="ftco-section bg-light">
+    	<div class="container">
+				<div class="row justify-content-center mb-5 pb-3">
+          <div class="col-md-7 heading-section text-center ftco-animate">
+            <h2 class="mb-4">Phòng nổi bật</h2>
+          </div>
+        </div>
+        <div id="homeRooms" class="row"></div>
+    	</div>
+    </section>
+
+    <!-- Reviews Section -->
+    <section class="ftco-section">
+      <div class="container">
+        <div class="row justify-content-center mb-5 pb-3">
+          <div class="col-md-7 heading-section text-center ftco-animate">
+            <span class="subheading">Đánh giá từ khách hàng</span>
+            <h2 class="mb-4">Khách hàng nói gì về chúng tôi</h2>
+          </div>
+        </div>
+        <div id="homeReviews" class="row">
+          <div class="col-12 text-center">
+            <div class="spinner-border text-primary" role="status">
+              <span class="sr-only">Đang tải đánh giá...</span>
+            </div>
+          </div>
+        </div>
+        <div class="row mt-4">
+          <div class="col-12 text-center">
+            <a href="reviews.html" class="btn btn-primary py-3 px-4">Xem tất cả đánh giá</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="ftco-section ftco-counter img" id="section-counter" style="background-image: url(images/bg_1.jpg);">
+    	<div class="container">
+    		<div class="row justify-content-center">
+    			<div class="col-md-10">
+		    		<div class="row">
+		          <div class="col-md-3 d-flex justify-content-center counter-wrap ftco-animate">
+		            <div class="block-18 text-center">
+		              <div class="text">
+		                <strong class="number" data-number="50000">0</strong>
+                <span>Khách hàng hạnh phúc</span>
+		              </div>
+		            </div>
+		          </div>
+		          <div class="col-md-3 d-flex justify-content-center counter-wrap ftco-animate">
+		            <div class="block-18 text-center">
+		              <div class="text">
+		                <strong class="number" data-number="3000">0</strong>
+                <span>Phòng nghỉ</span>
+		              </div>
+		            </div>
+		          </div>
+		          <div class="col-md-3 d-flex justify-content-center counter-wrap ftco-animate">
+		            <div class="block-18 text-center">
+		              <div class="text">
+		                <strong class="number" data-number="1000">0</strong>
+                <span>Nhân viên</span>
+		              </div>
+		            </div>
+		          </div>
+		          <div class="col-md-3 d-flex justify-content-center counter-wrap ftco-animate">
+		            <div class="block-18 text-center">
+		              <div class="text">
+		                <strong class="number" data-number="100">0</strong>
+                <span>Điểm đến</span>
+		              </div>
+		            </div>
+		          </div>
+		        </div>
+	        </div>
+        </div>
+    	</div>
+    </section>
+
+
+    <section class="ftco-section testimony-section bg-light">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-md-8 ftco-animate">
+          	<div class="row ftco-animate">
+		          <div class="col-md-12">
+		            <div class="carousel-testimony owl-carousel ftco-owl">
+		              <div class="item">
+		                <div class="testimony-wrap py-4 pb-5">
+		                  <div class="user-img mb-4" style="background-image: url(images/person_1.jpg)">
+		                    <span class="quote d-flex align-items-center justify-content-center">
+		                      <i class="icon-quote-left"></i>
+		                    </span>
+		                  </div>
+		                  <div class="text text-center">
+		                    <p class="mb-4">A small river named Duden flows by their place and supplies it with the necessary regelialia. It is a paradisematic country, in which roasted parts of sentences fly into your mouth.</p>
+		                    <p class="name">Nathan Smith</p>
+		                    <span class="position">Guests</span>
+		                  </div>
+		                </div>
+		              </div>
+		              <div class="item">
+		                <div class="testimony-wrap py-4 pb-5">
+		                  <div class="user-img mb-4" style="background-image: url(images/person_2.jpg)">
+		                    <span class="quote d-flex align-items-center justify-content-center">
+		                      <i class="icon-quote-left"></i>
+		                    </span>
+		                  </div>
+		                  <div class="text text-center">
+		                    <p class="mb-4">A small river named Duden flows by their place and supplies it with the necessary regelialia. It is a paradisematic country, in which roasted parts of sentences fly into your mouth.</p>
+		                    <p class="name">Nathan Smith</p>
+		                    <span class="position">Guests</span>
+		                  </div>
+		                </div>
+		              </div>
+		              <div class="item">
+		                <div class="testimony-wrap py-4 pb-5">
+		                  <div class="user-img mb-4" style="background-image: url(images/person_3.jpg)">
+		                    <span class="quote d-flex align-items-center justify-content-center">
+		                      <i class="icon-quote-left"></i>
+		                    </span>
+		                  </div>
+		                  <div class="text text-center">
+		                    <p class="mb-4">A small river named Duden flows by their place and supplies it with the necessary regelialia. It is a paradisematic country, in which roasted parts of sentences fly into your mouth.</p>
+		                    <p class="name">Nathan Smith</p>
+		                    <span class="position">Guests</span>
+		                  </div>
+		                </div>
+		              </div>
+		              <div class="item">
+		                <div class="testimony-wrap py-4 pb-5">
+		                  <div class="user-img mb-4" style="background-image: url(images/person_1.jpg)">
+		                    <span class="quote d-flex align-items-center justify-content-center">
+		                      <i class="icon-quote-left"></i>
+		                    </span>
+		                  </div>
+		                  <div class="text text-center">
+		                    <p class="mb-4">A small river named Duden flows by their place and supplies it with the necessary regelialia. It is a paradisematic country, in which roasted parts of sentences fly into your mouth.</p>
+		                    <p class="name">Nathan Smith</p>
+		                    <span class="position">Guests</span>
+		                  </div>
+		                </div>
+		              </div>
+		              <div class="item">
+		                <div class="testimony-wrap py-4 pb-5">
+		                  <div class="user-img mb-4" style="background-image: url(images/person_1.jpg)">
+		                    <span class="quote d-flex align-items-center justify-content-center">
+		                      <i class="icon-quote-left"></i>
+		                    </span>
+		                  </div>
+		                  <div class="text text-center">
+		                    <p class="mb-4">A small river named Duden flows by their place and supplies it with the necessary regelialia. It is a paradisematic country, in which roasted parts of sentences fly into your mouth.</p>
+		                    <p class="name">Nathan Smith</p>
+		                    <span class="position">Guests</span>
+		                  </div>
+		                </div>
+		              </div>
+		            </div>
+		          </div>
+		        </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <section class="ftco-section">
+      <div class="container">
+        <div class="row justify-content-center mb-5 pb-3">
+          <div class="col-md-7 heading-section text-center ftco-animate">
+            <h2>Bài viết mới</h2>
+          </div>
+        </div>
+        <div class="row d-flex">
+          <div class="col-md-3 d-flex ftco-animate">
+            <div class="blog-entry align-self-stretch">
+              <a href="blog-single.html" class="block-20" style="background-image: url('images/image_1.jpg');">
+              </a>
+              <div class="text mt-3 d-block">
+                <h3 class="heading mt-3"><a href="#">Even the all-powerful Pointing has no control about the blind texts</a></h3>
+                <div class="meta mb-3">
+                  <div><a href="#">Dec 6, 2018</a></div>
+                  <div><a href="#">Admin</a></div>
+                  <div><a href="#" class="meta-chat"><span class="icon-chat"></span> 3</a></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 d-flex ftco-animate">
+            <div class="blog-entry align-self-stretch">
+              <a href="blog-single.html" class="block-20" style="background-image: url('images/image_2.jpg');">
+              </a>
+              <div class="text mt-3">
+                <h3 class="heading mt-3"><a href="#">Even the all-powerful Pointing has no control about the blind texts</a></h3>
+                <div class="meta mb-3">
+                  <div><a href="#">Dec 6, 2018</a></div>
+                  <div><a href="#">Admin</a></div>
+                  <div><a href="#" class="meta-chat"><span class="icon-chat"></span> 3</a></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 d-flex ftco-animate">
+            <div class="blog-entry align-self-stretch">
+              <a href="blog-single.html" class="block-20" style="background-image: url('images/image_3.jpg');">
+              </a>
+              <div class="text mt-3">
+                <h3 class="heading mt-3"><a href="#">Even the all-powerful Pointing has no control about the blind texts</a></h3>
+                <div class="meta mb-3">
+                  <div><a href="#">Dec 6, 2018</a></div>
+                  <div><a href="#">Admin</a></div>
+                  <div><a href="#" class="meta-chat"><span class="icon-chat"></span> 3</a></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-3 d-flex ftco-animate">
+            <div class="blog-entry align-self-stretch">
+              <a href="blog-single.html" class="block-20" style="background-image: url('images/image_4.jpg');">
+              </a>
+              <div class="text mt-3">
+                <h3 class="heading mt-3"><a href="#">Even the all-powerful Pointing has no control about the blind texts</a></h3>
+                <div class="meta mb-3">
+                  <div><a href="#">Dec 6, 2018</a></div>
+                  <div><a href="#">Admin</a></div>
+                  <div><a href="#" class="meta-chat"><span class="icon-chat"></span> 3</a></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="instagram">
+      <div class="container-fluid">
+        <div class="row no-gutters justify-content-center pb-5">
+          <div class="col-md-7 text-center heading-section ftco-animate">
+            <h2><span>Instagram</span></h2>
+          </div>
+        </div>
+        <div class="row no-gutters">
+          <div class="col-sm-12 col-md ftco-animate">
+            <a href="images/insta-1.jpg" class="insta-img image-popup" style="background-image: url(images/insta-1.jpg);">
+              <div class="icon d-flex justify-content-center">
+                <span class="icon-instagram align-self-center"></span>
+              </div>
+            </a>
+          </div>
+          <div class="col-sm-12 col-md ftco-animate">
+            <a href="images/insta-2.jpg" class="insta-img image-popup" style="background-image: url(images/insta-2.jpg);">
+              <div class="icon d-flex justify-content-center">
+                <span class="icon-instagram align-self-center"></span>
+              </div>
+            </a>
+          </div>
+          <div class="col-sm-12 col-md ftco-animate">
+            <a href="images/insta-3.jpg" class="insta-img image-popup" style="background-image: url(images/insta-3.jpg);">
+              <div class="icon d-flex justify-content-center">
+                <span class="icon-instagram align-self-center"></span>
+              </div>
+            </a>
+          </div>
+          <div class="col-sm-12 col-md ftco-animate">
+            <a href="images/insta-4.jpg" class="insta-img image-popup" style="background-image: url(images/insta-4.jpg);">
+              <div class="icon d-flex justify-content-center">
+                <span class="icon-instagram align-self-center"></span>
+              </div>
+            </a>
+          </div>
+          <div class="col-sm-12 col-md ftco-animate">
+            <a href="images/insta-5.jpg" class="insta-img image-popup" style="background-image: url(images/insta-5.jpg);">
+              <div class="icon d-flex justify-content-center">
+                <span class="icon-instagram align-self-center"></span>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="ftco-footer ftco-bg-dark ftco-section">
+      <div class="container">
+        <div class="row mb-5">
+          <div class="col-md">
+            <div class="ftco-footer-widget mb-4">
+              <h2 class="ftco-heading-2">RESORT DELUXE</h2>
+              <p>Khu nghỉ dưỡng cao cấp với không gian sang trọng, dịch vụ chu đáo và tiện nghi hiện đại, mang đến cho bạn kỳ nghỉ trọn vẹn.</p>
+              <ul class="ftco-footer-social list-unstyled float-md-left float-lft mt-5">
+                <li class="ftco-animate"><a href="#"><span class="icon-twitter"></span></a></li>
+                <li class="ftco-animate"><a href="#"><span class="icon-facebook"></span></a></li>
+                <li class="ftco-animate"><a href="#"><span class="icon-instagram"></span></a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-md">
+            <div class="ftco-footer-widget mb-4 ml-md-5">
+              <h2 class="ftco-heading-2">Liên kết hữu ích</h2>
+              <ul class="list-unstyled">
+                <li><a href="#" class="py-2 d-block">Blog</a></li>
+                <li><a href="#" class="py-2 d-block">Phòng</a></li>
+                <li><a href="#" class="py-2 d-block">Tiện ích</a></li>
+                <li><a href="#" class="py-2 d-block">Thẻ quà tặng</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-md">
+             <div class="ftco-footer-widget mb-4">
+              <h2 class="ftco-heading-2">Chính sách</h2>
+              <ul class="list-unstyled">
+                <li><a href="#" class="py-2 d-block">Tuyển dụng</a></li>
+                <li><a href="#" class="py-2 d-block">Về chúng tôi</a></li>
+                <li><a href="#" class="py-2 d-block">Liên hệ</a></li>
+                <li><a href="#" class="py-2 d-block">Dịch vụ</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-md">
+            <div class="ftco-footer-widget mb-4">
+                <h2 class="ftco-heading-2">Bạn cần hỗ trợ?</h2>
+            	<div class="block-23 mb-3">
+	              <ul>
+                <li><span class="icon icon-map-marker"></span><span class="text">123 Đường Biển Xanh, Thành phố Biển, Việt Nam</span></li>
+                <li><a href="#"><span class="icon icon-phone"></span><span class="text">+84 901 329 227</span></a></li>
+                <li><a href="#"><span class="icon icon-envelope"></span><span class="text">support@resortdeluxe.vn</span></a></li>
+	              </ul>
+	            </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12 text-center">
+
+            <p><!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+  Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved | This template is made with <i class="icon-heart color-danger" aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
+  <!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. --></p>
+          </div>
+        </div>
+      </div>
+    </footer>
+    
+  
+
+  <!-- loader -->
+  <div id="ftco-loader" class="show fullscreen"><svg class="circular" width="48px" height="48px"><circle class="path-bg" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke="#eeeeee"/><circle class="path" cx="24" cy="24" r="22" fill="none" stroke-width="4" stroke-miterlimit="10" stroke="#F96D00"/></svg></div>
+
+
+  <script src="js/jquery.min.js"></script>
+  <script src="js/jquery-migrate-3.0.1.min.js"></script>
+  <script src="js/popper.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js/jquery.easing.1.3.js"></script>
+  <script src="js/jquery.waypoints.min.js"></script>
+  <script src="js/jquery.stellar.min.js"></script>
+  <script src="js/owl.carousel.min.js"></script>
+  <script src="js/jquery.magnific-popup.min.js"></script>
+  <script src="js/aos.js"></script>
+  <script src="js/jquery.animateNumber.min.js"></script>
+  <script src="js/bootstrap-datepicker.js"></script>
+  <!-- <script src="js/jquery.timepicker.min.js"></script> -->
+  <script src="js/scrollax.min.js"></script>
+  <!-- Google Maps disabled on home (no map element) to avoid warnings -->
+  <script src="js/main.js"></script>
+  
+  <!-- Navbar Authentication Handler -->
+  <script src="../js/api.js"></script>
+  <script src="js/navbar-auth.js"></script>
+  
+  <!-- PWA Support -->
+  <script src="/js/pwa-init.js"></script>
+  <script>
+    // Function to load rooms - reusable for both DOMContentLoaded and pageshow
+    async function loadHomeRooms(){
+      try{
+        const url = `${location.origin}/api/rooms?isAvailable=true&_=${Date.now()}`;
+        console.log('[HomeRooms] Fetch URL:', url);
+        
+        const resp = await fetch(url,{cache:'no-store'});
+        console.log('[HomeRooms] Response status:', resp.status, resp.statusText);
+        
+        if(!resp.ok){
+          const errorText = await resp.text().catch(()=> '');
+          console.error('[HomeRooms] HTTP Error:', resp.status, errorText);
+          throw new Error(`HTTP ${resp.status}: ${errorText}`);
+        }
+        
+        const data = await resp.json();
+        console.log('[HomeRooms] Raw data:', data);
+        console.log('[HomeRooms] Is array?', Array.isArray(data));
+        
+        // Handle different response formats
+        let list = [];
+        if(Array.isArray(data)){
+          list = data;
+        } else if(data && Array.isArray(data.items)){
+          list = data.items;
+        } else if(data && Array.isArray(data.rooms)){
+          list = data.rooms;
+        } else if(data && typeof data === 'object'){
+          // Try to find any array property
+          for(const key in data){
+            if(Array.isArray(data[key])){
+              list = data[key];
+              break;
+            }
+          }
+        }
+        
+        console.log('[HomeRooms] Processed list length:', list.length);
+        console.log('[HomeRooms] First item:', list[0]);
+        
+        const rooms = list.slice(0,6);
+        console.log('[HomeRooms] Displaying', rooms.length, 'rooms');
+        
+        const wrap = document.getElementById('homeRooms');
+        console.log('[HomeRooms] Container found?', !!wrap);
+        
+        if(!wrap){ 
+          console.error('[HomeRooms] Container #homeRooms not found!'); 
+          return; 
+        }
+        
+        if(rooms.length === 0){
+          wrap.innerHTML = '<div class="col-12 text-center text-muted py-4"><p>Chưa có phòng khả dụng</p></div>';
+          console.warn('[HomeRooms] No rooms to display');
+          return;
+        }
+        
+        const html = rooms.map((r, idx)=>{
+          const price = r.pricePerNight ?? r.basePrice ?? 0;
+          const name = r.roomTypeName || r.roomType || 'Phòng';
+          // Use imageUrl, image, or fallback to room image based on roomId
+          let img = '';
+          if(r.imageUrl && String(r.imageUrl).trim()){
+            img = r.imageUrl;
+          } else if(r.image && String(r.image).trim()){
+            img = r.image;
+          } else {
+            // Fallback: cycle through room-1.jpg to room-5.jpg based on roomId
+            const imgNum = ((r.roomId || idx + 1) % 5) + 1;
+            img = `images/room-${imgNum}.jpg`;
+          }
+          
+          console.log(`[HomeRooms] Room ${idx}:`, {roomId: r.roomId, name, price, img});
+          
+          return `
+          <div class="col-12 col-sm-6 col-lg-4 ftco-animate ftco-animated" style="opacity:1; visibility:visible;">
+            <div class="room" style="opacity:1; visibility:visible;">
+              <a href="room-detail.html?id=${r.roomId}" class="img d-flex justify-content-center align-items-center" style="background-image: url('${img}'); height: 240px; background-size: cover; background-position: center; opacity:1; visibility:visible;">
+                <div class="icon d-flex justify-content-center align-items-center">
+                  <span class="icon-search2"></span>
+                </div>
+              </a>
+              <div class="text p-3 text-center" style="opacity:1; visibility:visible;">
+                <h3 class="mb-3"><a href="room-detail.html?id=${r.roomId}">${name}</a></h3>
+                <p><span class="price mr-2">${new Intl.NumberFormat('vi-VN',{style:'currency',currency:'VND'}).format(price)}</span> <span class="per">/ đêm</span></p>
+                <hr>
+                <p class="pt-1"><a href="room-detail.html?id=${r.roomId}" class="btn-custom">Xem chi tiết <span class="icon-long-arrow-right"></span></a></p>
+              </div>
+            </div>
+          </div>`;
+        }).join('');
+        
+        wrap.innerHTML = html;
+        console.log('[HomeRooms] HTML rendered successfully');
+        
+      }catch(e){ 
+        console.error('[HomeRooms] Load failed:', e);
+        const wrap = document.getElementById('homeRooms');
+        if(wrap){
+          wrap.innerHTML = '<div class="col-12 text-center text-danger py-4"><p>Lỗi khi tải danh sách phòng: ' + e.message + '</p></div>';
+        }
+      }
+    }
+    
+    // Function to load reviews preview
+    async function loadHomeReviews() {
+      try {
+        const url = `${location.origin}/api/reviews?limit=3&_=${Date.now()}`;
+        const resp = await fetch(url, { cache: 'no-store' });
+        
+        if (!resp.ok) {
+          throw new Error(`HTTP ${resp.status}`);
+        }
+        
+        const data = await resp.json();
+        const reviews = (data.reviews || []).slice(0, 3);
+        const container = document.getElementById('homeReviews');
+        
+        if (!container) return;
+        
+        if (reviews.length === 0) {
+          container.innerHTML = '<div class="col-12 text-center text-muted py-4"><p>Chưa có đánh giá nào</p></div>';
+          return;
+        }
+        
+        container.innerHTML = reviews.map(review => `
+          <div class="col-md-4 ftco-animate mb-4">
+            <div class="testimony-wrap py-4 pb-5" style="background:#fff;padding:30px;border-radius:15px;box-shadow:0 5px 20px rgba(0,0,0,0.08);height:100%">
+              <div class="user-img mb-4" style="background-image:url('images/person_1.jpg');width:80px;height:80px;border-radius:50%;margin:0 auto;background-size:cover"></div>
+              <div class="text text-center">
+                <p class="mb-4" style="color:#666;line-height:1.8;font-style:italic">"${review.comment.length > 120 ? review.comment.substring(0, 120) + '...' : review.comment}"</p>
+                <div class="star-rating mb-3">
+                  ${Array.from({length: 5}, (_, i) => 
+                    `<span style="color:${i < review.rating ? '#fbbf24' : '#e5e7eb'}">⭐</span>`
+                  ).join('')}
+                </div>
+                <p class="name" style="font-weight:600;color:#1a1a1a;margin:0">${review.customerName || 'Khách hàng'}</p>
+                <span class="position" style="color:#999;font-size:14px">${formatReviewDate(review.createdAt)}</span>
+              </div>
+            </div>
+          </div>
+        `).join('');
+        
+        function formatReviewDate(dateString) {
+          if (!dateString) return '';
+          const d = new Date(dateString);
+          return d.toLocaleDateString('vi-VN', { year: 'numeric', month: 'long', day: 'numeric' });
+        }
+      } catch (e) {
+        console.error('[HomeReviews] Load failed:', e);
+        const container = document.getElementById('homeReviews');
+        if (container) {
+          container.innerHTML = '<div class="col-12 text-center text-danger py-4"><p>Lỗi khi tải đánh giá</p></div>';
+        }
+      }
+    }
+    
+    // Load on DOM ready
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('[HomeRooms] DOM ready, starting load...');
+      loadHomeRooms();
+      loadHomeReviews();
+    });
+    
+    // Also load on pageshow event (when page is shown from cache/navigation)
+    window.addEventListener('pageshow', function(event) {
+      console.log('[HomeRooms] Page shown, persisted:', event.persisted);
+      // Always reload data when page is shown, especially if from cache
+      loadHomeRooms();
+      loadHomeReviews();
+    });
+    
+    // Load immediately if DOM is already ready (for fast navigation)
+    if(document.readyState === 'loading'){
+      // DOM is still loading, wait for DOMContentLoaded
+      console.log('[HomeRooms] DOM still loading, waiting...');
+    } else {
+      // DOM is already ready, load immediately
+      console.log('[HomeRooms] DOM already ready, loading immediately...');
+      loadHomeRooms();
+    }
+  </script>
+    
+  </body>
+</html>

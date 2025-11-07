@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="vi" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default" data-assets-path="../assets/" data-template="vertical-menu-template-free">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+  <title>Quản lý Nhân viên - Resort Management</title>
+  <link rel="icon" type="image/x-icon" href="../assets/img/favicon/favicon.ico" />
+  <link rel="stylesheet" href="../assets/vendor/fonts/boxicons.css" />
+  <link rel="stylesheet" href="../assets/vendor/css/core.css" class="template-customizer-core-css" />
+  <link rel="stylesheet" href="../assets/vendor/css/theme-default.css" class="template-customizer-theme-css" />
+  <link rel="stylesheet" href="../assets/css/demo.css" />
+  <link rel="stylesheet" href="../assets/css/fix-scrollbar.css" />
+  <link rel="stylesheet" href="../assets/css/admin-custom-theme.css" />
+  <link rel="stylesheet" href="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" />
+  <script src="../assets/vendor/js/helpers.js"></script>
+</head>
+
+<body>
+  <div class="layout-wrapper layout-content-navbar">
+    <div class="layout-container">
+      
+      <!-- Menu - Load from common component -->
+      <div id="common-menu"></div>
+      <script>
+        // Load common menu with cache busting
+        (function() {
+          // Use timestamp to ALWAYS fetch fresh
+          const menuVersion = Date.now();
+          fetch('layout-menu.html?v=' + menuVersion)
+            .then(response => {
+              if (!response.ok) {
+                throw new Error('Failed to load menu: ' + response.status);
+              }
+              return response.text();
+            })
+            .then(html => {
+              const menuContainer = document.getElementById('common-menu');
+              if (menuContainer) {
+                menuContainer.innerHTML = html;
+                console.log('✅ Menu loaded successfully');
+              } else {
+                console.error('❌ Menu container not found');
+              }
+            })
+            .catch(error => {
+              console.error('❌ Error loading menu:', error);
+            });
+        })();
+      </script>
+      <!-- / Menu -->
+
+      <!-- Layout container -->
+      <div class="layout-page">
+        
+        <!-- Navbar -->
+        <nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme" id="layout-navbar">
+          <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
+            <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
+              <i class="bx bx-menu bx-sm"></i>
+            </a>
+          </div>
+
+          <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+            <div class="navbar-nav align-items-center">
+              <div class="nav-item d-flex align-items-center">
+                <h4 class="mb-0" id="pageTitle">🧑‍💼 Quản lý Nhân viên</h4>
+              </div>
+            </div>
+
+            <ul class="navbar-nav flex-row align-items-center ms-auto">
+              <li class="nav-item navbar-dropdown dropdown-user dropdown">
+                <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
+                  <div class="avatar avatar-online">
+                    <img src="../assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                  </div>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li>
+                    <a class="dropdown-item" href="#">
+                      <div class="d-flex">
+                        <div class="flex-shrink-0 me-3">
+                          <div class="avatar avatar-online">
+                            <img src="../assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                          </div>
+                        </div>
+                        <div class="flex-grow-1">
+                          <span class="fw-semibold d-block" id="userFullName">Admin</span>
+                          <small class="text-muted" id="userRole">Admin</small>
+                        </div>
+                      </div>
+                    </a>
+                  </li>
+                  <li><div class="dropdown-divider"></div></li>
+                  <li><a class="dropdown-item" href="#" onclick="commonLogout()"><i class="bx bx-power-off me-2"></i><span class="align-middle">Đăng xuất</span></a></li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </nav>
+        <!-- / Navbar -->
+
+        <!-- Content wrapper -->
+        <div class="content-wrapper">
+          <div class="container-xxl flex-grow-1 container-p-y">
+            
+            <!-- Stats Cards -->
+            <div class="row mb-4">
+              <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                      <div class="card-info">
+                        <p class="card-text">Tổng NV</p>
+                        <h4 class="card-title mb-0" id="totalEmployees">0</h4>
+                      </div>
+                      <div class="card-icon">
+                        <span class="badge bg-label-primary rounded p-2">
+                          <i class="bx bx-user bx-sm"></i>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                      <div class="card-info">
+                        <p class="card-text">Đang làm</p>
+                        <h4 class="card-title mb-0 text-success" id="activeEmployees">0</h4>
+                      </div>
+                      <div class="card-icon">
+                        <span class="badge bg-label-success rounded p-2">
+                          <i class="bx bx-check-circle bx-sm"></i>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                      <div class="card-info">
+                        <p class="card-text">Đã nghỉ</p>
+                        <h4 class="card-title mb-0 text-danger" id="inactiveEmployees">0</h4>
+                      </div>
+                      <div class="card-icon">
+                        <span class="badge bg-label-danger rounded p-2">
+                          <i class="bx bx-x-circle bx-sm"></i>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                      <div class="card-info">
+                        <p class="card-text">Phòng ban</p>
+                        <h4 class="card-title mb-0" id="totalDepartments">0</h4>
+                      </div>
+                      <div class="card-icon">
+                        <span class="badge bg-label-info rounded p-2">
+                          <i class="bx bx-buildings bx-sm"></i>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Filters & Actions -->
+            <div class="card mb-4">
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-3">
+                    <label class="form-label">Phòng ban</label>
+                    <select id="filterDepartment" class="form-select">
+                      <option value="">Tất cả</option>
+                    </select>
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label">Chức vụ</label>
+                    <select id="filterPosition" class="form-select">
+                      <option value="">Tất cả</option>
+                    </select>
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label">Trạng thái</label>
+                    <select id="filterStatus" class="form-select">
+                      <option value="">Tất cả</option>
+                      <option value="true" selected>Đang làm việc</option>
+                      <option value="false">Đã nghỉ</option>
+                    </select>
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label">&nbsp;</label>
+                    <div>
+                      <button class="btn btn-primary" onclick="loadEmployees()">
+                        <i class="bx bx-search me-1"></i> Tìm kiếm
+                      </button>
+                      <button class="btn btn-success" onclick="openCreateModal()">
+                        <i class="bx bx-plus me-1"></i> Thêm NV
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Employees Table -->
+            <div class="card">
+              <h5 class="card-header">Danh sách Nhân viên</h5>
+              <div class="table-responsive text-nowrap">
+                <table class="table table-hover" id="employeesTable">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Họ tên</th>
+                      <th>Email</th>
+                      <th>Điện thoại</th>
+                      <th>Phòng ban</th>
+                      <th>Chức vụ</th>
+                      <th>Trạng thái</th>
+                      <th>Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody class="table-border-bottom-0">
+                    <!-- Data loaded via JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+        </div>
+        <!-- / Content -->
+
+      </div>
+      <!-- / Layout page -->
+    </div>
+  </div>
+
+  <!-- Create/Edit Employee Modal -->
+  <div class="modal fade" id="employeeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalTitle">Thêm Nhân viên Mới</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="employeeForm">
+            <input type="hidden" id="employeeId">
+            <div class="row">
+              <div class="col-md-4 mb-3">
+                <label class="form-label">Họ tên <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="fullName" required>
+              </div>
+              <div class="col-md-4 mb-3">
+                <label class="form-label">Email <span class="text-danger">*</span></label>
+                <input type="email" class="form-control" id="email" required>
+              </div>
+              <div class="col-md-4 mb-3">
+                <label class="form-label">Số điện thoại</label>
+                <input type="text" class="form-control" id="phoneNumber">
+              </div>
+              <div class="col-md-4 mb-3">
+                <label class="form-label">Phòng ban <span class="text-danger">*</span></label>
+                <select class="form-select" id="department" required></select>
+              </div>
+              <div class="col-md-4 mb-3">
+                <label class="form-label">Chức vụ <span class="text-danger">*</span></label>
+                <select class="form-select" id="position" required></select>
+              </div>
+              <div class="col-md-4 mb-3">
+                <label class="form-label">Lương (VNĐ)</label>
+                <input type="number" class="form-control" id="salary" step="100000">
+              </div>
+              <div class="col-md-4 mb-3">
+                <label class="form-label">Số CMND/CCCD</label>
+                <input type="text" class="form-control" id="idCardNumber">
+              </div>
+              <div class="col-md-4 mb-3">
+                <label class="form-label">Ngày sinh</label>
+                <input type="date" class="form-control" id="dateOfBirth">
+              </div>
+              <div class="col-md-4 mb-3">
+                <label class="form-label">Ngày vào làm</label>
+                <input type="date" class="form-control" id="hireDate">
+              </div>
+              <div class="col-md-12 mb-3">
+                <label class="form-label">Địa chỉ</label>
+                <textarea class="form-control" id="address" rows="2"></textarea>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+          <button type="button" class="btn btn-primary" onclick="saveEmployee()">
+            <i class="bx bx-save me-1"></i> Lưu
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../assets/vendor/libs/jquery/jquery.js"></script>
+  <script src="../assets/vendor/libs/popper/popper.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+  <script src="../assets/vendor/js/menu.js"></script>
+  <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+  <script src="../assets/js/main.js"></script>
+  <script src="../../js/api.js"></script>
+  <script src="../../js/common-navbar.js"></script>
+  <script>
+    // Đảm bảo Bootstrap được load trước khi sử dụng
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('🔵 DOM loaded, checking Bootstrap...');
+      console.log('🔍 Bootstrap available:', typeof bootstrap !== 'undefined');
+      
+      if (typeof bootstrap === 'undefined') {
+        console.error('❌ Bootstrap not loaded!');
+        // Thử load lại Bootstrap
+        const script = document.createElement('script');
+        script.src = '../assets/vendor/js/bootstrap.bundle.min.js';
+        script.onload = function() {
+          console.log('✅ Bootstrap loaded successfully');
+        };
+        script.onerror = function() {
+          console.error('❌ Failed to load Bootstrap');
+        };
+        document.head.appendChild(script);
+      }
+    });
+    let dataTable;
+    let departments = [];
+    let positions = [];
+
+    document.addEventListener('DOMContentLoaded', function() {
+      initEmployeePage();
+      loadDepartments();
+      loadPositions();
+      loadStatistics();
+      loadEmployees();
+    });
+
+    function initEmployeePage() {
+      console.log('🔵 [initEmployeePage] Checking auth...');
+      const token = localStorage.getItem('token');
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      
+
+      if (user.role !== 'Admin' && user.role !== 'Manager') {
+        console.log('❌ [initEmployeePage] Insufficient permissions:', user.role);
+        alert('Bạn không có quyền truy cập trang này!');
+        window.location.href = '/customer/index.html';
+        return;
+      }
+
+      console.log('✅ [initEmployeePage] Auth OK, role:', user.role);
+      
+      document.getElementById('userFullName').textContent = user.fullName || user.username;
+      
+      const roleElement = document.getElementById('userRole');
+      if (roleElement && user.role) {
+        const roleNames = {
+          'Admin': 'Quản trị viên',
+          'Manager': 'Quản lý',
+          'FrontDesk': 'Lễ tân'
+        };
+        roleElement.textContent = roleNames[user.role] || user.role;
+      }
+    }
+
+    async function loadDepartments() {
+      try {
+        const response = await fetch(`${API_BASE}/employeemanagement/departments`, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
+        departments = await response.json();
+        
+        const select = document.getElementById('department');
+        const filterSelect = document.getElementById('filterDepartment');
+        
+        select.innerHTML = '<option value="">-- Chọn phòng ban --</option>';
+        filterSelect.innerHTML = '<option value="">Tất cả</option>';
+        
+        departments.forEach(dept => {
+          select.innerHTML += `<option value="${dept.value}">${dept.label}</option>`;
+          filterSelect.innerHTML += `<option value="${dept.value}">${dept.label}</option>`;
+        });
+      } catch (error) {
+        console.error('Error loading departments:', error);
+      }
+    }
+
+    async function loadPositions() {
+      try {
+        const response = await fetch(`${API_BASE}/employeemanagement/positions`, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
+        positions = await response.json();
+        
+        const select = document.getElementById('position');
+        const filterSelect = document.getElementById('filterPosition');
+        
+        select.innerHTML = '<option value="">-- Chọn chức vụ --</option>';
+        filterSelect.innerHTML = '<option value="">Tất cả</option>';
+        
+        positions.forEach(pos => {
+          select.innerHTML += `<option value="${pos}">${pos}</option>`;
+          filterSelect.innerHTML += `<option value="${pos}">${pos}</option>`;
+        });
+      } catch (error) {
+        console.error('Error loading positions:', error);
+      }
+    }
+
+    async function loadStatistics() {
+      try {
+        const response = await fetch(`${API_BASE}/employeemanagement/statistics`, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
+        const stats = await response.json();
+        
+        document.getElementById('totalEmployees').textContent = stats.totalEmployees;
+        document.getElementById('activeEmployees').textContent = stats.activeEmployees;
+        document.getElementById('inactiveEmployees').textContent = stats.inactiveEmployees;
+        document.getElementById('totalDepartments').textContent = stats.byDepartment.length;
+      } catch (error) {
+        console.error('Error loading statistics:', error);
+      }
+    }
+
+    async function loadEmployees() {
+      console.log('🔵 [loadEmployees] Starting...');
+      const token = localStorage.getItem('token');
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      console.log('🔵 [loadEmployees] Token:', token ? token.substring(0, 20) + '...' : 'NULL');
+      console.log('🔵 [loadEmployees] User role:', user.role);
+      
+      const department = document.getElementById('filterDepartment').value;
+      const position = document.getElementById('filterPosition').value;
+      const isActive = document.getElementById('filterStatus').value;
+      
+      let url = `${API_BASE}/employeemanagement?`;
+      if (department) url += `department=${department}&`;
+      if (position) url += `position=${position}&`;
+      if (isActive !== '') url += `isActive=${isActive}&`;
+
+      console.log('🔵 [loadEmployees] URL:', url);
+
+      try {
+        const response = await fetch(url, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        console.log('🔵 [loadEmployees] Response status:', response.status);
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('❌ [loadEmployees] Error response:', errorText);
+          throw new Error(`Failed to load employees: ${response.status}`);
+        }
+
+        const employees = await response.json();
+        console.log('✅ [loadEmployees] Employees data:', employees);
+        console.log('✅ [loadEmployees] Total employees:', employees.length);
+        
+        if (dataTable) dataTable.destroy();
+
+        const tbody = document.querySelector('#employeesTable tbody');
+        tbody.innerHTML = employees.map(emp => `
+          <tr>
+            <td>${emp.employeeId}</td>
+            <td><strong>${emp.fullName}</strong></td>
+            <td>${emp.email}</td>
+            <td>${emp.phoneNumber || '-'}</td>
+            <td><span class="badge bg-info">${emp.department}</span></td>
+            <td>${emp.position}</td>
+            <td>${emp.isActive ? '<span class="badge bg-success">Đang làm</span>' : '<span class="badge bg-danger">Đã nghỉ</span>'}</td>
+            <td>
+              <div class="dropdown">
+                <button type="button" class="btn btn-sm btn-icon dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                  <i class="bx bx-dots-vertical-rounded"></i>
+                </button>
+                <div class="dropdown-menu">
+                  <a class="dropdown-item" href="javascript:void(0);" onclick="editEmployee(${emp.employeeId})">
+                    <i class="bx bx-edit-alt me-1"></i> Sửa
+                  </a>
+                  ${emp.isActive ? `
+                    <a class="dropdown-item" href="javascript:void(0);" onclick="terminateEmployee(${emp.employeeId})">
+                      <i class="bx bx-lock me-1"></i> Chấm dứt HĐ
+                    </a>
+                  ` : `
+                    <a class="dropdown-item" href="javascript:void(0);" onclick="reactivateEmployee(${emp.employeeId})">
+                      <i class="bx bx-lock-open me-1"></i> Kích hoạt lại
+                    </a>
+                  `}
+                  <div class="dropdown-divider"></div>
+                  <a class="dropdown-item text-danger" href="javascript:void(0);" onclick="deleteEmployee(${emp.employeeId})">
+                    <i class="bx bx-trash me-1"></i> Xóa
+                  </a>
+                </div>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+
+        dataTable = $('#employeesTable').DataTable({
+          language: { url: '/admin/local-plugins/datatables/i18n/vi.json' },
+          pageLength: 25,
+          order: [[0, 'desc']]
+        });
+
+      } catch (error) {
+        console.error('❌ [loadEmployees] Error:', error);
+        alert('Lỗi khi tải danh sách nhân viên: ' + error.message);
+      }
+    }
+
+    function openCreateModal() {
+      console.log('🔵 openCreateModal called');
+      
+      try {
+        document.getElementById('modalTitle').textContent = 'Thêm Nhân viên Mới';
+        document.getElementById('employeeForm').reset();
+        document.getElementById('employeeId').value = '';
+        
+        console.log('✅ Form reset successful');
+        console.log('🔍 Bootstrap available:', typeof bootstrap !== 'undefined');
+        
+        if (typeof bootstrap === 'undefined') {
+          console.error('❌ Bootstrap not loaded!');
+          alert('Lỗi: Bootstrap chưa được tải. Vui lòng refresh trang.');
+          return;
+        }
+        
+        const modalElement = document.getElementById('employeeModal');
+        console.log('🔍 Modal element:', modalElement);
+        
+        if (!modalElement) {
+          console.error('❌ Modal element not found!');
+          alert('Lỗi: Không tìm thấy modal element.');
+          return;
+        }
+        
+        const modal = new bootstrap.Modal(modalElement);
+        console.log('✅ Modal instance created');
+        modal.show();
+        console.log('✅ Modal show() called');
+      } catch (error) {
+        console.error('❌ Error in openCreateModal:', error);
+        alert('Lỗi khi mở modal: ' + error.message);
+      }
+    }
+
+    async function editEmployee(id) {
+      try {
+        const response = await fetch(`${API_BASE}/employeemanagement/${id}`, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
+
+        if (!response.ok) throw new Error('Failed to load employee');
+
+        const emp = await response.json();
+        
+        document.getElementById('modalTitle').textContent = 'Sửa Nhân viên';
+        document.getElementById('employeeId').value = emp.employeeId;
+        document.getElementById('fullName').value = emp.fullName;
+        document.getElementById('email').value = emp.email;
+        document.getElementById('phoneNumber').value = emp.phoneNumber || '';
+        document.getElementById('department').value = emp.department;
+        document.getElementById('position').value = emp.position;
+        document.getElementById('salary').value = emp.salary || '';
+        document.getElementById('idCardNumber').value = emp.idCardNumber || '';
+        document.getElementById('dateOfBirth').value = emp.dateOfBirth ? emp.dateOfBirth.split('T')[0] : '';
+        document.getElementById('hireDate').value = emp.hireDate ? emp.hireDate.split('T')[0] : '';
+        document.getElementById('address').value = emp.address || '';
+
+        const modal = new bootstrap.Modal(document.getElementById('employeeModal'));
+        modal.show();
+
+      } catch (error) {
+        console.error('Error loading employee:', error);
+        alert('Lỗi khi tải thông tin nhân viên!');
+      }
+    }
+
+    async function saveEmployee() {
+      const form = document.getElementById('employeeForm');
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      const employeeId = document.getElementById('employeeId').value;
+      const data = {
+        fullName: document.getElementById('fullName').value,
+        email: document.getElementById('email').value,
+        phoneNumber: document.getElementById('phoneNumber').value,
+        department: document.getElementById('department').value,
+        position: document.getElementById('position').value,
+        salary: document.getElementById('salary').value ? parseFloat(document.getElementById('salary').value) : null,
+        idCardNumber: document.getElementById('idCardNumber').value,
+        dateOfBirth: document.getElementById('dateOfBirth').value || null,
+        hireDate: document.getElementById('hireDate').value || null,
+        address: document.getElementById('address').value
+      };
+
+      try {
+        const url = employeeId ? `${API_BASE}/employeemanagement/${employeeId}` : `${API_BASE}/employeemanagement`;
+        const method = employeeId ? 'PUT' : 'POST';
+
+        const response = await fetch(url, {
+          method: method,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify(data)
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || 'Failed to save employee');
+        }
+
+        alert(employeeId ? 'Cập nhật nhân viên thành công!' : 'Thêm nhân viên thành công!');
+        bootstrap.Modal.getInstance(document.getElementById('employeeModal')).hide();
+        loadEmployees();
+        loadStatistics();
+
+      } catch (error) {
+        console.error('Error saving employee:', error);
+        alert('Lỗi: ' + error.message);
+      }
+    }
+
+    async function terminateEmployee(id) {
+      const reason = prompt('Lý do chấm dứt hợp đồng:');
+      if (!reason) return;
+
+      try {
+        const response = await fetch(`${API_BASE}/employeemanagement/${id}/terminate`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify({ reason, terminationDate: new Date().toISOString() })
+        });
+
+        if (!response.ok) throw new Error('Failed to terminate employee');
+
+        alert('Chấm dứt hợp đồng thành công!');
+        loadEmployees();
+        loadStatistics();
+
+      } catch (error) {
+        console.error('Error terminating employee:', error);
+        alert('Lỗi khi chấm dứt hợp đồng!');
+      }
+    }
+
+    async function reactivateEmployee(id) {
+      if (!confirm('Bạn có chắc muốn kích hoạt lại nhân viên này?')) return;
+
+      try {
+        const response = await fetch(`${API_BASE}/employeemanagement/${id}/reactivate`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
+
+        if (!response.ok) throw new Error('Failed to reactivate employee');
+
+        alert('Kích hoạt lại nhân viên thành công!');
+        loadEmployees();
+        loadStatistics();
+
+      } catch (error) {
+        console.error('Error reactivating employee:', error);
+        alert('Lỗi khi kích hoạt lại nhân viên!');
+      }
+    }
+
+    async function deleteEmployee(id) {
+      if (!confirm('Bạn có chắc muốn xóa nhân viên này? Thao tác này không thể hoàn tác!')) return;
+
+      try {
+        const response = await fetch(`${API_BASE}/employeemanagement/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
+
+        if (!response.ok) throw new Error('Failed to delete employee');
+
+        alert('Xóa nhân viên thành công!');
+        loadEmployees();
+        loadStatistics();
+
+      } catch (error) {
+        console.error('Error deleting employee:', error);
+        alert('Lỗi khi xóa nhân viên!');
+      }
+    }
+
+    // logout() function đã được định nghĩa trong api.js
+  </script>
+</body>
+</html>
+

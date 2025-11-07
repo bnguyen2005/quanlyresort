@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Debug Rooms API Connection</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f7f8fa;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 6px 18px rgba(17,17,17,0.06);
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #111;
+            margin-bottom: 24px;
+        }
+        .test-section {
+            margin-bottom: 24px;
+            padding: 16px;
+            border: 1px solid #e6e9ee;
+            border-radius: 8px;
+            background: #fafbfc;
+        }
+        .test-section h3 {
+            color: #007aff;
+            margin-top: 0;
+        }
+        button {
+            background: #007aff;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .result {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 16px;
+            margin-top: 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .success {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+        .error {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+        .warning {
+            border-color: #ffc107;
+            background: #fff3cd;
+        }
+        .loading {
+            color: #007aff;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-success { background: #28a745; }
+        .status-error { background: #dc3545; }
+        .status-warning { background: #ffc107; }
+        .status-loading { background: #007aff; animation: pulse 1s infinite; }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .url-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .url-card {
+            background: white;
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid #e6e9ee;
+        }
+        .url-card h4 {
+            margin-top: 0;
+            color: #333;
+        }
+        .url {
+            font-family: monospace;
+            background: #f8f9fa;
+            padding: 8px;
+            border-radius: 4px;
+            margin: 8px 0;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Debug Rooms API Connection</h1>
+        
+        <!-- Server Status Check -->
+        <div class="test-section">
+            <h3>1. 🌐 Kiểm tra Server Status</h3>
+            <p>Kiểm tra các URL có thể để xác định server đang chạy ở đâu:</p>
+            <div class="url-list">
+                <div class="url-card">
+                    <h4>HTTP Ports</h4>
+                    <div class="url">http://localhost:5130</div>
+                    <div class="url">http://localhost:5140</div>
+                    <div class="url">http://127.0.0.1:5130</div>
+                </div>
+                <div class="url-card">
+                    <h4>HTTPS Ports</h4>
+                    <div class="url">https://localhost:7130</div>
+                    <div class="url">https://localhost:5130</div>
+                    <div class="url">https://127.0.0.1:7130</div>
+                </div>
+            </div>
+            <button onclick="checkAllServers()">Kiểm tra tất cả servers</button>
+            <div class="result" id="serverStatus"></div>
+        </div>
+
+        <!-- API Endpoints Check -->
+        <div class="test-section">
+            <h3>2. 🔗 Kiểm tra API Endpoints</h3>
+            <p>Kiểm tra các endpoint API chính:</p>
+            <button onclick="testApiEndpoints()">Test API Endpoints</button>
+            <div class="result" id="apiEndpoints"></div>
+        </div>
+
+        <!-- CORS Check -->
+        <div class="test-section">
+            <h3>3. 🚫 Kiểm tra CORS</h3>
+            <p>Kiểm tra CORS headers và preflight requests:</p>
+            <button onclick="testCors()">Test CORS</button>
+            <div class="result" id="corsTest"></div>
+        </div>
+
+        <!-- Authentication Check -->
+        <div class="test-section">
+            <h3>4. 🔐 Kiểm tra Authentication</h3>
+            <p>Kiểm tra login và JWT token:</p>
+            <button onclick="testAuth()">Test Authentication</button>
+            <div class="result" id="authTest"></div>
+        </div>
+
+        <!-- Rooms Data Check -->
+        <div class="test-section">
+            <h3>5. 🏨 Kiểm tra Rooms Data</h3>
+            <p>Kiểm tra dữ liệu phòng và loại phòng:</p>
+            <button onclick="testRoomsData()">Test Rooms Data</button>
+            <div class="result" id="roomsData"></div>
+        </div>
+
+        <!-- Network Issues -->
+        <div class="test-section">
+            <h3>6. 🌐 Kiểm tra Network Issues</h3>
+            <p>Kiểm tra các vấn đề mạng phổ biến:</p>
+            <button onclick="testNetworkIssues()">Test Network Issues</button>
+            <div class="result" id="networkIssues"></div>
+        </div>
+
+        <!-- Quick Fixes -->
+        <div class="test-section">
+            <h3>7. 🛠️ Quick Fixes</h3>
+            <p>Các giải pháp nhanh để khắc phục:</p>
+            <button onclick="showQuickFixes()">Hiển thị Quick Fixes</button>
+            <div class="result" id="quickFixes"></div>
+        </div>
+    </div>
+
+    <script>
+        let workingServer = null;
+        let authToken = null;
+
+        function showResult(elementId, data, type = 'success') {
+            const element = document.getElementById(elementId);
+            element.textContent = JSON.stringify(data, null, 2);
+            element.className = `result ${type}`;
+        }
+
+        function showLoading(elementId) {
+            const element = document.getElementById(elementId);
+            element.textContent = 'Loading...';
+            element.className = 'result loading';
+        }
+
+        async function checkServer(url) {
+            try {
+                const response = await fetch(url, {
+                    method: 'HEAD',
+                    mode: 'no-cors'
+                });
+                return { url, status: 'success', message: 'Server is running' };
+            } catch (error) {
+                try {
+                    const response = await fetch(url + '/swagger', {
+                        method: 'GET',
+                        mode: 'cors'
+                    });
+                    if (response.ok) {
+                        return { url, status: 'success', message: 'Server is running with Swagger' };
+                    }
+                } catch (e) {
+                    return { url, status: 'error', message: error.message };
+                }
+            }
+        }
+
+        async function checkAllServers() {
+            showLoading('serverStatus');
+            
+            const urls = [
+                'http://localhost:5130',
+                'http://localhost:5140', 
+                'http://127.0.0.1:5130',
+                'https://localhost:7130',
+                'https://localhost:5130',
+                'https://127.0.0.1:7130'
+            ];
+
+            const results = [];
+            for (const url of urls) {
+                try {
+                    const response = await fetch(url + '/swagger', {
+                        method: 'GET',
+                        mode: 'cors'
+                    });
+                    if (response.ok) {
+                        results.push({ url, status: 'success', message: '✅ Server is running with Swagger' });
+                        if (!workingServer) workingServer = url;
+                    } else {
+                        results.push({ url, status: 'warning', message: `⚠️ Server responded with ${response.status}` });
+                    }
+                } catch (error) {
+                    results.push({ url, status: 'error', message: `❌ ${error.message}` });
+                }
+            }
+
+            showResult('serverStatus', results);
+        }
+
+        async function testApiEndpoints() {
+            showLoading('apiEndpoints');
+            
+            if (!workingServer) {
+                showResult('apiEndpoints', { error: 'No working server found. Please run server check first.' }, 'error');
+                return;
+            }
+
+            const endpoints = [
+                '/api/rooms',
+                '/api/room-types',
+                '/api/rooms/statistics',
+                '/api/rooms/floors'
+            ];
+
+            const results = [];
+            for (const endpoint of endpoints) {
+                try {
+                    const response = await fetch(workingServer + endpoint, {
+                        method: 'GET',
+                        mode: 'cors'
+                    });
+                    results.push({
+                        endpoint,
+                        status: response.status,
+                        statusText: response.statusText,
+                        ok: response.ok
+                    });
+                } catch (error) {
+                    results.push({
+                        endpoint,
+                        error: error.message
+                    });
+                }
+            }
+
+            showResult('apiEndpoints', results);
+        }
+
+        async function testCors() {
+            showLoading('corsTest');
+            
+            if (!workingServer) {
+                showResult('corsTest', { error: 'No working server found. Please run server check first.' }, 'error');
+                return;
+            }
+
+            try {
+                // Test preflight request
+                const response = await fetch(workingServer + '/api/rooms', {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Origin': window.location.origin,
+                        'Access-Control-Request-Method': 'GET',
+                        'Access-Control-Request-Headers': 'Authorization, Content-Type'
+                    }
+                });
+
+                const corsHeaders = {
+                    'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+                    'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
+                    'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers'),
+                    'Access-Control-Allow-Credentials': response.headers.get('Access-Control-Allow-Credentials')
+                };
+
+                showResult('corsTest', {
+                    preflightStatus: response.status,
+                    corsHeaders,
+                    message: response.ok ? 'CORS is properly configured' : 'CORS might have issues'
+                });
+            } catch (error) {
+                showResult('corsTest', { error: error.message }, 'error');
+            }
+        }
+
+        async function testAuth() {
+            showLoading('authTest');
+            
+            if (!workingServer) {
+                showResult('authTest', { error: 'No working server found. Please run server check first.' }, 'error');
+                return;
+            }
+
+            try {
+                // Test login
+                const loginResponse = await fetch(workingServer + '/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: 'admin@resort.test',
+                        password: 'P@ssw0rd123'
+                    })
+                });
+
+                if (loginResponse.ok) {
+                    const loginData = await loginResponse.json();
+                    authToken = loginData.token;
+                    
+                    // Test authenticated request
+                    const authResponse = await fetch(workingServer + '/api/rooms/statistics', {
+                        headers: {
+                            'Authorization': `Bearer ${authToken}`
+                        }
+                    });
+
+                    showResult('authTest', {
+                        login: 'Success',
+                        token: authToken ? 'Token received' : 'No token',
+                        authenticatedRequest: authResponse.ok ? 'Success' : `Failed: ${authResponse.status}`
+                    });
+                } else {
+                    showResult('authTest', { 
+                        login: 'Failed', 
+                        status: loginResponse.status,
+                        message: 'Login failed'
+                    }, 'error');
+                }
+            } catch (error) {
+                showResult('authTest', { error: error.message }, 'error');
+            }
+        }
+
+        async function testRoomsData() {
+            showLoading('roomsData');
+            
+            if (!workingServer) {
+                showResult('roomsData', { error: 'No working server found. Please run server check first.' }, 'error');
+                return;
+            }
+
+            try {
+                // Test rooms endpoint
+                const roomsResponse = await fetch(workingServer + '/api/rooms');
+                const roomsData = await roomsResponse.ok ? await roomsResponse.json() : null;
+
+                // Test room types endpoint
+                const roomTypesResponse = await fetch(workingServer + '/api/room-types');
+                const roomTypesData = await roomTypesResponse.ok ? await roomTypesResponse.json() : null;
+
+                // Test statistics endpoint
+                let statsData = null;
+                if (authToken) {
+                    try {
+                        const statsResponse = await fetch(workingServer + '/api/rooms/statistics', {
+                            headers: {
+                                'Authorization': `Bearer ${authToken}`
+                            }
+                        });
+                        statsData = statsResponse.ok ? await statsResponse.json() : null;
+                    } catch (e) {
+                        statsData = { error: e.message };
+                    }
+                }
+
+                showResult('roomsData', {
+                    rooms: {
+                        status: roomsResponse.status,
+                        count: roomsData ? roomsData.length : 0,
+                        data: roomsData ? roomsData.slice(0, 2) : null // Show first 2 rooms
+                    },
+                    roomTypes: {
+                        status: roomTypesResponse.status,
+                        count: roomTypesData ? roomTypesData.length : 0,
+                        data: roomTypesData ? roomTypesData.slice(0, 2) : null // Show first 2 room types
+                    },
+                    statistics: statsData
+                });
+            } catch (error) {
+                showResult('roomsData', { error: error.message }, 'error');
+            }
+        }
+
+        async function testNetworkIssues() {
+            showLoading('networkIssues');
+            
+            const issues = [];
+            
+            // Check if we're on HTTPS trying to call HTTP
+            if (window.location.protocol === 'https:' && workingServer && workingServer.startsWith('http:')) {
+                issues.push({
+                    type: 'Mixed Content',
+                    severity: 'high',
+                    message: 'HTTPS page trying to call HTTP API - this will be blocked by browsers',
+                    solution: 'Use HTTPS API or serve page over HTTP'
+                });
+            }
+
+            // Check if API_BASE matches working server
+            if (workingServer && !workingServer.includes('5130')) {
+                issues.push({
+                    type: 'Port Mismatch',
+                    severity: 'high',
+                    message: `Frontend expects port 5130 but server is running on ${workingServer}`,
+                    solution: 'Update API_BASE in frontend files to match server port'
+                });
+            }
+
+            // Check CORS
+            if (workingServer) {
+                try {
+                    const response = await fetch(workingServer + '/api/rooms', {
+                        method: 'GET',
+                        mode: 'cors'
+                    });
+                    if (!response.ok && response.status === 0) {
+                        issues.push({
+                            type: 'CORS Error',
+                            severity: 'high',
+                            message: 'CORS preflight failed or blocked',
+                            solution: 'Check CORS configuration in Program.cs'
+                        });
+                    }
+                } catch (error) {
+                    if (error.message.includes('CORS')) {
+                        issues.push({
+                            type: 'CORS Error',
+                            severity: 'high',
+                            message: error.message,
+                            solution: 'Check CORS configuration in Program.cs'
+                        });
+                    }
+                }
+            }
+
+            showResult('networkIssues', {
+                issuesFound: issues.length,
+                issues: issues
+            }, issues.length > 0 ? 'warning' : 'success');
+        }
+
+        function showQuickFixes() {
+            const fixes = [
+                {
+                    problem: 'Server not running',
+                    solution: 'Run: dotnet run --urls "http://localhost:5130"',
+                    command: 'cd "D:\\Lam\\QuanLyResort-main (1)\\QuanLyResort-main\\QuanLyResort" && dotnet run --urls "http://localhost:5130"'
+                },
+                {
+                    problem: 'Port mismatch (server on 7130, frontend expects 5130)',
+                    solution: 'Update API_BASE in frontend files',
+                    command: 'Change API_BASE from "http://localhost:5130/api" to "https://localhost:7130/api"'
+                },
+                {
+                    problem: 'CORS issues',
+                    solution: 'Check CORS configuration in Program.cs',
+                    command: 'Ensure CORS policy includes your frontend origin'
+                },
+                {
+                    problem: 'Authentication issues',
+                    solution: 'Login first to get JWT token',
+                    command: 'Go to /customer/login.html and login with admin@resort.test / P@ssw0rd123'
+                },
+                {
+                    problem: 'No data in database',
+                    solution: 'Check if DataSeeder ran successfully',
+                    command: 'Check console output when starting server for seeder messages'
+                }
+            ];
+
+            showResult('quickFixes', fixes);
+        }
+
+        // Auto-run server check on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAllServers();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧹 FORCE CLEAR ALL CACHE & RELOAD</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+        .warning { background: #fff3cd; padding: 20px; border-radius: 10px; margin: 20px 0; }
+        .success { background: #d4edda; padding: 20px; border-radius: 10px; margin: 20px 0; }
+        button { padding: 15px 30px; font-size: 18px; margin: 10px; cursor: pointer; }
+        .danger { background: #dc3545; color: white; }
+        .primary { background: #007bff; color: white; }
+    </style>
+</head>
+<body>
+    <h1>🧹 FORCE CLEAR ALL CACHE & RELOAD</h1>
+    
+    <div class="warning">
+        <h2>⚠️ QUAN TRỌNG:</h2>
+        <p>Bạn PHẢI thực hiện CẢ 3 BƯỚC sau theo thứ tự:</p>
+        <ol>
+            <li><strong>Bước 1:</strong> Click "CLEAR ALL CACHE" bên dưới</li>
+            <li><strong>Bước 2:</strong> Đóng TẤT CẢ tab của localhost:5130</li>
+            <li><strong>Bước 3:</strong> Mở tab mới và truy cập: <code>http://localhost:5130/admin/html/rooms-new.html</code></li>
+        </ol>
+    </div>
+    
+    <button class="danger" onclick="clearAllCache()">CLEAR ALL CACHE</button>
+    <button class="primary" onclick="openNewRoomsPage()">OPEN NEW ROOMS PAGE</button>
+    
+    <div id="result"></div>
+
+    <script>
+        async function clearAllCache() {
+            const result = document.getElementById('result');
+            result.innerHTML = '<h3>⏳ Clearing cache...</h3>';
+            
+            try {
+                // 1. Unregister all service workers
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    for (const registration of registrations) {
+                        await registration.unregister();
+                        result.innerHTML += '<p>✅ Unregistered Service Worker</p>';
+                    }
+                }
+                
+                // 2. Clear all caches
+                if ('caches' in window) {
+                    const cacheNames = await caches.keys();
+                    for (const cacheName of cacheNames) {
+                        await caches.delete(cacheName);
+                        result.innerHTML += '<p>✅ Deleted cache: ' + cacheName + '</p>';
+                    }
+                }
+                
+                // 3. Clear localStorage
+                localStorage.clear();
+                result.innerHTML += '<p>✅ Cleared localStorage</p>';
+                
+                // 4. Clear sessionStorage
+                sessionStorage.clear();
+                result.innerHTML += '<p>✅ Cleared sessionStorage</p>';
+                
+                result.innerHTML += '<div class="success"><h3>✅ ALL CACHE CLEARED!</h3><p>Bây giờ hãy:</p><ol><li>Đóng TẤT CẢ tab localhost:5130</li><li>Mở tab mới và click "OPEN NEW ROOMS PAGE"</li></ol></div>';
+                
+            } catch (error) {
+                result.innerHTML += '<p>❌ Error: ' + error.message + '</p>';
+            }
+        }
+        
+        function openNewRoomsPage() {
+            // Open new page with timestamp to ensure fresh load
+            const timestamp = Date.now();
+            window.open(`/admin/html/rooms-new.html?v=${timestamp}&nocache=1&force=1`, '_blank');
+        }
+    </script>
+</body>
+</html>

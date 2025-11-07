@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 Quick API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .result { background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; }
+        .error { background: #f8d7da; }
+        button { padding: 10px 20px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Quick API Test</h1>
+    
+    <button onclick="testRooms()">Test /api/rooms</button>
+    <button onclick="testRoomTypes()">Test /api/room-types</button>
+    <button onclick="testFloors()">Test /api/rooms/floors</button>
+    <button onclick="testLogin()">Test Login</button>
+    <button onclick="testStatistics()">Test Statistics</button>
+    
+    <div id="results"></div>
+
+    <script>
+        const API_BASE = 'http://localhost:5130/api';
+        
+        function showResult(message, isError = false) {
+            const div = document.createElement('div');
+            div.className = `result ${isError ? 'error' : 'success'}`;
+            div.textContent = message;
+            document.getElementById('results').appendChild(div);
+        }
+        
+        async function testRooms() {
+            try {
+                const response = await fetch(`${API_BASE}/rooms`);
+                const data = await response.json();
+                showResult(`✅ /api/rooms: ${response.status} - ${data.length} rooms`);
+            } catch (error) {
+                showResult(`❌ /api/rooms: ${error.message}`, true);
+            }
+        }
+        
+        async function testRoomTypes() {
+            try {
+                const response = await fetch(`${API_BASE}/room-types`);
+                const data = await response.json();
+                showResult(`✅ /api/room-types: ${response.status} - ${data.length} types`);
+            } catch (error) {
+                showResult(`❌ /api/room-types: ${error.message}`, true);
+            }
+        }
+        
+        async function testFloors() {
+            try {
+                const response = await fetch(`${API_BASE}/rooms/floors`);
+                const data = await response.json();
+                showResult(`✅ /api/rooms/floors: ${response.status} - ${data.length} floors`);
+            } catch (error) {
+                showResult(`❌ /api/rooms/floors: ${error.message}`, true);
+            }
+        }
+        
+        async function testLogin() {
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'admin@resort.test',
+                        password: 'P@ssw0rd123'
+                    })
+                });
+                const data = await response.json();
+                if (data.token) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    showResult(`✅ Login: ${response.status} - Token received`);
+                } else {
+                    showResult(`❌ Login: ${response.status} - No token`, true);
+                }
+            } catch (error) {
+                showResult(`❌ Login: ${error.message}`, true);
+            }
+        }
+        
+        async function testStatistics() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_BASE}/rooms/statistics`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+                showResult(`✅ /api/rooms/statistics: ${response.status} - ${data.totalRooms} total rooms`);
+            } catch (error) {
+                showResult(`❌ /api/rooms/statistics: ${error.message}`, true);
+            }
+        }
+        
+        // Auto-test on page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                testRooms();
+                testRoomTypes();
+                testFloors();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tài khoản của tôi | Resort</title>
+  <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/globals.css">
+  <link rel="stylesheet" href="/css/grid.css">
+  <link rel="stylesheet" href="css/navbar-auth.css">
+  <link rel="stylesheet" href="css/open-iconic-bootstrap.min.css">
+  <style>
+    body{font-family:'Poppins',sans-serif;padding-top:0;overflow-x:hidden;background:#f8f9fa}
+    .ftco-navbar{position:sticky!important;top:0!important;z-index:1030!important;background-color:#1a1a1a!important;width:100%!important;margin:0!important}
+    
+    .profile-header{background:linear-gradient(135deg,#c8a97e 0%,#b89968 100%);padding:60px 0;color:#fff;text-align:center}
+    .profile-avatar{width:120px;height:120px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:60px;box-shadow:0 10px 40px rgba(0,0,0,0.2)}
+    
+    .profile-card{background:#fff;padding:40px;border-radius:20px;box-shadow:0 10px 40px rgba(0,0,0,0.1);margin-top:-50px;position:relative;z-index:10;animation:slideUp 0.8s ease}
+    .info-row{display:flex;padding:20px 0;border-bottom:1px solid #e9ecef;align-items:center}
+    .info-row:last-child{border-bottom:none}
+    .info-label{flex:0 0 200px;color:#666;font-weight:500}
+    .info-value{flex:1;color:#1a1a1a;font-weight:600}
+    .info-value input,.info-value select,.info-value textarea{width:100%;border:none;background:transparent;color:#1a1a1a;font-weight:600;padding:5px 0}
+    .info-value input:focus,.info-value select:focus,.info-value textarea:focus{outline:none;border-bottom:2px solid #c8a97e}
+    
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;margin:30px 0}
+    .stat-card{background:linear-gradient(135deg,#fff 0%,#f8f9fa 100%);padding:25px;border-radius:15px;text-align:center;box-shadow:0 5px 15px rgba(0,0,0,0.1)}
+    .stat-number{font-size:36px;font-weight:700;color:#c8a97e;display:block;margin-bottom:10px}
+    .stat-label{color:#666;font-size:14px;text-transform:uppercase}
+    
+    .btn-edit{position:absolute;top:20px;right:20px}
+    
+    @keyframes slideUp{from{opacity:0;transform:translateY(50px)}to{opacity:1;transform:translateY(0)}}
+  </style>
+</head>
+<body>
+  <!-- Header placeholder - will be loaded by load-header.js -->
+  <div id="header-placeholder"></div>
+  
+  <!-- Load header component -->
+  <script src="js/load-header.js"></script>
+
+  <div class="profile-header">
+    <div class="container">
+      <div class="profile-avatar">👤</div>
+      <h1 class="display-5 mb-2" id="profileName">Đang tải...</h1>
+      <p class="lead mb-0" id="profileEmail">Đang tải...</p>
+    </div>
+  </div>
+
+  <div class="container mb-5">
+    <div class="profile-card position-relative">
+      <button class="btn btn-outline-primary btn-edit" id="btnEdit" onclick="toggleEdit()">✏️ Chỉnh sửa</button>
+      <button class="btn btn-primary btn-edit" id="btnSave" onclick="saveProfile()" style="display:none">💾 Lưu thay đổi</button>
+      <button class="btn btn-outline-secondary btn-edit" id="btnCancel" onclick="cancelEdit()" style="display:none">❌ Hủy</button>
+      
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-number" id="totalBookings">0</span>
+          <span class="stat-label">Đặt phòng</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number" id="totalSpent">0 ₫</span>
+          <span class="stat-label">Tổng chi tiêu</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number" id="loyaltyPoints">0</span>
+          <span class="stat-label">Điểm thưởng</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number" id="customerType">-</span>
+          <span class="stat-label">Loại khách hàng</span>
+        </div>
+      </div>
+
+      <h3 class="mb-4 mt-4">Thông tin cá nhân</h3>
+      <div class="info-row">
+        <span class="info-label">Họ và tên:</span>
+        <span class="info-value">
+          <input type="text" id="fullName" value="" readonly />
+        </span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Email:</span>
+        <span class="info-value">
+          <input type="email" id="email" value="" readonly />
+        </span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Số điện thoại:</span>
+        <span class="info-value">
+          <input type="tel" id="phoneNumber" value="" readonly />
+        </span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Ngày sinh:</span>
+        <span class="info-value">
+          <input type="date" id="dateOfBirth" value="" readonly />
+        </span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Quốc tịch:</span>
+        <span class="info-value">
+          <input type="text" id="nationality" value="" readonly />
+        </span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Địa chỉ:</span>
+        <span class="info-value">
+          <textarea id="address" rows="2" readonly></textarea>
+        </span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">CMND/CCCD:</span>
+        <span class="info-value">
+          <input type="text" id="idCardNumber" value="" readonly />
+        </span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Hộ chiếu:</span>
+        <span class="info-value">
+          <input type="text" id="passportNumber" value="" readonly />
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/jquery.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js/popper.min.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="js/navbar-auth.js"></script>
+  <script>
+    let originalData = {};
+    let customerId = null;
+    let isEditing = false;
+
+    function vnd(n) {
+      try {
+        return new Intl.NumberFormat('vi-VN', {style:'currency', currency:'VND'}).format(n || 0);
+      } catch(_) {
+        return (n || 0) + '₫';
+      }
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      return d.toISOString().split('T')[0];
+    }
+
+    async function loadProfile() {
+      try {
+        const token = localStorage.getItem('token');
+        const userStr = localStorage.getItem('user');
+        
+        if (!token || !userStr) {
+          showToast('Vui lòng đăng nhập', 'warning');
+          setTimeout(() => window.location.href = '../admin/html/login.html', 2000);
+          return;
+        }
+
+        function getCustomerIdFromToken(token) {
+          try {
+            const parts = token.split('.');
+            if (parts.length >= 2) {
+              const payload = JSON.parse(atob(parts[1]));
+              return payload.CustomerId || payload.customerId || null;
+            }
+          } catch(e) {
+            console.warn('Error decoding token:', e);
+          }
+          return null;
+        }
+        
+        let customerIdFromToken = getCustomerIdFromToken(token);
+        const user = JSON.parse(userStr);
+        customerId = customerIdFromToken || user.customerId || user.userId || user.CustomerId;
+        
+        console.log('🔵 [loadProfile] CustomerId from token:', customerIdFromToken);
+        console.log('🔵 [loadProfile] CustomerId from user:', user.customerId || user.userId || user.CustomerId);
+        console.log('🔵 [loadProfile] Final CustomerId:', customerId);
+        
+        if (!customerId) {
+          showToast('Không tìm thấy thông tin khách hàng. Vui lòng đăng nhập lại', 'danger');
+          setTimeout(() => window.location.href = '../admin/html/login.html', 2000);
+          return;
+        }
+
+        showPageLoading('Đang tải thông tin...');
+        
+        // Lấy thông tin customer từ API
+        const API_CUSTOMERS = location.origin + '/api/customermanagement/' + customerId + '?_=' + Date.now();
+        const resp = await fetch(API_CUSTOMERS, {
+          cache: 'no-store',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!resp.ok) {
+          throw new Error('Không thể tải thông tin');
+        }
+
+        const customer = await resp.json();
+        originalData = {...customer};
+        renderProfile(customer);
+        
+      } catch(e) {
+        console.error('Error loading profile:', e);
+        showToast('Lỗi tải thông tin: ' + e.message, 'danger');
+      } finally {
+        hidePageLoading();
+      }
+    }
+
+    function renderProfile(customer) {
+      document.getElementById('profileName').textContent = customer.fullName || customer.email || 'Khách hàng';
+      document.getElementById('profileEmail').textContent = customer.email || '';
+      
+      document.getElementById('fullName').value = customer.fullName || '';
+      document.getElementById('email').value = customer.email || '';
+      document.getElementById('phoneNumber').value = customer.phoneNumber || '';
+      document.getElementById('dateOfBirth').value = formatDate(customer.dateOfBirth);
+      document.getElementById('nationality').value = customer.nationality || 'Vietnam';
+      document.getElementById('address').value = customer.address || '';
+      document.getElementById('idCardNumber').value = customer.idCardNumber || '';
+      document.getElementById('passportNumber').value = customer.passportNumber || '';
+      
+      document.getElementById('totalSpent').textContent = vnd(customer.totalSpent || 0);
+      document.getElementById('loyaltyPoints').textContent = customer.loyaltyPoints || 0;
+      document.getElementById('customerType').textContent = customer.customerType === 'VIP' ? 'VIP' : 'Thường';
+      
+      // Load booking count
+      loadBookingCount();
+    }
+
+    async function loadBookingCount() {
+      try {
+        const token = localStorage.getItem('token');
+        const API_BOOKINGS = location.origin + '/api/bookings/customer/' + customerId + '?_=' + Date.now();
+        const resp = await fetch(API_BOOKINGS, {
+          cache: 'no-store',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (resp.ok) {
+          const bookings = await resp.json();
+          document.getElementById('totalBookings').textContent = Array.isArray(bookings) ? bookings.length : 0;
+        }
+      } catch(e) {
+        console.warn('Could not load booking count:', e);
+      }
+    }
+
+    function toggleEdit() {
+      isEditing = !isEditing;
+      const inputs = document.querySelectorAll('.info-value input, .info-value textarea, .info-value select');
+      inputs.forEach(input => {
+        input.readOnly = !isEditing;
+        if (isEditing) {
+          input.style.borderBottom = '2px solid #c8a97e';
+          input.style.padding = '5px 10px';
+        } else {
+          input.style.borderBottom = 'none';
+          input.style.padding = '5px 0';
+        }
+      });
+      
+      document.getElementById('btnEdit').style.display = isEditing ? 'none' : 'inline-block';
+      document.getElementById('btnSave').style.display = isEditing ? 'inline-block' : 'none';
+      document.getElementById('btnCancel').style.display = isEditing ? 'inline-block' : 'none';
+    }
+
+    function cancelEdit() {
+      renderProfile(originalData);
+      toggleEdit();
+    }
+
+    async function saveProfile() {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          showToast('Vui lòng đăng nhập lại', 'warning');
+          return;
+        }
+
+        const updateData = {
+          fullName: document.getElementById('fullName').value,
+          email: document.getElementById('email').value,
+          phoneNumber: document.getElementById('phoneNumber').value,
+          dateOfBirth: document.getElementById('dateOfBirth').value || null,
+          nationality: document.getElementById('nationality').value,
+          address: document.getElementById('address').value,
+          idCardNumber: document.getElementById('idCardNumber').value,
+          passportNumber: document.getElementById('passportNumber').value,
+          customerType: originalData.customerType || 'Regular',
+          notes: originalData.notes || ''
+        };
+
+        showPageLoading('Đang lưu thông tin...');
+        
+        const API_CUSTOMERS = location.origin + '/api/customermanagement/' + customerId;
+        const resp = await fetch(API_CUSTOMERS, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(updateData)
+        });
+
+        if (!resp.ok) {
+          const error = await resp.json().catch(() => ({message: 'Lỗi cập nhật'}));
+          throw new Error(error.message || 'Lỗi cập nhật');
+        }
+
+        const updated = await resp.json();
+        originalData = {...updated};
+        showToast('Cập nhật thông tin thành công!', 'success');
+        toggleEdit();
+        renderProfile(updated);
+        
+      } catch(e) {
+        console.error('Error saving profile:', e);
+        showToast('Lỗi: ' + e.message, 'danger');
+      } finally {
+        hidePageLoading();
+      }
+    }
+
+    // Load profile on page load
+    loadProfile();
+  </script>
+</body>
+</html>
+

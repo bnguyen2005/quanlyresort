@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧹 Clear Cache & Service Worker</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background: #d4edda; }
+        .error { background: #f8d7da; }
+        .warning { background: #fff3cd; }
+        button { padding: 10px 20px; margin: 5px; }
+        .log { background: #f8f9fa; padding: 10px; margin: 10px 0; border-radius: 5px; font-family: monospace; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h1>🧹 Clear Cache & Service Worker</h1>
+    
+    <div class="section">
+        <h3>1. Clear Service Worker</h3>
+        <button onclick="clearServiceWorker()">Clear Service Worker</button>
+        <div id="swResult" class="log"></div>
+    </div>
+    
+    <div class="section">
+        <h3>2. Clear Browser Cache</h3>
+        <button onclick="clearBrowserCache()">Clear Browser Cache</button>
+        <div id="cacheResult" class="log"></div>
+    </div>
+    
+    <div class="section">
+        <h3>3. Clear Local Storage</h3>
+        <button onclick="clearLocalStorage()">Clear Local Storage</button>
+        <div id="storageResult" class="log"></div>
+    </div>
+    
+    <div class="section">
+        <h3>4. Force Reload Rooms Page</h3>
+        <button onclick="forceReloadRooms()">Force Reload Rooms</button>
+        <div id="reloadResult" class="log"></div>
+    </div>
+    
+    <div class="section">
+        <h3>5. Test Fresh Load</h3>
+        <button onclick="testFreshLoad()">Test Fresh Load</button>
+        <div id="freshResult" class="log"></div>
+    </div>
+
+    <script>
+        function log(elementId, message) {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            element.textContent += `[${timestamp}] ${message}\n`;
+        }
+        
+        async function clearServiceWorker() {
+            log('swResult', 'Clearing Service Worker...');
+            
+            if ('serviceWorker' in navigator) {
+                try {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    log('swResult', `Found ${registrations.length} service workers`);
+                    
+                    for (let i = 0; i < registrations.length; i++) {
+                        const registration = registrations[i];
+                        log('swResult', `Unregistering SW ${i + 1}: ${registration.scope}`);
+                        await registration.unregister();
+                    }
+                    
+                    log('swResult', '✅ All service workers cleared');
+                    
+                    // Clear all caches
+                    const cacheNames = await caches.keys();
+                    log('swResult', `Found ${cacheNames.length} caches`);
+                    
+                    for (const cacheName of cacheNames) {
+                        log('swResult', `Deleting cache: ${cacheName}`);
+                        await caches.delete(cacheName);
+                    }
+                    
+                    log('swResult', '✅ All caches cleared');
+                    
+                } catch (error) {
+                    log('swResult', `❌ Error: ${error.message}`);
+                }
+            } else {
+                log('swResult', '❌ Service Worker not supported');
+            }
+        }
+        
+        function clearBrowserCache() {
+            log('cacheResult', 'Clearing browser cache...');
+            
+            // Clear various types of cache
+            if ('caches' in window) {
+                caches.keys().then(cacheNames => {
+                    cacheNames.forEach(cacheName => {
+                        caches.delete(cacheName);
+                        log('cacheResult', `Deleted cache: ${cacheName}`);
+                    });
+                    log('cacheResult', '✅ Browser caches cleared');
+                });
+            }
+            
+            // Clear application cache (if exists)
+            if ('applicationCache' in window) {
+                window.applicationCache.update();
+                log('cacheResult', '✅ Application cache updated');
+            }
+            
+            log('cacheResult', '✅ Browser cache clearing initiated');
+        }
+        
+        function clearLocalStorage() {
+            log('storageResult', 'Clearing local storage...');
+            
+            try {
+                // Clear localStorage
+                localStorage.clear();
+                log('storageResult', '✅ localStorage cleared');
+                
+                // Clear sessionStorage
+                sessionStorage.clear();
+                log('storageResult', '✅ sessionStorage cleared');
+                
+                // Clear IndexedDB (if exists)
+                if ('indexedDB' in window) {
+                    indexedDB.databases().then(databases => {
+                        databases.forEach(db => {
+                            indexedDB.deleteDatabase(db.name);
+                            log('storageResult', `Deleted IndexedDB: ${db.name}`);
+                        });
+                    });
+                }
+                
+                log('storageResult', '✅ All storage cleared');
+                
+            } catch (error) {
+                log('storageResult', `❌ Error: ${error.message}`);
+            }
+        }
+        
+        function forceReloadRooms() {
+            log('reloadResult', 'Force reloading rooms page...');
+            
+            // Create a new window with cache-busting parameters
+            const roomsUrl = '/admin/html/rooms.html';
+            const cacheBuster = `?v=${Date.now()}&nocache=1`;
+            const fullUrl = roomsUrl + cacheBuster;
+            
+            log('reloadResult', `Opening: ${fullUrl}`);
+            
+            // Open in new tab
+            window.open(fullUrl, '_blank');
+            
+            log('reloadResult', '✅ Rooms page opened in new tab');
+        }
+        
+        async function testFreshLoad() {
+            log('freshResult', 'Testing fresh load...');
+            
+            try {
+                // Test loading rooms.html with cache-busting
+                const cacheBuster = `?v=${Date.now()}&nocache=1`;
+                const response = await fetch(`/admin/html/rooms.html${cacheBuster}`, {
+                    cache: 'no-store',
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    }
+                });
+                
+                log('freshResult', `Response status: ${response.status}`);
+                
+                if (response.ok) {
+                    const html = await response.text();
+                    log('freshResult', `✅ Fresh HTML loaded: ${html.length} characters`);
+                    
+                    // Check if it contains expected content
+                    if (html.includes('Quản lý phòng') || html.includes('rooms')) {
+                        log('freshResult', '✅ Contains expected content');
+                    } else {
+                        log('freshResult', '⚠️ Missing expected content');
+                    }
+                } else {
+                    log('freshResult', `❌ Failed to load: ${response.status}`);
+                }
+                
+            } catch (error) {
+                log('freshResult', `❌ Error: ${error.message}`);
+            }
+        }
+        
+        // Auto-run on page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                clearServiceWorker();
+                clearBrowserCache();
+                clearLocalStorage();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

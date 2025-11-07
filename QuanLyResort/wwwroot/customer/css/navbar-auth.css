@@ -1,0 +1,275 @@
+/**
+ * Navbar Authentication Styles
+ * Styles cho dropdown menu user
+ */
+
+/* Đồng bộ navbar-nav để tất cả items căn giữa */
+.ftco-navbar-light .navbar-nav {
+  display: flex !important;
+  align-items: center !important;
+}
+
+/* Đồng bộ nav-item để tất cả items căn giữa */
+.ftco-navbar-light .navbar-nav > .nav-item {
+  display: flex !important;
+  align-items: center !important;
+}
+
+/* User dropdown button - ĐỒNG BỘ HOÀN TOÀN với nav-link khác */
+.ftco-navbar-light .navbar-nav > .nav-item.user-dropdown > .nav-link {
+  /* Sử dụng flexbox để căn giữa hoàn hảo */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  /* QUAN TRỌNG: Dùng padding giống hệt nav-link thông thường */
+  padding-top: 1.5rem !important;
+  padding-bottom: 1.5rem !important;
+  padding-left: 20px !important;
+  padding-right: 20px !important;
+  text-decoration: none !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out !important;
+  /* Reset các giá trị */
+  margin: 0 !important;
+  border: none !important;
+  background: none !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  font-weight: 400 !important;
+  /* Đảm bảo height giống nav-link khác */
+  height: auto !important;
+  box-sizing: border-box !important;
+  opacity: 1 !important;
+}
+
+/* Fallback cho trường hợp không có ftco-navbar-light */
+.user-dropdown .nav-link {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  padding-top: 1.5rem !important;
+  padding-bottom: 1.5rem !important;
+  padding-left: 20px !important;
+  padding-right: 20px !important;
+  text-decoration: none !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out !important;
+  margin: 0 !important;
+  border: none !important;
+  background: none !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  font-weight: 400 !important;
+  height: auto !important;
+  box-sizing: border-box !important;
+}
+
+.ftco-navbar-light .navbar-nav > .nav-item.user-dropdown > .nav-link:hover,
+.user-dropdown .nav-link:hover {
+  color: #fff !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-radius: 5px;
+}
+
+.user-dropdown .user-email {
+  /* Email text - line-height: 1 để căn giữa tốt hơn */
+  color: rgba(255, 255, 255, 0.7) !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  line-height: 1 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  text-decoration: none !important;
+}
+
+.user-dropdown .icon-user {
+  /* Icon người dùng - line-height: 1 để căn giữa tốt hơn */
+  color: rgba(255, 255, 255, 0.7) !important;
+  font-size: 14px !important;
+  margin-right: 6px !important;
+  display: inline-block !important;
+  line-height: 1 !important;
+  text-decoration: none !important;
+  flex-shrink: 0 !important;
+}
+
+/* Dropdown menu */
+.user-dropdown-menu {
+  min-width: 250px;
+  border: none;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  padding: 0;
+  margin-top: 10px;
+  animation: dropdownFadeIn 0.3s ease;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Dropdown header */
+.user-dropdown-menu .dropdown-header {
+  background: linear-gradient(135deg, #c8a97e 0%, #b89968 100%);
+  color: white;
+  padding: 15px 20px;
+  border-radius: 8px 8px 0 0;
+  margin-bottom: 0;
+}
+
+.user-dropdown-menu .dropdown-header strong {
+  display: block;
+  font-size: 16px;
+  margin-bottom: 5px;
+}
+
+.user-dropdown-menu .dropdown-header small {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+/* Dropdown items */
+.user-dropdown-menu .dropdown-item {
+  padding: 12px 20px;
+  color: #333;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-dropdown-menu .dropdown-item:hover {
+  background: #f8f9fa;
+  color: #c8a97e;
+  padding-left: 25px;
+}
+
+.user-dropdown-menu .dropdown-item i {
+  font-size: 16px;
+  width: 20px;
+}
+
+.user-dropdown-menu .dropdown-item.text-danger:hover {
+  background: #fff5f5;
+  color: #dc3545;
+}
+
+/* Dropdown divider */
+.user-dropdown-menu .dropdown-divider {
+  margin: 5px 0;
+  border-color: #e9ecef;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .user-dropdown .user-email {
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+  }
+  
+  .user-dropdown-menu {
+    min-width: 200px;
+  }
+}
+
+/* Khi navbar collapse (mobile) - ĐỒNG BỘ với nav-link thông thường */
+@media (max-width: 991.98px) {
+  /* Điều chỉnh padding cho mobile giống nav-link thông thường */
+  .ftco-navbar-light .navbar-nav > .nav-item.user-dropdown > .nav-link,
+  .user-dropdown .nav-link {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    padding-top: 0.9rem !important;
+    padding-bottom: 0.9rem !important;
+  }
+  
+  .user-dropdown {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: 10px;
+    padding-top: 10px;
+  }
+  
+  .user-dropdown-menu {
+    position: static !important;
+    transform: none !important;
+    box-shadow: none;
+    background: rgba(0, 0, 0, 0.1);
+    margin-top: 5px;
+  }
+  
+  .user-dropdown-menu .dropdown-header {
+    background: rgba(200, 169, 126, 0.3);
+  }
+  
+  .user-dropdown-menu .dropdown-item {
+    color: #fff;
+  }
+  
+  .user-dropdown-menu .dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #c8a97e;
+  }
+}
+
+/* Animation for dropdown arrow - Căn giữa với flexbox */
+.user-dropdown .dropdown-toggle::after {
+  transition: transform 0.3s ease;
+  margin-left: 0.5em;
+  /* Điều chỉnh vị trí arrow cho ngang hàng */
+  border-top: 0.3em solid;
+  border-right: 0.3em solid transparent;
+  border-bottom: 0;
+  border-left: 0.3em solid transparent;
+  align-self: center !important;
+  line-height: 1 !important;
+}
+
+.user-dropdown .dropdown-toggle[aria-expanded="true"]::after {
+  transform: rotate(180deg);
+}
+
+/* Đảm bảo nav-item ngang hàng - FORCE ALIGNMENT */
+.navbar-nav .user-dropdown {
+  /* Copy chính xác từ Bootstrap nav-item */
+  display: list-item !important;
+  position: relative !important;
+  /* FORCE ALIGNMENT */
+  margin: 0 !important;
+  padding: 0 !important;
+  float: none !important;
+  background: none !important;
+  border: none !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  font-weight: 400 !important;
+  vertical-align: top !important;
+  /* Force same height as other nav-items */
+  height: auto !important;
+  min-height: 2.5rem !important;
+  box-sizing: border-box !important;
+}
+
+/* Badge for notifications (optional) */
+.user-dropdown .badge {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: #dc3545;
+  color: white;
+  font-size: 10px;
+  padding: 2px 5px;
+  border-radius: 10px;
+}
+

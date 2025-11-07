@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="vi" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default" data-assets-path="../assets/" data-template="vertical-menu-template-free">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+  <title>Quản lý Khách hàng - Resort Management</title>
+  
+  <!-- NO CACHE -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  
+  <link rel="icon" type="image/x-icon" href="../assets/img/favicon/favicon.ico" />
+  <link rel="stylesheet" href="../assets/vendor/fonts/boxicons.css" />
+  <link rel="stylesheet" href="../assets/vendor/css/core.css" class="template-customizer-core-css" />
+  <link rel="stylesheet" href="../assets/vendor/css/theme-default.css" class="template-customizer-theme-css" />
+  <link rel="stylesheet" href="../assets/css/demo.css" />
+  <link rel="stylesheet" href="../assets/css/fix-scrollbar.css" />
+  <link rel="stylesheet" href="../assets/css/admin-custom-theme.css" />
+  <link rel="stylesheet" href="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" />
+  <script src="../assets/vendor/js/helpers.js"></script>
+</head>
+
+<body>
+  <div class="layout-wrapper layout-content-navbar">
+    <div class="layout-container">
+      
+      <!-- Menu - Load from common component -->
+      <div id="common-menu"></div>
+      <script>
+        // Load common menu with cache busting
+        (function() {
+          const menuVersion = Date.now();
+          fetch('layout-menu.html?v=' + menuVersion)
+            .then(response => {
+              if (!response.ok) {
+                throw new Error('Failed to load menu: ' + response.status);
+              }
+              return response.text();
+            })
+            .then(html => {
+              const menuContainer = document.getElementById('common-menu');
+              if (menuContainer) {
+                menuContainer.innerHTML = html;
+                console.log('✅ Menu loaded successfully');
+              } else {
+                console.error('❌ Menu container not found');
+              }
+            })
+            .catch(error => {
+              console.error('❌ Error loading menu:', error);
+            });
+        })();
+      </script>
+      <!-- / Menu -->
+
+      <!-- Layout container -->
+      <div class="layout-page">
+        
+        <!-- Navbar -->
+        <nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme" id="layout-navbar">
+          <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
+            <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
+              <i class="bx bx-menu bx-sm"></i>
+            </a>
+          </div>
+
+          <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+            <div class="navbar-nav align-items-center">
+              <div class="nav-item d-flex align-items-center">
+                <h4 class="mb-0" id="pageTitle">👥 Quản lý Khách hàng</h4>
+              </div>
+            </div>
+
+            <ul class="navbar-nav flex-row align-items-center ms-auto">
+              <li class="nav-item navbar-dropdown dropdown-user dropdown">
+                <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
+                  <div class="avatar avatar-online">
+                    <img src="../assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                  </div>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li>
+                    <a class="dropdown-item" href="#">
+                      <div class="d-flex">
+                        <div class="flex-shrink-0 me-3">
+                          <div class="avatar avatar-online">
+                            <img src="../assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                          </div>
+                        </div>
+                        <div class="flex-grow-1">
+                          <span class="fw-semibold d-block" id="userFullName">Admin</span>
+                          <small class="text-muted" id="userRole">Admin</small>
+                        </div>
+                      </div>
+                    </a>
+                  </li>
+                  <li><div class="dropdown-divider"></div></li>
+                  <li><a class="dropdown-item" href="#" onclick="commonLogout()"><i class="bx bx-power-off me-2"></i><span class="align-middle">Đăng xuất</span></a></li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </nav>
+        <!-- / Navbar -->
+
+        <!-- Content wrapper -->
+        <div class="content-wrapper">
+          <div class="container-xxl flex-grow-1 container-p-y">
+            
+            <!-- Statistics Cards -->
+            <div class="row mb-4">
+              <div class="col-lg-3 col-md-6 col-6 mb-4">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="card-title d-flex align-items-start justify-content-between">
+                      <div class="avatar flex-shrink-0">
+                        <i class="bx bx-user text-primary" style="font-size: 2rem;"></i>
+                      </div>
+                    </div>
+                    <span class="fw-semibold d-block mb-1">Tổng khách hàng</span>
+                    <h3 class="card-title mb-2" id="totalCustomers">-</h3>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-3 col-md-6 col-6 mb-4">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="card-title d-flex align-items-start justify-content-between">
+                      <div class="avatar flex-shrink-0">
+                        <i class="bx bx-user-check text-success" style="font-size: 2rem;"></i>
+                      </div>
+                    </div>
+                    <span class="fw-semibold d-block mb-1">Khách VIP</span>
+                    <h3 class="card-title mb-2" id="vipCustomers">-</h3>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-3 col-md-6 col-6 mb-4">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="card-title d-flex align-items-start justify-content-between">
+                      <div class="avatar flex-shrink-0">
+                        <i class="bx bx-calendar text-info" style="font-size: 2rem;"></i>
+                      </div>
+                    </div>
+                    <span class="fw-semibold d-block mb-1">Khách mới tháng này</span>
+                    <h3 class="card-title mb-2" id="newCustomers">-</h3>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-3 col-md-6 col-6 mb-4">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="card-title d-flex align-items-start justify-content-between">
+                      <div class="avatar flex-shrink-0">
+                        <i class="bx bx-star text-warning" style="font-size: 2rem;"></i>
+                      </div>
+                    </div>
+                    <span class="fw-semibold d-block mb-1">Điểm trung bình</span>
+                    <h3 class="card-title mb-2" id="avgLoyaltyPoints">-</h3>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Filters & Actions -->
+            <div class="card mb-4">
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-3">
+                    <label class="form-label">Loại khách hàng</label>
+                    <select id="filterCustomerType" class="form-select">
+                      <option value="">Tất cả</option>
+                      <option value="Individual">Cá nhân</option>
+                      <option value="Corporate">Doanh nghiệp</option>
+                      <option value="Group">Nhóm</option>
+                    </select>
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label">Quốc tịch</label>
+                    <select id="filterNationality" class="form-select">
+                      <option value="">Tất cả</option>
+                      <option value="Vietnam">Việt Nam</option>
+                      <option value="USA">Mỹ</option>
+                      <option value="China">Trung Quốc</option>
+                      <option value="Japan">Nhật Bản</option>
+                      <option value="Korea">Hàn Quốc</option>
+                      <option value="Thailand">Thái Lan</option>
+                      <option value="Singapore">Singapore</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Tìm kiếm</label>
+                    <input type="text" id="searchInput" class="form-control" placeholder="Tên, email, SĐT, CMND/Passport...">
+                  </div>
+                  <div class="col-md-2">
+                    <label class="form-label">&nbsp;</label>
+                    <div>
+                      <button class="btn btn-primary" onclick="loadCustomers()">
+                        <i class="bx bx-search me-1"></i> Tìm kiếm
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Customers Table -->
+            <div class="card">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Danh sách Khách hàng</h5>
+                <button class="btn btn-success" onclick="openCreateModal()">
+                  <i class="bx bx-plus me-1"></i> Thêm khách hàng
+                </button>
+              </div>
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table id="customersTable" class="table table-striped">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Họ tên</th>
+                        <th>Email</th>
+                        <th>SĐT</th>
+                        <th>Loại</th>
+                        <th>Quốc tịch</th>
+                        <th>Điểm tích lũy</th>
+                        <th>Ngày tạo</th>
+                        <th>Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <!-- Data will be loaded here -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+        <!-- / Content wrapper -->
+
+      </div>
+      <!-- / Layout page -->
+    </div>
+    <!-- Overlay -->
+    <div class="layout-overlay layout-menu-toggle"></div>
+  </div>
+  <!-- Toast container -->
+  <div class="position-fixed top-0 end-0 p-3" style="z-index:1080">
+    <div id="toastContainer"></div>
+  </div>
+  <!-- / Layout wrapper -->
+
+  <!-- Create/Edit Customer Modal -->
+  <div class="modal fade" id="customerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalTitle">Thêm khách hàng mới</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="customerForm">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label" for="fullName">Họ tên *</label>
+                <input type="text" id="fullName" name="fullName" class="form-control" required autocomplete="name">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label" for="email">Email *</label>
+                <input type="email" id="email" name="email" class="form-control" required autocomplete="email">
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label" for="phoneNumber">Số điện thoại</label>
+                <input type="tel" id="phoneNumber" name="phoneNumber" class="form-control" autocomplete="tel">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label" for="dateOfBirth">Ngày sinh</label>
+                <input type="date" id="dateOfBirth" name="dateOfBirth" class="form-control" autocomplete="bday">
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label" for="gender">Giới tính</label>
+                <select id="gender" name="gender" class="form-select" autocomplete="sex">
+                  <option value="">Chọn giới tính</option>
+                  <option value="Male">Nam</option>
+                  <option value="Female">Nữ</option>
+                  <option value="Other">Khác</option>
+                </select>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label" for="nationality">Quốc tịch</label>
+                <select id="nationality" name="nationality" class="form-select" autocomplete="country">
+                  <option value="Vietnam">Việt Nam</option>
+                  <option value="USA">Mỹ</option>
+                  <option value="China">Trung Quốc</option>
+                  <option value="Japan">Nhật Bản</option>
+                  <option value="Korea">Hàn Quốc</option>
+                  <option value="Thailand">Thái Lan</option>
+                  <option value="Singapore">Singapore</option>
+                </select>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label" for="customerType">Loại khách hàng</label>
+                <select id="customerType" name="customerType" class="form-select">
+                  <option value="Individual">Cá nhân</option>
+                  <option value="Corporate">Doanh nghiệp</option>
+                  <option value="Group">Nhóm</option>
+                </select>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label" for="address">Địa chỉ</label>
+                <input type="text" id="address" name="address" class="form-control" autocomplete="street-address">
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label" for="idCardNumber">CMND/CCCD</label>
+                <input type="text" id="idCardNumber" name="idCardNumber" class="form-control" autocomplete="off">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label" for="passportNumber">Passport</label>
+                <input type="text" id="passportNumber" name="passportNumber" class="form-control" autocomplete="off">
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label" for="loyaltyPoints">Điểm tích lũy</label>
+                <input type="number" id="loyaltyPoints" name="loyaltyPoints" class="form-control" value="0" min="0" autocomplete="off">
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label" for="vipLevel">Cấp độ VIP</label>
+                <select id="vipLevel" name="vipLevel" class="form-select">
+                  <option value="Bronze">Bronze</option>
+                  <option value="Silver">Silver</option>
+                  <option value="Gold">Gold</option>
+                  <option value="Platinum">Platinum</option>
+                </select>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label" for="notes">Ghi chú</label>
+              <textarea id="notes" name="notes" class="form-control" rows="3" autocomplete="off"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+          <button type="button" class="btn btn-primary" onclick="handleSaveCustomer()">Lưu</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Change Type Modal -->
+  <div class="modal fade" id="changeTypeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Đổi loại khách hàng</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="changeTypeCustomerId" />
+          <label class="form-label">Loại mới</label>
+          <select id="newCustomerType" class="form-select">
+            <option value="Regular">Thường</option>
+            <option value="VIP">VIP</option>
+            <option value="Corporate">Doanh nghiệp</option>
+            <option value="Member">Thành viên</option>
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+          <button type="button" class="btn btn-primary" onclick="confirmChangeType()">Cập nhật</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Points Modal -->
+  <div class="modal fade" id="addPointsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Cộng điểm khách hàng</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="addPointsCustomerId" />
+          <div class="mb-3">
+            <label class="form-label">Số điểm</label>
+            <input type="number" id="pointsAmount" class="form-control" min="1" value="1" />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Lý do</label>
+            <input type="text" id="pointsReason" class="form-control" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+          <button type="button" class="btn btn-primary" onclick="confirmAddPoints()">Cập nhật</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Core JS -->
+  <script src="../assets/vendor/libs/jquery/jquery.js"></script>
+  <script src="../assets/vendor/libs/popper/popper.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+  <script src="../assets/vendor/js/menu.js"></script>
+  <script src="../../js/api.js"></script>
+  <script src="../assets/js/main.js"></script>
+  
+  <!-- DataTables -->
+  <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+
+  <script>
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toastContainer');
+      const wrapper = document.createElement('div');
+      wrapper.className = `toast align-items-center text-bg-${type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'danger'} border-0`;
+      wrapper.setAttribute('role', 'alert');
+      wrapper.setAttribute('aria-live', 'assertive');
+      wrapper.setAttribute('aria-atomic', 'true');
+      wrapper.innerHTML = `
+        <div class="d-flex">
+          <div class="toast-body">${message}</div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>`;
+      container.appendChild(wrapper);
+      const toast = new bootstrap.Toast(wrapper, { delay: 2500 });
+      toast.show();
+      wrapper.addEventListener('hidden.bs.toast', () => wrapper.remove());
+    }
+    // Đảm bảo Bootstrap được load trước khi sử dụng
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('🔵 DOM loaded, checking Bootstrap...');
+      console.log('🔍 Bootstrap available:', typeof bootstrap !== 'undefined');
+      
+      if (typeof bootstrap === 'undefined') {
+        console.error('❌ Bootstrap not loaded!');
+        // Thử load lại Bootstrap
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js';
+        script.onload = function() {
+          console.log('✅ Bootstrap loaded successfully');
+        };
+        script.onerror = function() {
+          console.error('❌ Failed to load Bootstrap');
+        };
+        document.head.appendChild(script);
+      }
+    });
+    
+    // Sử dụng API_BASE từ api.js thay vì khai báo lại
+    // const API_BASE = 'http://localhost:5130/api'; // Đã xóa để tránh duplicate
+    
+    async function apiGet(url) {
+      const token = localStorage.getItem('token');
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      return fetch(`${API_BASE}${url}`, { method: 'GET', headers });
+    }
+
+    async function apiPost(url, data) {
+      const token = localStorage.getItem('token');
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      return fetch(`${API_BASE}${url}`, { method: 'POST', headers, body: JSON.stringify(data) });
+    }
+
+    async function apiPut(url, data) {
+      const token = localStorage.getItem('token');
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      return fetch(`${API_BASE}${url}`, { method: 'PUT', headers, body: JSON.stringify(data) });
+    }
+
+    async function apiDelete(url) {
+      const token = localStorage.getItem('token');
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      return fetch(`${API_BASE}${url}`, { method: 'DELETE', headers });
+    }
+
+    let customersTable;
+    let editingCustomerId = null;
+
+
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('🚀 Customers page loaded');
+      loadStatistics();
+      loadCustomers();
+      // Debounce search input
+      const searchEl = document.getElementById('searchInput');
+      let debounceTimer;
+      searchEl.addEventListener('input', function() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => loadCustomers(), 300);
+      });
+    });
+
+    // Load customer statistics
+    async function loadStatistics() {
+      try {
+        const response = await apiGet('/customermanagement/statistics');
+        if (response.ok) {
+          const stats = await response.json();
+          document.getElementById('totalCustomers').textContent = stats.totalCustomers || 0;
+          document.getElementById('vipCustomers').textContent = stats.vipCustomers || 0;
+          document.getElementById('newCustomers').textContent = stats.newCustomersThisMonth || 0;
+          document.getElementById('avgLoyaltyPoints').textContent = Math.round(stats.averageLoyaltyPoints || 0);
+        } else {
+          console.error('❌ Error loading statistics:', response.status);
+          document.getElementById('totalCustomers').textContent = '0';
+          document.getElementById('vipCustomers').textContent = '0';
+          document.getElementById('newCustomers').textContent = '0';
+          document.getElementById('avgLoyaltyPoints').textContent = '0';
+          showToast('Lỗi tải thống kê khách hàng', 'danger');
+        }
+      } catch (error) {
+        console.error('❌ Error loading statistics:', error);
+        document.getElementById('totalCustomers').textContent = '0';
+        document.getElementById('vipCustomers').textContent = '0';
+        document.getElementById('newCustomers').textContent = '0';
+        document.getElementById('avgLoyaltyPoints').textContent = '0';
+        showToast('Lỗi tải thống kê khách hàng', 'danger');
+      }
+    }
+
+    // Load customers list
+    async function loadCustomers() {
+      try {
+        const customerType = document.getElementById('filterCustomerType').value;
+        const nationality = document.getElementById('filterNationality').value;
+        const search = document.getElementById('searchInput').value;
+
+        let url = '/customermanagement?';
+        const params = new URLSearchParams();
+        
+        if (customerType) params.append('customerType', customerType);
+        if (nationality) params.append('nationality', nationality);
+        if (search) params.append('search', search);
+        
+        url += params.toString();
+
+        const response = await apiGet(url);
+        if (response.ok) {
+          const customers = await response.json();
+          updateCustomersTable(customers);
+        } else {
+          console.error('❌ Error loading customers:', response.status);
+          showToast('Lỗi tải danh sách khách hàng', 'danger');
+        }
+      } catch (error) {
+        console.error('❌ Error loading customers:', error);
+        showToast('Lỗi tải danh sách khách hàng', 'danger');
+      }
+    }
+
+    // Update customers table
+    function updateCustomersTable(customers) {
+      const tbody = document.querySelector('#customersTable tbody');
+      tbody.innerHTML = '';
+
+      customers.forEach(customer => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${customer.customerId}</td>
+          <td>${customer.fullName}</td>
+          <td>${customer.email}</td>
+          <td>${customer.phoneNumber || '-'}</td>
+          <td>
+            <span class="badge bg-${getCustomerTypeColor(customer.customerType)}">
+              ${getCustomerTypeText(customer.customerType)}
+            </span>
+          </td>
+          <td>${customer.nationality || '-'}</td>
+          <td>
+            <span class="badge bg-${getVipLevelColor(customer.vipLevel)}">
+              ${customer.loyaltyPoints || 0} pts
+            </span>
+          </td>
+          <td>${formatDate(customer.createdAt)}</td>
+          <td>
+            <div class="dropdown">
+              <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                Thao tác
+              </button>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#" onclick="openEditModal(${customer.customerId})">
+                  <i class="bx bx-edit me-2"></i>Chỉnh sửa
+                </a></li>
+                <li><a class="dropdown-item" href="#" onclick="viewCustomerDetails(${customer.customerId})">
+                  <i class="bx bx-show me-2"></i>Xem chi tiết
+                </a></li>
+                <li><a class="dropdown-item" href="#" onclick="openChangeTypeModal(${customer.customerId})">
+                  <i class="bx bx-transfer-alt me-2"></i>Đổi loại khách
+                </a></li>
+                <li><a class="dropdown-item" href="#" onclick="openAddPointsModal(${customer.customerId})">
+                  <i class="bx bx-plus-circle me-2"></i>Cộng điểm
+                </a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item text-danger" href="#" onclick="deleteCustomer(${customer.customerId})">
+                  <i class="bx bx-trash me-2"></i>Xóa
+                </a></li>
+              </ul>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+
+      // Initialize DataTable if not already done
+      if (!customersTable) {
+        customersTable = $('#customersTable').DataTable({
+          language: {
+            url: '../local-plugins/datatables/i18n/vi.json'
+          },
+          pageLength: 10,
+          order: [[0, 'desc']],
+          columnDefs: [
+            { targets: [0], visible: true }, // ID column
+            { targets: [1], visible: true }, // Name column
+            { targets: [2], visible: true }, // Email column
+            { targets: [3], visible: true }, // Phone column
+            { targets: [4], visible: true }, // Type column
+            { targets: [5], visible: true }, // Nationality column
+            { targets: [6], visible: true }, // Points column
+            { targets: [7], visible: true }, // Created date column
+            { targets: [8], visible: true, orderable: false } // Actions column
+          ]
+        });
+      } else {
+        // Destroy and recreate DataTable to avoid column mismatch
+        customersTable.destroy();
+        customersTable = $('#customersTable').DataTable({
+          language: {
+            url: '../local-plugins/datatables/i18n/vi.json'
+          },
+          pageLength: 10,
+          order: [[0, 'desc']],
+          columnDefs: [
+            { targets: [0], visible: true }, // ID column
+            { targets: [1], visible: true }, // Name column
+            { targets: [2], visible: true }, // Email column
+            { targets: [3], visible: true }, // Phone column
+            { targets: [4], visible: true }, // Type column
+            { targets: [5], visible: true }, // Nationality column
+            { targets: [6], visible: true }, // Points column
+            { targets: [7], visible: true }, // Created date column
+            { targets: [8], visible: true, orderable: false } // Actions column
+          ]
+        });
+      }
+    }
+
+    // Open create modal - Global function
+    window.openCreateModal = function() {
+      console.log('🔵 openCreateModal called');
+      console.log('🔍 Bootstrap available:', typeof bootstrap !== 'undefined');
+      
+      editingCustomerId = null;
+      document.getElementById('modalTitle').textContent = 'Thêm khách hàng mới';
+      document.getElementById('customerForm').reset();
+      document.getElementById('loyaltyPoints').value = 0;
+      
+      try {
+        const modalElement = document.getElementById('customerModal');
+        console.log('🔍 Modal element found:', !!modalElement);
+        
+        if (typeof bootstrap !== 'undefined') {
+          const modal = new bootstrap.Modal(modalElement);
+          console.log('✅ Modal instance created');
+          modal.show();
+          console.log('✅ Modal show() called');
+        } else {
+          console.error('❌ Bootstrap not available');
+        }
+      } catch (error) {
+        console.error('❌ Error opening modal:', error);
+      }
+    };
+
+    // Open edit modal - Global function
+    window.openEditModal = async function(customerId) {
+      try {
+        const response = await apiGet(`/customermanagement/${customerId}`);
+        if (response.ok) {
+          const customer = await response.json();
+          
+          editingCustomerId = customerId;
+          document.getElementById('modalTitle').textContent = 'Chỉnh sửa khách hàng';
+          
+          // Fill form with customer data
+          document.getElementById('fullName').value = customer.fullName || '';
+          document.getElementById('email').value = customer.email || '';
+          document.getElementById('phoneNumber').value = customer.phoneNumber || '';
+          document.getElementById('dateOfBirth').value = customer.dateOfBirth ? customer.dateOfBirth.split('T')[0] : '';
+          document.getElementById('gender').value = customer.gender || '';
+          document.getElementById('nationality').value = customer.nationality || 'Vietnam';
+          document.getElementById('customerType').value = customer.customerType || 'Individual';
+          document.getElementById('address').value = customer.address || '';
+          document.getElementById('idCardNumber').value = customer.idCardNumber || '';
+          document.getElementById('passportNumber').value = customer.passportNumber || '';
+          document.getElementById('loyaltyPoints').value = customer.loyaltyPoints || 0;
+          document.getElementById('vipLevel').value = customer.vipLevel || 'Bronze';
+          document.getElementById('notes').value = customer.notes || '';
+          
+          const modal = new bootstrap.Modal(document.getElementById('customerModal'));
+          modal.show();
+        }
+      } catch (error) {
+        console.error('❌ Error loading customer:', error);
+        alert('Không thể tải thông tin khách hàng');
+      }
+    }
+
+    // Handle save customer - Global function
+    window.handleSaveCustomer = async function() {
+      const formData = {
+        fullName: document.getElementById('fullName').value,
+        email: document.getElementById('email').value,
+        phoneNumber: document.getElementById('phoneNumber').value,
+        dateOfBirth: document.getElementById('dateOfBirth').value || null,
+        gender: document.getElementById('gender').value || null,
+        nationality: document.getElementById('nationality').value,
+        customerType: document.getElementById('customerType').value,
+        address: document.getElementById('address').value || null,
+        idCardNumber: document.getElementById('idCardNumber').value || null,
+        passportNumber: document.getElementById('passportNumber').value || null,
+        loyaltyPoints: parseInt(document.getElementById('loyaltyPoints').value) || 0,
+        vipLevel: document.getElementById('vipLevel').value,
+        notes: document.getElementById('notes').value || null
+      };
+
+      try {
+        let response;
+        if (editingCustomerId) {
+          // Update existing customer
+          response = await apiPut(`/customermanagement/${editingCustomerId}`, formData);
+        } else {
+          // Create new customer
+          response = await apiPost('/customermanagement', formData);
+        }
+
+        if (response.ok) {
+          const modal = bootstrap.Modal.getInstance(document.getElementById('customerModal'));
+          modal.hide();
+          loadCustomers();
+          loadStatistics();
+          showToast(editingCustomerId ? 'Cập nhật khách hàng thành công!' : 'Tạo khách hàng thành công!', 'success');
+        } else {
+          const error = await response.json();
+          showToast('Lỗi: ' + (error.message || 'Không thể lưu khách hàng'), 'danger');
+        }
+      } catch (error) {
+        console.error('❌ Error saving customer:', error);
+        showToast('Có lỗi xảy ra khi lưu khách hàng', 'danger');
+      }
+    }
+
+    // View customer details - Global function
+    window.viewCustomerDetails = async function(customerId) {
+      try {
+        const response = await apiGet(`/customermanagement/${customerId}`);
+        if (response.ok) {
+          const customer = await response.json();
+          alert(`Chi tiết khách hàng:\n\nID: ${customer.customerId}\nHọ tên: ${customer.fullName}\nEmail: ${customer.email}\nSĐT: ${customer.phoneNumber || 'N/A'}\nLoại: ${getCustomerTypeText(customer.customerType)}\nQuốc tịch: ${customer.nationality || 'N/A'}\nĐiểm tích lũy: ${customer.loyaltyPoints || 0}\nNgày tạo: ${formatDate(customer.createdAt)}`);
+        } else {
+          alert('Không thể tải thông tin khách hàng');
+        }
+      } catch (error) {
+        console.error('❌ Error loading customer details:', error);
+        alert('Có lỗi xảy ra khi tải thông tin khách hàng');
+      }
+    };
+
+    // Delete customer - Global function
+    window.deleteCustomer = async function(customerId) {
+      if (!confirm('Bạn có chắc chắn muốn xóa khách hàng này?')) {
+        return;
+      }
+
+      try {
+        const response = await apiDelete(`/customermanagement/${customerId}`);
+        if (response.ok) {
+          loadCustomers();
+          loadStatistics();
+          showToast('Xóa khách hàng thành công!', 'success');
+        } else {
+          showToast('Không thể xóa khách hàng', 'danger');
+        }
+      } catch (error) {
+        console.error('❌ Error deleting customer:', error);
+        showToast('Có lỗi xảy ra khi xóa khách hàng', 'danger');
+      }
+    }
+
+    // View customer details
+    async function viewCustomerDetails(customerId) {
+      try {
+        const response = await apiGet(`/customermanagement/${customerId}`);
+        if (response.ok) {
+          const customer = await response.json();
+          
+          let details = `
+            <h5>Thông tin khách hàng</h5>
+            <p><strong>Họ tên:</strong> ${customer.fullName}</p>
+            <p><strong>Email:</strong> ${customer.email}</p>
+            <p><strong>SĐT:</strong> ${customer.phoneNumber || '-'}</p>
+            <p><strong>Ngày sinh:</strong> ${customer.dateOfBirth ? formatDate(customer.dateOfBirth) : '-'}</p>
+            <p><strong>Giới tính:</strong> ${customer.gender || '-'}</p>
+            <p><strong>Quốc tịch:</strong> ${customer.nationality || '-'}</p>
+            <p><strong>Loại:</strong> ${getCustomerTypeText(customer.customerType)}</p>
+            <p><strong>Địa chỉ:</strong> ${customer.address || '-'}</p>
+            <p><strong>CMND/CCCD:</strong> ${customer.idCardNumber || '-'}</p>
+            <p><strong>Passport:</strong> ${customer.passportNumber || '-'}</p>
+            <p><strong>Điểm tích lũy:</strong> ${customer.loyaltyPoints || 0}</p>
+            <p><strong>Cấp VIP:</strong> ${customer.vipLevel || 'Bronze'}</p>
+            <p><strong>Ghi chú:</strong> ${customer.notes || '-'}</p>
+          `;
+          
+          alert(details);
+        }
+      } catch (error) {
+        console.error('❌ Error loading customer details:', error);
+        alert('Không thể tải thông tin khách hàng');
+      }
+    }
+
+    // Helper functions
+    function getCustomerTypeColor(type) {
+      switch (type) {
+        case 'Individual': return 'primary';
+        case 'Corporate': return 'success';
+        case 'Group': return 'info';
+        default: return 'secondary';
+      }
+    }
+
+    function getCustomerTypeText(type) {
+      switch (type) {
+        case 'Individual': return 'Cá nhân';
+        case 'Corporate': return 'Doanh nghiệp';
+        case 'Group': return 'Nhóm';
+        default: return type;
+      }
+    }
+
+    function getVipLevelColor(level) {
+      switch (level) {
+        case 'Bronze': return 'warning';
+        case 'Silver': return 'secondary';
+        case 'Gold': return 'warning';
+        case 'Platinum': return 'info';
+        default: return 'secondary';
+      }
+    }
+
+    function formatDate(dateString) {
+      if (!dateString) return '-';
+      const date = new Date(dateString);
+      return date.toLocaleDateString('vi-VN');
+    }
+
+    // Change Type flow
+    window.openChangeTypeModal = function(customerId) {
+      document.getElementById('changeTypeCustomerId').value = customerId;
+      new bootstrap.Modal(document.getElementById('changeTypeModal')).show();
+    }
+
+    window.confirmChangeType = async function() {
+      try {
+        const id = document.getElementById('changeTypeCustomerId').value;
+        const newType = document.getElementById('newCustomerType').value;
+        const response = await apiPost(`/customermanagement/${id}/change-type`, { newType });
+        if (!response.ok) {
+          const err = await response.json().catch(()=>({}));
+          throw new Error(err.message || 'Đổi loại thất bại');
+        }
+        bootstrap.Modal.getInstance(document.getElementById('changeTypeModal')).hide();
+        showToast('Đã đổi loại khách hàng', 'success');
+        loadCustomers();
+        loadStatistics();
+      } catch (e) {
+        showToast('Lỗi: ' + e.message, 'danger');
+      }
+    }
+
+    // Add Points flow
+    window.openAddPointsModal = function(customerId) {
+      document.getElementById('addPointsCustomerId').value = customerId;
+      document.getElementById('pointsAmount').value = 1;
+      document.getElementById('pointsReason').value = '';
+      new bootstrap.Modal(document.getElementById('addPointsModal')).show();
+    }
+
+    window.confirmAddPoints = async function() {
+      try {
+        const id = document.getElementById('addPointsCustomerId').value;
+        const points = parseInt(document.getElementById('pointsAmount').value) || 0;
+        const reason = document.getElementById('pointsReason').value || null;
+        if (points <= 0) { showToast('Điểm phải > 0', 'warning'); return; }
+        const response = await apiPost(`/customermanagement/${id}/add-points`, { points, reason });
+        if (!response.ok) {
+          const err = await response.json().catch(()=>({}));
+          throw new Error(err.message || 'Cộng điểm thất bại');
+        }
+        bootstrap.Modal.getInstance(document.getElementById('addPointsModal')).hide();
+        showToast('Đã cộng điểm', 'success');
+        loadCustomers();
+        loadStatistics();
+      } catch (e) { showToast('Lỗi: ' + e.message, 'danger'); }
+    }
+  </script>
+</body>
+</html>
