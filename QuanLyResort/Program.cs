@@ -278,30 +278,39 @@ using (var scope = app.Services.CreateScope())
     
     try
     {
-        // Check if database can be connected
+        // Always apply migrations to ensure database schema is up to date
         logger.LogInformation("🔧 Checking database connection...");
         var canConnect = await context.Database.CanConnectAsync();
+        logger.LogInformation($"   Database can connect: {canConnect}");
         
-        if (!canConnect)
+        // Get all migrations
+        var allMigrations = await context.Database.GetMigrationsAsync();
+        var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();
+        var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
+        
+        logger.LogInformation($"   Total migrations: {allMigrations.Count()}");
+        logger.LogInformation($"   Applied migrations: {appliedMigrations.Count()}");
+        logger.LogInformation($"   Pending migrations: {pendingMigrations.Count()}");
+        
+        if (!canConnect || pendingMigrations.Any())
         {
-            logger.LogInformation("📦 Database not found, creating database and applying migrations...");
-            await context.Database.MigrateAsync();
-            logger.LogInformation("✅ Database created and migrations applied");
+            logger.LogInformation("📦 Creating/updating database and applying migrations...");
+            try
+            {
+                await context.Database.MigrateAsync();
+                logger.LogInformation("✅ Database created/updated and migrations applied");
+            }
+            catch (Exception migrateEx)
+            {
+                logger.LogError(migrateEx, "❌ Error applying migrations, trying EnsureCreated...");
+                // Fallback: use EnsureCreated if Migrate fails
+                await context.Database.EnsureCreatedAsync();
+                logger.LogInformation("✅ Database created using EnsureCreated");
+            }
         }
         else
         {
-            // Database exists, check for pending migrations
-            var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
-            if (pendingMigrations.Any())
-            {
-                logger.LogInformation($"📦 Applying {pendingMigrations.Count()} pending migrations...");
-                await context.Database.MigrateAsync();
-                logger.LogInformation("✅ Migrations applied");
-            }
-            else
-            {
-                logger.LogInformation("✅ Database is up to date");
-            }
+            logger.LogInformation("✅ Database is up to date");
         }
         
         // Seed initial data (only if tables are empty)
