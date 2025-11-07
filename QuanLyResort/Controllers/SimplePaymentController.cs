@@ -27,13 +27,26 @@ public class SimplePaymentController : ControllerBase
     /// </summary>
     [HttpPost("webhook")]
     [Microsoft.AspNetCore.Authorization.AllowAnonymous]
-    public async Task<IActionResult> Webhook([FromBody] SimpleWebhookRequest request)
+    public async Task<IActionResult> Webhook([FromBody] SimpleWebhookRequest? request = null)
     {
         var webhookId = Guid.NewGuid().ToString("N")[..8];
         var startTime = DateTime.UtcNow;
         
         try
         {
+            // Handle PayOs verification request (empty body)
+            if (request == null || (string.IsNullOrEmpty(request.Content) && request.Amount == 0))
+            {
+                _logger.LogInformation("🔍 [WEBHOOK-{WebhookId}] PayOs verification request (empty body)", webhookId);
+                return Ok(new
+                {
+                    status = "active",
+                    endpoint = "/api/simplepayment/webhook",
+                    message = "Webhook endpoint is ready",
+                    timestamp = DateTime.UtcNow
+                });
+            }
+            
             _logger.LogInformation("═══════════════════════════════════════════════════════════");
             _logger.LogInformation("📥 [WEBHOOK-{WebhookId}] Webhook received at {Time}", webhookId, startTime);
             _logger.LogInformation("   Content: {Content}", request.Content);
