@@ -274,8 +274,13 @@ public class SimplePaymentController : ControllerBase
 
             if (paymentLink == null || paymentLink.Data == null)
             {
-                _logger.LogError("❌ [CreateLink] Failed to create PayOs payment link");
-                return StatusCode(500, new { message = "Không thể tạo mã thanh toán. Vui lòng thử lại." });
+                _logger.LogError("❌ [CreateLink] Failed to create PayOs payment link. Code: {Code}, Desc: {Desc}", 
+                    paymentLink?.Code, paymentLink?.Desc);
+                return StatusCode(500, new { 
+                    message = $"Không thể tạo mã thanh toán. {paymentLink?.Desc ?? "Vui lòng thử lại."}",
+                    code = paymentLink?.Code,
+                    desc = paymentLink?.Desc
+                });
             }
 
             _logger.LogInformation("✅ [CreateLink] Payment link created: PaymentLinkId={PaymentLinkId}", 
@@ -297,8 +302,16 @@ public class SimplePaymentController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "❌ [CreateLink] Error creating payment link");
-            return StatusCode(500, new { message = "Lỗi tạo mã thanh toán", error = ex.Message });
+            _logger.LogError(ex, "❌ [CreateLink] Error creating payment link: {Message}", ex.Message);
+            if (ex.InnerException != null)
+            {
+                _logger.LogError(ex.InnerException, "❌ [CreateLink] Inner exception: {Message}", ex.InnerException.Message);
+            }
+            return StatusCode(500, new { 
+                message = "Lỗi tạo mã thanh toán", 
+                error = ex.Message,
+                innerError = ex.InnerException?.Message
+            });
         }
     }
 

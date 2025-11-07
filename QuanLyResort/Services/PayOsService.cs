@@ -23,16 +23,18 @@ public class PayOsService
     public PayOsService(
         IConfiguration configuration,
         ILogger<PayOsService> logger,
-        IHttpClientFactory httpClientFactory)
+        HttpClient httpClient)
     {
         _configuration = configuration;
         _logger = logger;
-        _httpClient = httpClientFactory.CreateClient();
+        _httpClient = httpClient;
         
         var payOsConfig = _configuration.GetSection("BankWebhook:PayOs");
-        _clientId = payOsConfig["ClientId"] ?? "c704495b-5984-4ad3-aa23-b2794a02aa83";
-        _apiKey = payOsConfig["ApiKey"] ?? "f6ea421b-a8b7-46b8-92be-209eb1a9b2fb";
-        _checksumKey = payOsConfig["ChecksumKey"] ?? payOsConfig["SecretKey"] ?? "429890033cc6f1ca9696c91bb4abf499de9ac6132c64e335e46f4c87e6d95313";
+        _clientId = payOsConfig["ClientId"] ?? throw new ArgumentNullException(nameof(payOsConfig), "PayOs ClientId is not configured");
+        _apiKey = payOsConfig["ApiKey"] ?? throw new ArgumentNullException(nameof(payOsConfig), "PayOs ApiKey is not configured");
+        _checksumKey = payOsConfig["ChecksumKey"] ?? payOsConfig["SecretKey"] ?? throw new ArgumentNullException(nameof(payOsConfig), "PayOs ChecksumKey/SecretKey is not configured");
+        
+        _logger.LogInformation("✅ [PayOs] Service initialized with ClientId: {ClientId}", _clientId.Substring(0, Math.Min(8, _clientId.Length)));
     }
 
     /// <summary>
@@ -67,10 +69,22 @@ public class PayOsService
             var sortedKeys = dataForSignature.Keys.OrderBy(k => k).ToList();
             var signatureString = string.Join("&", sortedKeys.Select(k => $"{k}={dataForSignature[k]}"));
             
+            _logger.LogInformation("🔐 [PayOs] Signature string: {SignatureString}", signatureString);
+            
             // Create signature using HMAC_SHA256
             var signature = ComputeHmacSha256(signatureString, _checksumKey);
+            
+            _logger.LogInformation("🔐 [PayOs] Computed signature: {Signature}", signature.Substring(0, Math.Min(16, signature.Length)) + "...");
 
             // Prepare request body
+            // expiredAt must be Int32 Unix Timestamp (not double)
+            var expiredAtUnix = 0;
+            if (expiredAt.HasValue)
+            {
+                var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+                expiredAtUnix = (int)(expiredAt.Value.ToUniversalTime().Subtract(epoch).TotalSeconds);
+            }
+            
             var requestBody = new
             {
                 orderCode = orderCode,
@@ -78,7 +92,7 @@ public class PayOsService
                 description = description,
                 cancelUrl = cancelUrl,
                 returnUrl = returnUrl,
-                expiredAt = expiredAt?.Subtract(new DateTime(1970, 1, 1)).TotalSeconds ?? 0,
+                expiredAt = expiredAtUnix,
                 signature = signature
             };
 
@@ -108,18 +122,27 @@ public class PayOsService
                 return null;
             }
 
-            var result = JsonSerializer.Deserialize<PayOsPaymentLinkResponse>(responseContent);
+            PayOsPaymentLinkResponse? result = null;
+            try
+            {
+                result = JsonSerializer.Deserialize<PayOsPaymentLinkResponse>(responseContent);
+            }
+            catch (JsonException jsonEx)
+            {
+                _logger.LogError(jsonEx, "❌ [PayOs] Failed to deserialize response: {ResponseBody}", responseContent);
+                return null;
+            }
             
-            if (result?.Code == "00")
+            if (result?.Code == "00" && result.Data != null)
             {
                 _logger.LogInformation("✅ [PayOs] Payment link created: PaymentLinkId={PaymentLinkId}, QRCode={HasQR}", 
-                    result.Data?.PaymentLinkId, !string.IsNullOrEmpty(result.Data?.QrCode));
+                    result.Data.PaymentLinkId, !string.IsNullOrEmpty(result.Data.QrCode));
                 return result;
             }
             else
             {
-                _logger.LogWarning("⚠️ [PayOs] Payment link creation failed: Code={Code}, Desc={Desc}", 
-                    result?.Code, result?.Desc);
+                _logger.LogWarning("⚠️ [PayOs] Payment link creation failed: Code={Code}, Desc={Desc}, Response={Response}", 
+                    result?.Code ?? "NULL", result?.Desc ?? "NULL", responseContent);
                 return null;
             }
         }
