@@ -1,18 +1,19 @@
 # Dockerfile cho .NET 8.0
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
-EXPOSE 80
-EXPOSE 443
+EXPOSE 10000
+ENV ASPNETCORE_URLS=http://0.0.0.0:10000
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-COPY ["QuanLyResort.csproj", "./"]
-RUN dotnet restore "QuanLyResort.csproj"
-COPY . .
-WORKDIR "/src"
+COPY ["QuanLyResort/QuanLyResort.csproj", "QuanLyResort/"]
+RUN dotnet restore "QuanLyResort/QuanLyResort.csproj"
+COPY QuanLyResort/ QuanLyResort/
+WORKDIR "/src/QuanLyResort"
 RUN dotnet build "QuanLyResort.csproj" -c Release -o /app/build
 
 FROM build AS publish
+WORKDIR "/src/QuanLyResort"
 RUN dotnet publish "QuanLyResort.csproj" -c Release -o /app/publish
 
 FROM base AS final
