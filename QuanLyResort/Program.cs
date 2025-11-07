@@ -18,14 +18,31 @@ var builder = WebApplication.CreateBuilder(args);
 // Add Database Context
 builder.Services.AddDbContext<ResortDbContext>(options =>
 {
-    // Use SQLite in Development for cross-platform local dev; SQL Server otherwise
-    if (builder.Environment.IsDevelopment())
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    
+    // Use SQLite if connection string is SQLite format, otherwise try SQL Server
+    // SQLite works on all platforms (Windows, Linux, macOS)
+    if (connectionString != null && (connectionString.Contains("Data Source=") || connectionString.Contains(".db")))
     {
-        options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
+        options.UseSqlite(connectionString);
+    }
+    else if (builder.Environment.IsDevelopment())
+    {
+        // Development: prefer SQLite for cross-platform
+        options.UseSqlite(connectionString ?? "Data Source=ResortDev.db");
     }
     else
     {
-        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+        // Production: try SQL Server, but fallback to SQLite if LocalDB (not supported on Linux)
+        if (connectionString != null && connectionString.Contains("(localdb)"))
+        {
+            // LocalDB not supported on Linux (Render), use SQLite instead
+            options.UseSqlite("Data Source=resort.db");
+        }
+        else
+        {
+            options.UseSqlServer(connectionString);
+        }
     }
 });
 
