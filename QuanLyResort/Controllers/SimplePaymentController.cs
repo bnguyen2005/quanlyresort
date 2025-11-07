@@ -1,24 +1,28 @@
 using Microsoft.AspNetCore.Mvc;
 using QuanLyResort.Services;
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Authorization;
 
 namespace QuanLyResort.Controllers;
 
 /// <summary>
-/// Controller đơn giản cho thanh toán - chỉ xử lý webhook
+/// Controller đơn giản cho thanh toán - tạo PayOs payment link và xử lý webhook
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class SimplePaymentController : ControllerBase
 {
     private readonly IBookingService _bookingService;
+    private readonly PayOsService _payOsService;
     private readonly ILogger<SimplePaymentController> _logger;
 
     public SimplePaymentController(
         IBookingService bookingService,
+        PayOsService payOsService,
         ILogger<SimplePaymentController> logger)
     {
         _bookingService = bookingService;
+        _payOsService = payOsService;
         _logger = logger;
     }
 
@@ -218,6 +222,87 @@ public class SimplePaymentController : ControllerBase
     }
 
     /// <summary>
+    /// Tạo PayOs payment link
+    /// </summary>
+    [HttpPost("create-link")]
+    [Authorize]
+    public async Task<IActionResult> CreatePaymentLink([FromBody] CreatePaymentLinkRequest request)
+    {
+        try
+        {
+            _logger.LogInformation("🔄 [CreateLink] Creating PayOs payment link for booking {BookingId}", request.BookingId);
+
+            // Get booking
+            var booking = await _bookingService.GetBookingByIdAsync(request.BookingId);
+            if (booking == null)
+            {
+                return NotFound(new { message = $"Booking {request.BookingId} không tồn tại" });
+            }
+
+            // Check if already paid
+            if (booking.Status == "Paid")
+            {
+                return BadRequest(new { message = "Đặt phòng này đã được thanh toán" });
+            }
+
+            // Get amount
+            var amount = booking.EstimatedTotalAmount ?? 0;
+            if (amount <= 0)
+            {
+                return BadRequest(new { message = "Số tiền thanh toán không hợp lệ" });
+            }
+
+            // Use bookingId as orderCode (PayOs requirement)
+            var orderCode = request.BookingId;
+            var description = $"BOOKING{request.BookingId}"; // PayOs description
+            
+            // Get base URL from request
+            var baseUrl = $"{Request.Scheme}://{Request.Host}";
+            var returnUrl = $"{baseUrl}/customer/my-bookings.html?payment=success&bookingId={request.BookingId}";
+            var cancelUrl = $"{baseUrl}/customer/my-bookings.html?payment=cancelled&bookingId={request.BookingId}";
+
+            // Create payment link via PayOs API
+            var expiredAt = DateTime.UtcNow.AddHours(24); // Expire after 24 hours
+            var paymentLink = await _payOsService.CreatePaymentLinkAsync(
+                orderCode: orderCode,
+                amount: amount,
+                description: description,
+                returnUrl: returnUrl,
+                cancelUrl: cancelUrl,
+                expiredAt: expiredAt
+            );
+
+            if (paymentLink == null || paymentLink.Data == null)
+            {
+                _logger.LogError("❌ [CreateLink] Failed to create PayOs payment link");
+                return StatusCode(500, new { message = "Không thể tạo mã thanh toán. Vui lòng thử lại." });
+            }
+
+            _logger.LogInformation("✅ [CreateLink] Payment link created: PaymentLinkId={PaymentLinkId}", 
+                paymentLink.Data.PaymentLinkId);
+
+            return Ok(new
+            {
+                success = true,
+                paymentLinkId = paymentLink.Data.PaymentLinkId,
+                orderCode = paymentLink.Data.OrderCode,
+                qrCode = paymentLink.Data.QrCode, // Base64 QR code image
+                checkoutUrl = paymentLink.Data.CheckoutUrl,
+                amount = paymentLink.Data.Amount,
+                description = paymentLink.Data.Description,
+                accountNumber = paymentLink.Data.AccountNumber,
+                accountName = paymentLink.Data.AccountName,
+                expiredAt = paymentLink.Data.ExpiredAt
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "❌ [CreateLink] Error creating payment link");
+            return StatusCode(500, new { message = "Lỗi tạo mã thanh toán", error = ex.Message });
+        }
+    }
+
+    /// <summary>
     /// Endpoint để PayOs verify webhook URL (GET request)
     /// PayOs sẽ gửi GET request để verify webhook URL trước khi chấp nhận
     /// </summary>
@@ -343,5 +428,13 @@ public class PayOsWebhookData
     public string? TransactionDateTime { get; set; }
     public string? Currency { get; set; }
     public string? PaymentLinkId { get; set; }
+}
+
+/// <summary>
+/// Request để tạo PayOs payment link
+/// </summary>
+public class CreatePaymentLinkRequest
+{
+    public int BookingId { get; set; }
 }
 

@@ -76,6 +76,7 @@ builder.Services.AddScoped<VietQRWebhookService>();
 builder.Services.AddScoped<MBBankWebhookService>();
 builder.Services.AddScoped<MBBankApiService>();
 builder.Services.AddScoped<PayOsWebhookService>();
+builder.Services.AddScoped<PayOsService>();
 builder.Services.AddHttpClient();
 
 // Add SignalR

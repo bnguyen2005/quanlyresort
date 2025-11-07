@@ -167,9 +167,9 @@ async function openSimplePayment(bookingId) {
 }
 
 /**
- * Update modal content
+ * Update modal content - Tạo PayOs payment link
  */
-function updatePaymentModal(bookingId, bookingCode, amount) {
+async function updatePaymentModal(bookingId, bookingCode, amount) {
   // Booking code
   const codeEl = document.getElementById('spBookingCode');
   if (codeEl) codeEl.textContent = bookingCode;
@@ -178,50 +178,104 @@ function updatePaymentModal(bookingId, bookingCode, amount) {
   const amountEl = document.getElementById('spAmount');
   if (amountEl) amountEl.textContent = formatCurrency(amount);
 
-  // QR code
+  // Show loading
   const qrImg = document.getElementById('spQRImage');
-  if (qrImg) {
-    const content = `BOOKING-${bookingId}`;
-    const qrUrl = `https://img.vietqr.io/image/${BANK_CODE}-${BANK_ACCOUNT}-compact.png?amount=${Math.round(amount)}&addInfo=${encodeURIComponent(content)}&accountName=${encodeURIComponent(BANK_ACCOUNT_NAME)}&_t=${Date.now()}`;
-    qrImg.src = qrUrl;
-    qrImg.style.display = 'block';
-    console.log('✅ [updatePaymentModal] QR image set, display: block');
-  } else {
-    console.warn('⚠️ [updatePaymentModal] spQRImage element not found');
-  }
-  
-  // Ensure QR section is visible
   const qrSection = document.getElementById('spQRSection');
-  if (qrSection) {
-    qrSection.style.display = 'block';
-    console.log('✅ [updatePaymentModal] QR section set, display: block');
-  }
-
-  // Bank info
-  const bankAccEl = document.getElementById('spBankAccount');
-  if (bankAccEl) bankAccEl.textContent = BANK_ACCOUNT;
-  
-  const bankNameEl = document.getElementById('spBankName');
-  if (bankNameEl) bankNameEl.textContent = BANK_ACCOUNT_NAME;
-
-  // Content
-  const contentEl = document.getElementById('spContent');
-  if (contentEl) contentEl.textContent = `BOOKING-${bookingId}`;
-
-  // Reset status messages
   const waitingEl = document.getElementById('spWaiting');
   const successEl = document.getElementById('spSuccess');
+  
   if (waitingEl) {
     waitingEl.style.display = 'block';
-    console.log('✅ [updatePaymentModal] Waiting message set, display: block');
-  } else {
-    console.warn('⚠️ [updatePaymentModal] spWaiting element not found');
+    waitingEl.textContent = 'Đang tạo mã thanh toán...';
+    waitingEl.className = 'text-center mt-4';
   }
-  if (successEl) {
-    successEl.style.display = 'none';
-    console.log('✅ [updatePaymentModal] Success message set, display: none');
-  } else {
-    console.warn('⚠️ [updatePaymentModal] spSuccess element not found');
+  if (successEl) successEl.style.display = 'none';
+  if (qrSection) qrSection.style.display = 'none';
+
+  try {
+    // Call PayOs API to create payment link
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('Không tìm thấy token đăng nhập');
+    }
+
+    console.log('🔄 [updatePaymentModal] Creating PayOs payment link for booking:', bookingId);
+    
+    const response = await fetch(`${location.origin}/api/simplepayment/create-link`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ bookingId: bookingId })
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: 'Lỗi không xác định' }));
+      throw new Error(error.message || `HTTP ${response.status}`);
+    }
+
+    const result = await response.json();
+    console.log('✅ [updatePaymentModal] PayOs payment link created:', result);
+
+    if (!result.success || !result.qrCode) {
+      throw new Error('Không thể tạo mã thanh toán từ PayOs');
+    }
+
+    // Display QR code from PayOs (base64)
+    if (qrImg) {
+      // PayOs returns base64 QR code image
+      qrImg.src = `data:image/png;base64,${result.qrCode}`;
+      qrImg.style.display = 'block';
+      qrImg.alt = `PayOs QR - ${bookingCode}`;
+      console.log('✅ [updatePaymentModal] QR image set from PayOs');
+    }
+
+    // Show QR section
+    if (qrSection) {
+      qrSection.style.display = 'block';
+      console.log('✅ [updatePaymentModal] QR section displayed');
+    }
+
+    // Update bank info if available
+    if (result.accountNumber) {
+      const bankAccEl = document.getElementById('spBankAccount');
+      if (bankAccEl) bankAccEl.textContent = result.accountNumber;
+    }
+    if (result.accountName) {
+      const bankNameEl = document.getElementById('spBankName');
+      if (bankNameEl) bankNameEl.textContent = result.accountName;
+    }
+
+    // Update content
+    const contentEl = document.getElementById('spContent');
+    if (contentEl) contentEl.textContent = result.description || `BOOKING${bookingId}`;
+
+    // Update waiting message
+    if (waitingEl) {
+      waitingEl.style.display = 'block';
+      waitingEl.textContent = 'Vui lòng quét mã QR để thanh toán';
+      waitingEl.className = 'text-center mt-4';
+    }
+
+    // Store payment link info for later use
+    window._currentPaymentLink = {
+      paymentLinkId: result.paymentLinkId,
+      orderCode: result.orderCode,
+      checkoutUrl: result.checkoutUrl
+    };
+
+  } catch (error) {
+    console.error('❌ [updatePaymentModal] Error creating PayOs payment link:', error);
+    
+    // Show error message
+    if (waitingEl) {
+      waitingEl.style.display = 'block';
+      waitingEl.textContent = `Lỗi: ${error.message}. Vui lòng thử lại.`;
+      waitingEl.className = 'text-center mt-4 text-danger';
+    }
+    
+    showSimpleToast(`Lỗi tạo mã thanh toán: ${error.message}`, 'danger');
   }
 }
 
