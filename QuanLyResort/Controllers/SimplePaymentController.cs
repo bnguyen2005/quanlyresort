@@ -35,15 +35,22 @@ public class SimplePaymentController : ControllerBase
     /// </summary>
     [HttpPost("webhook")]
     [Microsoft.AspNetCore.Authorization.AllowAnonymous]
-    public async Task<IActionResult> Webhook([FromBody] object? rawRequest = null)
+    public async Task<IActionResult> Webhook()
     {
         var webhookId = Guid.NewGuid().ToString("N")[..8];
         var startTime = DateTime.UtcNow;
         
         try
         {
+            // Read raw request body
+            string rawRequestJson;
+            using (var reader = new StreamReader(Request.Body))
+            {
+                rawRequestJson = await reader.ReadToEndAsync();
+            }
+            
             // Handle PayOs verification request (empty body)
-            if (rawRequest == null)
+            if (string.IsNullOrWhiteSpace(rawRequestJson))
             {
                 _logger.LogInformation("🔍 [WEBHOOK-{WebhookId}] PayOs verification request (empty body)", webhookId);
                 return Ok(new
@@ -57,11 +64,7 @@ public class SimplePaymentController : ControllerBase
             
             _logger.LogInformation("═══════════════════════════════════════════════════════════");
             _logger.LogInformation("📥 [WEBHOOK-{WebhookId}] Webhook received at {Time}", webhookId, startTime);
-            
-            // Log raw request as JSON string
-            var rawRequestJson = System.Text.Json.JsonSerializer.Serialize(rawRequest);
             _logger.LogInformation("   Raw request JSON: {RawRequest}", rawRequestJson);
-            _logger.LogInformation("   Raw request type: {Type}", rawRequest?.GetType().Name ?? "NULL");
             _logger.LogInformation("   IP Address: {RemoteIp}", HttpContext.Connection.RemoteIpAddress?.ToString());
             _logger.LogInformation("   User-Agent: {UserAgent}", Request.Headers["User-Agent"].ToString());
             
