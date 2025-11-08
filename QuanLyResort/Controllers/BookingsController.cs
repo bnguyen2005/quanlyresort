@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using QuanLyResort.Data;
 using QuanLyResort.Models;
 using QuanLyResort.Services;
 using System.Security.Claims;
@@ -12,10 +14,12 @@ namespace QuanLyResort.Controllers;
 public class BookingsController : ControllerBase
 {
     private readonly IBookingService _bookingService;
+    private readonly ResortDbContext _context;
 
-    public BookingsController(IBookingService bookingService)
+    public BookingsController(IBookingService bookingService, ResortDbContext context)
     {
         _bookingService = bookingService;
+        _context = context;
     }
 
     [HttpPost]
@@ -29,6 +33,14 @@ public class BookingsController : ControllerBase
             if (request.CustomerId <= 0)
             {
                 return BadRequest(new { message = "CustomerId is required and must be valid" });
+            }
+
+            // Validate CustomerId exists in database
+            var customerExists = await _context.Customers.AnyAsync(c => c.CustomerId == request.CustomerId);
+            if (!customerExists)
+            {
+                Console.WriteLine($"❌ [CreateBooking] CustomerId {request.CustomerId} does not exist in database");
+                return BadRequest(new { message = $"CustomerId {request.CustomerId} không tồn tại trong hệ thống" });
             }
 
             if (request.CheckOutDate <= request.CheckInDate)
@@ -56,7 +68,20 @@ public class BookingsController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { message = "Failed to create booking", error = ex.Message, stackTrace = ex.StackTrace });
+            // Log chi tiết lỗi để debug
+            Console.WriteLine($"❌ [CreateBooking] Error: {ex.Message}");
+            Console.WriteLine($"❌ [CreateBooking] StackTrace: {ex.StackTrace}");
+            if (ex.InnerException != null)
+            {
+                Console.WriteLine($"❌ [CreateBooking] InnerException: {ex.InnerException.Message}");
+            }
+            
+            return StatusCode(500, new { 
+                message = "Failed to create booking", 
+                error = ex.Message,
+                innerException = ex.InnerException?.Message,
+                stackTrace = ex.StackTrace 
+            });
         }
     }
 

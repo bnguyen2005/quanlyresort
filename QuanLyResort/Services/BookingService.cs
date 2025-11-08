@@ -28,8 +28,30 @@ public class BookingService : IBookingService
             .OrderByDescending(b => b.BookingId)
             .FirstOrDefault();
 
-        var bookingNumber = lastBooking != null ? 
-            int.Parse(lastBooking.BookingCode.Replace("BKG", "")) + 1 : 1;
+        int bookingNumber = 1;
+        if (lastBooking != null && !string.IsNullOrEmpty(lastBooking.BookingCode))
+        {
+            try
+            {
+                var codePart = lastBooking.BookingCode.Replace("BKG", "").Trim();
+                if (int.TryParse(codePart, out int lastNumber))
+                {
+                    bookingNumber = lastNumber + 1;
+                }
+                else
+                {
+                    // Fallback: use BookingId if parsing fails
+                    bookingNumber = lastBooking.BookingId + 1;
+                    Console.WriteLine($"⚠️ [CreateBookingAsync] Failed to parse BookingCode '{lastBooking.BookingCode}', using BookingId {lastBooking.BookingId} + 1");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Fallback: use BookingId if parsing fails
+                bookingNumber = lastBooking.BookingId + 1;
+                Console.WriteLine($"⚠️ [CreateBookingAsync] Error parsing BookingCode '{lastBooking.BookingCode}': {ex.Message}, using BookingId {lastBooking.BookingId} + 1");
+            }
+        }
         
         booking.BookingCode = $"BKG{bookingNumber:D7}";
         booking.Status = "Pending";
@@ -170,8 +192,30 @@ public class BookingService : IBookingService
                 .OrderByDescending(i => i.InvoiceId)
                 .FirstOrDefault();
 
-            var invoiceNumber = lastInvoice != null ?
-                int.Parse(lastInvoice.InvoiceNumber.Replace("INV", "")) + 1 : 1;
+            int invoiceNumber = 1;
+            if (lastInvoice != null && !string.IsNullOrEmpty(lastInvoice.InvoiceNumber))
+            {
+                try
+                {
+                    var codePart = lastInvoice.InvoiceNumber.Replace("INV", "").Trim();
+                    if (int.TryParse(codePart, out int lastNumber))
+                    {
+                        invoiceNumber = lastNumber + 1;
+                    }
+                    else
+                    {
+                        // Fallback: use InvoiceId if parsing fails
+                        invoiceNumber = lastInvoice.InvoiceId + 1;
+                        Console.WriteLine($"⚠️ [CreateBookingAsync] Failed to parse InvoiceNumber '{lastInvoice.InvoiceNumber}', using InvoiceId {lastInvoice.InvoiceId} + 1");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Fallback: use InvoiceId if parsing fails
+                    invoiceNumber = lastInvoice.InvoiceId + 1;
+                    Console.WriteLine($"⚠️ [CreateBookingAsync] Error parsing InvoiceNumber '{lastInvoice.InvoiceNumber}': {ex.Message}, using InvoiceId {lastInvoice.InvoiceId} + 1");
+                }
+            }
 
             var invoice = new Invoice
             {
