@@ -283,6 +283,36 @@ public class SimplePaymentController : ControllerBase
 
             if (paymentLink.Data == null)
             {
+                // Nếu lỗi "Đơn thanh toán đã tồn tại", thử lấy payment link hiện có
+                if (paymentLink.Desc?.Contains("đã tồn tại") == true || 
+                    paymentLink.Desc?.Contains("already exists") == true ||
+                    paymentLink.Code == "03")
+                {
+                    _logger.LogWarning("⚠️ [CreateLink] Payment link already exists for orderCode {OrderCode}. Trying to get existing link...", orderCode);
+                    
+                    var existingLink = await _payOsService.GetPaymentLinkByOrderCodeAsync(orderCode);
+                    if (existingLink?.Data != null)
+                    {
+                        _logger.LogInformation("✅ [CreateLink] Found existing payment link: PaymentLinkId={PaymentLinkId}", 
+                            existingLink.Data.PaymentLinkId);
+                        
+                        // Trả về payment link hiện có
+                        return Ok(new
+                        {
+                            success = true,
+                            paymentLinkId = existingLink.Data.PaymentLinkId,
+                            orderCode = existingLink.Data.OrderCode,
+                            qrCode = existingLink.Data.QrCode,
+                            checkoutUrl = existingLink.Data.CheckoutUrl,
+                            amount = existingLink.Data.Amount,
+                            description = existingLink.Data.Description,
+                            accountNumber = existingLink.Data.AccountNumber,
+                            accountName = existingLink.Data.AccountName,
+                            expiredAt = existingLink.Data.ExpiredAt
+                        });
+                    }
+                }
+                
                 _logger.LogError("❌ [CreateLink] PayOs returned error. Code: {Code}, Desc: {Desc}", 
                     paymentLink.Code, paymentLink.Desc);
                 return StatusCode(500, new { 

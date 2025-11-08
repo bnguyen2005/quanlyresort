@@ -198,6 +198,57 @@ public class PayOsService
     }
 
     /// <summary>
+    /// Lấy thông tin payment link từ PayOs theo orderCode
+    /// </summary>
+    public async Task<PayOsPaymentLinkResponse?> GetPaymentLinkByOrderCodeAsync(long orderCode)
+    {
+        try
+        {
+            _logger.LogInformation("🔄 [PayOs] Getting payment link by orderCode: {OrderCode}", orderCode);
+
+            // Create HTTP request
+            var request = new HttpRequestMessage(HttpMethod.Get, $"{_baseUrl}/v2/payment-requests?orderCode={orderCode}");
+            
+            request.Headers.Add("x-client-id", _clientId);
+            request.Headers.Add("x-api-key", _apiKey);
+
+            // Send request
+            var response = await _httpClient.SendAsync(request);
+            var responseContent = await response.Content.ReadAsStringAsync();
+
+            _logger.LogInformation("📥 [PayOs] GetByOrderCode Response status: {Status}", response.StatusCode);
+            _logger.LogInformation("📥 [PayOs] GetByOrderCode Response body: {Body}", responseContent);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogError("❌ [PayOs] GetByOrderCode HTTP Error: {Status} - {Content}", response.StatusCode, responseContent);
+                return null;
+            }
+
+            var result = JsonSerializer.Deserialize<PayOsPaymentLinkResponse>(responseContent);
+            
+            if (result?.Code == "00" && result.Data != null)
+            {
+                var hasQrCode = !string.IsNullOrEmpty(result.Data.QrCode);
+                _logger.LogInformation("✅ [PayOs] GetByOrderCode success. QR Code available: {HasQR}, Length: {Length}", 
+                    hasQrCode, result.Data.QrCode?.Length ?? 0);
+                return result;
+            }
+            else
+            {
+                _logger.LogWarning("⚠️ [PayOs] GetByOrderCode failed: Code={Code}, Desc={Desc}", 
+                    result?.Code ?? "NULL", result?.Desc ?? "NULL");
+                return null;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "❌ [PayOs] Error getting payment link by orderCode");
+            return null;
+        }
+    }
+
+    /// <summary>
     /// Lấy thông tin payment link từ PayOs (để lấy QR code nếu CreateAsync không trả về)
     /// </summary>
     public async Task<PayOsPaymentLinkResponse?> GetPaymentLinkAsync(string paymentLinkId)
