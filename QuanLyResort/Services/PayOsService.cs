@@ -163,8 +163,22 @@ public class PayOsService
                 }
                 else
                 {
-                    _logger.LogWarning("⚠️ [PayOs] QR Code is NULL or empty. Available fields: PaymentLinkId={PaymentLinkId}, CheckoutUrl={CheckoutUrl}", 
-                        result.Data.PaymentLinkId, result.Data.CheckoutUrl);
+                    _logger.LogWarning("⚠️ [PayOs] QR Code is NULL or empty. Trying to get from GetAsync...");
+                    // Nếu CreateAsync không trả về QR code, gọi GetAsync để lấy QR code
+                    if (!string.IsNullOrEmpty(result.Data.PaymentLinkId))
+                    {
+                        var paymentLinkDetails = await GetPaymentLinkAsync(result.Data.PaymentLinkId);
+                        if (paymentLinkDetails?.Data != null && !string.IsNullOrEmpty(paymentLinkDetails.Data.QrCode))
+                        {
+                            _logger.LogInformation("✅ [PayOs] Got QR code from GetAsync");
+                            result.Data.QrCode = paymentLinkDetails.Data.QrCode;
+                        }
+                        else
+                        {
+                            _logger.LogWarning("⚠️ [PayOs] GetAsync also did not return QR code. PaymentLinkId={PaymentLinkId}, CheckoutUrl={CheckoutUrl}", 
+                                result.Data.PaymentLinkId, result.Data.CheckoutUrl);
+                        }
+                    }
                 }
                 
                 return result;
@@ -179,6 +193,57 @@ public class PayOsService
         catch (Exception ex)
         {
             _logger.LogError(ex, "❌ [PayOs] Error creating payment link");
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Lấy thông tin payment link từ PayOs (để lấy QR code nếu CreateAsync không trả về)
+    /// </summary>
+    public async Task<PayOsPaymentLinkResponse?> GetPaymentLinkAsync(string paymentLinkId)
+    {
+        try
+        {
+            _logger.LogInformation("🔄 [PayOs] Getting payment link: PaymentLinkId={PaymentLinkId}", paymentLinkId);
+
+            // Create HTTP request
+            var request = new HttpRequestMessage(HttpMethod.Get, $"{_baseUrl}/v2/payment-requests/{paymentLinkId}");
+            
+            request.Headers.Add("x-client-id", _clientId);
+            request.Headers.Add("x-api-key", _apiKey);
+
+            // Send request
+            var response = await _httpClient.SendAsync(request);
+            var responseContent = await response.Content.ReadAsStringAsync();
+
+            _logger.LogInformation("📥 [PayOs] GetAsync Response status: {Status}", response.StatusCode);
+            _logger.LogInformation("📥 [PayOs] GetAsync Response body: {Body}", responseContent);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogError("❌ [PayOs] GetAsync HTTP Error: {Status} - {Content}", response.StatusCode, responseContent);
+                return null;
+            }
+
+            var result = JsonSerializer.Deserialize<PayOsPaymentLinkResponse>(responseContent);
+            
+            if (result?.Code == "00" && result.Data != null)
+            {
+                var hasQrCode = !string.IsNullOrEmpty(result.Data.QrCode);
+                _logger.LogInformation("✅ [PayOs] GetAsync success. QR Code available: {HasQR}, Length: {Length}", 
+                    hasQrCode, result.Data.QrCode?.Length ?? 0);
+                return result;
+            }
+            else
+            {
+                _logger.LogWarning("⚠️ [PayOs] GetAsync failed: Code={Code}, Desc={Desc}", 
+                    result?.Code ?? "NULL", result?.Desc ?? "NULL");
+                return null;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "❌ [PayOs] Error getting payment link");
             return null;
         }
     }

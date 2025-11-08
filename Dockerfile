@@ -1,6 +1,5 @@
-# Dockerfile cho .NET 8.0
-# Build context: Root của repo (QuanLyResort-main)
-# Dockerfile path trong Render: QuanLyResort/Dockerfile
+# Dockerfile ở root - Build context: Root của repo
+# Sử dụng Dockerfile này nếu Render không tìm thấy QuanLyResort/Dockerfile
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
@@ -29,3 +28,4 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "QuanLyResort.dll"]
+

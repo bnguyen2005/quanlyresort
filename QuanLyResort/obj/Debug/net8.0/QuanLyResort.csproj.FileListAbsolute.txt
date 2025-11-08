@@ -163,3 +163,4 @@
 /Users/vyto/Downloads/QuanLyResort-main (1)/QuanLyResort-main/QuanLyResort/obj/Debug/net8.0/QuanLyResort.pdb
 /Users/vyto/Downloads/QuanLyResort-main (1)/QuanLyResort-main/QuanLyResort/obj/Debug/net8.0/QuanLyResort.genruntimeconfig.cache
 /Users/vyto/Downloads/QuanLyResort-main (1)/QuanLyResort-main/QuanLyResort/obj/Debug/net8.0/ref/QuanLyResort.dll
+/Users/vyto/Downloads/QuanLyResort-main (1)/QuanLyResort-main/QuanLyResort/bin/Debug/net8.0/railway.json

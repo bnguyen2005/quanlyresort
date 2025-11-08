@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("QuanLyResort")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+37aa3bf927cf55c6ecdb67d389a6b84830c35abe")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+cf7bddb2384a9fbf521383135df205665cac31a3")]
 [assembly: System.Reflection.AssemblyProductAttribute("QuanLyResort")]
 [assembly: System.Reflection.AssemblyTitleAttribute("QuanLyResort")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -245,7 +245,13 @@ async function updatePaymentModal(bookingId, bookingCode, amount) {
           
           qrImg.onerror = function(e) {
             console.error('❌ [updatePaymentModal] QR URL failed to load:', e);
-            generateQRFromCheckoutUrl(result.checkoutUrl, qrImg.parentElement);
+            console.error('❌ [updatePaymentModal] QR URL:', qrCodeData);
+            // Không tự generate QR - chỉ hiển thị lỗi
+            qrImg.style.display = 'none';
+            if (waitingEl) {
+              waitingEl.textContent = 'Không thể tải QR code từ PayOs. Vui lòng thử lại.';
+              waitingEl.className = 'text-center mt-4 text-danger';
+            }
           };
           
           qrImg.onload = function() {
@@ -275,7 +281,12 @@ async function updatePaymentModal(bookingId, bookingCode, amount) {
           qrImg.onerror = function(e) {
             console.error('❌ [updatePaymentModal] QR Base64 failed to load:', e);
             console.error('❌ [updatePaymentModal] Failed src (first 200 chars):', qrSrc.substring(0, 200));
-            generateQRFromCheckoutUrl(result.checkoutUrl, qrImg.parentElement);
+            // Không tự generate QR - chỉ hiển thị lỗi
+            qrImg.style.display = 'none';
+            if (waitingEl) {
+              waitingEl.textContent = 'Không thể tải QR code từ PayOs. Vui lòng thử lại.';
+              waitingEl.className = 'text-center mt-4 text-danger';
+            }
           };
           
           qrImg.onload = function() {
@@ -284,14 +295,12 @@ async function updatePaymentModal(bookingId, bookingCode, amount) {
           };
         }
       } 
-      // Case 3: Không có QR code, chỉ có checkoutUrl - tự generate QR code
-      else if (result.checkoutUrl) {
-        console.log('🔄 [updatePaymentModal] No QR code, generating from checkoutUrl');
-        generateQRFromCheckoutUrl(result.checkoutUrl, qrImg.parentElement);
-      } 
+      // Case 3: Không có QR code từ PayOs - báo lỗi (không tự generate)
       else {
-        console.error('❌ [updatePaymentModal] No QR code and no checkoutUrl');
-        throw new Error('PayOs không trả về QR code hoặc checkout URL');
+        console.error('❌ [updatePaymentModal] PayOs không trả về QR code');
+        console.error('❌ [updatePaymentModal] PaymentLinkId:', result.paymentLinkId);
+        console.error('❌ [updatePaymentModal] CheckoutUrl:', result.checkoutUrl);
+        throw new Error('PayOs không trả về QR code. Vui lòng thử lại hoặc liên hệ hỗ trợ.');
       }
     }
 
