@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using QuanLyResort.Services;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace QuanLyResort.Controllers;
 
@@ -68,7 +69,9 @@ public class SimplePaymentController : ControllerBase
             
             // Try PayOs format first
             var payOsRequest = System.Text.Json.JsonSerializer.Deserialize<PayOsWebhookRequest>(System.Text.Json.JsonSerializer.Serialize(rawRequest));
-            if (payOsRequest != null && payOsRequest.Success && payOsRequest.Data != null)
+            // PayOs gửi "code": "00" cho success, không có field "success"
+            // Check cả Code và Data để đảm bảo đúng format PayOs
+            if (payOsRequest != null && !string.IsNullOrEmpty(payOsRequest.Code) && payOsRequest.Data != null)
             {
                 // PayOs format
                 _logger.LogInformation("📋 [WEBHOOK-{WebhookId}] Detected PayOs format", webhookId);
@@ -81,6 +84,14 @@ public class SimplePaymentController : ControllerBase
                 _logger.LogInformation("   PayOs - OrderCode: {OrderCode}, Amount: {Amount:N0} VND", orderCode, amount);
                 _logger.LogInformation("   PayOs - Description: {Description}", content);
                 _logger.LogInformation("   PayOs - Reference: {Reference}", transactionId);
+                
+                // Chỉ xử lý nếu code = "00" (success)
+                if (payOsRequest.Code != "00")
+                {
+                    _logger.LogWarning("⚠️ [WEBHOOK-{WebhookId}] PayOs webhook failed with code: {Code}, Desc: {Desc}", 
+                        webhookId, payOsRequest.Code, payOsRequest.Desc);
+                    return Ok(new { message = $"Payment failed: {payOsRequest.Desc}", code = payOsRequest.Code });
+                }
             }
             else
             {
@@ -482,6 +493,55 @@ public class SimplePaymentController : ControllerBase
             return directId;
 
         return null;
+    }
+
+    /// <summary>
+    /// Endpoint để manually update booking status thành Paid (dùng khi webhook không hoạt động)
+    /// </summary>
+    [HttpPost("manual-update-paid/{bookingId}")]
+    [Authorize(Roles = "Admin,FrontDesk,Manager")]
+    public async Task<IActionResult> ManualUpdatePaid(int bookingId)
+    {
+        try
+        {
+            _logger.LogInformation("🔄 [ManualUpdate] Manually updating booking {BookingId} to Paid", bookingId);
+            
+            var booking = await _bookingService.GetBookingByIdAsync(bookingId);
+            if (booking == null)
+            {
+                return NotFound(new { message = $"Booking {bookingId} không tồn tại" });
+            }
+
+            if (booking.Status == "Paid")
+            {
+                return Ok(new { message = "Booking đã được thanh toán rồi", bookingId, bookingCode = booking.BookingCode });
+            }
+
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value ?? "Manual";
+            var updated = await _bookingService.ProcessOnlinePaymentAsync(bookingId, userEmail);
+            
+            if (!updated)
+            {
+                return StatusCode(500, new { message = "Không thể cập nhật booking" });
+            }
+
+            _logger.LogInformation("✅ [ManualUpdate] Booking {BookingId} ({BookingCode}) updated to Paid", 
+                bookingId, booking.BookingCode);
+
+            return Ok(new 
+            { 
+                success = true,
+                message = "Cập nhật thành công",
+                bookingId,
+                bookingCode = booking.BookingCode,
+                status = "Paid"
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "❌ [ManualUpdate] Error updating booking {BookingId}", bookingId);
+            return StatusCode(500, new { message = "Lỗi khi cập nhật booking", error = ex.Message });
+        }
     }
 }
 
