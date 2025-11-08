@@ -605,11 +605,23 @@ function startSimplePolling(bookingId) {
 
   // Poll every 2 seconds (tăng tần suất để detect nhanh hơn)
   console.log('🔄 [SimplePolling] Starting polling for booking:', bookingId);
+  let pollCount = 0;
+  const maxPolls = 300; // Poll tối đa 10 phút (300 * 2s = 600s)
+  
   window.paymentPollingInterval = setInterval(async () => {
+    pollCount++;
     try {
       const token = localStorage.getItem('token');
       if (!token) {
         console.warn('⚠️ [SimplePolling] No token found');
+        stopSimplePolling();
+        return;
+      }
+
+      // Timeout sau 10 phút
+      if (pollCount > maxPolls) {
+        console.log('⏰ [SimplePolling] Timeout reached after 10 minutes, stopping polling');
+        stopSimplePolling();
         return;
       }
 
@@ -627,18 +639,17 @@ function startSimplePolling(bookingId) {
 
       const booking = await response.json();
       
-      // Log full booking object for debugging
-      console.log('🔍 [SimplePolling] Full booking response:', booking);
-      console.log('🔍 [SimplePolling] Booking status (raw):', booking.status, 'Type:', typeof booking.status);
-      console.log('🔍 [SimplePolling] Booking status (trimmed):', String(booking.status || '').trim());
+      // Log mỗi 10 lần poll để không spam console
+      if (pollCount % 10 === 0 || pollCount === 1) {
+        console.log(`🔍 [SimplePolling] Poll #${pollCount} - Status: ${booking.status} (booking ${bookingId})`);
+      }
       
       const currentStatus = String(booking.status || '').trim().toLowerCase();
-      console.log('🔍 [SimplePolling] Booking status (lowercase):', currentStatus, 'for booking:', bookingId);
-      
-      // Check status (case-insensitive and handle different formats)
-      // Also check for "Paid" with capital P
+
+      // Check for "Paid" status (case-insensitive)
       if (currentStatus === 'paid' || booking.status === 'Paid' || booking.status === 'PAID') {
         console.log('✅ [SimplePolling] Payment detected! Status = Paid, stopping polling...');
+        console.log('✅ [SimplePolling] Poll count:', pollCount);
         console.log('✅ [SimplePolling] Full booking object:', booking);
         
         // Stop polling first
@@ -657,24 +668,28 @@ function startSimplePolling(bookingId) {
           modal.offsetHeight;
         }
         
-        // Reload bookings and close modal after 2 seconds
+        // Reload bookings list to update status
+        if (window.loadBookings) {
+          window.loadBookings();
+        }
+        
+        // Close modal after 3 seconds
         setTimeout(() => {
-          if (window.loadBookings) {
-            window.loadBookings();
-          }
           const modalInstance = bootstrap.Modal.getInstance(document.getElementById('simplePaymentModal'));
           if (modalInstance) {
             modalInstance.hide();
           }
-        }, 2000);
+        }, 3000);
       } else {
-        // Log status for debugging
-        console.log('⏳ [SimplePolling] Still waiting... Status:', booking.status);
+        // Log status mỗi 10 lần poll
+        if (pollCount % 10 === 0) {
+          console.log(`⏳ [SimplePolling] Still waiting... Status: ${booking.status} (poll #${pollCount})`);
+        }
       }
     } catch (error) {
       console.error('❌ [SimplePolling] Polling error:', error);
     }
-  }, 2000); // 2 seconds - tăng tần suất để detect payment nhanh hơn
+  }, 2000); // Poll mỗi 2 giây
   
   // Update local variable
   paymentPollingInterval = window.paymentPollingInterval;
