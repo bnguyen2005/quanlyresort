@@ -41,7 +41,7 @@ public class PayOsService
     /// Tạo PayOs payment link
     /// </summary>
     public async Task<PayOsPaymentLinkResponse?> CreatePaymentLinkAsync(
-        int orderCode,
+        long orderCode,
         decimal amount,
         string description,
         string returnUrl,
@@ -79,7 +79,7 @@ public class PayOsService
             // PayOs expects long for orderCode and amount
             var requestBody = new
             {
-                orderCode = (long)orderCode,
+                orderCode = orderCode,
                 amount = amountLong,
                 description = description,
                 cancelUrl = cancelUrl,
