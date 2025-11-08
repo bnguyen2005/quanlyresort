@@ -10,9 +10,13 @@ echo ""
 # Lấy URL từ environment hoặc dùng default
 WEBHOOK_URL="${WEBHOOK_URL:-https://quanlyresort.onrender.com/api/simplepayment/webhook}"
 BOOKING_ID="${1:-4}"
+ORDER_CODE="${2:-47571}"  # OrderCode từ PayOs response (có thể override)
+DESCRIPTION_PREFIX="${3:-CSMJ4XFPZW3}"  # Prefix từ PayOs description (có thể override)
 
 echo "📋 Booking ID: $BOOKING_ID"
 echo "🔗 Webhook URL: $WEBHOOK_URL"
+echo "📦 Order Code: $ORDER_CODE"
+echo "📝 Description Prefix: $DESCRIPTION_PREFIX"
 echo ""
 
 # Format PayOs webhook (dựa trên PayOs API documentation)
@@ -21,14 +25,14 @@ echo ""
 #   "code": "00",
 #   "desc": "success",
 #   "data": {
-#     "orderCode": 43843,
+#     "orderCode": 47571,
 #     "amount": 5000,
-#     "description": "CSCOK68MZC1 BOOKING4",
+#     "description": "CSMJ4XFPZW3 BOOKING4",
 #     "accountNumber": "0901329227",
 #     "reference": "REF123456",
 #     "transactionDateTime": "2025-11-09T00:44:06Z",
 #     "currency": "VND",
-#     "paymentLinkId": "d0496972015547f9a78af3a3847474b4"
+#     "paymentLinkId": "093bab572a0542d4a752e1f1bb22abd7"
 #   },
 #   "signature": "..."
 # }
@@ -38,15 +42,15 @@ PAYOS_WEBHOOK_JSON=$(cat <<EOF
   "code": "00",
   "desc": "success",
   "data": {
-    "orderCode": 43843,
+    "orderCode": ${ORDER_CODE},
     "amount": 5000,
-    "description": "CSCOK68MZC1 BOOKING${BOOKING_ID}",
+    "description": "${DESCRIPTION_PREFIX} BOOKING${BOOKING_ID}",
     "accountNumber": "0901329227",
     "accountName": "PHAM THANH LAM",
     "reference": "REF$(date +%s)",
     "transactionDateTime": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
     "currency": "VND",
-    "paymentLinkId": "test-payment-link-id-$(date +%s)"
+    "paymentLinkId": "093bab572a0542d4a752e1f1bb22abd7"
   },
   "signature": "test-signature"
 }
@@ -54,7 +58,8 @@ EOF
 )
 
 echo "📤 Sending PayOs webhook..."
-echo "   Description: CSCOK68MZC1 BOOKING${BOOKING_ID}"
+echo "   Description: ${DESCRIPTION_PREFIX} BOOKING${BOOKING_ID}"
+echo "   Order Code: ${ORDER_CODE}"
 echo ""
 
 RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "$WEBHOOK_URL" \
