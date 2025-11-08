@@ -207,7 +207,9 @@ public class PayOsService
             _logger.LogInformation("🔄 [PayOs] Getting payment link by orderCode: {OrderCode}", orderCode);
 
             // Create HTTP request
-            var request = new HttpRequestMessage(HttpMethod.Get, $"{_baseUrl}/v2/payment-requests?orderCode={orderCode}");
+            // PayOs API: GET /v2/payment-requests/{idOrOrderCode}
+            // Có thể dùng orderCode hoặc paymentLinkId
+            var request = new HttpRequestMessage(HttpMethod.Get, $"{_baseUrl}/v2/payment-requests/{orderCode}");
             
             request.Headers.Add("x-client-id", _clientId);
             request.Headers.Add("x-api-key", _apiKey);
