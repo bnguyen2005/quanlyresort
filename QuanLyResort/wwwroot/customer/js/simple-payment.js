@@ -644,33 +644,55 @@ function startSimplePolling(bookingId) {
         console.log(`🔍 [SimplePolling] Poll #${pollCount} - Status: ${booking.status} (booking ${bookingId})`);
       }
       
-      const currentStatus = String(booking.status || '').trim().toLowerCase();
+      // Normalize status để check (case-insensitive, trim whitespace)
+      const rawStatus = String(booking.status || '').trim();
+      const normalizedStatus = rawStatus.toLowerCase();
 
-      // Check for "Paid" status (case-insensitive)
-      if (currentStatus === 'paid' || booking.status === 'Paid' || booking.status === 'PAID') {
-        console.log('✅ [SimplePolling] Payment detected! Status = Paid, stopping polling...');
+      // Check for "Paid" status (case-insensitive, với nhiều variations)
+      const isPaid = normalizedStatus === 'paid' || 
+                     rawStatus === 'Paid' || 
+                     rawStatus === 'PAID' ||
+                     normalizedStatus.includes('paid');
+      
+      if (isPaid) {
+        console.log('✅ [SimplePolling] Payment detected! Status =', rawStatus, '(normalized:', normalizedStatus + ')');
         console.log('✅ [SimplePolling] Poll count:', pollCount);
         console.log('✅ [SimplePolling] Full booking object:', booking);
         
         // Stop polling first
         stopSimplePolling();
         
-        // Show success UI immediately
+        // Small delay để đảm bảo polling đã dừng
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Show success UI immediately (force update)
         showPaymentSuccess();
+        
+        // Double-check và force update lại sau 200ms
+        setTimeout(() => {
+          showPaymentSuccess();
+        }, 200);
         
         // Show toast notification
         showSimpleToast('✅ Thanh toán thành công!', 'success');
         
-        // Force UI update
+        // Force UI update - trigger reflow
         const modal = document.getElementById('simplePaymentModal');
         if (modal) {
           // Trigger a reflow to ensure CSS updates
-          modal.offsetHeight;
+          void modal.offsetHeight;
+          // Force repaint
+          modal.style.display = 'block';
+          setTimeout(() => {
+            modal.style.display = '';
+          }, 0);
         }
         
         // Reload bookings list to update status
         if (window.loadBookings) {
-          window.loadBookings();
+          setTimeout(() => {
+            window.loadBookings();
+          }, 500);
         }
         
         // Close modal after 3 seconds
@@ -683,7 +705,7 @@ function startSimplePolling(bookingId) {
       } else {
         // Log status mỗi 10 lần poll
         if (pollCount % 10 === 0) {
-          console.log(`⏳ [SimplePolling] Still waiting... Status: ${booking.status} (poll #${pollCount})`);
+          console.log(`⏳ [SimplePolling] Still waiting... Status: ${rawStatus} (normalized: ${normalizedStatus}, poll #${pollCount})`);
         }
       }
     } catch (error) {
@@ -728,45 +750,73 @@ function showPaymentSuccess() {
   const qrImg = document.getElementById('spQRImage');
   const qrSection = document.getElementById('spQRSection');
 
-  // Hide waiting message
+  // Hide waiting message - force với !important
   if (waitingEl) {
     waitingEl.style.display = 'none';
+    waitingEl.style.visibility = 'hidden';
+    waitingEl.style.opacity = '0';
+    waitingEl.setAttribute('hidden', '');
     console.log('✅ [showPaymentSuccess] Hidden waiting message');
   } else {
     console.warn('⚠️ [showPaymentSuccess] spWaiting element not found');
   }
   
-  // Show success message
+  // Show success message - force với nhiều cách
   if (successEl) {
     successEl.style.display = 'block';
     successEl.style.visibility = 'visible';
     successEl.style.opacity = '1';
+    successEl.removeAttribute('hidden');
+    successEl.classList.remove('d-none');
+    successEl.classList.add('d-block');
     console.log('✅ [showPaymentSuccess] Showed success message');
+    console.log('   - display:', successEl.style.display);
+    console.log('   - visibility:', successEl.style.visibility);
+    console.log('   - computed display:', window.getComputedStyle(successEl).display);
   } else {
     console.warn('⚠️ [showPaymentSuccess] spSuccess element not found');
   }
   
-  // Hide QR image
+  // Hide QR image - force với nhiều cách
   if (qrImg) {
     qrImg.style.display = 'none';
     qrImg.style.visibility = 'hidden';
+    qrImg.style.opacity = '0';
+    qrImg.setAttribute('hidden', '');
+    qrImg.src = ''; // Clear src để đảm bảo không load lại
     console.log('✅ [showPaymentSuccess] Hidden QR image');
+    console.log('   - display:', qrImg.style.display);
+    console.log('   - visibility:', qrImg.style.visibility);
+    console.log('   - computed display:', window.getComputedStyle(qrImg).display);
   } else {
     console.warn('⚠️ [showPaymentSuccess] spQRImage element not found');
   }
   
-  // Hide QR section
+  // Hide QR section - force với nhiều cách
   if (qrSection) {
     qrSection.style.display = 'none';
     qrSection.style.visibility = 'hidden';
+    qrSection.style.opacity = '0';
+    qrSection.setAttribute('hidden', '');
+    qrSection.classList.add('d-none');
+    qrSection.classList.remove('d-block');
     console.log('✅ [showPaymentSuccess] Hidden QR section');
+    console.log('   - display:', qrSection.style.display);
+    console.log('   - visibility:', qrSection.style.visibility);
+    console.log('   - computed display:', window.getComputedStyle(qrSection).display);
   } else {
     console.warn('⚠️ [showPaymentSuccess] spQRSection element not found');
   }
   
-  // Force modal to update
+  // Force modal to update - trigger reflow
   if (modal.classList.contains('show')) {
-    console.log('✅ [showPaymentSuccess] Modal is visible, UI should update immediately');
+    console.log('✅ [showPaymentSuccess] Modal is visible, forcing UI update...');
+    // Force reflow
+    void modal.offsetHeight;
+    // Trigger repaint
+    requestAnimationFrame(() => {
+      void modal.offsetHeight;
+    });
   }
   
   console.log('✅ [showPaymentSuccess] Completed');
