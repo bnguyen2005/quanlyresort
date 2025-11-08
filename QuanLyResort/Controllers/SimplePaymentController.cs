@@ -52,7 +52,7 @@ public class SimplePaymentController : ControllerBase
             // Handle PayOs verification request (empty body)
             if (string.IsNullOrWhiteSpace(rawRequestJson))
             {
-                _logger.LogInformation("🔍 [WEBHOOK-{WebhookId}] PayOs verification request (empty body)", webhookId);
+                _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] PayOs verification request (empty body)", webhookId);
                 return Ok(new
                 {
                     status = "active",
@@ -63,10 +63,10 @@ public class SimplePaymentController : ControllerBase
             }
             
             _logger.LogInformation("═══════════════════════════════════════════════════════════");
-            _logger.LogInformation("📥 [WEBHOOK-{WebhookId}] Webhook received at {Time}", webhookId, startTime);
-            _logger.LogInformation("   Raw request JSON: {RawRequest}", rawRequestJson);
-            _logger.LogInformation("   IP Address: {RemoteIp}", HttpContext.Connection.RemoteIpAddress?.ToString());
-            _logger.LogInformation("   User-Agent: {UserAgent}", Request.Headers["User-Agent"].ToString());
+            _logger.LogInformation("[WEBHOOK] 📥 [WEBHOOK-{WebhookId}] Webhook received at {Time}", webhookId, startTime);
+            _logger.LogInformation("[WEBHOOK]    Raw request JSON: {RawRequest}", rawRequestJson);
+            _logger.LogInformation("[WEBHOOK]    IP Address: {RemoteIp}", HttpContext.Connection.RemoteIpAddress?.ToString());
+            _logger.LogInformation("[WEBHOOK]    User-Agent: {UserAgent}", Request.Headers["User-Agent"].ToString());
             
             // Parse request - hỗ trợ cả PayOs format và Simple format
             string? content = null;
@@ -79,12 +79,12 @@ public class SimplePaymentController : ControllerBase
             try
             {
                 payOsRequest = System.Text.Json.JsonSerializer.Deserialize<PayOsWebhookRequest>(rawRequestJson);
-                _logger.LogInformation("🔍 [WEBHOOK-{WebhookId}] PayOs deserialization result: Code={Code}, Desc={Desc}, Data={HasData}", 
+                _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] PayOs deserialization result: Code={Code}, Desc={Desc}, Data={HasData}", 
                     webhookId, payOsRequest?.Code ?? "NULL", payOsRequest?.Desc ?? "NULL", payOsRequest?.Data != null);
             }
             catch (Exception ex)
             {
-                _logger.LogWarning("⚠️ [WEBHOOK-{WebhookId}] Failed to deserialize as PayOs format: {Error}", webhookId, ex.Message);
+                _logger.LogWarning("[WEBHOOK] ⚠️ [WEBHOOK-{WebhookId}] Failed to deserialize as PayOs format: {Error}", webhookId, ex.Message);
             }
             
             // PayOs gửi "code": "00" cho success, không có field "success"
@@ -92,21 +92,21 @@ public class SimplePaymentController : ControllerBase
             if (payOsRequest != null && !string.IsNullOrEmpty(payOsRequest.Code) && payOsRequest.Data != null)
             {
                 // PayOs format
-                _logger.LogInformation("📋 [WEBHOOK-{WebhookId}] Detected PayOs format", webhookId);
+                _logger.LogInformation("[WEBHOOK] 📋 [WEBHOOK-{WebhookId}] Detected PayOs format", webhookId);
                 content = payOsRequest.Data.Description; // PayOs gửi booking ID trong description
                 amount = payOsRequest.Data.Amount;
                 transactionId = payOsRequest.Data.Reference;
                 orderCode = payOsRequest.Data.OrderCode;
                 
-                _logger.LogInformation("   PayOs - Code: {Code}, Desc: {Desc}", payOsRequest.Code, payOsRequest.Desc);
-                _logger.LogInformation("   PayOs - OrderCode: {OrderCode}, Amount: {Amount:N0} VND", orderCode, amount);
-                _logger.LogInformation("   PayOs - Description: {Description}", content);
-                _logger.LogInformation("   PayOs - Reference: {Reference}", transactionId);
+                _logger.LogInformation("[WEBHOOK]    PayOs - Code: {Code}, Desc: {Desc}", payOsRequest.Code, payOsRequest.Desc);
+                _logger.LogInformation("[WEBHOOK]    PayOs - OrderCode: {OrderCode}, Amount: {Amount:N0} VND", orderCode, amount);
+                _logger.LogInformation("[WEBHOOK]    PayOs - Description: {Description}", content);
+                _logger.LogInformation("[WEBHOOK]    PayOs - Reference: {Reference}", transactionId);
                 
                 // Chỉ xử lý nếu code = "00" (success)
                 if (payOsRequest.Code != "00")
                 {
-                    _logger.LogWarning("⚠️ [WEBHOOK-{WebhookId}] PayOs webhook failed with code: {Code}, Desc: {Desc}", 
+                    _logger.LogWarning("[WEBHOOK] ⚠️ [WEBHOOK-{WebhookId}] PayOs webhook failed with code: {Code}, Desc: {Desc}", 
                         webhookId, payOsRequest.Code, payOsRequest.Desc);
                     return Ok(new { message = $"Payment failed: {payOsRequest.Desc}", code = payOsRequest.Code });
                 }
@@ -118,17 +118,17 @@ public class SimplePaymentController : ControllerBase
                 try
                 {
                     simpleRequest = System.Text.Json.JsonSerializer.Deserialize<SimpleWebhookRequest>(rawRequestJson);
-                    _logger.LogInformation("🔍 [WEBHOOK-{WebhookId}] Simple deserialization result: Content={Content}, Amount={Amount}", 
+                    _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Simple deserialization result: Content={Content}, Amount={Amount}", 
                         webhookId, simpleRequest?.Content ?? "NULL", simpleRequest?.Amount ?? 0);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning("⚠️ [WEBHOOK-{WebhookId}] Failed to deserialize as Simple format: {Error}", webhookId, ex.Message);
+                    _logger.LogWarning("[WEBHOOK] ⚠️ [WEBHOOK-{WebhookId}] Failed to deserialize as Simple format: {Error}", webhookId, ex.Message);
                 }
                 
                 if (simpleRequest != null && (!string.IsNullOrEmpty(simpleRequest.Content) || simpleRequest.Amount > 0))
                 {
-                    _logger.LogInformation("📋 [WEBHOOK-{WebhookId}] Detected Simple format", webhookId);
+                    _logger.LogInformation("[WEBHOOK] 📋 [WEBHOOK-{WebhookId}] Detected Simple format", webhookId);
                     content = simpleRequest.Content;
                     amount = simpleRequest.Amount;
                     transactionId = simpleRequest.TransactionId;
@@ -138,7 +138,7 @@ public class SimplePaymentController : ControllerBase
             // If still no data, check if it's empty verification request
             if (string.IsNullOrEmpty(content) && amount == 0)
             {
-                _logger.LogInformation("🔍 [WEBHOOK-{WebhookId}] PayOs verification request (empty data)", webhookId);
+                _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] PayOs verification request (empty data)", webhookId);
                 return Ok(new
                 {
                     status = "active",
@@ -148,10 +148,10 @@ public class SimplePaymentController : ControllerBase
                 });
             }
             
-            Console.WriteLine($"\n📥 [WEBHOOK-{webhookId}] Webhook received: {content} - {amount:N0} VND");
+            _logger.LogInformation("[WEBHOOK] 📥 Webhook received: {Content} - {Amount:N0} VND", content, amount);
 
             // Parse booking ID từ content/description hoặc orderCode
-            _logger.LogInformation("🔍 [WEBHOOK-{WebhookId}] Extracting booking ID...", webhookId);
+            _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Extracting booking ID...", webhookId);
             int? bookingId = null;
             
             // Ưu tiên extract từ description/content (vì orderCode đã không còn là bookingId nữa)
@@ -160,7 +160,7 @@ public class SimplePaymentController : ControllerBase
                 bookingId = ExtractBookingId(content);
                 if (bookingId.HasValue)
                 {
-                    _logger.LogInformation("✅ [WEBHOOK-{WebhookId}] Extracted bookingId from description: {BookingId}", webhookId, bookingId);
+                    _logger.LogInformation("[WEBHOOK] ✅ [WEBHOOK-{WebhookId}] Extracted bookingId from description: {BookingId}", webhookId, bookingId);
                 }
             }
             
@@ -169,39 +169,34 @@ public class SimplePaymentController : ControllerBase
             {
                 // Chỉ dùng orderCode nếu nó nhỏ hơn 10000 (có thể là bookingId cũ)
                 bookingId = (int)orderCode.Value;
-                _logger.LogInformation("✅ [WEBHOOK-{WebhookId}] Using orderCode as bookingId (fallback): {BookingId}", webhookId, bookingId);
+                _logger.LogInformation("[WEBHOOK] ✅ [WEBHOOK-{WebhookId}] Using orderCode as bookingId (fallback): {BookingId}", webhookId, bookingId);
             }
             
             if (!bookingId.HasValue)
             {
-                _logger.LogWarning("⚠️ [WEBHOOK-{WebhookId}] Cannot extract booking ID. Content: {Content}, OrderCode: {OrderCode}", 
+                _logger.LogWarning("[WEBHOOK] ⚠️ [WEBHOOK-{WebhookId}] Cannot extract booking ID. Content: {Content}, OrderCode: {OrderCode}", 
                     webhookId, content, orderCode);
-                Console.WriteLine($"⚠️ [WEBHOOK-{webhookId}] Failed: Cannot extract booking ID");
                 return BadRequest(new { message = "Không tìm thấy booking ID trong nội dung", webhookId });
             }
             
-            _logger.LogInformation("✅ [WEBHOOK-{WebhookId}] Extracted booking ID: {BookingId}", webhookId, bookingId.Value);
-            Console.WriteLine($"✅ [WEBHOOK-{webhookId}] Booking ID: {bookingId.Value}");
+            _logger.LogInformation("[WEBHOOK] ✅ [WEBHOOK-{WebhookId}] Extracted booking ID: {BookingId}", webhookId, bookingId.Value);
 
             // Get booking
-            _logger.LogInformation("🔍 [WEBHOOK-{WebhookId}] Fetching booking {BookingId}...", webhookId, bookingId.Value);
+            _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Fetching booking {BookingId}...", webhookId, bookingId.Value);
             var booking = await _bookingService.GetBookingByIdAsync(bookingId.Value);
             if (booking == null)
             {
-                _logger.LogWarning("⚠️ [WEBHOOK-{WebhookId}] Booking {BookingId} not found", webhookId, bookingId.Value);
-                Console.WriteLine($"❌ [WEBHOOK-{webhookId}] Booking {bookingId.Value} not found");
+                _logger.LogWarning("[WEBHOOK] ⚠️ [WEBHOOK-{WebhookId}] Booking {BookingId} not found", webhookId, bookingId.Value);
                 return NotFound(new { message = $"Booking {bookingId.Value} không tồn tại", webhookId });
             }
 
-            _logger.LogInformation("✅ [WEBHOOK-{WebhookId}] Booking found: Code={BookingCode}, Status={Status}, Amount={Amount:N0} VND", 
+            _logger.LogInformation("[WEBHOOK] ✅ [WEBHOOK-{WebhookId}] Booking found: Code={BookingCode}, Status={Status}, Amount={Amount:N0} VND", 
                 webhookId, booking.BookingCode, booking.Status, booking.EstimatedTotalAmount ?? 0);
-            Console.WriteLine($"✅ [WEBHOOK-{webhookId}] Booking {booking.BookingCode} - Status: {booking.Status} - Amount: {booking.EstimatedTotalAmount:N0} VND");
 
             // Check if already paid
             if (booking.Status == "Paid")
             {
-                _logger.LogInformation("✅ [WEBHOOK-{WebhookId}] Booking {BookingId} already paid, ignoring duplicate", webhookId, bookingId.Value);
-                Console.WriteLine($"ℹ️ [WEBHOOK-{webhookId}] Booking already paid - ignoring");
+                _logger.LogInformation("[WEBHOOK] ✅ [WEBHOOK-{WebhookId}] Booking {BookingId} already paid, ignoring duplicate", webhookId, bookingId.Value);
                 return Ok(new { message = "Đã thanh toán rồi", bookingId = bookingId.Value, webhookId });
             }
 
@@ -218,33 +213,30 @@ public class SimplePaymentController : ControllerBase
                 // 2. Hoặc sai số <= 10%
                 if (amount < estimatedAmount && diff > maxDiff)
                 {
-                    _logger.LogWarning("⚠️ Amount mismatch: Expected={Expected}, Received={Received}", 
+                    _logger.LogWarning("[WEBHOOK] ⚠️ Amount mismatch: Expected={Expected}, Received={Received}", 
                         estimatedAmount, amount);
                     return BadRequest(new { message = "Số tiền không khớp" });
                 }
                 
-                _logger.LogInformation("✅ Amount verified: Expected={Expected}, Received={Received}, Diff={Diff}", 
+                _logger.LogInformation("[WEBHOOK] ✅ Amount verified: Expected={Expected}, Received={Received}, Diff={Diff}", 
                     estimatedAmount, amount, diff);
             }
 
             // Update booking status using ProcessOnlinePaymentAsync
-            _logger.LogInformation("🔄 [WEBHOOK-{WebhookId}] Updating booking {BookingId} to Paid status...", webhookId, bookingId.Value);
+            _logger.LogInformation("[WEBHOOK] 🔄 [WEBHOOK-{WebhookId}] Updating booking {BookingId} to Paid status...", webhookId, bookingId.Value);
             var performedBy = $"Webhook-{transactionId ?? webhookId}";
             var updated = await _bookingService.ProcessOnlinePaymentAsync(bookingId.Value, performedBy);
             if (!updated)
             {
-                _logger.LogError("❌ [WEBHOOK-{WebhookId}] Failed to update booking {BookingId}", webhookId, bookingId.Value);
-                Console.WriteLine($"❌ [WEBHOOK-{webhookId}] Failed to update booking");
+                _logger.LogError("[WEBHOOK] ❌ [WEBHOOK-{WebhookId}] Failed to update booking {BookingId}", webhookId, bookingId.Value);
                 return StatusCode(500, new { message = "Không thể cập nhật booking", webhookId });
             }
 
             var duration = (DateTime.UtcNow - startTime).TotalMilliseconds;
-            _logger.LogInformation("✅ [WEBHOOK-{WebhookId}] Booking {BookingId} ({BookingCode}) updated to Paid successfully!", 
+            _logger.LogInformation("[WEBHOOK] ✅ [WEBHOOK-{WebhookId}] Booking {BookingId} ({BookingCode}) updated to Paid successfully!", 
                 webhookId, bookingId.Value, booking.BookingCode);
-            _logger.LogInformation("⏱️ [WEBHOOK-{WebhookId}] Processing time: {Duration}ms", webhookId, duration);
+            _logger.LogInformation("[WEBHOOK] ⏱️ [WEBHOOK-{WebhookId}] Processing time: {Duration}ms", webhookId, duration);
             _logger.LogInformation("═══════════════════════════════════════════════════════════");
-            
-            Console.WriteLine($"✅ [WEBHOOK-{webhookId}] SUCCESS! Booking {booking.BookingCode} updated to Paid ({duration:F0}ms)");
 
             return Ok(new
             {
@@ -260,8 +252,9 @@ public class SimplePaymentController : ControllerBase
         catch (Exception ex)
         {
             var duration = (DateTime.UtcNow - startTime).TotalMilliseconds;
-            _logger.LogError(ex, "❌ [WEBHOOK-{WebhookId}] Error processing webhook after {Duration}ms", webhookId, duration);
-            Console.WriteLine($"❌ [WEBHOOK-{webhookId}] ERROR: {ex.Message}");
+            _logger.LogError(ex, "[WEBHOOK] ❌ [WEBHOOK-{WebhookId}] Error processing webhook after {Duration}ms", webhookId, duration);
+            _logger.LogError("[WEBHOOK] ❌ [WEBHOOK-{WebhookId}] Error message: {Message}", webhookId, ex.Message);
+            _logger.LogError("[WEBHOOK] ❌ [WEBHOOK-{WebhookId}] Stack trace: {StackTrace}", webhookId, ex.StackTrace);
             _logger.LogInformation("═══════════════════════════════════════════════════════════");
             return StatusCode(500, new { message = "Lỗi xử lý webhook", error = ex.Message, webhookId });
         }
@@ -276,7 +269,7 @@ public class SimplePaymentController : ControllerBase
     {
         try
         {
-            _logger.LogInformation("🔄 [CreateLink] Creating PayOs payment link for booking {BookingId}", request.BookingId);
+            _logger.LogInformation("[BACKEND] 🔄 [CreateLink] Creating PayOs payment link for booking {BookingId}", request.BookingId);
 
             // Get booking
             var booking = await _bookingService.GetBookingByIdAsync(request.BookingId);
@@ -323,7 +316,7 @@ public class SimplePaymentController : ControllerBase
 
             if (paymentLink == null)
             {
-                _logger.LogError("❌ [CreateLink] PayOs service returned null");
+                _logger.LogError("[BACKEND] ❌ [CreateLink] PayOs service returned null");
                 return StatusCode(500, new { 
                     message = "Không thể tạo mã thanh toán. Vui lòng thử lại.",
                     error = "PayOs service returned null"
@@ -337,12 +330,12 @@ public class SimplePaymentController : ControllerBase
                     paymentLink.Desc?.Contains("already exists") == true ||
                     paymentLink.Code == "03")
                 {
-                    _logger.LogWarning("⚠️ [CreateLink] Payment link already exists for orderCode {OrderCode}. Trying to get existing link...", orderCode);
+                    _logger.LogWarning("[BACKEND] ⚠️ [CreateLink] Payment link already exists for orderCode {OrderCode}. Trying to get existing link...", orderCode);
                     
                     var existingLink = await _payOsService.GetPaymentLinkByOrderCodeAsync(orderCode);
                     if (existingLink?.Data != null)
                     {
-                        _logger.LogInformation("✅ [CreateLink] Found existing payment link: PaymentLinkId={PaymentLinkId}", 
+                        _logger.LogInformation("[BACKEND] ✅ [CreateLink] Found existing payment link: PaymentLinkId={PaymentLinkId}", 
                             existingLink.Data.PaymentLinkId);
                         
                         // Trả về payment link hiện có
@@ -362,7 +355,7 @@ public class SimplePaymentController : ControllerBase
                     }
                 }
                 
-                _logger.LogError("❌ [CreateLink] PayOs returned error. Code: {Code}, Desc: {Desc}", 
+                _logger.LogError("[BACKEND] ❌ [CreateLink] PayOs returned error. Code: {Code}, Desc: {Desc}", 
                     paymentLink.Code, paymentLink.Desc);
                 return StatusCode(500, new { 
                     message = $"Không thể tạo mã thanh toán. {paymentLink.Desc ?? "Vui lòng thử lại."}",
@@ -372,16 +365,16 @@ public class SimplePaymentController : ControllerBase
                 });
             }
 
-            _logger.LogInformation("✅ [CreateLink] Payment link created: PaymentLinkId={PaymentLinkId}", 
+            _logger.LogInformation("[BACKEND] ✅ [CreateLink] Payment link created: PaymentLinkId={PaymentLinkId}", 
                 paymentLink.Data.PaymentLinkId);
             
             // Log QR code details
             var hasQrCode = !string.IsNullOrEmpty(paymentLink.Data.QrCode);
-            _logger.LogInformation("🔍 [CreateLink] QR Code in response: {HasQR}, Length: {Length}", 
+            _logger.LogInformation("[BACKEND] 🔍 [CreateLink] QR Code in response: {HasQR}, Length: {Length}", 
                 hasQrCode, paymentLink.Data.QrCode?.Length ?? 0);
             
             // Log account information để đảm bảo đúng tài khoản MB Bank
-            _logger.LogInformation("🏦 [CreateLink] Account Number: {AccountNumber}, Account Name: {AccountName}", 
+            _logger.LogInformation("[BACKEND] 🏦 [CreateLink] Account Number: {AccountNumber}, Account Name: {AccountName}", 
                 paymentLink.Data.AccountNumber, paymentLink.Data.AccountName);
             
             // Validate account number - phải là 0901329227 (MB Bank)
@@ -389,18 +382,18 @@ public class SimplePaymentController : ControllerBase
             if (!string.IsNullOrEmpty(paymentLink.Data.AccountNumber) && 
                 paymentLink.Data.AccountNumber != expectedAccountNumber)
             {
-                _logger.LogWarning("⚠️ [CreateLink] Account Number mismatch! Expected: {Expected}, Got: {Actual}", 
+                _logger.LogWarning("[BACKEND] ⚠️ [CreateLink] Account Number mismatch! Expected: {Expected}, Got: {Actual}", 
                     expectedAccountNumber, paymentLink.Data.AccountNumber);
             }
             else if (paymentLink.Data.AccountNumber == expectedAccountNumber)
             {
-                _logger.LogInformation("✅ [CreateLink] Account Number verified: {AccountNumber} (MB Bank)", 
+                _logger.LogInformation("[BACKEND] ✅ [CreateLink] Account Number verified: {AccountNumber} (MB Bank)", 
                     paymentLink.Data.AccountNumber);
             }
             
             if (!hasQrCode)
             {
-                _logger.LogWarning("⚠️ [CreateLink] PayOs did not return QR code. CheckoutUrl: {CheckoutUrl}", 
+                _logger.LogWarning("[BACKEND] ⚠️ [CreateLink] PayOs did not return QR code. CheckoutUrl: {CheckoutUrl}", 
                     paymentLink.Data.CheckoutUrl);
             }
 
@@ -420,12 +413,12 @@ public class SimplePaymentController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "❌ [CreateLink] Exception creating payment link: {Message}", ex.Message);
+            _logger.LogError(ex, "[BACKEND] ❌ [CreateLink] Exception creating payment link: {Message}", ex.Message);
             if (ex.InnerException != null)
             {
-                _logger.LogError(ex.InnerException, "❌ [CreateLink] Inner exception: {Message}", ex.InnerException.Message);
+                _logger.LogError(ex.InnerException, "[BACKEND] ❌ [CreateLink] Inner exception: {Message}", ex.InnerException.Message);
             }
-            _logger.LogError("❌ [CreateLink] Stack trace: {StackTrace}", ex.StackTrace);
+            _logger.LogError("[BACKEND] ❌ [CreateLink] Stack trace: {StackTrace}", ex.StackTrace);
             return StatusCode(500, new { 
                 message = "Lỗi tạo mã thanh toán", 
                 error = ex.Message,
