@@ -110,20 +110,26 @@ public class SimplePaymentController : ControllerBase
             
             Console.WriteLine($"\n📥 [WEBHOOK-{webhookId}] Webhook received: {content} - {amount:N0} VND");
 
-            // Parse booking ID từ content hoặc orderCode
+            // Parse booking ID từ content/description hoặc orderCode
             _logger.LogInformation("🔍 [WEBHOOK-{WebhookId}] Extracting booking ID...", webhookId);
             int? bookingId = null;
             
-            // Try orderCode first (PayOs format)
-            if (orderCode.HasValue && orderCode.Value > 0)
-            {
-                bookingId = orderCode.Value;
-                _logger.LogInformation("✅ [WEBHOOK-{WebhookId}] Using orderCode as bookingId: {BookingId}", webhookId, bookingId);
-            }
-            // Try extract from content/description
-            else if (!string.IsNullOrEmpty(content))
+            // Ưu tiên extract từ description/content (vì orderCode đã không còn là bookingId nữa)
+            if (!string.IsNullOrEmpty(content))
             {
                 bookingId = ExtractBookingId(content);
+                if (bookingId.HasValue)
+                {
+                    _logger.LogInformation("✅ [WEBHOOK-{WebhookId}] Extracted bookingId from description: {BookingId}", webhookId, bookingId);
+                }
+            }
+            
+            // Fallback: Nếu không extract được từ description, thử từ orderCode (chỉ khi orderCode nhỏ, có thể là bookingId cũ)
+            if (!bookingId.HasValue && orderCode.HasValue && orderCode.Value > 0 && orderCode.Value < 10000)
+            {
+                // Chỉ dùng orderCode nếu nó nhỏ hơn 10000 (có thể là bookingId cũ)
+                bookingId = (int)orderCode.Value;
+                _logger.LogInformation("✅ [WEBHOOK-{WebhookId}] Using orderCode as bookingId (fallback): {BookingId}", webhookId, bookingId);
             }
             
             if (!bookingId.HasValue)
@@ -252,8 +258,11 @@ public class SimplePaymentController : ControllerBase
                 return BadRequest(new { message = "Số tiền thanh toán không hợp lệ" });
             }
 
-            // Use bookingId as orderCode (PayOs requirement)
-            var orderCode = request.BookingId;
+            // Tạo orderCode unique để tránh conflict với PayOs
+            // PayOs yêu cầu orderCode phải unique, nếu bookingId trùng sẽ báo lỗi "đã tồn tại"
+            // Giải pháp: orderCode = bookingId * 10000 + timestamp (giây) để đảm bảo unique
+            var timestamp = (int)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds);
+            var orderCode = request.BookingId * 10000L + (timestamp % 10000); // Đảm bảo unique
             var description = $"BOOKING{request.BookingId}"; // PayOs description
             
             // Get base URL from request
