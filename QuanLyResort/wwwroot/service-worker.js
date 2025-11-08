@@ -1,13 +1,13 @@
 // Service Worker for Resort Management System
-const CACHE_NAME = 'resort-cache-v33'; // Force update - No cache for dynamic customer pages
+const CACHE_NAME = 'resort-cache-v34'; // Force update - Fix CORS by clearing old cached JS files
 const urlsToCache = [
   '/customer/index.html',
   // REMOVED: '/customer/login.html' - KHÔNG cache trang login!
   // REMOVED: '/customer/register.html' - có dữ liệu động
   // REMOVED: '/customer/rooms.html' - có dữ liệu động từ API
   '/customer/css/style.css',
-  '/customer/js/main.js'
-  // REMOVED: customer-api.js, customer-login.js - để chúng luôn fresh
+      '/customer/js/main.js'
+      // REMOVED: customer-api.js, customer-login.js, customer-register.js - để chúng luôn fresh
 ];
 
 // URLs that should NEVER be cached (always fetch fresh)
@@ -24,8 +24,9 @@ const NEVER_CACHE_URLS = [
   '/customer/blog.html',  // Blog page với dynamic footer fixes
   '/portal.html',
   '/test-cache.html',
-  '/customer/js/customer-api.js',
-  '/customer/js/navbar-auth.js',
+  '/customer/js/customer-api.js',  // NEVER cache - có API URL động
+      '/customer/js/customer-register.js',  // NEVER cache - có API URL động
+      '/customer/js/navbar-auth.js',
   '/customer/js/load-header.js',  // Header loader script
   '/customer/components/header.html',  // Header component - NEVER cache
   '/admin/',  // KHÔNG cache TẤT CẢ admin pages
