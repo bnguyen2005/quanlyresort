@@ -1,189 +1,286 @@
-# 🔍 Debug: QR Code Không Biến Mất Sau Khi Thanh Toán
+# 🔍 DEBUG: QR Không Biến Mất và Không Hiện "Thanh Toán Thành Công"
 
-## ❌ Vấn Đề
+## 📋 Vấn Đề
+- ✅ PayOs đã hiển thị "Đã thanh toán"
+- ❌ QR code không biến mất
+- ❌ Không hiển thị "Thanh toán thành công"
 
-Đã chuyển tiền nhưng QR code không biến mất và không hiển thị "Thanh toán thành công".
+## 🔍 Các Nguyên Nhân Có Thể
 
-## 🔍 Các Bước Kiểm Tra
+### 1. ❌ Webhook Không Được Gửi Từ PayOs (Nguyên nhân phổ biến nhất)
 
-### Bước 1: Kiểm Tra Webhook Có Nhận Được Request Không
+**Triệu chứng:**
+- PayOs hiển thị "Đã thanh toán" nhưng backend không nhận được webhook
+- Booking status vẫn là "Pending" (không đổi thành "Paid")
+- Logs trên Render **KHÔNG CÓ** entry `[WEBHOOK-xxx]`
 
-**Xem logs trên Render:**
-1. Vào: https://dashboard.render.com
-2. Click service `quanlyresort-api`
-3. Tab "Logs"
-4. Tìm các dòng:
-   ```
-   📥 [WEBHOOK-xxx] Webhook received
-   ✅ [WEBHOOK-xxx] Booking xxx updated to Paid
-   ```
+**Kiểm tra:**
+```bash
+# 1. Xem logs trên Render
+# https://dashboard.render.com -> Logs
+# Tìm: [WEBHOOK-xxx] hoặc "Webhook received"
 
-**Nếu KHÔNG thấy webhook logs:**
-- PayOs chưa gọi webhook
-- Có thể do PayOs chưa config webhook URL
-- Hoặc PayOs không gửi webhook tự động
+# 2. Test webhook thủ công
+./test-payos-webhook.sh 4
+
+# 3. Kiểm tra booking status
+curl -H "Authorization: Bearer YOUR_TOKEN" \
+  https://quanlyresort.onrender.com/api/bookings/4
+```
 
 **Giải pháp:**
-- Test webhook thủ công (xem Bước 2)
-- Hoặc dùng polling (đã có sẵn, mỗi 2 giây)
+- Chạy lại script config webhook: `./config-payos-webhook.sh`
+- Kiểm tra PayOs dashboard xem webhook có được gửi không
 
-### Bước 2: Test Webhook Thủ Công
+---
 
-**Lấy bookingId từ booking vừa thanh toán:**
-- Ví dụ: bookingId = 7
+### 2. ❌ Webhook Được Gửi Nhưng Không Parse Được
 
-**Test webhook:**
-```bash
-curl -X POST https://quanlyresort.onrender.com/api/simplepayment/webhook \
-  -H "Content-Type: application/json" \
-  -d '{
-    "content": "BOOKING7",
-    "amount": 5000,
-    "transactionId": "TEST123"
-  }'
+**Triệu chứng:**
+- Logs có: `[WEBHOOK-xxx] Webhook received`
+- Nhưng có lỗi: `⚠️ Cannot extract booking ID` hoặc `⚠️ PayOs webhook failed`
+
+**Kiểm tra logs:**
+```
+📥 [WEBHOOK-xxx] Webhook received
+   PayOs - Description: CSCOK68MZC1 BOOKING4
+⚠️ Cannot extract booking ID
 ```
 
-**Kết quả mong đợi:**
-```json
-{
-  "success": true,
-  "message": "Thanh toán thành công",
-  "bookingId": 7,
-  "bookingCode": "BKG2025007"
-}
+**Nguyên nhân:**
+- Description không có format "BOOKING4"
+- PayOs gửi format khác
+
+**Giải pháp:**
+- Kiểm tra description trong logs
+- Update logic extract nếu cần
+
+---
+
+### 3. ❌ Booking Status Không Được Update
+
+**Triệu chứng:**
+- Webhook được xử lý thành công
+- Logs có: `✅ Booking updated to Paid`
+- Nhưng khi query lại, status vẫn là "Pending"
+
+**Kiểm tra:**
+```bash
+# Query booking sau khi webhook xử lý
+curl -H "Authorization: Bearer YOUR_TOKEN" \
+  https://quanlyresort.onrender.com/api/bookings/4
 ```
 
-### Bước 3: Kiểm Tra Booking Status
+**Nguyên nhân:**
+- Database transaction rollback
+- Cache issue
 
-**Kiểm tra booking status trong database hoặc API:**
+**Giải pháp:**
+- Kiểm tra database logs
+- Clear cache nếu có
+
+---
+
+### 4. ❌ Frontend Polling Không Hoạt Động
+
+**Triệu chứng:**
+- Booking status đã đổi thành "Paid" trong database
+- Nhưng frontend không detect được
+- Console không có logs: `[SimplePolling]`
+
+**Kiểm tra:**
+1. Mở browser console (F12)
+2. Tìm logs: `[SimplePolling]` hoặc `[showPaymentSuccess]`
+3. Kiểm tra xem polling có chạy không
+
+**Nguyên nhân:**
+- Polling không được start
+- Polling bị stop sớm
+- API call bị lỗi
+
+**Giải pháp:**
+- Kiểm tra console logs
+- Đảm bảo `startSimplePolling(bookingId)` được gọi
+
+---
+
+### 5. ❌ showPaymentSuccess() Không Tìm Được Elements
+
+**Triệu chứng:**
+- Polling detect được "Paid" status
+- Console có: `✅ [SimplePolling] Payment detected!`
+- Nhưng có warnings: `⚠️ [showPaymentSuccess] spQRImage element not found`
+
+**Kiểm tra:**
+- Console logs có warnings về missing elements
+- HTML có đúng IDs không: `spQRImage`, `spSuccess`, `spQRSection`
+
+**Giải pháp:**
+- Kiểm tra HTML modal có đúng IDs
+- Update IDs nếu cần
+
+---
+
+## 🧪 CÁCH KIỂM TRA TỪNG BƯỚC
+
+### Bước 1: Kiểm Tra Webhook Có Được Gửi Không
+
+**Xem logs trên Render:**
+```
+1. Vào: https://dashboard.render.com
+2. Chọn service: quanlyresort
+3. Click "Logs"
+4. Tìm: [WEBHOOK-xxx] hoặc "Webhook received"
+```
+
+**Nếu KHÔNG CÓ logs:**
+→ **Nguyên nhân #1: PayOs không gửi webhook**
+
+**Nếu CÓ logs:**
+→ Xem bước 2
+
+---
+
+### Bước 2: Kiểm Tra Webhook Có Parse Được Không
+
+**Xem logs:**
+```
+📥 [WEBHOOK-xxx] Webhook received
+   PayOs - Description: CSCOK68MZC1 BOOKING4
+✅ Extracted booking ID: 4
+✅ Booking 4 updated to Paid
+```
+
+**Nếu có lỗi:**
+```
+⚠️ Cannot extract booking ID
+```
+→ **Nguyên nhân #2: Webhook không parse được**
+
+**Nếu thành công:**
+→ Xem bước 3
+
+---
+
+### Bước 3: Kiểm Tra Booking Status Có Đổi Không
+
+**Query booking:**
 ```bash
-# Lấy token từ browser console: localStorage.getItem('token')
-TOKEN="your-token-here"
-BOOKING_ID=7
-
-curl -H "Authorization: Bearer $TOKEN" \
-  https://quanlyresort.onrender.com/api/bookings/$BOOKING_ID
+curl -H "Authorization: Bearer YOUR_TOKEN" \
+  https://quanlyresort.onrender.com/api/bookings/4
 ```
 
 **Kiểm tra:**
 - `status` có phải `"Paid"` không?
-- Nếu vẫn là `"Pending"` → Webhook chưa được gọi hoặc chưa update
+
+**Nếu vẫn là "Pending":**
+→ **Nguyên nhân #3: Booking status không được update**
+
+**Nếu đã là "Paid":**
+→ Xem bước 4
+
+---
 
 ### Bước 4: Kiểm Tra Frontend Polling
 
-**Mở browser console (F12) và tìm:**
+**Mở browser console (F12):**
+- Tìm logs: `[SimplePolling]`
+- Kiểm tra xem có polling không
+
+**Nếu KHÔNG CÓ logs:**
+→ **Nguyên nhân #4: Polling không hoạt động**
+
+**Nếu CÓ logs nhưng không detect:**
 ```
-🔍 [SimplePolling] Booking status: Paid
-✅ [SimplePolling] Payment detected!
+⏳ [SimplePolling] Still waiting... Status: Pending
+```
+→ Kiểm tra xem status có đúng không
+
+**Nếu detect được:**
+```
+✅ [SimplePolling] Payment detected! Status = Paid
+```
+→ Xem bước 5
+
+---
+
+### Bước 5: Kiểm Tra showPaymentSuccess()
+
+**Xem console logs:**
+```
 🎉 [showPaymentSuccess] Showing payment success...
+✅ [showPaymentSuccess] Hidden QR image
+✅ [showPaymentSuccess] Showed success message
 ```
 
-**Nếu KHÔNG thấy logs:**
-- Polling có thể không chạy
-- Hoặc status chưa đổi thành "Paid"
+**Nếu có warnings:**
+```
+⚠️ [showPaymentSuccess] spQRImage element not found
+```
+→ **Nguyên nhân #5: Elements không tìm được**
 
-**Kiểm tra polling có chạy không:**
-```javascript
-// Trong browser console
-console.log('Polling interval:', window.paymentPollingInterval);
-console.log('Current booking ID:', window.currentPaymentBookingId);
+**Giải pháp:**
+- Kiểm tra HTML modal có đúng IDs
+- Update IDs nếu cần
+
+---
+
+## 🔧 GIẢI PHÁP TỪNG TRƯỜNG HỢP
+
+### Trường Hợp 1: PayOs Không Gửi Webhook
+
+```bash
+# Config webhook lại
+./config-payos-webhook.sh
+
+# Test webhook thủ công
+./test-payos-webhook.sh 4
 ```
 
-### Bước 5: Kiểm Tra UI Elements
+### Trường Hợp 2: Webhook Không Parse Được
 
-**Kiểm tra các elements có tồn tại không:**
-```javascript
-// Trong browser console
-console.log('QR Image:', document.getElementById('spQRImage'));
-console.log('QR Section:', document.getElementById('spQRSection'));
-console.log('Success Message:', document.getElementById('spSuccess'));
-console.log('Waiting Message:', document.getElementById('spWaiting'));
-console.log('Modal:', document.getElementById('simplePaymentModal'));
-```
+- Xem logs để biết description format
+- Update logic extract nếu cần
+- Test lại với format mới
 
-**Nếu elements không tồn tại:**
-- HTML có thể không đúng
-- Hoặc modal ID khác
+### Trường Hợp 3: Booking Status Không Update
 
-## ✅ Giải Pháp
+- Kiểm tra database logs
+- Kiểm tra transaction có commit không
+- Test manual update: `POST /api/simplepayment/manual-update-paid/4`
 
-### Giải Pháp 1: Test Webhook Thủ Công (Nhanh Nhất)
+### Trường Hợp 4: Polling Không Hoạt Động
 
-1. **Lấy bookingId từ booking vừa thanh toán**
-2. **Test webhook:**
-   ```bash
-   curl -X POST https://quanlyresort.onrender.com/api/simplepayment/webhook \
-     -H "Content-Type: application/json" \
-     -d '{"content":"BOOKING7","amount":5000}'
-   ```
-3. **Kiểm tra:**
-   - Backend logs có update booking không?
-   - Frontend có detect status "Paid" không?
-   - QR có biến mất không?
+- Kiểm tra console logs
+- Đảm bảo `startSimplePolling(bookingId)` được gọi
+- Kiểm tra API call có lỗi không
 
-### Giải Pháp 2: Kiểm Tra Polling
+### Trường Hợp 5: Elements Không Tìm Được
 
-**Mở browser console và chạy:**
-```javascript
-// Force check booking status
-const bookingId = window.currentPaymentBookingId || 7; // Thay 7 bằng bookingId thật
-const token = localStorage.getItem('token');
+- Kiểm tra HTML modal
+- Update IDs nếu cần
+- Test lại
 
-fetch(`${location.origin}/api/bookings/${bookingId}`, {
-  headers: { 'Authorization': `Bearer ${token}` }
-})
-  .then(r => r.json())
-  .then(booking => {
-    console.log('Booking status:', booking.status);
-    if (booking.status === 'Paid') {
-      // Force show success
-      if (window.showPaymentSuccess) {
-        window.showPaymentSuccess();
-      }
-    }
-  });
-```
+---
 
-### Giải Pháp 3: Force Update UI
+## 📊 CHECKLIST DEBUG
 
-**Nếu status đã là "Paid" nhưng UI chưa update:**
-```javascript
-// Trong browser console
-const qrImg = document.getElementById('spQRImage');
-const qrSection = document.getElementById('spQRSection');
-const successEl = document.getElementById('spSuccess');
-const waitingEl = document.getElementById('spWaiting');
+- [ ] Logs trên Render có `[WEBHOOK-xxx]` không?
+- [ ] Webhook có parse được booking ID không?
+- [ ] Booking status có đổi thành "Paid" không?
+- [ ] Frontend polling có chạy không?
+- [ ] Console có logs `[SimplePolling]` không?
+- [ ] `showPaymentSuccess()` có tìm được elements không?
+- [ ] HTML modal có đúng IDs không?
 
-if (qrImg) qrImg.style.display = 'none';
-if (qrSection) qrSection.style.display = 'none';
-if (successEl) {
-  successEl.style.display = 'block';
-  successEl.style.visibility = 'visible';
-  successEl.style.opacity = '1';
-}
-if (waitingEl) waitingEl.style.display = 'none';
-```
+---
 
-## 🎯 Checklist
+## 🎯 KẾT LUẬN
 
-- [ ] Webhook có nhận được request không? (Xem logs Render)
-- [ ] Booking status có đổi thành "Paid" không? (Test API)
-- [ ] Frontend polling có chạy không? (Xem browser console)
-- [ ] UI elements có tồn tại không? (Test trong console)
-- [ ] showPaymentSuccess() có được gọi không? (Xem logs)
+**Nguyên nhân phổ biến nhất:**
+1. ❌ **PayOs không gửi webhook** (80%)
+2. ❌ **Webhook không parse được** (10%)
+3. ❌ **Frontend polling không hoạt động** (5%)
+4. ❌ **Elements không tìm được** (5%)
 
-## 💡 Lưu Ý
-
-1. **PayOs có thể không gọi webhook tự động:**
-   - Nếu PayOs chưa config webhook URL
-   - Hoặc PayOs không hỗ trợ webhook cho loại thanh toán này
-
-2. **Polling vẫn hoạt động:**
-   - Frontend polling mỗi 2 giây
-   - Sẽ detect status "Paid" và ẩn QR
-   - Nhưng cần backend update status trước
-
-3. **Test thủ công:**
-   - Có thể test webhook thủ công để update booking
-   - Sau đó frontend sẽ tự động detect và ẩn QR
-
+**Cần logs từ Render để xác định chính xác nguyên nhân!**
