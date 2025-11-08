@@ -340,6 +340,24 @@ public class SimplePaymentController : ControllerBase
             _logger.LogInformation("🔍 [CreateLink] QR Code in response: {HasQR}, Length: {Length}", 
                 hasQrCode, paymentLink.Data.QrCode?.Length ?? 0);
             
+            // Log account information để đảm bảo đúng tài khoản MB Bank
+            _logger.LogInformation("🏦 [CreateLink] Account Number: {AccountNumber}, Account Name: {AccountName}", 
+                paymentLink.Data.AccountNumber, paymentLink.Data.AccountName);
+            
+            // Validate account number - phải là 0901329227 (MB Bank)
+            const string expectedAccountNumber = "0901329227";
+            if (!string.IsNullOrEmpty(paymentLink.Data.AccountNumber) && 
+                paymentLink.Data.AccountNumber != expectedAccountNumber)
+            {
+                _logger.LogWarning("⚠️ [CreateLink] Account Number mismatch! Expected: {Expected}, Got: {Actual}", 
+                    expectedAccountNumber, paymentLink.Data.AccountNumber);
+            }
+            else if (paymentLink.Data.AccountNumber == expectedAccountNumber)
+            {
+                _logger.LogInformation("✅ [CreateLink] Account Number verified: {AccountNumber} (MB Bank)", 
+                    paymentLink.Data.AccountNumber);
+            }
+            
             if (!hasQrCode)
             {
                 _logger.LogWarning("⚠️ [CreateLink] PayOs did not return QR code. CheckoutUrl: {CheckoutUrl}", 

@@ -437,14 +437,41 @@ async function updatePaymentModal(bookingId, bookingCode, amount) {
       console.log('✅ [updatePaymentModal] QR section displayed');
     }
 
-    // Update bank info if available
+    // Update bank info if available - đảm bảo hiển thị đúng tài khoản MB Bank
+    const expectedAccountNumber = '0901329227';
     if (result.accountNumber) {
       const bankAccEl = document.getElementById('spBankAccount');
-      if (bankAccEl) bankAccEl.textContent = result.accountNumber;
+      if (bankAccEl) {
+        bankAccEl.textContent = result.accountNumber;
+        // Validate account number
+        if (result.accountNumber !== expectedAccountNumber) {
+          console.warn('⚠️ [updatePaymentModal] Account Number mismatch! Expected: ' + expectedAccountNumber + ', Got: ' + result.accountNumber);
+        } else {
+          console.log('✅ [updatePaymentModal] Account Number verified: ' + result.accountNumber + ' (MB Bank)');
+        }
+      }
+    } else {
+      // Fallback to default if PayOs doesn't return account number
+      const bankAccEl = document.getElementById('spBankAccount');
+      if (bankAccEl) {
+        bankAccEl.textContent = expectedAccountNumber;
+        console.warn('⚠️ [updatePaymentModal] PayOs did not return accountNumber, using default: ' + expectedAccountNumber);
+      }
     }
+    
     if (result.accountName) {
       const bankNameEl = document.getElementById('spBankName');
-      if (bankNameEl) bankNameEl.textContent = result.accountName;
+      if (bankNameEl) {
+        bankNameEl.textContent = result.accountName;
+        console.log('✅ [updatePaymentModal] Account Name: ' + result.accountName);
+      }
+    } else {
+      // Fallback to default if PayOs doesn't return account name
+      const bankNameEl = document.getElementById('spBankName');
+      if (bankNameEl) {
+        bankNameEl.textContent = 'MB Bank';
+        console.warn('⚠️ [updatePaymentModal] PayOs did not return accountName, using default: MB Bank');
+      }
     }
 
     // Update amount from PayOs response (to ensure accuracy)
