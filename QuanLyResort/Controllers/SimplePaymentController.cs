@@ -57,7 +57,11 @@ public class SimplePaymentController : ControllerBase
             
             _logger.LogInformation("═══════════════════════════════════════════════════════════");
             _logger.LogInformation("📥 [WEBHOOK-{WebhookId}] Webhook received at {Time}", webhookId, startTime);
-            _logger.LogInformation("   Raw request: {RawRequest}", System.Text.Json.JsonSerializer.Serialize(rawRequest));
+            
+            // Log raw request as JSON string
+            var rawRequestJson = System.Text.Json.JsonSerializer.Serialize(rawRequest);
+            _logger.LogInformation("   Raw request JSON: {RawRequest}", rawRequestJson);
+            _logger.LogInformation("   Raw request type: {Type}", rawRequest?.GetType().Name ?? "NULL");
             _logger.LogInformation("   IP Address: {RemoteIp}", HttpContext.Connection.RemoteIpAddress?.ToString());
             _logger.LogInformation("   User-Agent: {UserAgent}", Request.Headers["User-Agent"].ToString());
             
@@ -68,7 +72,18 @@ public class SimplePaymentController : ControllerBase
             long? orderCode = null;
             
             // Try PayOs format first
-            var payOsRequest = System.Text.Json.JsonSerializer.Deserialize<PayOsWebhookRequest>(System.Text.Json.JsonSerializer.Serialize(rawRequest));
+            PayOsWebhookRequest? payOsRequest = null;
+            try
+            {
+                payOsRequest = System.Text.Json.JsonSerializer.Deserialize<PayOsWebhookRequest>(rawRequestJson);
+                _logger.LogInformation("🔍 [WEBHOOK-{WebhookId}] PayOs deserialization result: Code={Code}, Desc={Desc}, Data={HasData}", 
+                    webhookId, payOsRequest?.Code ?? "NULL", payOsRequest?.Desc ?? "NULL", payOsRequest?.Data != null);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning("⚠️ [WEBHOOK-{WebhookId}] Failed to deserialize as PayOs format: {Error}", webhookId, ex.Message);
+            }
+            
             // PayOs gửi "code": "00" cho success, không có field "success"
             // Check cả Code và Data để đảm bảo đúng format PayOs
             if (payOsRequest != null && !string.IsNullOrEmpty(payOsRequest.Code) && payOsRequest.Data != null)
@@ -96,7 +111,18 @@ public class SimplePaymentController : ControllerBase
             else
             {
                 // Try Simple format
-                var simpleRequest = System.Text.Json.JsonSerializer.Deserialize<SimpleWebhookRequest>(System.Text.Json.JsonSerializer.Serialize(rawRequest));
+                SimpleWebhookRequest? simpleRequest = null;
+                try
+                {
+                    simpleRequest = System.Text.Json.JsonSerializer.Deserialize<SimpleWebhookRequest>(rawRequestJson);
+                    _logger.LogInformation("🔍 [WEBHOOK-{WebhookId}] Simple deserialization result: Content={Content}, Amount={Amount}", 
+                        webhookId, simpleRequest?.Content ?? "NULL", simpleRequest?.Amount ?? 0);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning("⚠️ [WEBHOOK-{WebhookId}] Failed to deserialize as Simple format: {Error}", webhookId, ex.Message);
+                }
+                
                 if (simpleRequest != null && (!string.IsNullOrEmpty(simpleRequest.Content) || simpleRequest.Amount > 0))
                 {
                     _logger.LogInformation("📋 [WEBHOOK-{WebhookId}] Detected Simple format", webhookId);
