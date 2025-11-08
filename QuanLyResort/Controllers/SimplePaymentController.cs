@@ -65,7 +65,7 @@ public class SimplePaymentController : ControllerBase
             string? content = null;
             decimal amount = 0;
             string? transactionId = null;
-            int? orderCode = null;
+            long? orderCode = null;
             
             // Try PayOs format first
             var payOsRequest = System.Text.Json.JsonSerializer.Deserialize<PayOsWebhookRequest>(System.Text.Json.JsonSerializer.Serialize(rawRequest));
@@ -573,7 +573,7 @@ public class PayOsWebhookRequest
 /// </summary>
 public class PayOsWebhookData
 {
-    public int? OrderCode { get; set; } // Order code (có thể dùng làm bookingId)
+    public long? OrderCode { get; set; } // Order code (PayOs gửi long, ví dụ: 43843)
     public decimal Amount { get; set; } // Số tiền
     public string? Description { get; set; } // Mô tả (có thể chứa booking ID: "BOOKING7")
     public string? AccountNumber { get; set; }
