@@ -100,8 +100,9 @@ public class SimplePaymentController : ControllerBase
                 
                 _logger.LogInformation("[WEBHOOK]    PayOs - Code: {Code}, Desc: {Desc}", payOsRequest.Code, payOsRequest.Desc);
                 _logger.LogInformation("[WEBHOOK]    PayOs - OrderCode: {OrderCode}, Amount: {Amount:N0} VND", orderCode, amount);
-                _logger.LogInformation("[WEBHOOK]    PayOs - Description: {Description}", content);
+                _logger.LogInformation("[WEBHOOK]    PayOs - Description: '{Description}'", content);
                 _logger.LogInformation("[WEBHOOK]    PayOs - Reference: {Reference}", transactionId);
+                _logger.LogInformation("[WEBHOOK]    PayOs - Extracted content: '{Content}', amount: {Amount}", content, amount);
                 
                 // Chỉ xử lý nếu code = "00" (success)
                 if (payOsRequest.Code != "00")
@@ -157,11 +158,20 @@ public class SimplePaymentController : ControllerBase
             // Ưu tiên extract từ description/content (vì orderCode đã không còn là bookingId nữa)
             if (!string.IsNullOrEmpty(content))
             {
+                _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Attempting to extract bookingId from content: '{Content}'", webhookId, content);
                 bookingId = ExtractBookingId(content);
                 if (bookingId.HasValue)
                 {
                     _logger.LogInformation("[WEBHOOK] ✅ [WEBHOOK-{WebhookId}] Extracted bookingId from description: {BookingId}", webhookId, bookingId);
                 }
+                else
+                {
+                    _logger.LogWarning("[WEBHOOK] ⚠️ [WEBHOOK-{WebhookId}] Failed to extract bookingId from content: '{Content}'", webhookId, content);
+                }
+            }
+            else
+            {
+                _logger.LogWarning("[WEBHOOK] ⚠️ [WEBHOOK-{WebhookId}] Content is null or empty, cannot extract bookingId", webhookId);
             }
             
             // Fallback: Nếu không extract được từ description, thử từ orderCode (chỉ khi orderCode nhỏ, có thể là bookingId cũ)
@@ -224,12 +234,26 @@ public class SimplePaymentController : ControllerBase
 
             // Update booking status using ProcessOnlinePaymentAsync
             _logger.LogInformation("[WEBHOOK] 🔄 [WEBHOOK-{WebhookId}] Updating booking {BookingId} to Paid status...", webhookId, bookingId.Value);
+            _logger.LogInformation("[WEBHOOK] 🔄 [WEBHOOK-{WebhookId}] Current booking status before update: {Status}", webhookId, booking.Status);
             var performedBy = $"Webhook-{transactionId ?? webhookId}";
             var updated = await _bookingService.ProcessOnlinePaymentAsync(bookingId.Value, performedBy);
+            
             if (!updated)
             {
                 _logger.LogError("[WEBHOOK] ❌ [WEBHOOK-{WebhookId}] Failed to update booking {BookingId}", webhookId, bookingId.Value);
                 return StatusCode(500, new { message = "Không thể cập nhật booking", webhookId });
+            }
+
+            // Verify booking was updated
+            var updatedBooking = await _bookingService.GetBookingByIdAsync(bookingId.Value);
+            if (updatedBooking != null)
+            {
+                _logger.LogInformation("[WEBHOOK] ✅ [WEBHOOK-{WebhookId}] Booking status after update: {Status}", webhookId, updatedBooking.Status);
+                if (updatedBooking.Status != "Paid")
+                {
+                    _logger.LogWarning("[WEBHOOK] ⚠️ [WEBHOOK-{WebhookId}] WARNING: Booking status is not 'Paid' after update! Status: {Status}", 
+                        webhookId, updatedBooking.Status);
+                }
             }
 
             var duration = (DateTime.UtcNow - startTime).TotalMilliseconds;
@@ -475,10 +499,14 @@ public class SimplePaymentController : ControllerBase
     private int? ExtractBookingId(string content)
     {
         if (string.IsNullOrWhiteSpace(content))
+        {
+            _logger.LogWarning("[WEBHOOK] ExtractBookingId: Content is null or empty");
             return null;
+        }
 
         // Normalize content: uppercase và trim
         var normalizedContent = content.ToUpper().Trim();
+        _logger.LogInformation("[WEBHOOK] ExtractBookingId: Normalized content: '{NormalizedContent}'", normalizedContent);
 
         // Pattern 1: "BOOKING-39" hoặc "BOOKING_39" (có dấu gạch ngang/gạch dưới)
         var pattern1 = @"BOOKING[-_](\d+)";
@@ -486,17 +514,21 @@ public class SimplePaymentController : ControllerBase
         if (match1.Success && match1.Groups.Count > 1)
         {
             if (int.TryParse(match1.Groups[1].Value, out var id))
+            {
+                _logger.LogInformation("[WEBHOOK] ExtractBookingId: ✅ Matched pattern1 'BOOKING-{Id}': {BookingId}", id, id);
                 return id;
+            }
         }
 
         // Pattern 2: "BOOKING7" hoặc "BOOKING39" (KHÔNG có dấu gạch ngang) - QUAN TRỌNG!
+        // Pattern này sẽ match "CSHAX0QC6D9 BOOKING4" -> extract "4"
         var pattern2 = @"BOOKING(\d+)";
         var match2 = Regex.Match(normalizedContent, pattern2, RegexOptions.IgnoreCase);
         if (match2.Success && match2.Groups.Count > 1)
         {
             if (int.TryParse(match2.Groups[1].Value, out var id))
             {
-                _logger.LogInformation("✅ Extracted booking ID from pattern 'BOOKING{Id}': {BookingId}", id, id);
+                _logger.LogInformation("[WEBHOOK] ExtractBookingId: ✅ Matched pattern2 'BOOKING{Id}': {BookingId}", id, id);
                 return id;
             }
         }

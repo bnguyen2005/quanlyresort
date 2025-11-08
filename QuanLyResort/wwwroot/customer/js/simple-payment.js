@@ -639,14 +639,17 @@ function startSimplePolling(bookingId) {
 
       const booking = await response.json();
       
-      // Log mỗi 10 lần poll để không spam console
+      // Log mỗi 10 lần poll để không spam console, nhưng luôn log lần đầu
       if (pollCount % 10 === 0 || pollCount === 1) {
-        console.log("[FRONTEND] " + `🔍 [SimplePolling] Poll #${pollCount} - Status: ${booking.status} (booking ${bookingId})`);
+        console.log(`[FRONTEND] 🔍 [SimplePolling] Poll #${pollCount} - Status: ${booking.status} (booking ${bookingId})`);
+        console.log(`[FRONTEND] 🔍 [SimplePolling] Full booking response:`, JSON.stringify(booking, null, 2));
       }
       
       // Normalize status để check (case-insensitive, trim whitespace)
       const rawStatus = String(booking.status || '').trim();
       const normalizedStatus = rawStatus.toLowerCase();
+      
+      console.log(`[FRONTEND] 🔍 [SimplePolling] Poll #${pollCount} - Raw status: '${rawStatus}', Normalized: '${normalizedStatus}'`);
 
       // Check for "Paid" status (case-insensitive, với nhiều variations)
       const isPaid = normalizedStatus === 'paid' || 
@@ -654,10 +657,12 @@ function startSimplePolling(bookingId) {
                      rawStatus === 'PAID' ||
                      normalizedStatus.includes('paid');
       
+      console.log(`[FRONTEND] 🔍 [SimplePolling] Poll #${pollCount} - isPaid check: ${isPaid} (normalizedStatus='${normalizedStatus}', rawStatus='${rawStatus}')`);
+      
       if (isPaid) {
-        console.log("[FRONTEND] " + '✅ [SimplePolling] Payment detected! Status =', rawStatus, '(normalized:', normalizedStatus + ')');
-        console.log("[FRONTEND] " + '✅ [SimplePolling] Poll count:', pollCount);
-        console.log("[FRONTEND] " + '✅ [SimplePolling] Full booking object:', booking);
+        console.log('[FRONTEND] ✅ [SimplePolling] Payment detected! Status =', rawStatus, '(normalized:', normalizedStatus + ')');
+        console.log('[FRONTEND] ✅ [SimplePolling] Poll count:', pollCount);
+        console.log('[FRONTEND] ✅ [SimplePolling] Full booking object:', booking);
         
         // Stop polling first
         stopSimplePolling();
@@ -703,13 +708,22 @@ function startSimplePolling(bookingId) {
           }
         }, 3000);
       } else {
-        // Log status mỗi 10 lần poll
-        if (pollCount % 10 === 0) {
-          console.log("[FRONTEND] " + `⏳ [SimplePolling] Still waiting... Status: ${rawStatus} (normalized: ${normalizedStatus}, poll #${pollCount})`);
+        // Log status mỗi 10 lần poll hoặc mỗi lần để debug
+        if (pollCount % 10 === 0 || pollCount <= 5) {
+          console.log(`[FRONTEND] ⏳ [SimplePolling] Still waiting... Status: '${rawStatus}' (normalized: '${normalizedStatus}', poll #${pollCount})`);
+          console.log(`[FRONTEND] ⏳ [SimplePolling] Booking object keys:`, Object.keys(booking));
+          console.log(`[FRONTEND] ⏳ [SimplePolling] Booking.status type:`, typeof booking.status);
+          console.log(`[FRONTEND] ⏳ [SimplePolling] Booking.status value:`, booking.status);
         }
       }
     } catch (error) {
-      console.error("[FRONTEND] " + '❌ [SimplePolling] Polling error:', error);
+      console.error('[FRONTEND] ❌ [SimplePolling] Polling error:', error);
+      console.error('[FRONTEND] ❌ [SimplePolling] Error details:', {
+        message: error.message,
+        stack: error.stack,
+        pollCount: pollCount,
+        bookingId: bookingId
+      });
     }
   }, 2000); // Poll mỗi 2 giây
   
