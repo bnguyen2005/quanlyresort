@@ -313,13 +313,17 @@ async function updatePaymentModal(bookingId, bookingCode, amount) {
             // Clear container trước khi generate
             tempContainer.innerHTML = '';
             
-            // Remove space từ QR data string (EMV QR không nên có space)
-            const cleanQrData = qrCodeData.trim().replace(/\s/g, '');
-            console.log('📱 [updatePaymentModal] Cleaned QR data (removed spaces):', cleanQrData.substring(0, 50) + '...');
+            // Sử dụng QR data string trực tiếp từ PayOs (không remove space)
+            // PayOs trả về EMV QR format, space có thể là một phần của format hoặc description
+            // Việc remove space có thể làm hỏng format và ngân hàng không nhận diện được
+            const qrDataToUse = qrCodeData.trim();
+            console.log('📱 [updatePaymentModal] Using QR data from PayOs (preserving format):', qrDataToUse.substring(0, 100) + '...');
+            console.log('📱 [updatePaymentModal] QR data length:', qrDataToUse.length);
+            console.log('📱 [updatePaymentModal] QR data has spaces:', qrDataToUse.includes(' '));
             
-            // Generate QR code từ QR data string
+            // Generate QR code từ QR data string (giữ nguyên format từ PayOs)
             const qr = new QRCode(tempContainer, {
-              text: cleanQrData,
+              text: qrDataToUse,
               width: 256,
               height: 256,
               colorDark: '#000000',
