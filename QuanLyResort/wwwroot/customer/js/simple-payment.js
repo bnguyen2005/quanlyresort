@@ -295,7 +295,8 @@ async function updatePaymentModal(bookingId, bookingCode, amount) {
           };
         }
         // Case 3: QR code là QR data string (EMV QR format - bắt đầu bằng số)
-        else if (/^[0-9A-Za-z]+$/.test(qrCodeData.trim()) && qrCodeData.length > 50) {
+        // PayOs QR data có thể chứa space, nên cần remove space trước khi test
+        else if (/^[0-9A-Za-z\s]+$/.test(qrCodeData.trim()) && qrCodeData.trim().length > 50 && qrCodeData.trim().startsWith('000201')) {
           console.log('📱 [updatePaymentModal] QR Code is QR data string (EMV format)');
           console.log('📱 [updatePaymentModal] QR data string length:', qrCodeData.length);
           
@@ -312,9 +313,13 @@ async function updatePaymentModal(bookingId, bookingCode, amount) {
             // Clear container trước khi generate
             tempContainer.innerHTML = '';
             
+            // Remove space từ QR data string (EMV QR không nên có space)
+            const cleanQrData = qrCodeData.trim().replace(/\s/g, '');
+            console.log('📱 [updatePaymentModal] Cleaned QR data (removed spaces):', cleanQrData.substring(0, 50) + '...');
+            
             // Generate QR code từ QR data string
             const qr = new QRCode(tempContainer, {
-              text: qrCodeData,
+              text: cleanQrData,
               width: 256,
               height: 256,
               colorDark: '#000000',
