@@ -427,7 +427,7 @@
           return apiUrl;
         } else if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
           // Use localhost for local development
-          const apiUrl = 'http://localhost:5130/api';
+          const apiUrl = `${window.location.origin}/api`;
           console.log('🏠 Detected localhost - Using API URL:', apiUrl);
           return apiUrl;
         } else {

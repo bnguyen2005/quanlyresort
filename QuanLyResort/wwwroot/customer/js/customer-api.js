@@ -3,7 +3,8 @@
  * API functions for customer portal
  */
 
-const API_BASE_URL = 'http://localhost:5130/api';
+// Auto-detect API base URL from current origin
+const API_BASE_URL = `${window.location.origin}/api`;
 
 /**
  * API Call wrapper
