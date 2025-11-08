@@ -123,15 +123,30 @@ public class PayOsService
                 return null;
             }
 
+            // Check HTTP status first
             if (!response.IsSuccessStatusCode)
             {
                 _logger.LogError("❌ [PayOs] HTTP Error: {Status} - {Content}", response.StatusCode, responseContent);
-                _logger.LogError("❌ [PayOs] PayOs Error Code: {Code}, Desc: {Desc}", 
-                    result?.Code ?? "NULL", result?.Desc ?? "NULL");
-                return result; // Return result để controller có thể lấy error message
+                if (result != null)
+                {
+                    _logger.LogError("❌ [PayOs] PayOs Error Code: {Code}, Desc: {Desc}", 
+                        result.Code ?? "NULL", result.Desc ?? "NULL");
+                    // Return result để controller có thể lấy error message
+                    return result;
+                }
+                // If can't parse response, return null
+                return null;
             }
             
-            if (result?.Code == "00" && result.Data != null)
+            // Check PayOs response code
+            if (result?.Code != "00")
+            {
+                _logger.LogError("❌ [PayOs] PayOs API returned error. Code: {Code}, Desc: {Desc}", 
+                    result?.Code ?? "NULL", result?.Desc ?? "NULL");
+                return result; // Return để controller có thể lấy error message
+            }
+            
+            if (result.Data != null)
             {
                 _logger.LogInformation("✅ [PayOs] Payment link created: PaymentLinkId={PaymentLinkId}", 
                     result.Data.PaymentLinkId);
