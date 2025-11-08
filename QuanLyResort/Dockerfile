@@ -8,6 +8,8 @@ EXPOSE 10000
 ENV ASPNETCORE_URLS=http://0.0.0.0:10000
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+# Clear cache layer to fix Docker cache issue
+RUN echo "Build cache cleared at $(date)"
 WORKDIR /src
 
 # Copy csproj và restore dependencies
