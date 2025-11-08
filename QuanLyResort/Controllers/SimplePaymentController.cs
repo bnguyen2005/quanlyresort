@@ -78,17 +78,29 @@ public class SimplePaymentController : ControllerBase
             PayOsWebhookRequest? payOsRequest = null;
             try
             {
+                _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Attempting to deserialize as PayOs format...", webhookId);
                 payOsRequest = System.Text.Json.JsonSerializer.Deserialize<PayOsWebhookRequest>(rawRequestJson);
-                _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] PayOs deserialization result: Code={Code}, Desc={Desc}, Data={HasData}", 
-                    webhookId, payOsRequest?.Code ?? "NULL", payOsRequest?.Desc ?? "NULL", payOsRequest?.Data != null);
+                _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] PayOs deserialization result: Code={Code}, Desc={Desc}, Success={Success}, Data={HasData}", 
+                    webhookId, payOsRequest?.Code ?? "NULL", payOsRequest?.Desc ?? "NULL", payOsRequest?.Success, payOsRequest?.Data != null);
+                
+                if (payOsRequest != null)
+                {
+                    _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] PayOs request details: Code='{Code}', Desc='{Desc}', Success={Success}, Data is null: {DataIsNull}", 
+                        webhookId, payOsRequest.Code, payOsRequest.Desc, payOsRequest.Success, payOsRequest.Data == null);
+                }
             }
             catch (Exception ex)
             {
                 _logger.LogWarning("[WEBHOOK] ⚠️ [WEBHOOK-{WebhookId}] Failed to deserialize as PayOs format: {Error}", webhookId, ex.Message);
+                _logger.LogWarning("[WEBHOOK] ⚠️ [WEBHOOK-{WebhookId}] Exception type: {ExceptionType}, Stack trace: {StackTrace}", 
+                    webhookId, ex.GetType().Name, ex.StackTrace);
             }
             
-            // PayOs gửi "code": "00" cho success, không có field "success"
+            // PayOs gửi "code": "00" cho success, có thể có field "success": true
             // Check cả Code và Data để đảm bảo đúng format PayOs
+            _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Checking PayOs format conditions: payOsRequest is null: {IsNull}, Code is empty: {CodeEmpty}, Data is null: {DataNull}", 
+                webhookId, payOsRequest == null, string.IsNullOrEmpty(payOsRequest?.Code ?? ""), payOsRequest?.Data == null);
+            
             if (payOsRequest != null && !string.IsNullOrEmpty(payOsRequest.Code) && payOsRequest.Data != null)
             {
                 // PayOs format
