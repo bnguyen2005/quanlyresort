@@ -234,6 +234,36 @@ public class PayOsService
                 var hasQrCode = !string.IsNullOrEmpty(result.Data.QrCode);
                 _logger.LogInformation("✅ [PayOs] GetByOrderCode success. QR Code available: {HasQR}, Length: {Length}", 
                     hasQrCode, result.Data.QrCode?.Length ?? 0);
+                
+                // Nếu không có QR code, thử lấy bằng payment link ID
+                if (!hasQrCode)
+                {
+                    // PayOs có thể trả về field "id" thay vì "paymentLinkId" trong response
+                    var paymentLinkId = result.Data.PaymentLinkId ?? result.Data.Id;
+                    if (!string.IsNullOrEmpty(paymentLinkId))
+                    {
+                        _logger.LogWarning("⚠️ [PayOs] GetByOrderCode không có QR code. Thử lấy bằng PaymentLinkId: {PaymentLinkId}", paymentLinkId);
+                        var fullDetails = await GetPaymentLinkAsync(paymentLinkId);
+                        if (fullDetails?.Data != null && !string.IsNullOrEmpty(fullDetails.Data.QrCode))
+                        {
+                            _logger.LogInformation("✅ [PayOs] Đã lấy QR code từ GetPaymentLinkAsync");
+                            // Merge data: giữ nguyên data từ GetByOrderCode, nhưng lấy QR code từ GetPaymentLinkAsync
+                            result.Data.QrCode = fullDetails.Data.QrCode;
+                            result.Data.CheckoutUrl = fullDetails.Data.CheckoutUrl ?? result.Data.CheckoutUrl;
+                            result.Data.AccountNumber = fullDetails.Data.AccountNumber ?? result.Data.AccountNumber;
+                            result.Data.AccountName = fullDetails.Data.AccountName ?? result.Data.AccountName;
+                        }
+                        else
+                        {
+                            _logger.LogWarning("⚠️ [PayOs] GetPaymentLinkAsync cũng không trả về QR code");
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogWarning("⚠️ [PayOs] Không có PaymentLinkId hoặc Id trong response");
+                    }
+                }
+                
                 return result;
             }
             else
@@ -350,6 +380,9 @@ public class PayOsPaymentLinkData
     
     [JsonPropertyName("paymentLinkId")]
     public string? PaymentLinkId { get; set; }
+    
+    [JsonPropertyName("id")]
+    public string? Id { get; set; } // PayOs có thể trả về "id" thay vì "paymentLinkId"
     
     [JsonPropertyName("amount")]
     public int Amount { get; set; }
