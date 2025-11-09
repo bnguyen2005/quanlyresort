@@ -151,8 +151,31 @@ async function openSimplePayment(bookingId) {
       return;
     }
     
-    const modal = new bootstrap.Modal(modalElement);
-    modal.show();
+    // Show modal - compatible with Bootstrap 4 and 5
+    try {
+      if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        const modal = new bootstrap.Modal(modalElement);
+        modal.show();
+      } else if (typeof $ !== 'undefined' && $.fn.modal) {
+        // jQuery fallback
+        $(modalElement).modal('show');
+      } else {
+        // Direct show fallback
+        modalElement.classList.add('show');
+        modalElement.style.display = 'block';
+        document.body.classList.add('modal-open');
+        // Add backdrop
+        const backdrop = document.createElement('div');
+        backdrop.className = 'modal-backdrop fade show';
+        document.body.appendChild(backdrop);
+      }
+    } catch (e) {
+      console.error("[FRONTEND] " + '❌ Error showing modal:', e);
+      // Fallback: direct show
+      modalElement.classList.add('show');
+      modalElement.style.display = 'block';
+      document.body.classList.add('modal-open');
+    }
 
     // Start polling
     startSimplePolling(bookingId);
