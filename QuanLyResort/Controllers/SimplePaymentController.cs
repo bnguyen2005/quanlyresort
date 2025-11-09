@@ -4,6 +4,8 @@ using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using System.Text.Json.Serialization;
+using QuanLyResort.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace QuanLyResort.Controllers;
 
@@ -17,15 +19,18 @@ public class SimplePaymentController : ControllerBase
     private readonly IBookingService _bookingService;
     private readonly PayOsService _payOsService;
     private readonly ILogger<SimplePaymentController> _logger;
+    private readonly ResortDbContext _context;
 
     public SimplePaymentController(
         IBookingService bookingService,
         PayOsService payOsService,
-        ILogger<SimplePaymentController> logger)
+        ILogger<SimplePaymentController> logger,
+        ResortDbContext context)
     {
         _bookingService = bookingService;
         _payOsService = payOsService;
         _logger = logger;
+        _context = context;
     }
 
     /// <summary>
@@ -207,35 +212,55 @@ public class SimplePaymentController : ControllerBase
             
             _logger.LogInformation("[WEBHOOK] 📥 Webhook received: {Content} - {Amount:N0} VND", content, amount);
 
-            // Parse booking ID từ content/description hoặc orderCode
-            _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] ========== STARTING BOOKING ID EXTRACTION ==========", webhookId);
+            // Parse booking ID hoặc restaurant order ID từ content/description
+            _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] ========== STARTING ID EXTRACTION ==========", webhookId);
             _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Current values: Content='{Content}', Amount={Amount}, OrderCode={OrderCode}", 
                 webhookId, content ?? "NULL", amount, orderCode?.ToString() ?? "NULL");
-            int? bookingId = null;
             
-            // Ưu tiên extract từ description/content (vì orderCode đã không còn là bookingId nữa)
+            int? bookingId = null;
+            int? restaurantOrderId = null;
+            
+            // Check if it's a restaurant order (format: ORDER{id} hoặc ORDER-{id})
             if (!string.IsNullOrEmpty(content))
             {
-                _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Content is NOT empty, attempting to extract bookingId from: '{Content}'", webhookId, content);
-                bookingId = ExtractBookingId(content);
-                if (bookingId.HasValue)
+                var normalizedContent = content.ToUpper().Trim();
+                
+                // Pattern for restaurant order: "ORDER7" hoặc "ORDER-7"
+                var orderPattern = @"ORDER[-_]?(\d+)";
+                var orderMatch = Regex.Match(normalizedContent, orderPattern, RegexOptions.IgnoreCase);
+                if (orderMatch.Success && orderMatch.Groups.Count > 1)
                 {
-                    _logger.LogInformation("[WEBHOOK] ✅ [WEBHOOK-{WebhookId}] ✅✅✅ SUCCESS: Extracted bookingId from description: {BookingId}", webhookId, bookingId);
+                    if (int.TryParse(orderMatch.Groups[1].Value, out var orderId))
+                    {
+                        restaurantOrderId = orderId;
+                        _logger.LogInformation("[WEBHOOK] ✅ [WEBHOOK-{WebhookId}] ✅✅✅ SUCCESS: Extracted restaurant order ID from description: {OrderId}", webhookId, restaurantOrderId);
+                    }
                 }
-                else
+                
+                // If not restaurant order, try booking ID
+                if (!restaurantOrderId.HasValue)
                 {
-                    _logger.LogWarning("[WEBHOOK] ⚠️ [WEBHOOK-{WebhookId}] ❌ FAILED: Could not extract bookingId from content: '{Content}'", webhookId, content);
+                    _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Content is NOT empty, attempting to extract bookingId from: '{Content}'", webhookId, content);
+                    bookingId = ExtractBookingId(content);
+                    if (bookingId.HasValue)
+                    {
+                        _logger.LogInformation("[WEBHOOK] ✅ [WEBHOOK-{WebhookId}] ✅✅✅ SUCCESS: Extracted bookingId from description: {BookingId}", webhookId, bookingId);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("[WEBHOOK] ⚠️ [WEBHOOK-{WebhookId}] ❌ FAILED: Could not extract bookingId from content: '{Content}'", webhookId, content);
+                    }
                 }
             }
             else
             {
-                _logger.LogWarning("[WEBHOOK] ⚠️ [WEBHOOK-{WebhookId}] Content is NULL or EMPTY, cannot extract bookingId from content", webhookId);
+                _logger.LogWarning("[WEBHOOK] ⚠️ [WEBHOOK-{WebhookId}] Content is NULL or EMPTY, cannot extract ID from content", webhookId);
             }
             
-            // Fallback: Nếu không extract được từ description, thử từ orderCode (chỉ khi orderCode nhỏ, có thể là bookingId cũ)
-            if (!bookingId.HasValue)
+            // Fallback: Nếu không extract được từ description, thử từ orderCode (chỉ khi orderCode nhỏ, có thể là ID cũ)
+            if (!bookingId.HasValue && !restaurantOrderId.HasValue)
             {
-                _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] BookingId not found from content, checking orderCode fallback...", webhookId);
+                _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] ID not found from content, checking orderCode fallback...", webhookId);
                 _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] OrderCode: {OrderCode}, Value > 0: {GreaterThanZero}, Value < 10000: {LessThan10000}", 
                     webhookId, orderCode?.ToString() ?? "NULL", orderCode.HasValue && orderCode.Value > 0, orderCode.HasValue && orderCode.Value < 10000);
                 
@@ -251,16 +276,93 @@ public class SimplePaymentController : ControllerBase
                 }
             }
             
+            // Process restaurant order payment if found
+            if (restaurantOrderId.HasValue)
+            {
+                _logger.LogInformation("[WEBHOOK] 🔄 [WEBHOOK-{WebhookId}] Processing restaurant order payment for OrderId: {OrderId}", webhookId, restaurantOrderId.Value);
+                
+                var order = await _context.RestaurantOrders
+                    .Include(o => o.Customer)
+                    .FirstOrDefaultAsync(o => o.OrderId == restaurantOrderId.Value);
+                
+                if (order == null)
+                {
+                    _logger.LogWarning("[WEBHOOK] ⚠️ [WEBHOOK-{WebhookId}] Restaurant order {OrderId} not found", webhookId, restaurantOrderId.Value);
+                    return NotFound(new { message = $"Restaurant order {restaurantOrderId.Value} không tồn tại", webhookId });
+                }
+                
+                _logger.LogInformation("[WEBHOOK] ✅ [WEBHOOK-{WebhookId}] Restaurant order found: OrderNumber={OrderNumber}, Status={Status}, PaymentStatus={PaymentStatus}, Amount={Amount:N0} VND", 
+                    webhookId, order.OrderNumber, order.Status, order.PaymentStatus, order.TotalAmount);
+                
+                // Check if already paid
+                if (order.PaymentStatus == "Paid")
+                {
+                    _logger.LogInformation("[WEBHOOK] ✅ [WEBHOOK-{WebhookId}] Restaurant order {OrderId} already paid, ignoring duplicate", webhookId, restaurantOrderId.Value);
+                    return Ok(new { message = "Đã thanh toán rồi", orderId = restaurantOrderId.Value, webhookId });
+                }
+                
+                // Verify amount
+                if (amount > 0 && order.TotalAmount > 0)
+                {
+                    var diff = Math.Abs(amount - order.TotalAmount);
+                    var maxDiff = order.TotalAmount * 0.1m;
+                    
+                    if (amount < order.TotalAmount && diff > maxDiff)
+                    {
+                        _logger.LogWarning("[WEBHOOK] ⚠️ Amount mismatch: Expected={Expected}, Received={Received}", 
+                            order.TotalAmount, amount);
+                        return BadRequest(new { message = "Số tiền không khớp" });
+                    }
+                    
+                    _logger.LogInformation("[WEBHOOK] ✅ Amount verified: Expected={Expected}, Received={Received}, Diff={Diff}", 
+                        order.TotalAmount, amount, diff);
+                }
+                
+                // Update restaurant order payment status
+                _logger.LogInformation("[WEBHOOK] 🔄 [WEBHOOK-{WebhookId}] Updating restaurant order {OrderId} to Paid status...", webhookId, restaurantOrderId.Value);
+                order.PaymentMethod = "BankTransfer";
+                order.PaymentStatus = "Paid";
+                order.UpdatedAt = DateTime.UtcNow;
+                
+                // If status is Pending, update to Confirmed
+                if (order.Status == "Pending")
+                {
+                    order.Status = "Confirmed";
+                }
+                
+                await _context.SaveChangesAsync();
+                
+                _logger.LogInformation("[WEBHOOK] ✅ [WEBHOOK-{WebhookId}] Restaurant order {OrderId} ({OrderNumber}) updated to Paid successfully!", 
+                    webhookId, restaurantOrderId.Value, order.OrderNumber);
+                
+                var duration = (DateTime.UtcNow - startTime).TotalMilliseconds;
+                _logger.LogInformation("[WEBHOOK] ⏱️ [WEBHOOK-{WebhookId}] Processing time: {Duration}ms", webhookId, duration);
+                _logger.LogInformation("═══════════════════════════════════════════════════════════");
+                
+                return Ok(new
+                {
+                    success = true,
+                    message = "Thanh toán thành công",
+                    orderId = restaurantOrderId.Value,
+                    orderNumber = order.OrderNumber,
+                    type = "restaurant",
+                    webhookId = webhookId,
+                    processedAt = DateTime.UtcNow,
+                    durationMs = duration
+                });
+            }
+            
+            // Process booking payment if found
             if (!bookingId.HasValue)
             {
-                _logger.LogError("[WEBHOOK] ❌ [WEBHOOK-{WebhookId}] ❌❌❌ CRITICAL: Cannot extract booking ID! Content: '{Content}', OrderCode: {OrderCode}", 
+                _logger.LogError("[WEBHOOK] ❌ [WEBHOOK-{WebhookId}] ❌❌❌ CRITICAL: Cannot extract booking ID or restaurant order ID! Content: '{Content}', OrderCode: {OrderCode}", 
                     webhookId, content ?? "NULL", orderCode?.ToString() ?? "NULL");
-                _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] ========== BOOKING ID EXTRACTION FAILED ==========", webhookId);
-                return BadRequest(new { message = "Không tìm thấy booking ID trong nội dung", webhookId, content, orderCode });
+                _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] ========== ID EXTRACTION FAILED ==========", webhookId);
+                return BadRequest(new { message = "Không tìm thấy booking ID hoặc restaurant order ID trong nội dung", webhookId, content, orderCode });
             }
             
             _logger.LogInformation("[WEBHOOK] ✅ [WEBHOOK-{WebhookId}] ✅✅✅ FINAL: Extracted booking ID: {BookingId}", webhookId, bookingId.Value);
-            _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] ========== BOOKING ID EXTRACTION COMPLETE ==========", webhookId);
+            _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] ========== ID EXTRACTION COMPLETE ==========", webhookId);
 
             // Get booking
             _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Fetching booking {BookingId}...", webhookId, bookingId.Value);
@@ -649,6 +751,192 @@ public class SimplePaymentController : ControllerBase
     }
 
     /// <summary>
+    /// Tạo PayOs payment link cho restaurant order
+    /// </summary>
+    [HttpPost("create-link-restaurant")]
+    [Authorize]
+    public async Task<IActionResult> CreateRestaurantPaymentLink([FromBody] CreateRestaurantPaymentLinkRequest request)
+    {
+        try
+        {
+            _logger.LogInformation("[BACKEND] 🔄 [CreateRestaurantLink] Creating PayOs payment link for restaurant order {OrderId}", request.OrderId);
+
+            // Get restaurant order
+            var order = await _context.RestaurantOrders
+                .Include(o => o.Customer)
+                .FirstOrDefaultAsync(o => o.OrderId == request.OrderId);
+            
+            if (order == null)
+            {
+                return NotFound(new { message = $"Restaurant order {request.OrderId} không tồn tại" });
+            }
+
+            // Check authorization - customer chỉ có thể thanh toán đơn của mình
+            var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
+            var customerIdClaim = User.FindFirst("CustomerId")?.Value;
+            
+            if (userRole == "Customer")
+            {
+                if (order.CustomerId == null)
+                {
+                    return BadRequest(new { message = "Đơn hàng này là đơn tại quầy, vui lòng thanh toán trực tiếp tại nhà hàng" });
+                }
+                
+                if (string.IsNullOrEmpty(customerIdClaim) || !int.TryParse(customerIdClaim, out int customerId) || order.CustomerId != customerId)
+                {
+                    return StatusCode(403, new { message = "Bạn chỉ có thể thanh toán đơn hàng của chính bạn" });
+                }
+            }
+
+            // Check if already paid
+            if (order.PaymentStatus == "Paid")
+            {
+                return BadRequest(new { message = "Đơn hàng này đã được thanh toán" });
+            }
+
+            // Get amount
+            var amount = order.TotalAmount;
+            if (amount <= 0)
+            {
+                return BadRequest(new { message = "Số tiền thanh toán không hợp lệ" });
+            }
+
+            // Tạo orderCode unique - dùng format khác với booking để tránh conflict
+            // Restaurant order: orderCode = 20000000 + orderId * 10000 + timestamp
+            var timestamp = (int)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds);
+            var orderCode = 20000000L + request.OrderId * 10000L + (timestamp % 10000);
+            var description = $"ORDER{request.OrderId}"; // PayOs description
+            
+            // Get base URL from request
+            var baseUrl = $"{Request.Scheme}://{Request.Host}";
+            var returnUrl = $"{baseUrl}/customer/order-details.html?orderId={request.OrderId}&payment=success";
+            var cancelUrl = $"{baseUrl}/customer/order-details.html?orderId={request.OrderId}&payment=cancelled";
+
+            // Create payment link via PayOs API
+            var expiredAt = DateTime.UtcNow.AddHours(24); // Expire after 24 hours
+            var paymentLink = await _payOsService.CreatePaymentLinkAsync(
+                orderCode: orderCode,
+                amount: amount,
+                description: description,
+                returnUrl: returnUrl,
+                cancelUrl: cancelUrl,
+                expiredAt: expiredAt
+            );
+
+            if (paymentLink == null)
+            {
+                _logger.LogError("[BACKEND] ❌ [CreateRestaurantLink] PayOs service returned null");
+                return StatusCode(500, new { 
+                    message = "Không thể tạo mã thanh toán. Vui lòng thử lại.",
+                    error = "PayOs service returned null"
+                });
+            }
+
+            if (paymentLink.Data == null)
+            {
+                // Nếu lỗi "Đơn thanh toán đã tồn tại", thử lấy payment link hiện có
+                if (paymentLink.Desc?.Contains("đã tồn tại") == true || 
+                    paymentLink.Desc?.Contains("already exists") == true ||
+                    paymentLink.Code == "03")
+                {
+                    _logger.LogWarning("[BACKEND] ⚠️ [CreateRestaurantLink] Payment link already exists for orderCode {OrderCode}. Trying to get existing link...", orderCode);
+                    
+                    var existingLink = await _payOsService.GetPaymentLinkByOrderCodeAsync(orderCode);
+                    if (existingLink?.Data != null)
+                    {
+                        _logger.LogInformation("[BACKEND] ✅ [CreateRestaurantLink] Found existing payment link: PaymentLinkId={PaymentLinkId}", 
+                            existingLink.Data.PaymentLinkId);
+                        
+                        return Ok(new
+                        {
+                            success = true,
+                            paymentLinkId = existingLink.Data.PaymentLinkId,
+                            orderCode = existingLink.Data.OrderCode,
+                            qrCode = existingLink.Data.QrCode,
+                            checkoutUrl = existingLink.Data.CheckoutUrl,
+                            amount = existingLink.Data.Amount,
+                            description = existingLink.Data.Description,
+                            accountNumber = existingLink.Data.AccountNumber,
+                            accountName = existingLink.Data.AccountName,
+                            expiredAt = existingLink.Data.ExpiredAt
+                        });
+                    }
+                }
+                
+                _logger.LogError("[BACKEND] ❌ [CreateRestaurantLink] PayOs returned error. Code: {Code}, Desc: {Desc}", 
+                    paymentLink.Code, paymentLink.Desc);
+                return StatusCode(500, new { 
+                    message = $"Không thể tạo mã thanh toán. {paymentLink.Desc ?? "Vui lòng thử lại."}",
+                    code = paymentLink.Code,
+                    desc = paymentLink.Desc,
+                    error = "PayOs API returned error"
+                });
+            }
+
+            _logger.LogInformation("[BACKEND] ✅ [CreateRestaurantLink] Payment link created: PaymentLinkId={PaymentLinkId}", 
+                paymentLink.Data.PaymentLinkId);
+            
+            // Log QR code details
+            var hasQrCode = !string.IsNullOrEmpty(paymentLink.Data.QrCode);
+            _logger.LogInformation("[BACKEND] 🔍 [CreateRestaurantLink] QR Code in response: {HasQR}, Length: {Length}", 
+                hasQrCode, paymentLink.Data.QrCode?.Length ?? 0);
+            
+            // Log account information
+            _logger.LogInformation("[BACKEND] 🏦 [CreateRestaurantLink] Account Number: {AccountNumber}, Account Name: {AccountName}", 
+                paymentLink.Data.AccountNumber, paymentLink.Data.AccountName);
+            
+            // Validate account number - phải là 0901329227 (MB Bank)
+            const string expectedAccountNumber = "0901329227";
+            if (!string.IsNullOrEmpty(paymentLink.Data.AccountNumber) && 
+                paymentLink.Data.AccountNumber != expectedAccountNumber)
+            {
+                _logger.LogWarning("[BACKEND] ⚠️ [CreateRestaurantLink] Account Number mismatch! Expected: {Expected}, Got: {Actual}", 
+                    expectedAccountNumber, paymentLink.Data.AccountNumber);
+            }
+            else if (paymentLink.Data.AccountNumber == expectedAccountNumber)
+            {
+                _logger.LogInformation("[BACKEND] ✅ [CreateRestaurantLink] Account Number verified: {AccountNumber} (MB Bank)", 
+                    paymentLink.Data.AccountNumber);
+            }
+            
+            if (!hasQrCode)
+            {
+                _logger.LogWarning("[BACKEND] ⚠️ [CreateRestaurantLink] PayOs did not return QR code. CheckoutUrl: {CheckoutUrl}", 
+                    paymentLink.Data.CheckoutUrl);
+            }
+
+            return Ok(new
+            {
+                success = true,
+                paymentLinkId = paymentLink.Data.PaymentLinkId,
+                orderCode = paymentLink.Data.OrderCode,
+                qrCode = paymentLink.Data.QrCode, // Base64 QR code image (may be null)
+                checkoutUrl = paymentLink.Data.CheckoutUrl,
+                amount = paymentLink.Data.Amount,
+                description = paymentLink.Data.Description,
+                accountNumber = paymentLink.Data.AccountNumber,
+                accountName = paymentLink.Data.AccountName,
+                expiredAt = paymentLink.Data.ExpiredAt
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[BACKEND] ❌ [CreateRestaurantLink] Exception creating payment link: {Message}", ex.Message);
+            if (ex.InnerException != null)
+            {
+                _logger.LogError(ex.InnerException, "[BACKEND] ❌ [CreateRestaurantLink] Inner exception: {Message}", ex.InnerException.Message);
+            }
+            _logger.LogError("[BACKEND] ❌ [CreateRestaurantLink] Stack trace: {StackTrace}", ex.StackTrace);
+            return StatusCode(500, new { 
+                message = "Lỗi tạo mã thanh toán", 
+                error = ex.Message,
+                innerError = ex.InnerException?.Message,
+                stackTrace = ex.StackTrace
+            });
+        }
+    }
+
+    /// <summary>
     /// Endpoint để manually update booking status thành Paid (dùng khi webhook không hoạt động)
     /// </summary>
     [HttpPost("manual-update-paid/{bookingId}")]
@@ -766,5 +1054,13 @@ public class PayOsWebhookData
 public class CreatePaymentLinkRequest
 {
     public int BookingId { get; set; }
+}
+
+/// <summary>
+/// Request để tạo PayOs payment link cho restaurant order
+/// </summary>
+public class CreateRestaurantPaymentLinkRequest
+{
+    public int OrderId { get; set; }
 }
 
