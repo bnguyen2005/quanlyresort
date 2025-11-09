@@ -49,26 +49,44 @@ public class AuthService : IAuthService
         Console.WriteLine($"[LoginAsync DEBUG] Password length: {password.Length}");
         Console.WriteLine($"[LoginAsync DEBUG] Hash prefix: {user.PasswordHash.Substring(0, 20)}...");
 
-        // Check role if specified
-        if (!string.IsNullOrEmpty(role) && user.Role != role)
-        {
-            Console.WriteLine($"[LoginAsync DEBUG] Role mismatch: required={role}, actual={user.Role}");
-            return (false, null, null);
-        }
-
+        // Verify password first
         var verifyResult = BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
         Console.WriteLine($"[LoginAsync DEBUG] BCrypt.Verify result: {verifyResult}");
         
         if (!verifyResult)
+        {
+            Console.WriteLine($"[LoginAsync DEBUG] Password verification failed");
             return (false, null, null);
+        }
 
-        // Role-based access control
+        // Check role if specified (case-insensitive comparison)
         if (!string.IsNullOrEmpty(role))
         {
-            if (role == "admin" && user.Role != "Admin")
+            var requestedRole = role.Trim();
+            var userRole = user.Role?.Trim() ?? "";
+            
+            Console.WriteLine($"[LoginAsync DEBUG] Role check: requested='{requestedRole}', user.Role='{userRole}'");
+            
+            // Normalize roles for comparison (case-insensitive)
+            var normalizedRequested = requestedRole.Equals("admin", StringComparison.OrdinalIgnoreCase) ? "Admin" 
+                                    : requestedRole.Equals("customer", StringComparison.OrdinalIgnoreCase) ? "Customer"
+                                    : requestedRole;
+            
+            // Check if user role matches requested role (case-insensitive)
+            if (!userRole.Equals(normalizedRequested, StringComparison.OrdinalIgnoreCase) && 
+                !userRole.Equals(requestedRole, StringComparison.OrdinalIgnoreCase))
+            {
+                Console.WriteLine($"[LoginAsync DEBUG] Role mismatch: required='{requestedRole}' (normalized: '{normalizedRequested}'), actual='{userRole}'");
                 return (false, null, null);
-            if (role == "customer" && user.Role != "Customer")
+            }
+            
+            // Additional role-based access control for admin
+            // Only allow Admin role users to login with admin role request
+            if (normalizedRequested == "Admin" && userRole != "Admin")
+            {
+                Console.WriteLine($"[LoginAsync DEBUG] Admin role required but user role is '{userRole}'");
                 return (false, null, null);
+            }
         }
 
         user.LastLoginAt = DateTime.UtcNow;
