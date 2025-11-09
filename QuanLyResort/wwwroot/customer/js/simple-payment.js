@@ -660,30 +660,39 @@ function startSimplePolling(bookingId) {
       console.log(`[FRONTEND] 🔍 [SimplePolling] Poll #${pollCount} - isPaid check: ${isPaid} (normalizedStatus='${normalizedStatus}', rawStatus='${rawStatus}')`);
       
       if (isPaid) {
+        console.log('[FRONTEND] ✅✅✅ [SimplePolling] ========== PAYMENT DETECTED ==========');
         console.log('[FRONTEND] ✅ [SimplePolling] Payment detected! Status =', rawStatus, '(normalized:', normalizedStatus + ')');
         console.log('[FRONTEND] ✅ [SimplePolling] Poll count:', pollCount);
-        console.log('[FRONTEND] ✅ [SimplePolling] Full booking object:', booking);
+        console.log('[FRONTEND] ✅ [SimplePolling] Full booking object:', JSON.stringify(booking, null, 2));
         
         // Stop polling first
+        console.log('[FRONTEND] 🔄 [SimplePolling] Stopping polling...');
         stopSimplePolling();
         
-        // Small delay để đảm bảo polling đã dừng
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
-        // Show success UI immediately (force update)
+        // Show success UI immediately (KHÔNG cần delay)
+        console.log('[FRONTEND] 🎉 [SimplePolling] Calling showPaymentSuccess() immediately...');
         showPaymentSuccess();
         
-        // Double-check và force update lại sau 200ms
+        // Force update lại sau 100ms để đảm bảo
         setTimeout(() => {
+          console.log('[FRONTEND] 🎉 [SimplePolling] Calling showPaymentSuccess() again (100ms delay)...');
           showPaymentSuccess();
-        }, 200);
+        }, 100);
+        
+        // Force update lại sau 300ms để đảm bảo
+        setTimeout(() => {
+          console.log('[FRONTEND] 🎉 [SimplePolling] Calling showPaymentSuccess() again (300ms delay)...');
+          showPaymentSuccess();
+        }, 300);
         
         // Show toast notification
+        console.log('[FRONTEND] 🎉 [SimplePolling] Showing toast notification...');
         showSimpleToast('✅ Thanh toán thành công!', 'success');
         
         // Force UI update - trigger reflow
         const modal = document.getElementById('simplePaymentModal');
         if (modal) {
+          console.log('[FRONTEND] 🔄 [SimplePolling] Forcing modal UI update...');
           // Trigger a reflow to ensure CSS updates
           void modal.offsetHeight;
           // Force repaint
@@ -695,6 +704,7 @@ function startSimplePolling(bookingId) {
         
         // Reload bookings list to update status
         if (window.loadBookings) {
+          console.log('[FRONTEND] 🔄 [SimplePolling] Reloading bookings list...');
           setTimeout(() => {
             window.loadBookings();
           }, 500);
@@ -702,11 +712,14 @@ function startSimplePolling(bookingId) {
         
         // Close modal after 3 seconds
         setTimeout(() => {
+          console.log('[FRONTEND] 🔄 [SimplePolling] Closing modal after 3 seconds...');
           const modalInstance = bootstrap.Modal.getInstance(document.getElementById('simplePaymentModal'));
           if (modalInstance) {
             modalInstance.hide();
           }
         }, 3000);
+        
+        console.log('[FRONTEND] ✅✅✅ [SimplePolling] ========== PAYMENT PROCESSING COMPLETE ==========');
       } else {
         // Log status mỗi 10 lần poll hoặc mỗi lần để debug
         if (pollCount % 10 === 0 || pollCount <= 5) {
@@ -751,13 +764,15 @@ function stopSimplePolling() {
  * Show payment success
  */
 function showPaymentSuccess() {
-  console.log("[FRONTEND] " + '🎉 [showPaymentSuccess] Showing payment success...');
+  console.log("[FRONTEND] 🎉🎉🎉 [showPaymentSuccess] ========== STARTING ==========");
+  console.log("[FRONTEND] 🎉 [showPaymentSuccess] Showing payment success...");
   
   const modal = document.getElementById('simplePaymentModal');
   if (!modal) {
-    console.error("[FRONTEND] " + '❌ [showPaymentSuccess] Modal simplePaymentModal not found!');
+    console.error("[FRONTEND] ❌ [showPaymentSuccess] Modal simplePaymentModal not found!");
     return;
   }
+  console.log("[FRONTEND] ✅ [showPaymentSuccess] Modal found, is visible:", modal.classList.contains('show'));
   
   const waitingEl = document.getElementById('spWaiting');
   const successEl = document.getElementById('spSuccess');
@@ -766,74 +781,103 @@ function showPaymentSuccess() {
 
   // Hide waiting message - force với !important
   if (waitingEl) {
+    console.log("[FRONTEND] 🔄 [showPaymentSuccess] Hiding waiting message...");
     waitingEl.style.display = 'none';
     waitingEl.style.visibility = 'hidden';
     waitingEl.style.opacity = '0';
     waitingEl.setAttribute('hidden', '');
-    console.log("[FRONTEND] " + '✅ [showPaymentSuccess] Hidden waiting message');
+    waitingEl.classList.add('d-none');
+    waitingEl.classList.remove('d-block');
+    console.log("[FRONTEND] ✅ [showPaymentSuccess] Hidden waiting message");
+    console.log("[FRONTEND]    - computed display:", window.getComputedStyle(waitingEl).display);
   } else {
-    console.warn("[FRONTEND] " + '⚠️ [showPaymentSuccess] spWaiting element not found');
+    console.warn("[FRONTEND] ⚠️ [showPaymentSuccess] spWaiting element not found");
   }
   
   // Show success message - force với nhiều cách
   if (successEl) {
+    console.log("[FRONTEND] 🎉 [showPaymentSuccess] Showing success message...");
+    // Remove all hiding classes/styles
     successEl.style.display = 'block';
     successEl.style.visibility = 'visible';
     successEl.style.opacity = '1';
     successEl.removeAttribute('hidden');
     successEl.classList.remove('d-none');
     successEl.classList.add('d-block');
-    console.log("[FRONTEND] " + '✅ [showPaymentSuccess] Showed success message');
-    console.log("[FRONTEND] " + '   - display:', successEl.style.display);
-    console.log("[FRONTEND] " + '   - visibility:', successEl.style.visibility);
-    console.log("[FRONTEND] " + '   - computed display:', window.getComputedStyle(successEl).display);
+    
+    // Force với !important qua setAttribute
+    successEl.setAttribute('style', 'display: block !important; visibility: visible !important; opacity: 1 !important;');
+    
+    console.log("[FRONTEND] ✅ [showPaymentSuccess] Showed success message");
+    console.log("[FRONTEND]    - inline display:", successEl.style.display);
+    console.log("[FRONTEND]    - visibility:", successEl.style.visibility);
+    console.log("[FRONTEND]    - computed display:", window.getComputedStyle(successEl).display);
+    console.log("[FRONTEND]    - computed visibility:", window.getComputedStyle(successEl).visibility);
+    console.log("[FRONTEND]    - has d-none class:", successEl.classList.contains('d-none'));
+    console.log("[FRONTEND]    - has d-block class:", successEl.classList.contains('d-block'));
+    
+    // Verify nó thực sự visible
+    const rect = successEl.getBoundingClientRect();
+    console.log("[FRONTEND]    - bounding rect:", { width: rect.width, height: rect.height, top: rect.top, left: rect.left });
+    console.log("[FRONTEND]    - is visible:", rect.width > 0 && rect.height > 0);
   } else {
-    console.warn("[FRONTEND] " + '⚠️ [showPaymentSuccess] spSuccess element not found');
+    console.error("[FRONTEND] ❌ [showPaymentSuccess] spSuccess element not found!");
+    console.error("[FRONTEND] ❌ [showPaymentSuccess] Available elements in modal:", Array.from(modal.querySelectorAll('[id]')).map(el => el.id));
   }
   
   // Hide QR image - force với nhiều cách
   if (qrImg) {
+    console.log("[FRONTEND] 🔄 [showPaymentSuccess] Hiding QR image...");
     qrImg.style.display = 'none';
     qrImg.style.visibility = 'hidden';
     qrImg.style.opacity = '0';
     qrImg.setAttribute('hidden', '');
     qrImg.src = ''; // Clear src để đảm bảo không load lại
-    console.log("[FRONTEND] " + '✅ [showPaymentSuccess] Hidden QR image');
-    console.log("[FRONTEND] " + '   - display:', qrImg.style.display);
-    console.log("[FRONTEND] " + '   - visibility:', qrImg.style.visibility);
-    console.log("[FRONTEND] " + '   - computed display:', window.getComputedStyle(qrImg).display);
+    qrImg.classList.add('d-none');
+    qrImg.classList.remove('d-block');
+    console.log("[FRONTEND] ✅ [showPaymentSuccess] Hidden QR image");
+    console.log("[FRONTEND]    - computed display:", window.getComputedStyle(qrImg).display);
   } else {
-    console.warn("[FRONTEND] " + '⚠️ [showPaymentSuccess] spQRImage element not found');
+    console.warn("[FRONTEND] ⚠️ [showPaymentSuccess] spQRImage element not found");
   }
   
   // Hide QR section - force với nhiều cách
   if (qrSection) {
+    console.log("[FRONTEND] 🔄 [showPaymentSuccess] Hiding QR section...");
     qrSection.style.display = 'none';
     qrSection.style.visibility = 'hidden';
     qrSection.style.opacity = '0';
     qrSection.setAttribute('hidden', '');
     qrSection.classList.add('d-none');
     qrSection.classList.remove('d-block');
-    console.log("[FRONTEND] " + '✅ [showPaymentSuccess] Hidden QR section');
-    console.log("[FRONTEND] " + '   - display:', qrSection.style.display);
-    console.log("[FRONTEND] " + '   - visibility:', qrSection.style.visibility);
-    console.log("[FRONTEND] " + '   - computed display:', window.getComputedStyle(qrSection).display);
+    console.log("[FRONTEND] ✅ [showPaymentSuccess] Hidden QR section");
+    console.log("[FRONTEND]    - computed display:", window.getComputedStyle(qrSection).display);
   } else {
-    console.warn("[FRONTEND] " + '⚠️ [showPaymentSuccess] spQRSection element not found');
+    console.warn("[FRONTEND] ⚠️ [showPaymentSuccess] spQRSection element not found");
   }
   
   // Force modal to update - trigger reflow
   if (modal.classList.contains('show')) {
-    console.log("[FRONTEND] " + '✅ [showPaymentSuccess] Modal is visible, forcing UI update...');
+    console.log("[FRONTEND] 🔄 [showPaymentSuccess] Modal is visible, forcing UI update...");
     // Force reflow
     void modal.offsetHeight;
     // Trigger repaint
     requestAnimationFrame(() => {
       void modal.offsetHeight;
+      // Double-check success element after repaint
+      if (successEl) {
+        const finalDisplay = window.getComputedStyle(successEl).display;
+        console.log("[FRONTEND] 🔍 [showPaymentSuccess] After repaint - computed display:", finalDisplay);
+        if (finalDisplay === 'none') {
+          console.error("[FRONTEND] ❌ [showPaymentSuccess] WARNING: Success element still hidden after repaint!");
+          // Force one more time
+          successEl.style.setProperty('display', 'block', 'important');
+        }
+      }
     });
   }
   
-  console.log("[FRONTEND] " + '✅ [showPaymentSuccess] Completed');
+  console.log("[FRONTEND] ✅✅✅ [showPaymentSuccess] ========== COMPLETED ==========");
 }
 
 /**
