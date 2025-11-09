@@ -713,9 +713,31 @@ function startSimplePolling(bookingId) {
         // Close modal after 3 seconds
         setTimeout(() => {
           console.log('[FRONTEND] 🔄 [SimplePolling] Closing modal after 3 seconds...');
-          const modalInstance = bootstrap.Modal.getInstance(document.getElementById('simplePaymentModal'));
-          if (modalInstance) {
-            modalInstance.hide();
+          const modalElement = document.getElementById('simplePaymentModal');
+          if (modalElement) {
+            // Try Bootstrap 5 getInstance first
+            if (typeof bootstrap !== 'undefined' && bootstrap.Modal && typeof bootstrap.Modal.getInstance === 'function') {
+              try {
+                const modalInstance = bootstrap.Modal.getInstance(modalElement);
+                if (modalInstance) {
+                  console.log('[FRONTEND] ✅ [SimplePolling] Using Bootstrap Modal instance to hide');
+                  modalInstance.hide();
+                } else {
+                  // No instance, create new one and hide
+                  console.log('[FRONTEND] 🔄 [SimplePolling] No instance found, creating new one to hide');
+                  const newInstance = new bootstrap.Modal(modalElement);
+                  newInstance.hide();
+                }
+              } catch (e) {
+                console.warn('[FRONTEND] ⚠️ [SimplePolling] Error using Bootstrap Modal:', e);
+                // Fallback: hide directly
+                hideModalDirectly(modalElement);
+              }
+            } else {
+              // Bootstrap 4 or jQuery fallback
+              console.log('[FRONTEND] 🔄 [SimplePolling] Bootstrap getInstance not available, using fallback');
+              hideModalDirectly(modalElement);
+            }
           }
         }, 3000);
         
@@ -878,6 +900,52 @@ function showPaymentSuccess() {
   }
   
   console.log("[FRONTEND] ✅✅✅ [showPaymentSuccess] ========== COMPLETED ==========");
+}
+
+/**
+ * Hide modal directly (fallback method)
+ */
+function hideModalDirectly(modalElement) {
+  if (!modalElement) return;
+  
+  try {
+    // Method 1: jQuery (if available)
+    if (typeof $ !== 'undefined' && $.fn.modal) {
+      console.log('[FRONTEND] 🔄 [hideModalDirectly] Using jQuery to hide modal');
+      $(modalElement).modal('hide');
+      return;
+    }
+    
+    // Method 2: Bootstrap 4 data attribute
+    if (modalElement.getAttribute('data-bs-dismiss') || modalElement.classList.contains('modal')) {
+      console.log('[FRONTEND] 🔄 [hideModalDirectly] Using Bootstrap 4 method');
+      // Remove show class
+      modalElement.classList.remove('show');
+      modalElement.style.display = 'none';
+      // Remove backdrop
+      const backdrop = document.querySelector('.modal-backdrop');
+      if (backdrop) {
+        backdrop.remove();
+      }
+      // Remove modal-open class from body
+      document.body.classList.remove('modal-open');
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+      return;
+    }
+    
+    // Method 3: Direct hide
+    console.log('[FRONTEND] 🔄 [hideModalDirectly] Using direct hide');
+    modalElement.style.display = 'none';
+    modalElement.classList.remove('show');
+    const backdrop = document.querySelector('.modal-backdrop');
+    if (backdrop) backdrop.remove();
+    document.body.classList.remove('modal-open');
+    document.body.style.overflow = '';
+    document.body.style.paddingRight = '';
+  } catch (e) {
+    console.error('[FRONTEND] ❌ [hideModalDirectly] Error hiding modal:', e);
+  }
 }
 
 /**
