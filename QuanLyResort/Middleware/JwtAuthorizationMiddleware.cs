@@ -40,7 +40,6 @@ public class JwtAuthorizationMiddleware
             "/api/payment/mbbank-webhook", // Allow MB Bank webhook without auth
             "/api/payment/bank-webhook", // Allow generic bank webhook without auth
             "/api/faqs", // Allow public access to FAQs
-            "/api/supporttickets", // Allow public access to create support tickets (POST)
             "/swagger",
             "/swagger/",
             "/swagger/v1/swagger.json",
@@ -151,6 +150,14 @@ public class JwtAuthorizationMiddleware
 
         // Cho phép POST /api/restaurant-orders không cần token (customer có thể đặt món walk-in)
         if (path == "/api/restaurant-orders" && method == "POST")
+        {
+            await _next(context);
+            return;
+        }
+
+        // Cho phép POST /api/supporttickets không cần token (public - khách vãng lai có thể tạo ticket)
+        // Nhưng GET /api/supporttickets/my cần authentication (Customer role)
+        if (path == "/api/supporttickets" && method == "POST")
         {
             await _next(context);
             return;
@@ -350,6 +357,7 @@ public class JwtAuthorizationMiddleware
             // Cho phép truy cập reviews: xem reviews (GET), tạo review của mình (POST), xem review của mình
             // Cho phép truy cập payment: tạo payment session, xem payment status, nhận webhook
             // Cho phép truy cập simplepayment: tạo PayOs payment link, xem webhook status
+            // Cho phép truy cập supporttickets: xem tickets của mình, tạo ticket mới, thêm message
             // (Controller sẽ kiểm tra authorization chi tiết hơn)
             bool hasPermission = path.StartsWith("/api/rooms") ||
                    path.StartsWith("/api/services") ||
@@ -359,7 +367,8 @@ public class JwtAuthorizationMiddleware
                    path.StartsWith("/api/restaurant-orders") ||
                    path.StartsWith("/api/reviews") ||
                    path.StartsWith("/api/payment") ||
-                   path.StartsWith("/api/simplepayment");
+                   path.StartsWith("/api/simplepayment") ||
+                   path.StartsWith("/api/supporttickets");
             
             // Log để debug
             if (!hasPermission)
