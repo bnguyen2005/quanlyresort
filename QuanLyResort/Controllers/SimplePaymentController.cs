@@ -3,6 +3,7 @@ using QuanLyResort.Services;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using System.Text.Json.Serialization;
 
 namespace QuanLyResort.Controllers;
 
@@ -79,7 +80,14 @@ public class SimplePaymentController : ControllerBase
             try
             {
                 _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Attempting to deserialize as PayOs format...", webhookId);
-                payOsRequest = System.Text.Json.JsonSerializer.Deserialize<PayOsWebhookRequest>(rawRequestJson);
+                // Cấu hình JsonSerializerOptions để case-insensitive và cho phép trailing commas
+                var jsonOptions = new System.Text.Json.JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true, // Quan trọng: cho phép match lowercase với PascalCase
+                    AllowTrailingCommas = true,
+                    ReadCommentHandling = System.Text.Json.JsonCommentHandling.Skip
+                };
+                payOsRequest = System.Text.Json.JsonSerializer.Deserialize<PayOsWebhookRequest>(rawRequestJson, jsonOptions);
                 _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] PayOs deserialization result: Code={Code}, Desc={Desc}, Success={Success}, Data={HasData}", 
                     webhookId, payOsRequest?.Code ?? "NULL", payOsRequest?.Desc ?? "NULL", payOsRequest?.Success, payOsRequest?.Data != null);
                 
@@ -101,36 +109,72 @@ public class SimplePaymentController : ControllerBase
             _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Checking PayOs format conditions: payOsRequest is null: {IsNull}, Code is empty: {CodeEmpty}, Data is null: {DataNull}", 
                 webhookId, payOsRequest == null, string.IsNullOrEmpty(payOsRequest?.Code ?? ""), payOsRequest?.Data == null);
             
-            if (payOsRequest != null && !string.IsNullOrEmpty(payOsRequest.Code) && payOsRequest.Data != null)
+            if (payOsRequest != null)
             {
-                // PayOs format
-                _logger.LogInformation("[WEBHOOK] 📋 [WEBHOOK-{WebhookId}] Detected PayOs format", webhookId);
-                content = payOsRequest.Data.Description; // PayOs gửi booking ID trong description
-                amount = payOsRequest.Data.Amount;
-                transactionId = payOsRequest.Data.Reference;
-                orderCode = payOsRequest.Data.OrderCode;
+                _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] payOsRequest is NOT null, checking details...", webhookId);
+                _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Code value: '{Code}' (IsEmpty: {IsEmpty})", 
+                    webhookId, payOsRequest.Code ?? "NULL", string.IsNullOrEmpty(payOsRequest.Code));
+                _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Data is null: {DataIsNull}", webhookId, payOsRequest.Data == null);
                 
-                _logger.LogInformation("[WEBHOOK]    PayOs - Code: {Code}, Desc: {Desc}", payOsRequest.Code, payOsRequest.Desc);
-                _logger.LogInformation("[WEBHOOK]    PayOs - OrderCode: {OrderCode}, Amount: {Amount:N0} VND", orderCode, amount);
-                _logger.LogInformation("[WEBHOOK]    PayOs - Description: '{Description}'", content);
-                _logger.LogInformation("[WEBHOOK]    PayOs - Reference: {Reference}", transactionId);
-                _logger.LogInformation("[WEBHOOK]    PayOs - Extracted content: '{Content}', amount: {Amount}", content, amount);
-                
-                // Chỉ xử lý nếu code = "00" (success)
-                if (payOsRequest.Code != "00")
+                if (!string.IsNullOrEmpty(payOsRequest.Code) && payOsRequest.Data != null)
                 {
-                    _logger.LogWarning("[WEBHOOK] ⚠️ [WEBHOOK-{WebhookId}] PayOs webhook failed with code: {Code}, Desc: {Desc}", 
+                    // PayOs format
+                    _logger.LogInformation("[WEBHOOK] 📋 [WEBHOOK-{WebhookId}] ✅ Detected PayOs format - entering PayOs processing block", webhookId);
+                    content = payOsRequest.Data.Description; // PayOs gửi booking ID trong description
+                    amount = payOsRequest.Data.Amount;
+                    transactionId = payOsRequest.Data.Reference;
+                    orderCode = payOsRequest.Data.OrderCode;
+                    
+                    _logger.LogInformation("[WEBHOOK]    PayOs - Code: {Code}, Desc: {Desc}", payOsRequest.Code, payOsRequest.Desc);
+                    _logger.LogInformation("[WEBHOOK]    PayOs - OrderCode: {OrderCode}, Amount: {Amount:N0} VND", orderCode, amount);
+                    _logger.LogInformation("[WEBHOOK]    PayOs - Description: '{Description}'", content);
+                    _logger.LogInformation("[WEBHOOK]    PayOs - Reference: {Reference}", transactionId);
+                    _logger.LogInformation("[WEBHOOK]    PayOs - Extracted content: '{Content}', amount: {Amount}", content, amount);
+                    
+                    // Chỉ xử lý nếu code = "00" (success)
+                    _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Checking PayOs code: '{Code}' == '00'? {IsSuccess}", 
+                        webhookId, payOsRequest.Code, payOsRequest.Code == "00");
+                    
+                    if (payOsRequest.Code != "00")
+                    {
+                        _logger.LogWarning("[WEBHOOK] ⚠️ [WEBHOOK-{WebhookId}] PayOs webhook failed with code: {Code}, Desc: {Desc}", 
                         webhookId, payOsRequest.Code, payOsRequest.Desc);
-                    return Ok(new { message = $"Payment failed: {payOsRequest.Desc}", code = payOsRequest.Code });
+                        return Ok(new { message = $"Payment failed: {payOsRequest.Desc}", code = payOsRequest.Code });
+                    }
+                    
+                    _logger.LogInformation("[WEBHOOK] ✅ [WEBHOOK-{WebhookId}] PayOs code is '00' (success), continuing processing...", webhookId);
+                }
+                else
+                {
+                    _logger.LogWarning("[WEBHOOK] ⚠️ [WEBHOOK-{WebhookId}] PayOs format check failed: Code empty={CodeEmpty}, Data null={DataNull}", 
+                        webhookId, string.IsNullOrEmpty(payOsRequest.Code), payOsRequest.Data == null);
                 }
             }
             else
             {
+                _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] payOsRequest is NULL, will try Simple format", webhookId);
+            }
+            
+            // Check if we successfully extracted PayOs data
+            if (payOsRequest != null && !string.IsNullOrEmpty(payOsRequest.Code) && payOsRequest.Data != null && payOsRequest.Code == "00")
+            {
+                // PayOs format successfully processed - continue with extracted data
+                _logger.LogInformation("[WEBHOOK] ✅ [WEBHOOK-{WebhookId}] PayOs format successfully processed, extracted data: Content='{Content}', Amount={Amount}", 
+                    webhookId, content, amount);
+            }
+            else
+            {
                 // Try Simple format
+                _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] PayOs format not detected, trying Simple format...", webhookId);
                 SimpleWebhookRequest? simpleRequest = null;
                 try
                 {
-                    simpleRequest = System.Text.Json.JsonSerializer.Deserialize<SimpleWebhookRequest>(rawRequestJson);
+                    var jsonOptions = new System.Text.Json.JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true,
+                        AllowTrailingCommas = true
+                    };
+                    simpleRequest = System.Text.Json.JsonSerializer.Deserialize<SimpleWebhookRequest>(rawRequestJson, jsonOptions);
                     _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Simple deserialization result: Content={Content}, Amount={Amount}", 
                         webhookId, simpleRequest?.Content ?? "NULL", simpleRequest?.Amount ?? 0);
                 }
@@ -164,44 +208,59 @@ public class SimplePaymentController : ControllerBase
             _logger.LogInformation("[WEBHOOK] 📥 Webhook received: {Content} - {Amount:N0} VND", content, amount);
 
             // Parse booking ID từ content/description hoặc orderCode
-            _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Extracting booking ID...", webhookId);
+            _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] ========== STARTING BOOKING ID EXTRACTION ==========", webhookId);
+            _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Current values: Content='{Content}', Amount={Amount}, OrderCode={OrderCode}", 
+                webhookId, content ?? "NULL", amount, orderCode?.ToString() ?? "NULL");
             int? bookingId = null;
             
             // Ưu tiên extract từ description/content (vì orderCode đã không còn là bookingId nữa)
             if (!string.IsNullOrEmpty(content))
             {
-                _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Attempting to extract bookingId from content: '{Content}'", webhookId, content);
+                _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Content is NOT empty, attempting to extract bookingId from: '{Content}'", webhookId, content);
                 bookingId = ExtractBookingId(content);
                 if (bookingId.HasValue)
                 {
-                    _logger.LogInformation("[WEBHOOK] ✅ [WEBHOOK-{WebhookId}] Extracted bookingId from description: {BookingId}", webhookId, bookingId);
+                    _logger.LogInformation("[WEBHOOK] ✅ [WEBHOOK-{WebhookId}] ✅✅✅ SUCCESS: Extracted bookingId from description: {BookingId}", webhookId, bookingId);
                 }
                 else
                 {
-                    _logger.LogWarning("[WEBHOOK] ⚠️ [WEBHOOK-{WebhookId}] Failed to extract bookingId from content: '{Content}'", webhookId, content);
+                    _logger.LogWarning("[WEBHOOK] ⚠️ [WEBHOOK-{WebhookId}] ❌ FAILED: Could not extract bookingId from content: '{Content}'", webhookId, content);
                 }
             }
             else
             {
-                _logger.LogWarning("[WEBHOOK] ⚠️ [WEBHOOK-{WebhookId}] Content is null or empty, cannot extract bookingId", webhookId);
+                _logger.LogWarning("[WEBHOOK] ⚠️ [WEBHOOK-{WebhookId}] Content is NULL or EMPTY, cannot extract bookingId from content", webhookId);
             }
             
             // Fallback: Nếu không extract được từ description, thử từ orderCode (chỉ khi orderCode nhỏ, có thể là bookingId cũ)
-            if (!bookingId.HasValue && orderCode.HasValue && orderCode.Value > 0 && orderCode.Value < 10000)
+            if (!bookingId.HasValue)
             {
-                // Chỉ dùng orderCode nếu nó nhỏ hơn 10000 (có thể là bookingId cũ)
-                bookingId = (int)orderCode.Value;
-                _logger.LogInformation("[WEBHOOK] ✅ [WEBHOOK-{WebhookId}] Using orderCode as bookingId (fallback): {BookingId}", webhookId, bookingId);
+                _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] BookingId not found from content, checking orderCode fallback...", webhookId);
+                _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] OrderCode: {OrderCode}, Value > 0: {GreaterThanZero}, Value < 10000: {LessThan10000}", 
+                    webhookId, orderCode?.ToString() ?? "NULL", orderCode.HasValue && orderCode.Value > 0, orderCode.HasValue && orderCode.Value < 10000);
+                
+                if (orderCode.HasValue && orderCode.Value > 0 && orderCode.Value < 10000)
+                {
+                    // Chỉ dùng orderCode nếu nó nhỏ hơn 10000 (có thể là bookingId cũ)
+                    bookingId = (int)orderCode.Value;
+                    _logger.LogInformation("[WEBHOOK] ✅ [WEBHOOK-{WebhookId}] Using orderCode as bookingId (fallback): {BookingId}", webhookId, bookingId);
+                }
+                else
+                {
+                    _logger.LogWarning("[WEBHOOK] ⚠️ [WEBHOOK-{WebhookId}] OrderCode fallback not applicable: OrderCode={OrderCode}", webhookId, orderCode?.ToString() ?? "NULL");
+                }
             }
             
             if (!bookingId.HasValue)
             {
-                _logger.LogWarning("[WEBHOOK] ⚠️ [WEBHOOK-{WebhookId}] Cannot extract booking ID. Content: {Content}, OrderCode: {OrderCode}", 
-                    webhookId, content, orderCode);
-                return BadRequest(new { message = "Không tìm thấy booking ID trong nội dung", webhookId });
+                _logger.LogError("[WEBHOOK] ❌ [WEBHOOK-{WebhookId}] ❌❌❌ CRITICAL: Cannot extract booking ID! Content: '{Content}', OrderCode: {OrderCode}", 
+                    webhookId, content ?? "NULL", orderCode?.ToString() ?? "NULL");
+                _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] ========== BOOKING ID EXTRACTION FAILED ==========", webhookId);
+                return BadRequest(new { message = "Không tìm thấy booking ID trong nội dung", webhookId, content, orderCode });
             }
             
-            _logger.LogInformation("[WEBHOOK] ✅ [WEBHOOK-{WebhookId}] Extracted booking ID: {BookingId}", webhookId, bookingId.Value);
+            _logger.LogInformation("[WEBHOOK] ✅ [WEBHOOK-{WebhookId}] ✅✅✅ FINAL: Extracted booking ID: {BookingId}", webhookId, bookingId.Value);
+            _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] ========== BOOKING ID EXTRACTION COMPLETE ==========", webhookId);
 
             // Get booking
             _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Fetching booking {BookingId}...", webhookId, bookingId.Value);
@@ -245,28 +304,56 @@ public class SimplePaymentController : ControllerBase
             }
 
             // Update booking status using ProcessOnlinePaymentAsync
+            _logger.LogInformation("[WEBHOOK] 🔄 [WEBHOOK-{WebhookId}] ========== STARTING BOOKING STATUS UPDATE ==========", webhookId);
             _logger.LogInformation("[WEBHOOK] 🔄 [WEBHOOK-{WebhookId}] Updating booking {BookingId} to Paid status...", webhookId, bookingId.Value);
-            _logger.LogInformation("[WEBHOOK] 🔄 [WEBHOOK-{WebhookId}] Current booking status before update: {Status}", webhookId, booking.Status);
+            _logger.LogInformation("[WEBHOOK] 🔄 [WEBHOOK-{WebhookId}] Current booking status BEFORE update: {Status}", webhookId, booking.Status);
+            _logger.LogInformation("[WEBHOOK] 🔄 [WEBHOOK-{WebhookId}] Booking details: Code={BookingCode}, Amount={Amount:N0} VND", 
+                webhookId, booking.BookingCode, booking.EstimatedTotalAmount ?? 0);
+            
             var performedBy = $"Webhook-{transactionId ?? webhookId}";
+            _logger.LogInformation("[WEBHOOK] 🔄 [WEBHOOK-{WebhookId}] Calling ProcessOnlinePaymentAsync with: BookingId={BookingId}, PerformedBy={PerformedBy}", 
+                webhookId, bookingId.Value, performedBy);
+            
             var updated = await _bookingService.ProcessOnlinePaymentAsync(bookingId.Value, performedBy);
+            
+            _logger.LogInformation("[WEBHOOK] 🔄 [WEBHOOK-{WebhookId}] ProcessOnlinePaymentAsync returned: {Updated}", webhookId, updated);
             
             if (!updated)
             {
-                _logger.LogError("[WEBHOOK] ❌ [WEBHOOK-{WebhookId}] Failed to update booking {BookingId}", webhookId, bookingId.Value);
+                _logger.LogError("[WEBHOOK] ❌ [WEBHOOK-{WebhookId}] ❌❌❌ CRITICAL: Failed to update booking {BookingId}. ProcessOnlinePaymentAsync returned false", 
+                    webhookId, bookingId.Value);
+                _logger.LogInformation("[WEBHOOK] 🔄 [WEBHOOK-{WebhookId}] ========== BOOKING STATUS UPDATE FAILED ==========", webhookId);
                 return StatusCode(500, new { message = "Không thể cập nhật booking", webhookId });
             }
 
+            _logger.LogInformation("[WEBHOOK] ✅ [WEBHOOK-{WebhookId}] ProcessOnlinePaymentAsync returned true, verifying booking status...", webhookId);
+
             // Verify booking was updated
+            _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Fetching updated booking to verify status change...", webhookId);
             var updatedBooking = await _bookingService.GetBookingByIdAsync(bookingId.Value);
             if (updatedBooking != null)
             {
-                _logger.LogInformation("[WEBHOOK] ✅ [WEBHOOK-{WebhookId}] Booking status after update: {Status}", webhookId, updatedBooking.Status);
+                _logger.LogInformation("[WEBHOOK] ✅ [WEBHOOK-{WebhookId}] Updated booking fetched successfully", webhookId);
+                _logger.LogInformation("[WEBHOOK] ✅ [WEBHOOK-{WebhookId}] Booking status AFTER update: {Status}", webhookId, updatedBooking.Status);
+                _logger.LogInformation("[WEBHOOK] ✅ [WEBHOOK-{WebhookId}] Status comparison: Before='{BeforeStatus}', After='{AfterStatus}', IsPaid={IsPaid}", 
+                    webhookId, booking.Status, updatedBooking.Status, updatedBooking.Status == "Paid");
+                
                 if (updatedBooking.Status != "Paid")
                 {
-                    _logger.LogWarning("[WEBHOOK] ⚠️ [WEBHOOK-{WebhookId}] WARNING: Booking status is not 'Paid' after update! Status: {Status}", 
+                    _logger.LogWarning("[WEBHOOK] ⚠️ [WEBHOOK-{WebhookId}] ⚠️⚠️⚠️ WARNING: Booking status is NOT 'Paid' after update! Status: '{Status}'", 
                         webhookId, updatedBooking.Status);
                 }
+                else
+                {
+                    _logger.LogInformation("[WEBHOOK] ✅ [WEBHOOK-{WebhookId}] ✅✅✅ SUCCESS: Booking status is 'Paid'!", webhookId);
+                }
             }
+            else
+            {
+                _logger.LogWarning("[WEBHOOK] ⚠️ [WEBHOOK-{WebhookId}] Could not fetch updated booking to verify status", webhookId);
+            }
+            
+            _logger.LogInformation("[WEBHOOK] 🔄 [WEBHOOK-{WebhookId}] ========== BOOKING STATUS UPDATE COMPLETE ==========", webhookId);
 
             var duration = (DateTime.UtcNow - startTime).TotalMilliseconds;
             _logger.LogInformation("[WEBHOOK] ✅ [WEBHOOK-{WebhookId}] Booking {BookingId} ({BookingCode}) updated to Paid successfully!", 
@@ -627,10 +714,19 @@ public class SimpleWebhookRequest
 /// </summary>
 public class PayOsWebhookRequest
 {
+    [JsonPropertyName("code")]
     public string Code { get; set; } = string.Empty; // "00" = success
+    
+    [JsonPropertyName("desc")]
     public string Desc { get; set; } = string.Empty; // "success"
+    
+    [JsonPropertyName("success")]
     public bool Success { get; set; }
+    
+    [JsonPropertyName("data")]
     public PayOsWebhookData? Data { get; set; }
+    
+    [JsonPropertyName("signature")]
     public string? Signature { get; set; }
 }
 
@@ -639,13 +735,28 @@ public class PayOsWebhookRequest
 /// </summary>
 public class PayOsWebhookData
 {
+    [JsonPropertyName("orderCode")]
     public long? OrderCode { get; set; } // Order code (PayOs gửi long, ví dụ: 43843)
+    
+    [JsonPropertyName("amount")]
     public decimal Amount { get; set; } // Số tiền
+    
+    [JsonPropertyName("description")]
     public string? Description { get; set; } // Mô tả (có thể chứa booking ID: "BOOKING7")
+    
+    [JsonPropertyName("accountNumber")]
     public string? AccountNumber { get; set; }
+    
+    [JsonPropertyName("reference")]
     public string? Reference { get; set; } // Mã tham chiếu giao dịch
+    
+    [JsonPropertyName("transactionDateTime")]
     public string? TransactionDateTime { get; set; }
+    
+    [JsonPropertyName("currency")]
     public string? Currency { get; set; }
+    
+    [JsonPropertyName("paymentLinkId")]
     public string? PaymentLinkId { get; set; }
 }
 
