@@ -708,9 +708,12 @@ function startSimplePolling(bookingId) {
           showPaymentSuccess();
         }, 300);
         
-        // Show toast notification
+        // Show toast notification và alert để đảm bảo user thấy
         console.log('[FRONTEND] 🎉 [SimplePolling] Showing toast notification...');
         showSimpleToast('✅ Thanh toán thành công!', 'success');
+        
+        // Thêm alert để đảm bảo user thấy (optional - có thể comment nếu không muốn)
+        // alert('✅ Thanh toán thành công!\n\nĐặt phòng của bạn đã được thanh toán thành công.');
         
         // Force UI update - trigger reflow
         const modal = document.getElementById('simplePaymentModal');
@@ -733,36 +736,11 @@ function startSimplePolling(bookingId) {
           }, 500);
         }
         
-        // Close modal after 3 seconds
+        // Close modal after 5 seconds (tăng thời gian để user đọc được thông báo)
         setTimeout(() => {
-          console.log('[FRONTEND] 🔄 [SimplePolling] Closing modal after 3 seconds...');
-          const modalElement = document.getElementById('simplePaymentModal');
-          if (modalElement) {
-            // Try Bootstrap 5 getInstance first
-            if (typeof bootstrap !== 'undefined' && bootstrap.Modal && typeof bootstrap.Modal.getInstance === 'function') {
-              try {
-                const modalInstance = bootstrap.Modal.getInstance(modalElement);
-                if (modalInstance) {
-                  console.log('[FRONTEND] ✅ [SimplePolling] Using Bootstrap Modal instance to hide');
-                  modalInstance.hide();
-                } else {
-                  // No instance, create new one and hide
-                  console.log('[FRONTEND] 🔄 [SimplePolling] No instance found, creating new one to hide');
-                  const newInstance = new bootstrap.Modal(modalElement);
-                  newInstance.hide();
-                }
-              } catch (e) {
-                console.warn('[FRONTEND] ⚠️ [SimplePolling] Error using Bootstrap Modal:', e);
-                // Fallback: hide directly
-                hideModalDirectly(modalElement);
-              }
-            } else {
-              // Bootstrap 4 or jQuery fallback
-              console.log('[FRONTEND] 🔄 [SimplePolling] Bootstrap getInstance not available, using fallback');
-              hideModalDirectly(modalElement);
-            }
-          }
-        }, 3000);
+          console.log('[FRONTEND] 🔄 [SimplePolling] Closing modal after 5 seconds...');
+          hideModalDirectly(document.getElementById('simplePaymentModal'));
+        }, 5000);
         
         console.log('[FRONTEND] ✅✅✅ [SimplePolling] ========== PAYMENT PROCESSING COMPLETE ==========');
       } else {
