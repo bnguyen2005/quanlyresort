@@ -115,15 +115,29 @@ public class SupportTicketsController : ControllerBase
         try
         {
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            Console.WriteLine($"[SupportTicketsController] GetMyTickets called for email: {userEmail}");
+            
             if (string.IsNullOrEmpty(userEmail))
             {
+                Console.WriteLine("[SupportTicketsController] No user email found");
                 return Unauthorized(new { message = "Không tìm thấy thông tin người dùng" });
             }
 
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
-            if (user == null || !user.CustomerId.HasValue)
+            Console.WriteLine($"[SupportTicketsController] User found: {user != null}, CustomerId: {user?.CustomerId}");
+            
+            if (user == null)
             {
-                return NotFound(new { message = "Không tìm thấy thông tin khách hàng" });
+                Console.WriteLine("[SupportTicketsController] User not found in database");
+                return NotFound(new { message = "Không tìm thấy thông tin người dùng" });
+            }
+
+            if (!user.CustomerId.HasValue)
+            {
+                Console.WriteLine("[SupportTicketsController] User has no CustomerId - returning empty list");
+                // Trả về danh sách rỗng thay vì NotFound nếu user chưa có CustomerId
+                // (có thể là user mới tạo chưa có customer record)
+                return Ok(new List<object>());
             }
 
             var tickets = await _context.SupportTickets
@@ -144,11 +158,13 @@ public class SupportTicketsController : ControllerBase
                 })
                 .ToListAsync();
 
+            Console.WriteLine($"[SupportTicketsController] Found {tickets.Count} tickets for customer {user.CustomerId.Value}");
             return Ok(tickets);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[SupportTicketsController] Error: {ex.Message}");
+            Console.WriteLine($"[SupportTicketsController] Error in GetMyTickets: {ex.Message}");
+            Console.WriteLine($"[SupportTicketsController] Stack trace: {ex.StackTrace}");
             return StatusCode(500, new { message = "Lỗi khi tải tickets", error = ex.Message });
         }
     }
