@@ -39,6 +39,11 @@ public class ResortDbContext : DbContext
     
     // Coupons
     public DbSet<Coupon> Coupons { get; set; }
+    
+    // Customer Support
+    public DbSet<FAQ> FAQs { get; set; }
+    public DbSet<SupportTicket> SupportTickets { get; set; }
+    public DbSet<TicketMessage> TicketMessages { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -317,6 +322,40 @@ public class ResortDbContext : DbContext
         {
             entity.HasIndex(e => e.Code).IsUnique();
             entity.HasIndex(e => new { e.IsActive, e.StartDate, e.EndDate });
+        });
+
+        // FAQ configurations
+        modelBuilder.Entity<FAQ>(entity =>
+        {
+            entity.HasIndex(e => new { e.Category, e.IsActive, e.DisplayOrder });
+            entity.HasIndex(e => e.IsActive);
+        });
+
+        // SupportTicket configurations
+        modelBuilder.Entity<SupportTicket>(entity =>
+        {
+            entity.HasIndex(e => e.TicketNumber).IsUnique();
+            entity.HasIndex(e => new { e.CustomerId, e.CreatedAt });
+            entity.HasIndex(e => new { e.Status, e.Priority });
+            entity.HasIndex(e => e.CreatedAt);
+            entity.HasIndex(e => e.ContactEmail);
+
+            entity.HasOne(t => t.Customer)
+                .WithMany()
+                .HasForeignKey(t => t.CustomerId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        // TicketMessage configurations
+        modelBuilder.Entity<TicketMessage>(entity =>
+        {
+            entity.HasIndex(e => new { e.TicketId, e.CreatedAt });
+            entity.HasIndex(e => e.CreatedAt);
+
+            entity.HasOne(m => m.Ticket)
+                .WithMany(t => t.Messages)
+                .HasForeignKey(m => m.TicketId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

@@ -535,6 +535,131 @@ public class DataSeeder
             await _context.Notifications.AddRangeAsync(notifications);
             await _context.SaveChangesAsync();
         }
+
+        // Seed FAQs
+        if (!_context.FAQs.Any())
+        {
+            var faqs = new List<FAQ>
+            {
+                // Booking FAQs
+                new FAQ
+                {
+                    Question = "Làm thế nào để đặt phòng?",
+                    Answer = "Bạn có thể đặt phòng trực tuyến qua website của chúng tôi, gọi điện đến hotline +84 901 329 227, hoặc đến trực tiếp tại quầy lễ tân. Chúng tôi khuyến nghị đặt phòng trước ít nhất 3 ngày để đảm bảo có phòng trống.",
+                    Category = "Booking",
+                    DisplayOrder = 1,
+                    IsActive = true,
+                    CreatedBy = "admin@resort.test",
+                    CreatedAt = DateTime.UtcNow
+                },
+                new FAQ
+                {
+                    Question = "Tôi có thể hủy đặt phòng không?",
+                    Answer = "Có, bạn có thể hủy đặt phòng. Nếu hủy trước 48 giờ so với thời gian check-in, bạn sẽ được hoàn tiền đầy đủ. Nếu hủy trong vòng 24-48 giờ, phí hủy là 50% giá trị đặt phòng. Hủy trong vòng 24 giờ sẽ không được hoàn tiền.",
+                    Category = "Booking",
+                    DisplayOrder = 2,
+                    IsActive = true,
+                    CreatedBy = "admin@resort.test",
+                    CreatedAt = DateTime.UtcNow
+                },
+                new FAQ
+                {
+                    Question = "Thời gian check-in và check-out là khi nào?",
+                    Answer = "Thời gian check-in là từ 14:00 và check-out là trước 12:00. Nếu bạn cần check-in sớm hoặc check-out muộn, vui lòng liên hệ quầy lễ tân để được hỗ trợ (có thể phát sinh phụ phí).",
+                    Category = "Booking",
+                    DisplayOrder = 3,
+                    IsActive = true,
+                    CreatedBy = "admin@resort.test",
+                    CreatedAt = DateTime.UtcNow
+                },
+                // Payment FAQs
+                new FAQ
+                {
+                    Question = "Các phương thức thanh toán được chấp nhận?",
+                    Answer = "Chúng tôi chấp nhận thanh toán bằng tiền mặt, thẻ tín dụng/ghi nợ (Visa, Mastercard), chuyển khoản ngân hàng, QR code, hoặc charge vào phòng (nếu bạn đã có booking).",
+                    Category = "Payment",
+                    DisplayOrder = 1,
+                    IsActive = true,
+                    CreatedBy = "admin@resort.test",
+                    CreatedAt = DateTime.UtcNow
+                },
+                new FAQ
+                {
+                    Question = "Tôi có thể thanh toán trước khi đến không?",
+                    Answer = "Có, bạn có thể thanh toán trước qua website sau khi đặt phòng thành công. Thanh toán trước giúp bạn đảm bảo phòng và có thể nhận được ưu đãi đặc biệt.",
+                    Category = "Payment",
+                    DisplayOrder = 2,
+                    IsActive = true,
+                    CreatedBy = "admin@resort.test",
+                    CreatedAt = DateTime.UtcNow
+                },
+                // Restaurant FAQs
+                new FAQ
+                {
+                    Question = "Nhà hàng phục vụ những loại món ăn nào?",
+                    Answer = "Nhà hàng của chúng tôi phục vụ đa dạng các món ăn từ ẩm thực Việt Nam truyền thống đến các món quốc tế. Chúng tôi có thực đơn cho bữa sáng, trưa, tối và đồ uống. Bạn có thể đặt món qua website hoặc gọi điện trực tiếp.",
+                    Category = "Restaurant",
+                    DisplayOrder = 1,
+                    IsActive = true,
+                    CreatedBy = "admin@resort.test",
+                    CreatedAt = DateTime.UtcNow
+                },
+                new FAQ
+                {
+                    Question = "Tôi có thể đặt món giao đến phòng không?",
+                    Answer = "Có, chúng tôi cung cấp dịch vụ room service 24/7. Bạn có thể đặt món qua website, gọi điện đến nhà hàng, hoặc sử dụng dịch vụ đặt món trực tuyến. Phí giao hàng có thể áp dụng tùy theo thời gian và khoảng cách.",
+                    Category = "Restaurant",
+                    DisplayOrder = 2,
+                    IsActive = true,
+                    CreatedBy = "admin@resort.test",
+                    CreatedAt = DateTime.UtcNow
+                },
+                // Services FAQs
+                new FAQ
+                {
+                    Question = "Resort có những tiện ích gì?",
+                    Answer = "Resort của chúng tôi có đầy đủ tiện ích như hồ bơi, phòng gym, spa, nhà hàng, quầy bar, WiFi miễn phí, bãi đỗ xe, và nhiều dịch vụ khác. Vui lòng xem chi tiết tại trang Tiện ích trên website.",
+                    Category = "Services",
+                    DisplayOrder = 1,
+                    IsActive = true,
+                    CreatedBy = "admin@resort.test",
+                    CreatedAt = DateTime.UtcNow
+                },
+                new FAQ
+                {
+                    Question = "Resort có WiFi miễn phí không?",
+                    Answer = "Có, chúng tôi cung cấp WiFi miễn phí tốc độ cao cho tất cả khách hàng trong toàn bộ khu vực resort. Thông tin đăng nhập WiFi sẽ được cung cấp khi bạn check-in.",
+                    Category = "Services",
+                    DisplayOrder = 2,
+                    IsActive = true,
+                    CreatedBy = "admin@resort.test",
+                    CreatedAt = DateTime.UtcNow
+                },
+                // General FAQs
+                new FAQ
+                {
+                    Question = "Làm thế nào để liên hệ với resort?",
+                    Answer = "Bạn có thể liên hệ với chúng tôi qua: Hotline: +84 901 329 227, Email: support@resortdeluxe.vn, hoặc đến trực tiếp tại địa chỉ: 123 Đường Biển Xanh, Thành phố Biển, Việt Nam. Chúng tôi phục vụ 24/7.",
+                    Category = "General",
+                    DisplayOrder = 1,
+                    IsActive = true,
+                    CreatedBy = "admin@resort.test",
+                    CreatedAt = DateTime.UtcNow
+                },
+                new FAQ
+                {
+                    Question = "Tôi có thể yêu cầu dịch vụ đặc biệt không?",
+                    Answer = "Có, chúng tôi luôn sẵn sàng đáp ứng các yêu cầu đặc biệt của bạn như phòng không hút thuốc, giường phụ, dịch vụ spa, tổ chức sự kiện, v.v. Vui lòng liên hệ trước khi đến để chúng tôi có thể chuẩn bị tốt nhất.",
+                    Category = "General",
+                    DisplayOrder = 2,
+                    IsActive = true,
+                    CreatedBy = "admin@resort.test",
+                    CreatedAt = DateTime.UtcNow
+                }
+            };
+            await _context.FAQs.AddRangeAsync(faqs);
+            await _context.SaveChangesAsync();
+        }
     }
 }
 
