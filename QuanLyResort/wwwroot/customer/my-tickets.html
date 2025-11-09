@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <title>Tickets Hỗ Trợ Của Tôi | Resort Deluxe</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    
+    <link href="https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700" rel="stylesheet">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="/css/tokens.css">
+    <link rel="stylesheet" href="/css/globals.css">
+    <link rel="stylesheet" href="/css/grid.css">
+    <link rel="stylesheet" href="/css/components/navbar.css">
+    <link rel="stylesheet" href="css/navbar-auth.css">
+    <link rel="stylesheet" href="css/open-iconic-bootstrap.min.css">
+  
+    <style>
+      body {
+        font-family: 'Poppins', sans-serif;
+        padding-top: 0;
+        overflow-x: hidden;
+        background: #f8f9fa;
+      }
+      
+      .ftco-navbar {
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 1030 !important;
+        background-color: #1a1a1a !important;
+        transition: all 0.3s ease;
+        width: 100% !important;
+        margin: 0 !important;
+      }
+      
+      .rooms-hero {
+        background-image: url('images/bg_1.jpg');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        padding: 140px 0 100px;
+        color: #fff;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 60px;
+        min-height: 400px;
+        display: flex;
+        align-items: center;
+      }
+      
+      .rooms-hero::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: linear-gradient(135deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 100%);
+        z-index: 0;
+      }
+      
+      .rooms-hero-content {
+        position: relative;
+        z-index: 2;
+        width: 100%;
+      }
+      
+      .rooms-hero h1 {
+        font-size: 48px;
+        font-weight: 700;
+        margin-bottom: 20px;
+        color: #ffffff !important;
+        text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      }
+      
+      .tickets-section {
+        padding: 60px 0;
+      }
+      
+      .ticket-card {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+        cursor: pointer;
+      }
+      
+      .ticket-card:hover {
+        box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        transform: translateY(-2px);
+      }
+      
+      .ticket-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 15px;
+      }
+      
+      .ticket-number {
+        font-size: 18px;
+        font-weight: 700;
+        color: #c8a97e;
+      }
+      
+      .ticket-status {
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      
+      .status-open { background: #dbeafe; color: #1e40af; }
+      .status-inprogress { background: #fef3c7; color: #92400e; }
+      .status-waiting { background: #e0e7ff; color: #4338ca; }
+      .status-resolved { background: #d1fae5; color: #065f46; }
+      .status-closed { background: #f3f4f6; color: #374151; }
+      
+      .ticket-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: #1a1a1a;
+        margin-bottom: 10px;
+      }
+      
+      .ticket-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 15px;
+        font-size: 14px;
+        color: #6b7280;
+      }
+      
+      .ticket-meta span {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      
+      .ticket-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+      }
+      
+      .btn-view-ticket {
+        background: #c8a97e;
+        color: white;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 6px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+      
+      .btn-view-ticket:hover {
+        background: #b89968;
+        transform: translateY(-1px);
+      }
+      
+      .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6b7280;
+      }
+      
+      .empty-state-icon {
+        font-size: 64px;
+        margin-bottom: 20px;
+        opacity: 0.5;
+      }
+      
+      .create-ticket-btn {
+        background: linear-gradient(135deg, #c8a97e 0%, #b89968 100%);
+        color: white;
+        padding: 12px 30px;
+        border-radius: 10px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+      }
+      
+      .create-ticket-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(200,169,126,0.3);
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+
+    <!-- Header placeholder -->
+    <div id="header-placeholder"></div>
+    <script src="js/load-header.js"></script>
+
+    <section class="rooms-hero">
+      <div class="container">
+        <div class="rooms-hero-content">
+          <h1>Tickets Hỗ Trợ Của Tôi</h1>
+          <p>Theo dõi và quản lý các yêu cầu hỗ trợ của bạn</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="tickets-section">
+      <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h3 style="color: #1a1a1a; font-weight: 700;">Danh sách Tickets</h3>
+          <a href="support.html" class="create-ticket-btn">
+            <span class="icon-plus"></span> Tạo Ticket Mới
+          </a>
+        </div>
+
+        <div id="ticketsList">
+          <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="sr-only">Đang tải...</span>
+            </div>
+            <p class="mt-3 text-muted">Đang tải tickets...</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Ticket Detail Modal -->
+    <div class="modal fade" id="ticketDetailModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="ticketModalTitle">Chi tiết Ticket</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body" id="ticketDetailContent">
+            <!-- Content will be loaded dynamically -->
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reply Modal -->
+    <div class="modal fade" id="replyModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Trả lời Ticket</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <form id="replyForm">
+            <div class="modal-body">
+              <input type="hidden" id="replyTicketId">
+              
+              <div class="mb-3">
+                <label class="form-label">Nội dung tin nhắn *</label>
+                <textarea class="form-control" id="replyContent" rows="5" required placeholder="Nhập nội dung trả lời..."></textarea>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+              <button type="submit" class="btn btn-primary">Gửi trả lời</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <footer class="ftco-footer ftco-bg-dark ftco-section">
+      <div class="container">
+        <div class="row mb-5">
+          <div class="col-md">
+            <div class="ftco-footer-widget mb-4">
+              <h2 class="ftco-heading-2">RESORT DELUXE</h2>
+              <p>Khu nghỉ dưỡng cao cấp với đầy đủ tiện nghi hiện đại, phục vụ chu đáo và không gian tuyệt đẹp.</p>
+            </div>
+          </div>
+          <div class="col-md">
+            <div class="ftco-footer-widget mb-4 ml-md-5">
+              <h2 class="ftco-heading-2">Liên kết hữu ích</h2>
+              <ul class="list-unstyled">
+                <li><a href="blog.html" class="py-2 d-block">Blog</a></li>
+                <li><a href="rooms.html" class="py-2 d-block">Phòng</a></li>
+                <li><a href="restaurant.html" class="py-2 d-block">Nhà hàng</a></li>
+                <li><a href="faq.html" class="py-2 d-block">FAQ</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-md">
+            <div class="ftco-footer-widget mb-4">
+              <h2 class="ftco-heading-2">Bạn cần hỗ trợ?</h2>
+              <div class="block-23 mb-3">
+                <ul>
+                  <li><span class="icon icon-map-marker"></span><span class="text">123 Đường Biển Xanh, Thành phố Biển, Việt Nam</span></li>
+                  <li><a href="#"><span class="icon icon-phone"></span><span class="text">+84 901 329 227</span></a></li>
+                  <li><a href="#"><span class="icon icon-envelope"></span><span class="text">support@resortdeluxe.vn</span></a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12 text-center">
+            <p style="color: #9ca3af; margin: 0; padding: 20px 0;">
+              Copyright &copy; <script>document.write(new Date().getFullYear());</script> Resort Deluxe. All rights reserved.
+            </p>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <script src="js/jquery.min.js"></script>
+    <script src="js/popper.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/navbar-auth.js"></script>
+    <script src="../js/api.js"></script>
+
+    <script>
+      // Check authentication
+      const token = localStorage.getItem('token');
+      if (!token) {
+        window.location.href = 'login.html';
+      }
+
+      // Load tickets
+      async function loadTickets() {
+        try {
+          const response = await fetch(`${location.origin}/api/supporttickets/my`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+
+          if (response.status === 401) {
+            window.location.href = 'login.html';
+            return;
+          }
+
+          if (!response.ok) throw new Error('Failed to load tickets');
+
+          const tickets = await response.json();
+          renderTickets(tickets);
+        } catch (error) {
+          console.error('[My Tickets] Error loading tickets:', error);
+          document.getElementById('ticketsList').innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">❌</div>
+              <h4>Không thể tải tickets</h4>
+              <p>Vui lòng thử lại sau hoặc liên hệ hỗ trợ.</p>
+            </div>
+          `;
+        }
+      }
+
+      // Render tickets
+      function renderTickets(tickets) {
+        const container = document.getElementById('ticketsList');
+
+        if (tickets.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">📭</div>
+              <h4>Bạn chưa có ticket nào</h4>
+              <p>Tạo ticket mới để nhận hỗ trợ từ chúng tôi.</p>
+              <a href="support.html" class="create-ticket-btn mt-3">
+                <span class="icon-plus"></span> Tạo Ticket Mới
+              </a>
+            </div>
+          `;
+          return;
+        }
+
+        let html = '';
+        tickets.forEach(ticket => {
+          const statusClass = `status-${ticket.status.toLowerCase().replace(' ', '')}`;
+          const statusText = {
+            'Open': 'Mở',
+            'InProgress': 'Đang xử lý',
+            'WaitingCustomer': 'Chờ khách hàng',
+            'Resolved': 'Đã giải quyết',
+            'Closed': 'Đã đóng'
+          }[ticket.status] || ticket.status;
+
+          const createdDate = new Date(ticket.createdAt).toLocaleDateString('vi-VN', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+
+          html += `
+            <div class="ticket-card">
+              <div class="ticket-header">
+                <div>
+                  <div class="ticket-number">${ticket.ticketNumber}</div>
+                  <div class="ticket-title">${ticket.subject}</div>
+                </div>
+                <span class="ticket-status ${statusClass}">${statusText}</span>
+              </div>
+              
+              <div class="ticket-meta">
+                <span><i class="icon-folder"></i> ${ticket.category}</span>
+                <span><i class="icon-calendar"></i> ${createdDate}</span>
+                <span><i class="icon-chat"></i> ${ticket.messageCount || 0} tin nhắn</span>
+              </div>
+              
+              <div class="ticket-actions">
+                <button class="btn-view-ticket" onclick="viewTicket(${ticket.ticketId})">
+                  <i class="icon-eye"></i> Xem chi tiết
+                </button>
+                ${ticket.status !== 'Closed' && ticket.status !== 'Resolved' ? `
+                  <button class="btn-view-ticket" onclick="openReplyModal(${ticket.ticketId})" style="background: #6b7280;">
+                    <i class="icon-reply"></i> Trả lời
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+          `;
+        });
+
+        container.innerHTML = html;
+      }
+
+      // View ticket details
+      async function viewTicket(ticketId) {
+        try {
+          const response = await fetch(`${location.origin}/api/supporttickets/${ticketId}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+
+          if (!response.ok) throw new Error('Failed to load ticket');
+
+          const ticket = await response.json();
+          
+          const modal = new bootstrap.Modal(document.getElementById('ticketDetailModal'));
+          document.getElementById('ticketModalTitle').textContent = `Ticket: ${ticket.ticketNumber}`;
+          
+          const content = document.getElementById('ticketDetailContent');
+          content.innerHTML = `
+            <div class="mb-4">
+              <h6>Thông tin cơ bản</h6>
+              <table class="table table-bordered">
+                <tr>
+                  <th width="150">Mã Ticket:</th>
+                  <td><strong>${ticket.ticketNumber}</strong></td>
+                </tr>
+                <tr>
+                  <th>Tiêu đề:</th>
+                  <td>${ticket.subject}</td>
+                </tr>
+                <tr>
+                  <th>Danh mục:</th>
+                  <td>${ticket.category}</td>
+                </tr>
+                <tr>
+                  <th>Trạng thái:</th>
+                  <td><span class="badge bg-${getStatusColor(ticket.status)}">${ticket.status}</span></td>
+                </tr>
+                <tr>
+                  <th>Mức độ:</th>
+                  <td><span class="badge bg-${getPriorityColor(ticket.priority)}">${ticket.priority}</span></td>
+                </tr>
+                <tr>
+                  <th>Ngày tạo:</th>
+                  <td>${new Date(ticket.createdAt).toLocaleString('vi-VN')}</td>
+                </tr>
+                ${ticket.resolvedAt ? `<tr><th>Ngày giải quyết:</th><td>${new Date(ticket.resolvedAt).toLocaleString('vi-VN')}</td></tr>` : ''}
+              </table>
+            </div>
+            
+            <div class="mb-4">
+              <h6>Mô tả</h6>
+              <div class="p-3 bg-light rounded">${ticket.description}</div>
+            </div>
+            
+            ${ticket.resolutionNotes ? `
+            <div class="mb-4">
+              <h6>Ghi chú giải quyết</h6>
+              <div class="p-3 bg-light rounded">${ticket.resolutionNotes}</div>
+            </div>
+            ` : ''}
+            
+            <div>
+              <h6>Lịch sử tin nhắn (${ticket.messages.length})</h6>
+              <div class="list-group" style="max-height: 400px; overflow-y: auto;">
+                ${ticket.messages.map(msg => `
+                  <div class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-start">
+                      <div class="flex-grow-1">
+                        <div class="fw-bold">${msg.senderName || 'System'} 
+                          <span class="badge bg-${msg.senderType === 'Customer' ? 'primary' : 'success'} ms-2">${msg.senderType}</span>
+                        </div>
+                        <div class="mt-2">${msg.content}</div>
+                        <small class="text-muted">${new Date(msg.createdAt).toLocaleString('vi-VN')}</small>
+                      </div>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `;
+          
+          modal.show();
+        } catch (error) {
+          console.error('[My Tickets] Error viewing ticket:', error);
+          if (typeof showToast === 'function') {
+            showToast('Lỗi khi tải chi tiết ticket: ' + error.message, 'danger');
+          }
+        }
+      }
+
+      function getStatusColor(status) {
+        const colors = {
+          'Open': 'primary',
+          'InProgress': 'warning',
+          'WaitingCustomer': 'info',
+          'Resolved': 'success',
+          'Closed': 'secondary'
+        };
+        return colors[status] || 'secondary';
+      }
+
+      function getPriorityColor(priority) {
+        const colors = {
+          'Low': 'secondary',
+          'Normal': 'info',
+          'High': 'warning',
+          'Urgent': 'danger'
+        };
+        return colors[priority] || 'info';
+      }
+
+      // Open reply modal
+      function openReplyModal(ticketId) {
+        document.getElementById('replyTicketId').value = ticketId;
+        document.getElementById('replyContent').value = '';
+        
+        const modal = new bootstrap.Modal(document.getElementById('replyModal'));
+        modal.show();
+      }
+
+      // Handle reply
+      document.getElementById('replyForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        try {
+          const ticketId = document.getElementById('replyTicketId').value;
+          const content = document.getElementById('replyContent').value.trim();
+          
+          if (!content) {
+            if (typeof showToast === 'function') {
+              showToast('Vui lòng nhập nội dung tin nhắn', 'warning');
+            }
+            return;
+          }
+          
+          const response = await fetch(`${location.origin}/api/supporttickets/${ticketId}/messages`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              content: content
+            })
+          });
+
+          if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Failed to send reply');
+          }
+
+          const modal = bootstrap.Modal.getInstance(document.getElementById('replyModal'));
+          modal.hide();
+          
+          if (typeof showToast === 'function') {
+            showToast('Tin nhắn đã được gửi thành công', 'success');
+          }
+          
+          loadTickets();
+        } catch (error) {
+          console.error('[My Tickets] Error sending reply:', error);
+          if (typeof showToast === 'function') {
+            showToast('Lỗi: ' + error.message, 'danger');
+          }
+        }
+      });
+
+      // Load on page load
+      loadTickets();
+    </script>
+  </body>
+</html>
+

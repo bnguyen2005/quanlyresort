@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="vi" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default" data-assets-path="../assets/" data-template="vertical-menu-template-free">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+  <title>Quản lý Support Tickets - Resort Management</title>
+  <link rel="icon" type="image/x-icon" href="../assets/img/favicon/favicon.ico" />
+  <link rel="stylesheet" href="../assets/vendor/fonts/boxicons.css" />
+  <link rel="stylesheet" href="../assets/vendor/css/core.css" class="template-customizer-core-css" />
+  <link rel="stylesheet" href="../assets/vendor/css/theme-default.css" class="template-customizer-theme-css" />
+  <link rel="stylesheet" href="../assets/css/demo.css" />
+  <link rel="stylesheet" href="../assets/css/fix-scrollbar.css" />
+  <link rel="stylesheet" href="../assets/css/admin-custom-theme.css" />
+  <link rel="stylesheet" href="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+  <!-- DataTables -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
+</head>
+
+<body>
+  <div class="layout-wrapper layout-content-navbar">
+    <div class="layout-container">
+      
+      <!-- Menu -->
+      <div id="common-menu"></div>
+      <script>
+        (function() {
+          const menuVersion = Date.now();
+          fetch('layout-menu.html?v=' + menuVersion)
+            .then(response => response.text())
+            .then(html => {
+              const menuContainer = document.getElementById('common-menu');
+              if (menuContainer) menuContainer.innerHTML = html;
+            })
+            .catch(error => console.error('Error loading menu:', error));
+        })();
+      </script>
+
+      <!-- Layout container -->
+      <div class="layout-page">
+        
+        <!-- Navbar -->
+        <nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme" id="layout-navbar">
+          <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
+            <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
+              <i class="bx bx-menu bx-sm"></i>
+            </a>
+          </div>
+
+          <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+            <div class="navbar-nav align-items-center">
+              <div class="nav-item d-flex align-items-center">
+                <h4 class="mb-0" id="pageTitle">🎫 Quản lý Support Tickets</h4>
+              </div>
+            </div>
+
+            <ul class="navbar-nav flex-row align-items-center ms-auto">
+              <li class="nav-item navbar-dropdown dropdown-user dropdown">
+                <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
+                  <div class="avatar avatar-online">
+                    <img src="../assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                  </div>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li>
+                    <a class="dropdown-item" href="javascript:void(0);" id="logoutBtn">
+                      <i class="bx bx-power-off me-2"></i>
+                      <span class="align-middle">Đăng xuất</span>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </nav>
+
+        <!-- Content wrapper -->
+        <div class="content-wrapper">
+          <div class="container-xxl flex-grow-1 container-p-y">
+            
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <div>
+                <h4 class="fw-bold py-3 mb-2">
+                  <span class="text-muted fw-light">Quản lý /</span> Support Tickets
+                </h4>
+              </div>
+              <div class="d-flex gap-2">
+                <button type="button" class="btn btn-outline-secondary" onclick="refreshTickets()">
+                  <i class="bx bx-refresh me-1"></i> Làm mới
+                </button>
+              </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="card mb-4">
+              <div class="card-body">
+                <div class="row g-3">
+                  <div class="col-md-3">
+                    <label class="form-label">Trạng thái</label>
+                    <select class="form-select" id="filterStatus" onchange="applyFilters()">
+                      <option value="">Tất cả</option>
+                      <option value="Open">Mở</option>
+                      <option value="InProgress">Đang xử lý</option>
+                      <option value="WaitingCustomer">Chờ khách hàng</option>
+                      <option value="Resolved">Đã giải quyết</option>
+                      <option value="Closed">Đã đóng</option>
+                    </select>
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label">Mức độ</label>
+                    <select class="form-select" id="filterPriority" onchange="applyFilters()">
+                      <option value="">Tất cả</option>
+                      <option value="Low">Thấp</option>
+                      <option value="Normal">Bình thường</option>
+                      <option value="High">Cao</option>
+                      <option value="Urgent">Khẩn cấp</option>
+                    </select>
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label">Danh mục</label>
+                    <select class="form-select" id="filterCategory" onchange="applyFilters()">
+                      <option value="">Tất cả</option>
+                      <option value="General">Tổng quát</option>
+                      <option value="Booking">Đặt phòng</option>
+                      <option value="Payment">Thanh toán</option>
+                      <option value="Restaurant">Nhà hàng</option>
+                      <option value="Services">Dịch vụ</option>
+                      <option value="Complaint">Khiếu nại</option>
+                      <option value="Other">Khác</option>
+                    </select>
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label">Tìm kiếm</label>
+                    <input type="text" class="form-control" id="filterSearch" placeholder="Mã ticket, tiêu đề..." onkeyup="applyFilters()">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tickets Table -->
+            <div class="card">
+              <h5 class="card-header">Danh sách Tickets</h5>
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table id="ticketsTable" class="table table-striped table-hover">
+                    <thead>
+                      <tr>
+                        <th>Mã Ticket</th>
+                        <th>Khách hàng</th>
+                        <th>Tiêu đề</th>
+                        <th>Danh mục</th>
+                        <th>Trạng thái</th>
+                        <th>Mức độ</th>
+                        <th>Người phụ trách</th>
+                        <th>Ngày tạo</th>
+                        <th>Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <!-- Data will be loaded via JavaScript -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Footer -->
+          <footer class="content-footer footer bg-footer-theme">
+            <div class="container-xxl d-flex flex-wrap justify-content-between py-2 flex-md-row flex-column">
+              <div class="mb-2 mb-md-0">
+                © 2025 Resort Management System
+              </div>
+            </div>
+          </footer>
+
+          <div class="content-backdrop fade"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="layout-overlay layout-menu-toggle"></div>
+  </div>
+
+  <!-- Ticket Detail Modal -->
+  <div class="modal fade" id="ticketDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="ticketModalTitle">Chi tiết Ticket</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="ticketDetailContent">
+          <!-- Content will be loaded dynamically -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Update Ticket Modal -->
+  <div class="modal fade" id="updateTicketModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Cập nhật Ticket</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="updateTicketForm">
+          <div class="modal-body">
+            <input type="hidden" id="updateTicketId">
+            
+            <div class="mb-3">
+              <label class="form-label">Trạng thái *</label>
+              <select class="form-select" id="updateStatus" required>
+                <option value="Open">Mở</option>
+                <option value="InProgress">Đang xử lý</option>
+                <option value="WaitingCustomer">Chờ khách hàng</option>
+                <option value="Resolved">Đã giải quyết</option>
+                <option value="Closed">Đã đóng</option>
+              </select>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">Mức độ ưu tiên *</label>
+              <select class="form-select" id="updatePriority" required>
+                <option value="Low">Thấp</option>
+                <option value="Normal">Bình thường</option>
+                <option value="High">Cao</option>
+                <option value="Urgent">Khẩn cấp</option>
+              </select>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">Giao cho</label>
+              <input type="text" class="form-control" id="updateAssignedTo" placeholder="Email hoặc username">
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">Ghi chú giải quyết</label>
+              <textarea class="form-control" id="updateResolutionNotes" rows="3" placeholder="Ghi chú về cách giải quyết..."></textarea>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+            <button type="submit" class="btn btn-primary">Cập nhật</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reply Modal -->
+  <div class="modal fade" id="replyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Trả lời Ticket</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="replyForm">
+          <div class="modal-body">
+            <input type="hidden" id="replyTicketId">
+            
+            <div class="mb-3">
+              <label class="form-label">Nội dung tin nhắn *</label>
+              <textarea class="form-control" id="replyContent" rows="5" required placeholder="Nhập nội dung trả lời..."></textarea>
+            </div>
+            
+            <div class="mb-3">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="replyIsInternal">
+                <label class="form-check-label" for="replyIsInternal">
+                  Ghi chú nội bộ (khách hàng không thấy)
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+            <button type="submit" class="btn btn-primary">Gửi trả lời</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="../assets/vendor/libs/jquery/jquery.js"></script>
+  <script src="../assets/vendor/libs/popper/popper.js"></script>
+  <script src="../assets/vendor/js/bootstrap.js"></script>
+  <script src="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+  <script src="../assets/vendor/js/menu.js"></script>
+  <script src="../assets/js/main.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+  <script src="../js/common-navbar.js"></script>
+
+  <script>
+    // Get API_BASE from api.js or set default
+    const API_BASE = window.API_BASE || (location.origin + '/api');
+    
+    let ticketsTable;
+    let allTickets = [];
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', () => {
+      loadTickets();
+      initializeDataTable();
+      
+      // Handle update form
+      document.getElementById('updateTicketForm').addEventListener('submit', handleUpdateTicket);
+      
+      // Handle reply form
+      document.getElementById('replyForm').addEventListener('submit', handleReply);
+    });
+
+    // Load tickets
+    async function loadTickets() {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          window.location.href = 'auth-login-basic.html';
+          return;
+        }
+
+        const params = new URLSearchParams();
+        const status = document.getElementById('filterStatus')?.value;
+        const priority = document.getElementById('filterPriority')?.value;
+        const category = document.getElementById('filterCategory')?.value;
+        const search = document.getElementById('filterSearch')?.value;
+
+        if (status) params.append('status', status);
+        if (priority) params.append('priority', priority);
+        if (category) params.append('category', category);
+        if (search) params.append('search', search);
+
+        const url = `${API_BASE}/supporttickets${params.toString() ? '?' + params.toString() : ''}`;
+        const response = await fetch(url, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            window.location.href = 'auth-login-basic.html';
+            return;
+          }
+          throw new Error('Failed to load tickets');
+        }
+
+        allTickets = await response.json();
+        renderTickets();
+      } catch (error) {
+        console.error('[Tickets] Error loading tickets:', error);
+        if (typeof showToast === 'function') {
+          showToast('Lỗi khi tải tickets: ' + error.message, 'danger');
+        }
+      }
+    }
+
+    // Initialize DataTable
+    function initializeDataTable() {
+      if (ticketsTable) {
+        ticketsTable.destroy();
+      }
+      
+      ticketsTable = $('#ticketsTable').DataTable({
+        language: {
+          url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/vi.json'
+        },
+        order: [[7, 'desc']], // Sort by created date
+        pageLength: 25,
+        responsive: true
+      });
+    }
+
+    // Render tickets
+    function renderTickets() {
+      const tbody = document.querySelector('#ticketsTable tbody');
+      if (!tbody) return;
+
+      if (allTickets.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center py-4">Không có ticket nào</td></tr>';
+        if (ticketsTable) ticketsTable.clear().draw();
+        return;
+      }
+
+      let html = '';
+      allTickets.forEach(ticket => {
+        const statusBadge = getStatusBadge(ticket.status);
+        const priorityBadge = getPriorityBadge(ticket.priority);
+        const createdDate = new Date(ticket.createdAt).toLocaleDateString('vi-VN');
+        const customerName = ticket.customer ? ticket.customer.fullName : (ticket.contactName || 'Khách vãng lai');
+        const customerEmail = ticket.customer ? ticket.customer.email : ticket.contactEmail;
+
+        html += `
+          <tr>
+            <td><strong>${ticket.ticketNumber}</strong></td>
+            <td>
+              <div>${customerName}</div>
+              <small class="text-muted">${customerEmail || ''}</small>
+            </td>
+            <td>${ticket.subject}</td>
+            <td><span class="badge bg-label-info">${ticket.category}</span></td>
+            <td>${statusBadge}</td>
+            <td>${priorityBadge}</td>
+            <td>${ticket.assignedTo || '<span class="text-muted">Chưa giao</span>'}</td>
+            <td>${createdDate}</td>
+            <td>
+              <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-primary" onclick="viewTicket(${ticket.ticketId})" title="Xem chi tiết">
+                  <i class="bx bx-show"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-warning" onclick="openUpdateModal(${ticket.ticketId})" title="Cập nhật">
+                  <i class="bx bx-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-success" onclick="openReplyModal(${ticket.ticketId})" title="Trả lời">
+                  <i class="bx bx-reply"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = html;
+      if (ticketsTable) {
+        ticketsTable.clear();
+        ticketsTable.rows.add($(html));
+        ticketsTable.draw();
+      }
+    }
+
+    // Get status badge
+    function getStatusBadge(status) {
+      const badges = {
+        'Open': '<span class="badge bg-label-primary">Mở</span>',
+        'InProgress': '<span class="badge bg-label-warning">Đang xử lý</span>',
+        'WaitingCustomer': '<span class="badge bg-label-info">Chờ khách hàng</span>',
+        'Resolved': '<span class="badge bg-label-success">Đã giải quyết</span>',
+        'Closed': '<span class="badge bg-label-secondary">Đã đóng</span>',
+        'Cancelled': '<span class="badge bg-label-danger">Đã hủy</span>'
+      };
+      return badges[status] || `<span class="badge">${status}</span>`;
+    }
+
+    // Get priority badge
+    function getPriorityBadge(priority) {
+      const badges = {
+        'Low': '<span class="badge bg-label-secondary">Thấp</span>',
+        'Normal': '<span class="badge bg-label-info">Bình thường</span>',
+        'High': '<span class="badge bg-label-warning">Cao</span>',
+        'Urgent': '<span class="badge bg-label-danger">Khẩn cấp</span>'
+      };
+      return badges[priority] || `<span class="badge">${priority}</span>`;
+    }
+
+    // View ticket details
+    async function viewTicket(ticketId) {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_BASE}/supporttickets/${ticketId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) throw new Error('Failed to load ticket');
+
+        const ticket = await response.json();
+        
+        const modal = new bootstrap.Modal(document.getElementById('ticketDetailModal'));
+        document.getElementById('ticketModalTitle').textContent = `Ticket: ${ticket.ticketNumber}`;
+        
+        const content = document.getElementById('ticketDetailContent');
+        content.innerHTML = `
+          <div class="mb-4">
+            <h6>Thông tin cơ bản</h6>
+            <table class="table table-bordered">
+              <tr>
+                <th width="150">Mã Ticket:</th>
+                <td><strong>${ticket.ticketNumber}</strong></td>
+              </tr>
+              <tr>
+                <th>Khách hàng:</th>
+                <td>${ticket.customer ? ticket.customer.fullName : (ticket.contactName || 'N/A')}</td>
+              </tr>
+              <tr>
+                <th>Email:</th>
+                <td>${ticket.customer ? ticket.customer.email : (ticket.contactEmail || 'N/A')}</td>
+              </tr>
+              <tr>
+                <th>Tiêu đề:</th>
+                <td>${ticket.subject}</td>
+              </tr>
+              <tr>
+                <th>Danh mục:</th>
+                <td>${ticket.category}</td>
+              </tr>
+              <tr>
+                <th>Trạng thái:</th>
+                <td>${getStatusBadge(ticket.status)}</td>
+              </tr>
+              <tr>
+                <th>Mức độ:</th>
+                <td>${getPriorityBadge(ticket.priority)}</td>
+              </tr>
+              <tr>
+                <th>Người phụ trách:</th>
+                <td>${ticket.assignedTo || 'Chưa giao'}</td>
+              </tr>
+              <tr>
+                <th>Ngày tạo:</th>
+                <td>${new Date(ticket.createdAt).toLocaleString('vi-VN')}</td>
+              </tr>
+              ${ticket.resolvedAt ? `<tr><th>Ngày giải quyết:</th><td>${new Date(ticket.resolvedAt).toLocaleString('vi-VN')}</td></tr>` : ''}
+            </table>
+          </div>
+          
+          <div class="mb-4">
+            <h6>Mô tả</h6>
+            <div class="p-3 bg-light rounded">${ticket.description}</div>
+          </div>
+          
+          ${ticket.resolutionNotes ? `
+          <div class="mb-4">
+            <h6>Ghi chú giải quyết</h6>
+            <div class="p-3 bg-light rounded">${ticket.resolutionNotes}</div>
+          </div>
+          ` : ''}
+          
+          <div>
+            <h6>Lịch sử tin nhắn (${ticket.messages.length})</h6>
+            <div class="list-group" style="max-height: 400px; overflow-y: auto;">
+              ${ticket.messages.map(msg => `
+                <div class="list-group-item">
+                  <div class="d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                      <div class="fw-bold">${msg.senderName || 'System'} 
+                        <span class="badge bg-label-${msg.senderType === 'Customer' ? 'primary' : 'success'} ms-2">${msg.senderType}</span>
+                        ${msg.isInternal ? '<span class="badge bg-label-warning ms-2">Nội bộ</span>' : ''}
+                      </div>
+                      <div class="mt-2">${msg.content}</div>
+                      <small class="text-muted">${new Date(msg.createdAt).toLocaleString('vi-VN')}</small>
+                    </div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+        
+        modal.show();
+      } catch (error) {
+        console.error('[Tickets] Error viewing ticket:', error);
+        if (typeof showToast === 'function') {
+          showToast('Lỗi khi tải chi tiết ticket: ' + error.message, 'danger');
+        }
+      }
+    }
+
+    // Open update modal
+    async function openUpdateModal(ticketId) {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_BASE}/supporttickets/${ticketId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) throw new Error('Failed to load ticket');
+
+        const ticket = await response.json();
+        
+        document.getElementById('updateTicketId').value = ticketId;
+        document.getElementById('updateStatus').value = ticket.status;
+        document.getElementById('updatePriority').value = ticket.priority;
+        document.getElementById('updateAssignedTo').value = ticket.assignedTo || '';
+        document.getElementById('updateResolutionNotes').value = ticket.resolutionNotes || '';
+        
+        const modal = new bootstrap.Modal(document.getElementById('updateTicketModal'));
+        modal.show();
+      } catch (error) {
+        console.error('[Tickets] Error opening update modal:', error);
+        if (typeof showToast === 'function') {
+          showToast('Lỗi: ' + error.message, 'danger');
+        }
+      }
+    }
+
+    // Handle update ticket
+    async function handleUpdateTicket(e) {
+      e.preventDefault();
+      
+      try {
+        const token = localStorage.getItem('token');
+        const ticketId = document.getElementById('updateTicketId').value;
+        
+        const updateData = {
+          status: document.getElementById('updateStatus').value,
+          priority: document.getElementById('updatePriority').value,
+          assignedTo: document.getElementById('updateAssignedTo').value || null,
+          resolutionNotes: document.getElementById('updateResolutionNotes').value || null
+        };
+        
+        const response = await fetch(`${API_BASE}/supporttickets/${ticketId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(updateData)
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || 'Failed to update ticket');
+        }
+
+        const modal = bootstrap.Modal.getInstance(document.getElementById('updateTicketModal'));
+        modal.hide();
+        
+        if (typeof showToast === 'function') {
+          showToast('Ticket đã được cập nhật thành công', 'success');
+        }
+        
+        loadTickets();
+      } catch (error) {
+        console.error('[Tickets] Error updating ticket:', error);
+        if (typeof showToast === 'function') {
+          showToast('Lỗi: ' + error.message, 'danger');
+        }
+      }
+    }
+
+    // Open reply modal
+    function openReplyModal(ticketId) {
+      document.getElementById('replyTicketId').value = ticketId;
+      document.getElementById('replyContent').value = '';
+      document.getElementById('replyIsInternal').checked = false;
+      
+      const modal = new bootstrap.Modal(document.getElementById('replyModal'));
+      modal.show();
+    }
+
+    // Handle reply
+    async function handleReply(e) {
+      e.preventDefault();
+      
+      try {
+        const token = localStorage.getItem('token');
+        const ticketId = document.getElementById('replyTicketId').value;
+        const content = document.getElementById('replyContent').value.trim();
+        const isInternal = document.getElementById('replyIsInternal').checked;
+        
+        if (!content) {
+          if (typeof showToast === 'function') {
+            showToast('Vui lòng nhập nội dung tin nhắn', 'warning');
+          }
+          return;
+        }
+        
+        const response = await fetch(`${API_BASE}/supporttickets/${ticketId}/messages`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            content: content,
+            isInternal: isInternal
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || 'Failed to send reply');
+        }
+
+        const modal = bootstrap.Modal.getInstance(document.getElementById('replyModal'));
+        modal.hide();
+        
+        if (typeof showToast === 'function') {
+          showToast('Tin nhắn đã được gửi thành công', 'success');
+        }
+        
+        loadTickets();
+      } catch (error) {
+        console.error('[Tickets] Error sending reply:', error);
+        if (typeof showToast === 'function') {
+          showToast('Lỗi: ' + error.message, 'danger');
+        }
+      }
+    }
+
+    // Apply filters
+    function applyFilters() {
+      loadTickets();
+    }
+
+    // Refresh tickets
+    function refreshTickets() {
+      loadTickets();
+      if (typeof showToast === 'function') {
+        showToast('Đã làm mới danh sách tickets', 'success');
+      }
+    }
+  </script>
+</body>
+</html>
+

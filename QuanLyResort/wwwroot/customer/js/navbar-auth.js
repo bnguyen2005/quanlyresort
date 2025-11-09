@@ -197,6 +197,9 @@ function createUserDropdown(user) {
       <a class="dropdown-item" href="my-restaurant-orders.html">
         <i class="icon-restaurant"></i> Các Món Ăn Đã Đặt
       </a>
+      <a class="dropdown-item" href="my-tickets.html">
+        <i class="icon-support"></i> Tickets Hỗ Trợ
+      </a>
       <div class="dropdown-divider"></div>
       <a class="dropdown-item text-danger" href="#" onclick="handleLogout(event)">
         <i class="icon-power"></i> Đăng Xuất
