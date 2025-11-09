@@ -39,6 +39,8 @@ public class JwtAuthorizationMiddleware
             "/api/payment/vietqr-webhook", // Allow VietQR webhook without auth
             "/api/payment/mbbank-webhook", // Allow MB Bank webhook without auth
             "/api/payment/bank-webhook", // Allow generic bank webhook without auth
+            "/api/faqs", // Allow public access to FAQs
+            "/api/supporttickets", // Allow public access to create support tickets (POST)
             "/swagger",
             "/swagger/",
             "/swagger/v1/swagger.json",
