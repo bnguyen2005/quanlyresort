@@ -340,11 +340,28 @@ async function updateRestaurantPaymentModal(orderId, orderNumber, amount) {
     const contentEl = document.getElementById('rpContent');
     if (contentEl) contentEl.textContent = result.description || `ORDER${orderId}`;
 
-    // Update waiting message
+    // Update waiting message - đảm bảo success bị ẩn và waiting được hiển thị
     if (waitingEl) {
       waitingEl.style.display = 'block';
+      waitingEl.style.visibility = 'visible';
+      waitingEl.style.opacity = '1';
+      waitingEl.removeAttribute('hidden');
+      waitingEl.classList.remove('d-none');
+      waitingEl.classList.add('d-block');
       waitingEl.textContent = 'Vui lòng quét mã QR để thanh toán';
       waitingEl.className = 'text-center mt-4';
+    }
+    
+    // Đảm bảo success message bị ẩn sau khi tạo QR xong
+    const successElAfter = document.getElementById('rpSuccess');
+    if (successElAfter) {
+      successElAfter.style.display = 'none';
+      successElAfter.style.visibility = 'hidden';
+      successElAfter.style.opacity = '0';
+      successElAfter.setAttribute('hidden', '');
+      successElAfter.classList.add('d-none');
+      successElAfter.classList.remove('d-block');
+      console.log("[FRONTEND] ✅ [updateRestaurantPaymentModal] Success message hidden after QR creation");
     }
 
     // Store payment link info
@@ -380,35 +397,40 @@ function startRestaurantPaymentPolling(orderId) {
   let pollCount = 0;
   const maxPolls = 300; // Poll tối đa 10 phút
   
-  window.restaurantPaymentPollingInterval = setInterval(async () => {
-    pollCount++;
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        console.warn("[FRONTEND] ⚠️ [RestaurantPaymentPolling] No token found");
-        stopRestaurantPaymentPolling();
-        return;
-      }
+  // Delay polling lần đầu 3 giây để tránh check ngay khi mở modal
+  // (đảm bảo QR code đã được tạo và hiển thị trước khi bắt đầu check)
+  setTimeout(() => {
+    console.log("[FRONTEND] 🔄 [RestaurantPaymentPolling] Starting first poll after 3s delay...");
+    
+    window.restaurantPaymentPollingInterval = setInterval(async () => {
+      pollCount++;
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          console.warn("[FRONTEND] ⚠️ [RestaurantPaymentPolling] No token found");
+          stopRestaurantPaymentPolling();
+          return;
+        }
 
-      if (pollCount > maxPolls) {
-        console.log("[FRONTEND] ⏰ [RestaurantPaymentPolling] Timeout reached after 10 minutes, stopping polling");
-        stopRestaurantPaymentPolling();
-        return;
-      }
+        if (pollCount > maxPolls) {
+          console.log("[FRONTEND] ⏰ [RestaurantPaymentPolling] Timeout reached after 10 minutes, stopping polling");
+          stopRestaurantPaymentPolling();
+          return;
+        }
 
-      const response = await fetch(`${location.origin}/api/restaurant-orders/${orderId}?_=${Date.now()}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        cache: 'no-store'
-      });
+        const response = await fetch(`${location.origin}/api/restaurant-orders/${orderId}?_=${Date.now()}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          cache: 'no-store'
+        });
 
-      if (!response.ok) {
-        console.warn("[FRONTEND] ⚠️ [RestaurantPaymentPolling] Response not OK:", response.status);
-        return;
-      }
+        if (!response.ok) {
+          console.warn("[FRONTEND] ⚠️ [RestaurantPaymentPolling] Response not OK:", response.status);
+          return;
+        }
 
-      const order = await response.json();
+        const order = await response.json();
       
       if (pollCount % 10 === 0 || pollCount === 1) {
         console.log(`[FRONTEND] 🔍 [RestaurantPaymentPolling] Poll #${pollCount} - PaymentStatus: ${order.paymentStatus} (order ${orderId})`);
