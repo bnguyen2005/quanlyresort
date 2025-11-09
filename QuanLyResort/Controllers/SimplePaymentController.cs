@@ -335,8 +335,8 @@ public class SimplePaymentController : ControllerBase
                 _logger.LogInformation("[WEBHOOK] ✅ [WEBHOOK-{WebhookId}] Restaurant order {OrderId} ({OrderNumber}) updated to Paid successfully!", 
                     webhookId, restaurantOrderId.Value, order.OrderNumber);
                 
-                var duration = (DateTime.UtcNow - startTime).TotalMilliseconds;
-                _logger.LogInformation("[WEBHOOK] ⏱️ [WEBHOOK-{WebhookId}] Processing time: {Duration}ms", webhookId, duration);
+                var restaurantDuration = (DateTime.UtcNow - startTime).TotalMilliseconds;
+                _logger.LogInformation("[WEBHOOK] ⏱️ [WEBHOOK-{WebhookId}] Processing time: {Duration}ms", webhookId, restaurantDuration);
                 _logger.LogInformation("═══════════════════════════════════════════════════════════");
                 
                 return Ok(new
@@ -348,7 +348,7 @@ public class SimplePaymentController : ControllerBase
                     type = "restaurant",
                     webhookId = webhookId,
                     processedAt = DateTime.UtcNow,
-                    durationMs = duration
+                    durationMs = restaurantDuration
                 });
             }
             
