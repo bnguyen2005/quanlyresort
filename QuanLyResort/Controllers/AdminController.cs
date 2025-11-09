@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using QuanLyResort.Data;
 using QuanLyResort.Services;
 
@@ -54,15 +55,15 @@ public class AdminController : ControllerBase
     
     [HttpGet("check-users")]
     [AllowAnonymous]
-    public IActionResult CheckUsers()
+    public async Task<IActionResult> CheckUsers()
     {
-        var users = _context.Users.Select(u => new {
+        var users = await _context.Users.Select(u => new {
             u.UserId,
             u.Username,
             u.Email,
             u.Role,
             u.IsActive
-        }).ToList();
+        }).ToListAsync();
         
         return Ok(new {
             totalUsers = users.Count,
@@ -71,7 +72,7 @@ public class AdminController : ControllerBase
     }
 
     [HttpGet("stats")]
-    public async Task<IActionResult> GetSystemStats()
+    public IActionResult GetSystemStats()
     {
         var stats = new
         {

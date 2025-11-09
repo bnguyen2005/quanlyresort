@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using QuanLyResort.Models;
 using QuanLyResort.Repositories;
@@ -44,12 +45,24 @@ public class AuthService : IAuthService
         if (user == null)
         {
             Console.WriteLine($"[LoginAsync] ❌ User not found in database");
-            // Log all users for debugging
-            var allUsers = await _unitOfWork.Users.ToListAsync();
-            Console.WriteLine($"[LoginAsync] Total users in database: {allUsers.Count}");
-            foreach (var u in allUsers)
+            // Log user count for debugging (without listing all users to avoid performance issues)
+            try
             {
-                Console.WriteLine($"[LoginAsync]   - User: {u.Username} ({u.Email}), Role: {u.Role}, Active: {u.IsActive}");
+                var allUsers = await _unitOfWork.Users.GetAllAsync();
+                var userList = allUsers.ToList();
+                Console.WriteLine($"[LoginAsync] Total users in database: {userList.Count}");
+                if (userList.Count > 0 && userList.Count <= 10)
+                {
+                    // Only log if there are few users (for debugging)
+                    foreach (var u in userList)
+                    {
+                        Console.WriteLine($"[LoginAsync]   - User: {u.Username} ({u.Email}), Role: {u.Role}, Active: {u.IsActive}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[LoginAsync] Could not retrieve user list: {ex.Message}");
             }
             return (false, null, null);
         }
