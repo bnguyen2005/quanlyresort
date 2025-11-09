@@ -414,17 +414,26 @@ function startRestaurantPaymentPolling(orderId) {
         console.log(`[FRONTEND] 🔍 [RestaurantPaymentPolling] Poll #${pollCount} - PaymentStatus: ${order.paymentStatus} (order ${orderId})`);
       }
       
-      // Normalize status
+      // Normalize status - chỉ check paymentStatus, không check status
       const rawStatus = String(order.paymentStatus || '').trim();
       const normalizedStatus = rawStatus.toLowerCase();
       
-      console.log(`[FRONTEND] 🔍 [RestaurantPaymentPolling] Poll #${pollCount} - Raw status: '${rawStatus}', Normalized: '${normalizedStatus}'`);
+      console.log(`[FRONTEND] 🔍 [RestaurantPaymentPolling] Poll #${pollCount} - Raw paymentStatus: '${rawStatus}', Normalized: '${normalizedStatus}'`);
+      console.log(`[FRONTEND] 🔍 [RestaurantPaymentPolling] Full order object:`, {
+        orderId: order.orderId,
+        paymentStatus: order.paymentStatus,
+        status: order.status,
+        totalAmount: order.totalAmount
+      });
 
-      // Check for "Paid" status
+      // Check for "Paid" status - CHỈ chấp nhận chính xác "Paid", không dùng includes()
+      // Tránh false positive với "Unpaid" hoặc các status khác
       const isPaid = normalizedStatus === 'paid' || 
                        rawStatus === 'Paid' || 
-                       rawStatus === 'PAID' ||
-                       normalizedStatus.includes('paid');
+                       rawStatus === 'PAID';
+      
+      // Log để debug
+      console.log(`[FRONTEND] 🔍 [RestaurantPaymentPolling] isPaid check: ${isPaid} (rawStatus='${rawStatus}', normalizedStatus='${normalizedStatus}')`);
       
       if (isPaid) {
         console.log('[FRONTEND] ✅✅✅ [RestaurantPaymentPolling] ========== PAYMENT DETECTED ==========');
