@@ -494,7 +494,8 @@ function startRestaurantPaymentPolling(orderId) {
     } catch (error) {
       console.error('[FRONTEND] ❌ [RestaurantPaymentPolling] Polling error:', error);
     }
-  }, 2000); // Poll mỗi 2 giây
+    }, 2000); // Poll mỗi 2 giây
+  }, 3000); // Delay 3 giây trước khi bắt đầu polling
   
   window.currentRestaurantPaymentOrderId = orderId;
 }
