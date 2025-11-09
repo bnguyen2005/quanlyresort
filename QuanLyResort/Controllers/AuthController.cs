@@ -18,16 +18,23 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
+        Console.WriteLine($"[AuthController] Login request: Email={request.Email}, Role={request.Role}");
+        
         // Sử dụng Email property làm emailOrUsername (có thể là email hoặc username)
         var (success, token, user) = await _authService.LoginAsync(request.Email, request.Password, request.Role);
 
         if (!success)
+        {
+            Console.WriteLine($"[AuthController] ❌ Login failed for: {request.Email}");
             return Unauthorized(new { message = "Invalid credentials or insufficient permissions" });
+        }
 
+        Console.WriteLine($"[AuthController] ✅ Login successful for: {request.Email}, Role: {user!.Role}");
+        
         return Ok(new
         {
             token,
-            email = user!.Email,
+            email = user.Email,
             role = user.Role,
             user = new
             {

@@ -25,13 +25,49 @@ public class AdminController : ControllerBase
     {
         try
         {
+            Console.WriteLine("[AdminController] 🌱 Starting data seed...");
             await _dataSeeder.SeedAsync();
-            return Ok(new { message = "Data seeded successfully" });
+            Console.WriteLine("[AdminController] ✅ Data seeded successfully");
+            
+            // Return summary
+            var userCount = _context.Users.Count();
+            var adminCount = _context.Users.Count(u => u.Role == "Admin");
+            
+            return Ok(new { 
+                message = "Data seeded successfully",
+                usersCreated = userCount,
+                adminUsers = adminCount,
+                adminCredentials = new {
+                    email = "admin@resort.test",
+                    username = "admin",
+                    password = "P@ssw0rd123"
+                }
+            });
         }
         catch (Exception ex)
         {
-            return BadRequest(new { message = $"Seeding failed: {ex.Message}" });
+            Console.WriteLine($"[AdminController] ❌ Seeding failed: {ex.Message}");
+            Console.WriteLine($"[AdminController] Stack trace: {ex.StackTrace}");
+            return BadRequest(new { message = $"Seeding failed: {ex.Message}", details = ex.ToString() });
         }
+    }
+    
+    [HttpGet("check-users")]
+    [AllowAnonymous]
+    public IActionResult CheckUsers()
+    {
+        var users = _context.Users.Select(u => new {
+            u.UserId,
+            u.Username,
+            u.Email,
+            u.Role,
+            u.IsActive
+        }).ToList();
+        
+        return Ok(new {
+            totalUsers = users.Count,
+            users = users
+        });
     }
 
     [HttpGet("stats")]
