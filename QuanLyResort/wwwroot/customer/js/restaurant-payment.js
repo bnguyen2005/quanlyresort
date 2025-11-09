@@ -111,19 +111,36 @@ async function updateRestaurantPaymentModal(orderId, orderNumber, amount) {
   const amountEl = document.getElementById('rpAmount');
   if (amountEl) amountEl.textContent = formatCurrency(amount);
 
-  // Show loading
-  const qrImg = document.getElementById('rpQRImage');
-  const qrSection = document.getElementById('rpQRSection');
-  const waitingEl = document.getElementById('rpWaiting');
-  const successEl = document.getElementById('rpSuccess');
-  
-  if (waitingEl) {
-    waitingEl.style.display = 'block';
-    waitingEl.textContent = 'Đang tạo mã thanh toán...';
-    waitingEl.className = 'text-center mt-4';
-  }
-  if (successEl) successEl.style.display = 'none';
-  if (qrSection) qrSection.style.display = 'none';
+    // Show loading
+    const qrImg = document.getElementById('rpQRImage');
+    const qrSection = document.getElementById('rpQRSection');
+    const waitingEl = document.getElementById('rpWaiting');
+    const successEl = document.getElementById('rpSuccess');
+    
+    // Reset UI state - ensure success is hidden and waiting is shown
+    if (waitingEl) {
+      waitingEl.style.display = 'block';
+      waitingEl.style.visibility = 'visible';
+      waitingEl.style.opacity = '1';
+      waitingEl.removeAttribute('hidden');
+      waitingEl.classList.remove('d-none');
+      waitingEl.classList.add('d-block');
+      waitingEl.textContent = 'Đang tạo mã thanh toán...';
+      waitingEl.className = 'text-center mt-4';
+    }
+    if (successEl) {
+      successEl.style.display = 'none';
+      successEl.style.visibility = 'hidden';
+      successEl.style.opacity = '0';
+      successEl.setAttribute('hidden', '');
+      successEl.classList.add('d-none');
+      successEl.classList.remove('d-block');
+    }
+    if (qrSection) qrSection.style.display = 'none';
+    if (qrImg) {
+      qrImg.style.display = 'none';
+      qrImg.src = '';
+    }
 
   try {
     // Call PayOs API to create payment link
