@@ -708,12 +708,13 @@ function startSimplePolling(bookingId) {
           showPaymentSuccess();
         }, 300);
         
-        // Show toast notification và alert để đảm bảo user thấy
+        // Show toast notification
         console.log('[FRONTEND] 🎉 [SimplePolling] Showing toast notification...');
         showSimpleToast('✅ Thanh toán thành công!', 'success');
         
-        // Thêm alert để đảm bảo user thấy (optional - có thể comment nếu không muốn)
-        // alert('✅ Thanh toán thành công!\n\nĐặt phòng của bạn đã được thanh toán thành công.');
+        // Option 1: Reload trang sau 2 giây để đảm bảo UI được cập nhật
+        // Uncomment dòng dưới nếu muốn reload trang thay vì đóng modal
+        // setTimeout(() => { window.location.reload(); }, 2000);
         
         // Force UI update - trigger reflow
         const modal = document.getElementById('simplePaymentModal');
@@ -904,48 +905,54 @@ function showPaymentSuccess() {
 }
 
 /**
- * Hide modal directly (fallback method)
+ * Hide modal directly (KHÔNG dùng Bootstrap API - chỉ dùng DOM manipulation)
  */
 function hideModalDirectly(modalElement) {
-  if (!modalElement) return;
+  if (!modalElement) {
+    console.warn('[FRONTEND] ⚠️ [hideModalDirectly] Modal element not found');
+    return;
+  }
   
   try {
-    // Method 1: jQuery (if available)
+    console.log('[FRONTEND] 🔄 [hideModalDirectly] Hiding modal directly (no Bootstrap API)...');
+    
+    // Method 1: jQuery (if available) - đơn giản nhất
     if (typeof $ !== 'undefined' && $.fn.modal) {
       console.log('[FRONTEND] 🔄 [hideModalDirectly] Using jQuery to hide modal');
       $(modalElement).modal('hide');
       return;
     }
     
-    // Method 2: Bootstrap 4 data attribute
-    if (modalElement.getAttribute('data-bs-dismiss') || modalElement.classList.contains('modal')) {
-      console.log('[FRONTEND] 🔄 [hideModalDirectly] Using Bootstrap 4 method');
-      // Remove show class
-      modalElement.classList.remove('show');
-      modalElement.style.display = 'none';
-      // Remove backdrop
-      const backdrop = document.querySelector('.modal-backdrop');
-      if (backdrop) {
-        backdrop.remove();
-      }
-      // Remove modal-open class from body
-      document.body.classList.remove('modal-open');
-      document.body.style.overflow = '';
-      document.body.style.paddingRight = '';
-      return;
-    }
+    // Method 2: Direct DOM manipulation (KHÔNG cần Bootstrap API)
+    console.log('[FRONTEND] 🔄 [hideModalDirectly] Using direct DOM manipulation');
     
-    // Method 3: Direct hide
-    console.log('[FRONTEND] 🔄 [hideModalDirectly] Using direct hide');
-    modalElement.style.display = 'none';
+    // Remove show class và các attributes
     modalElement.classList.remove('show');
-    const backdrop = document.querySelector('.modal-backdrop');
-    if (backdrop) backdrop.remove();
+    modalElement.style.display = 'none';
+    modalElement.setAttribute('aria-hidden', 'true');
+    modalElement.removeAttribute('aria-modal');
+    modalElement.removeAttribute('role');
+    
+    // Remove ALL backdrops (có thể có nhiều)
+    const backdrops = document.querySelectorAll('.modal-backdrop');
+    backdrops.forEach(backdrop => {
+      console.log('[FRONTEND] 🔄 [hideModalDirectly] Removing backdrop');
+      backdrop.remove();
+    });
+    
+    // Remove modal-open class from body
     document.body.classList.remove('modal-open');
     document.body.style.overflow = '';
     document.body.style.paddingRight = '';
+    
+    console.log('[FRONTEND] ✅ [hideModalDirectly] Modal hidden successfully');
   } catch (e) {
     console.error('[FRONTEND] ❌ [hideModalDirectly] Error hiding modal:', e);
+    // Last resort: just hide it
+    if (modalElement) {
+      modalElement.style.display = 'none';
+      modalElement.classList.remove('show');
+    }
   }
 }
 
