@@ -198,7 +198,7 @@
                   </a>
                 </div>
                 <div class="col-md-6 mb-2">
-                  <button id="btnPayNow" class="btn btn-primary w-100" onclick="showPaymentModal()" style="display: none;">
+                  <button id="btnPayNow" class="btn btn-primary w-100" onclick="openRestaurantPaymentFromDetails()" style="display: none;">
                     <i class="icon-credit-card me-2"></i>Thanh toán ngay
                   </button>
                   <button id="btnViewOrders" class="btn btn-primary w-100" onclick="window.location.href='restaurant.html#my-orders'" style="display: none;">
@@ -396,6 +396,20 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
     // Get orderId from URL
     const urlParams = new URLSearchParams(window.location.search);
     const orderId = urlParams.get('orderId');
+    
+    // Helper function to open restaurant payment from order details page
+    window.openRestaurantPaymentFromDetails = function() {
+      if (!orderId) {
+        showError('Không tìm thấy mã đơn hàng');
+        return;
+      }
+      if (typeof openRestaurantPayment === 'function') {
+        openRestaurantPayment(parseInt(orderId));
+      } else {
+        console.error('[OrderDetails] openRestaurantPayment function not found');
+        showError('Hệ thống thanh toán chưa sẵn sàng. Vui lòng thử lại sau.');
+      }
+    };
     
     if (!orderId) {
       showError('Không tìm thấy mã đơn hàng. Vui lòng quay lại trang đặt món.');
