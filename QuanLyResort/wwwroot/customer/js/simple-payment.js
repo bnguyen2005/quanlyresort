@@ -712,36 +712,27 @@ function startSimplePolling(bookingId) {
         console.log('[FRONTEND] 🎉 [SimplePolling] Showing toast notification...');
         showSimpleToast('✅ Thanh toán thành công!', 'success');
         
-        // Option 1: Reload trang sau 2 giây để đảm bảo UI được cập nhật
-        // Uncomment dòng dưới nếu muốn reload trang thay vì đóng modal
-        // setTimeout(() => { window.location.reload(); }, 2000);
-        
-        // Force UI update - trigger reflow
-        const modal = document.getElementById('simplePaymentModal');
-        if (modal) {
-          console.log('[FRONTEND] 🔄 [SimplePolling] Forcing modal UI update...');
-          // Trigger a reflow to ensure CSS updates
-          void modal.offsetHeight;
-          // Force repaint
-          modal.style.display = 'block';
-          setTimeout(() => {
-            modal.style.display = '';
-          }, 0);
-        }
-        
-        // Reload bookings list to update status
+        // Reload bookings list to update status ngay lập tức
         if (window.loadBookings) {
           console.log('[FRONTEND] 🔄 [SimplePolling] Reloading bookings list...');
-          setTimeout(() => {
-            window.loadBookings();
-          }, 500);
+          window.loadBookings();
         }
         
-        // Close modal after 5 seconds (tăng thời gian để user đọc được thông báo)
+        // Option 1: Reload trang sau 2 giây (ĐƠN GIẢN NHẤT - không cần đóng modal)
+        // Giải pháp này đảm bảo UI được cập nhật hoàn toàn và không có lỗi Bootstrap
+        setTimeout(() => {
+          console.log('[FRONTEND] 🔄 [SimplePolling] Reloading page to show updated status...');
+          window.location.reload();
+        }, 2000);
+        
+        // Option 2: Đóng modal sau 5 giây (nếu không muốn reload trang)
+        // Uncomment dòng dưới và comment Option 1 nếu muốn dùng cách này
+        /*
         setTimeout(() => {
           console.log('[FRONTEND] 🔄 [SimplePolling] Closing modal after 5 seconds...');
           hideModalDirectly(document.getElementById('simplePaymentModal'));
         }, 5000);
+        */
         
         console.log('[FRONTEND] ✅✅✅ [SimplePolling] ========== PAYMENT PROCESSING COMPLETE ==========');
       } else {
