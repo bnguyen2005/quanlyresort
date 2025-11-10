@@ -44,6 +44,7 @@ public class AIChatService
         {
             _apiUrl = aiConfig["ApiUrl"] ?? "https://api.groq.com/openai/v1/chat/completions";
             _model = aiConfig["Model"] ?? "llama-3.1-8b-instant"; // Groq free model
+            // Groq sử dụng format giống OpenAI, nhưng URL phải chính xác
         }
         else if (_provider == "huggingface")
         {
