@@ -18,16 +18,15 @@ RUN dotnet restore "QuanLyResort/QuanLyResort.csproj" \
 # Copy toàn bộ source code
 COPY QuanLyResort/ QuanLyResort/
 
-# Build và publish trong một bước để tối ưu
+# Build và publish (không dùng --no-restore để tránh lỗi runtime)
 WORKDIR "/src/QuanLyResort"
 RUN dotnet publish "QuanLyResort.csproj" \
     -c Release \
     -o /app/publish \
-    --no-restore \
     --verbosity minimal
 
 FROM base AS final
 WORKDIR /app
-COPY --from=publish /app/publish .
+COPY --from=build /app/publish .
 ENTRYPOINT ["dotnet", "QuanLyResort.dll"]
 
