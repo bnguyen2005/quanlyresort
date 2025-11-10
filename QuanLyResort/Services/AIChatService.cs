@@ -1,0 +1,175 @@
+using System.Net.Http.Headers;
+using System.Text;
+using System.Text.Json;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+
+namespace QuanLyResort.Services;
+
+/// <summary>
+/// Service để tương tác với AI Chat API
+/// Hỗ trợ OpenAI hoặc các AI service khác
+/// </summary>
+public class AIChatService
+{
+    private readonly IConfiguration _configuration;
+    private readonly ILogger<AIChatService> _logger;
+    private readonly HttpClient _httpClient;
+    private readonly string? _apiKey;
+    private readonly string _apiUrl;
+    private readonly string _model;
+
+    public AIChatService(
+        IConfiguration configuration,
+        ILogger<AIChatService> logger,
+        HttpClient httpClient)
+    {
+        _configuration = configuration;
+        _logger = logger;
+        _httpClient = httpClient;
+
+        var aiConfig = _configuration.GetSection("AIChat");
+        _apiKey = aiConfig["ApiKey"];
+        _apiUrl = aiConfig["ApiUrl"] ?? "https://api.openai.com/v1/chat/completions";
+        _model = aiConfig["Model"] ?? "gpt-3.5-turbo";
+
+        if (!string.IsNullOrEmpty(_apiKey))
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
+        }
+
+        _logger.LogInformation("[AI Chat] ✅ Service initialized with Model: {Model}", _model);
+    }
+
+    /// <summary>
+    /// Gửi message đến AI và nhận response
+    /// </summary>
+    public async Task<string> SendMessageAsync(string userMessage, string? conversationContext = null)
+    {
+        try
+        {
+            // Nếu không có API key, trả về response mẫu
+            if (string.IsNullOrEmpty(_apiKey))
+            {
+                _logger.LogWarning("[AI Chat] ⚠️ No API key configured, returning sample response");
+                return GetSampleResponse(userMessage);
+            }
+
+            // Tạo system prompt cho resort context
+            var systemPrompt = @"Bạn là trợ lý AI thân thiện của Resort Deluxe. 
+Bạn giúp khách hàng với các câu hỏi về:
+- Đặt phòng và booking
+- Dịch vụ resort (nhà hàng, spa, hồ bơi, v.v.)
+- Thanh toán và hóa đơn
+- Chính sách hủy và đổi
+- Thông tin về phòng và tiện nghi
+- Hướng dẫn sử dụng website
+
+Hãy trả lời ngắn gọn, thân thiện và hữu ích bằng tiếng Việt.";
+
+            var messages = new List<object>
+            {
+                new { role = "system", content = systemPrompt }
+            };
+
+            // Thêm context nếu có
+            if (!string.IsNullOrEmpty(conversationContext))
+            {
+                messages.Add(new { role = "assistant", content = conversationContext });
+            }
+
+            // Thêm user message
+            messages.Add(new { role = "user", content = userMessage });
+
+            var requestBody = new
+            {
+                model = _model,
+                messages = messages,
+                temperature = 0.7,
+                max_tokens = 500
+            };
+
+            var json = JsonSerializer.Serialize(requestBody);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            _logger.LogInformation("[AI Chat] 📤 Sending message to AI: {Message}", userMessage.Substring(0, Math.Min(50, userMessage.Length)));
+
+            var response = await _httpClient.PostAsync(_apiUrl, content);
+            var responseContent = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogError("[AI Chat] ❌ API Error: {StatusCode} - {Response}", response.StatusCode, responseContent);
+                return "Xin lỗi, tôi gặp sự cố khi xử lý câu hỏi của bạn. Vui lòng thử lại sau hoặc liên hệ bộ phận hỗ trợ.";
+            }
+
+            var responseJson = JsonDocument.Parse(responseContent);
+            var aiResponse = responseJson.RootElement
+                .GetProperty("choices")[0]
+                .GetProperty("message")
+                .GetProperty("content")
+                .GetString();
+
+            _logger.LogInformation("[AI Chat] ✅ Received response from AI");
+
+            return aiResponse ?? "Xin lỗi, tôi không thể tạo phản hồi. Vui lòng thử lại.";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[AI Chat] ❌ Error sending message to AI");
+            return "Xin lỗi, đã xảy ra lỗi khi xử lý câu hỏi của bạn. Vui lòng thử lại sau.";
+        }
+    }
+
+    /// <summary>
+    /// Trả về response mẫu khi không có API key
+    /// </summary>
+    private string GetSampleResponse(string userMessage)
+    {
+        var lowerMessage = userMessage.ToLower();
+
+        if (lowerMessage.Contains("đặt phòng") || lowerMessage.Contains("booking"))
+        {
+            return "Để đặt phòng, bạn có thể:\n" +
+                   "1. Chọn phòng trên trang 'Phòng' của website\n" +
+                   "2. Chọn ngày check-in và check-out\n" +
+                   "3. Điền thông tin và xác nhận đặt phòng\n" +
+                   "4. Thanh toán qua PayOs hoặc chuyển khoản\n\n" +
+                   "Nếu cần hỗ trợ, vui lòng liên hệ hotline: 1900-xxxx";
+        }
+
+        if (lowerMessage.Contains("giá") || lowerMessage.Contains("phí"))
+        {
+            return "Giá phòng tại Resort Deluxe dao động từ 500.000₫ - 2.000.000₫/đêm tùy loại phòng.\n" +
+                   "Bạn có thể xem chi tiết giá trên trang 'Phòng' hoặc liên hệ để được tư vấn cụ thể.";
+        }
+
+        if (lowerMessage.Contains("dịch vụ") || lowerMessage.Contains("nhà hàng") || lowerMessage.Contains("spa"))
+        {
+            return "Resort Deluxe cung cấp nhiều dịch vụ:\n" +
+                   "🍽️ Nhà hàng với menu đa dạng\n" +
+                   "💆 Spa và massage\n" +
+                   "🏊 Hồ bơi ngoài trời\n" +
+                   "🏋️ Phòng gym\n" +
+                   "🎮 Khu vui chơi\n\n" +
+                   "Bạn có thể đặt dịch vụ qua website hoặc liên hệ lễ tân.";
+        }
+
+        if (lowerMessage.Contains("hủy") || lowerMessage.Contains("đổi"))
+        {
+            return "Chính sách hủy/đổi:\n" +
+                   "• Hủy trước 24h: Miễn phí\n" +
+                   "• Hủy trong 24h: Phí 50%\n" +
+                   "• Không đến: Phí 100%\n\n" +
+                   "Để hủy/đổi booking, vui lòng vào trang 'Đặt phòng của tôi' hoặc liên hệ hotline.";
+        }
+
+        return "Xin chào! Tôi là trợ lý AI của Resort Deluxe. Tôi có thể giúp bạn:\n" +
+               "• Tư vấn đặt phòng\n" +
+               "• Thông tin về dịch vụ\n" +
+               "• Hướng dẫn thanh toán\n" +
+               "• Chính sách hủy/đổi\n\n" +
+               "Bạn có câu hỏi gì không?";
+    }
+}
+

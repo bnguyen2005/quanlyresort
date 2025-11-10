@@ -78,6 +78,8 @@ builder.Services.AddScoped<MBBankApiService>();
 builder.Services.AddScoped<PayOsWebhookService>();
 builder.Services.AddHttpClient<PayOsService>();
 builder.Services.AddScoped<PayOsService>();
+builder.Services.AddHttpClient<AIChatService>();
+builder.Services.AddScoped<AIChatService>();
 
 // Add SignalR
 builder.Services.AddSignalR();
