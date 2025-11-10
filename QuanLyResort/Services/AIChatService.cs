@@ -176,8 +176,30 @@ Hãy trả lời ngắn gọn, thân thiện và hữu ích bằng tiếng Việ
             }
 
             _logger.LogInformation("[AI Chat] 📤 Request body: {Body}", json);
+            _logger.LogInformation("[AI Chat] 📤 Request method: POST");
+            _logger.LogInformation("[AI Chat] 📤 Full URL: {Url}", _apiUrl);
 
-            var response = await _httpClient.PostAsync(_apiUrl, content);
+            // Đảm bảo không có BaseAddress conflict - sử dụng absolute URI
+            Uri requestUri;
+            if (Uri.TryCreate(_apiUrl, UriKind.Absolute, out requestUri))
+            {
+                // URL đã là absolute, sử dụng trực tiếp
+            }
+            else
+            {
+                // Nếu URL không absolute, tạo absolute URI
+                requestUri = new Uri(_apiUrl, UriKind.Absolute);
+            }
+
+            // Tạo HttpRequestMessage với POST method rõ ràng
+            var request = new HttpRequestMessage(HttpMethod.Post, requestUri)
+            {
+                Content = content
+            };
+            
+            _logger.LogInformation("[AI Chat] 📤 Final request URI: {Uri}", request.RequestUri);
+            
+            var response = await _httpClient.SendAsync(request);
             var responseContent = await response.Content.ReadAsStringAsync();
             
             _logger.LogInformation("[AI Chat] 📥 Response status: {StatusCode}", response.StatusCode);
