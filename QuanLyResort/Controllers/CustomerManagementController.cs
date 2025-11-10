@@ -413,7 +413,7 @@ public class CustomerManagementController : ControllerBase
     /// <summary>
     /// Thay đổi loại khách hàng (Regular, VIP, Corporate)
     /// </summary>
-    [HttpPost("{id}/change-type")]
+    [HttpPost("{id:int}/change-type")]
     [Authorize(Roles = "Admin,Manager,Business")]
     public async Task<IActionResult> ChangeCustomerType(int id, [FromBody] ChangeCustomerTypeRequest request)
     {
