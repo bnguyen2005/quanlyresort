@@ -92,30 +92,51 @@ Hãy trả lời ngắn gọn, thân thiện và hữu ích bằng tiếng Việ
             var json = JsonSerializer.Serialize(requestBody);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            _logger.LogInformation("[AI Chat] 📤 Sending message to AI: {Message}", userMessage.Substring(0, Math.Min(50, userMessage.Length)));
+            _logger.LogInformation("[AI Chat] 📤 Sending message to AI");
+            _logger.LogInformation("[AI Chat] 📤 Message preview: {Message}", userMessage.Substring(0, Math.Min(50, userMessage.Length)));
+            _logger.LogInformation("[AI Chat] 📤 API URL: {ApiUrl}", _apiUrl);
+            _logger.LogInformation("[AI Chat] 📤 Model: {Model}", _model);
+            _logger.LogInformation("[AI Chat] 📤 Has API Key: {HasKey}", !string.IsNullOrEmpty(_apiKey));
+            if (!string.IsNullOrEmpty(_apiKey))
+            {
+                _logger.LogInformation("[AI Chat] 📤 API Key prefix: {Prefix}", _apiKey.Substring(0, Math.Min(10, _apiKey.Length)));
+            }
+
+            _logger.LogInformation("[AI Chat] 📤 Request body: {Body}", json);
 
             var response = await _httpClient.PostAsync(_apiUrl, content);
             var responseContent = await response.Content.ReadAsStringAsync();
+            
+            _logger.LogInformation("[AI Chat] 📥 Response status: {StatusCode}", response.StatusCode);
+            _logger.LogInformation("[AI Chat] 📥 Response headers: {Headers}", string.Join(", ", response.Headers.Select(h => $"{h.Key}={string.Join(",", h.Value)}")));
 
             if (!response.IsSuccessStatusCode)
             {
-                _logger.LogError("[AI Chat] ❌ API Error: {StatusCode} - {Response}", response.StatusCode, responseContent);
+                _logger.LogError("[AI Chat] ❌ API Error - Status: {StatusCode}", response.StatusCode);
+                _logger.LogError("[AI Chat] ❌ API Error - Response: {Response}", responseContent);
+                _logger.LogError("[AI Chat] ❌ API Error - Request URL: {Url}", _apiUrl);
+                _logger.LogError("[AI Chat] ❌ API Error - API Key configured: {HasKey}", !string.IsNullOrEmpty(_apiKey));
                 
                 // Xử lý các lỗi cụ thể
                 if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                 {
-                    _logger.LogError("[AI Chat] ❌ Unauthorized - API Key có thể không hợp lệ hoặc đã hết hạn");
+                    _logger.LogError("[AI Chat] ❌ Unauthorized (401) - API Key có thể không hợp lệ hoặc đã hết hạn");
+                    _logger.LogError("[AI Chat] ❌ Check API Key in configuration");
                     return "Xin lỗi, API key không hợp lệ. Vui lòng liên hệ quản trị viên để cập nhật cấu hình.";
                 }
                 
                 if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
                 {
-                    _logger.LogError("[AI Chat] ❌ Rate limit exceeded");
+                    _logger.LogError("[AI Chat] ❌ Rate limit exceeded (429)");
                     return "Xin lỗi, hệ thống đang quá tải. Vui lòng thử lại sau vài phút.";
                 }
                 
+                _logger.LogError("[AI Chat] ❌ Other error: {StatusCode}", response.StatusCode);
                 return "Xin lỗi, tôi gặp sự cố khi xử lý câu hỏi của bạn. Vui lòng thử lại sau hoặc liên hệ bộ phận hỗ trợ.";
             }
+
+            _logger.LogInformation("[AI Chat] 📥 Response content length: {Length}", responseContent.Length);
+            _logger.LogInformation("[AI Chat] 📥 Response preview: {Preview}", responseContent.Substring(0, Math.Min(200, responseContent.Length)));
 
             var responseJson = JsonDocument.Parse(responseContent);
             var aiResponse = responseJson.RootElement
@@ -124,13 +145,21 @@ Hãy trả lời ngắn gọn, thân thiện và hữu ích bằng tiếng Việ
                 .GetProperty("content")
                 .GetString();
 
-            _logger.LogInformation("[AI Chat] ✅ Received response from AI");
+            _logger.LogInformation("[AI Chat] ✅ Successfully parsed AI response");
+            _logger.LogInformation("[AI Chat] ✅ Response length: {Length}", aiResponse?.Length ?? 0);
 
             return aiResponse ?? "Xin lỗi, tôi không thể tạo phản hồi. Vui lòng thử lại.";
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "[AI Chat] ❌ Error sending message to AI");
+            _logger.LogError(ex, "[AI Chat] ❌ Exception occurred");
+            _logger.LogError("[AI Chat] ❌ Exception type: {Type}", ex.GetType().Name);
+            _logger.LogError("[AI Chat] ❌ Exception message: {Message}", ex.Message);
+            _logger.LogError("[AI Chat] ❌ Stack trace: {StackTrace}", ex.StackTrace);
+            if (ex.InnerException != null)
+            {
+                _logger.LogError("[AI Chat] ❌ Inner exception: {Inner}", ex.InnerException.Message);
+            }
             return "Xin lỗi, đã xảy ra lỗi khi xử lý câu hỏi của bạn. Vui lòng thử lại sau.";
         }
     }

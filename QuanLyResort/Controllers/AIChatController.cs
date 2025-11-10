@@ -37,9 +37,15 @@ public class AIChatController : ControllerBase
                 return BadRequest(new { error = "Message không được để trống" });
             }
 
-            _logger.LogInformation("[AI Chat] 📨 Received message: {Message}", request.Message.Substring(0, Math.Min(50, request.Message.Length)));
+            _logger.LogInformation("[AI Chat Controller] 📨 Received chat request");
+            _logger.LogInformation("[AI Chat Controller] 📨 Message length: {Length}", request.Message?.Length ?? 0);
+            _logger.LogInformation("[AI Chat Controller] 📨 Message preview: {Message}", request.Message?.Substring(0, Math.Min(50, request.Message?.Length ?? 0)) ?? "");
+            _logger.LogInformation("[AI Chat Controller] 📨 Has context: {HasContext}", !string.IsNullOrEmpty(request.Context));
 
             var response = await _aiChatService.SendMessageAsync(request.Message, request.Context);
+            
+            _logger.LogInformation("[AI Chat Controller] ✅ Got response from service");
+            _logger.LogInformation("[AI Chat Controller] ✅ Response length: {Length}", response?.Length ?? 0);
 
             return Ok(new
             {
