@@ -189,33 +189,53 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <form id="userForm">
+          <form id="userForm" class="needs-validation" novalidate>
             <input type="hidden" id="userId">
             <div class="row">
               <div class="col-md-6 mb-3">
                 <label class="form-label">Username <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" id="username" required>
+                <input type="text" class="form-control" id="username" required
+                       minlength="3" maxlength="50"
+                       pattern="^[a-zA-Z0-9_]+$"
+                       data-pattern-message="chỉ được chứa chữ cái, số và dấu gạch dưới"
+                       data-label="Username">
+                <div class="invalid-feedback"></div>
+                <small class="text-muted">3-50 ký tự, chỉ chữ cái, số và _</small>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Email <span class="text-danger">*</span></label>
-                <input type="email" class="form-control" id="email" required>
+                <input type="email" class="form-control" id="email" required
+                       maxlength="255"
+                       data-label="Email">
+                <div class="invalid-feedback"></div>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Mật khẩu <span class="text-danger" id="passwordRequired">*</span></label>
-                <input type="password" class="form-control" id="password">
-                <small class="text-muted">Để trống nếu không đổi (khi edit)</small>
+                <input type="password" class="form-control" id="password"
+                       minlength="6" maxlength="100"
+                       data-label="Mật khẩu">
+                <div class="invalid-feedback"></div>
+                <small class="text-muted">Tối thiểu 6 ký tự (bắt buộc khi tạo mới)</small>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Họ tên</label>
-                <input type="text" class="form-control" id="fullName">
+                <input type="text" class="form-control" id="fullName"
+                       maxlength="255"
+                       data-label="Họ tên">
+                <div class="invalid-feedback"></div>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Số điện thoại</label>
-                <input type="text" class="form-control" id="phoneNumber">
+                <input type="tel" class="form-control" id="phoneNumber"
+                       pattern="^[\d\s\-\+\(\)]+$"
+                       data-pattern-message="không đúng định dạng số điện thoại"
+                       maxlength="20"
+                       data-label="Số điện thoại">
+                <div class="invalid-feedback"></div>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Role <span class="text-danger">*</span></label>
-                <select class="form-select" id="role" required>
+                <select class="form-select" id="role" required data-label="Role">
                   <option value="">-- Chọn role --</option>
                   <option value="Admin">Admin - Quản trị viên</option>
                   <option value="Manager">Manager - Quản lý</option>
@@ -228,6 +248,7 @@
                   <option value="Maintenance">Maintenance - Kỹ thuật</option>
                   <option value="Customer">Customer - Khách hàng</option>
                 </select>
+                <div class="invalid-feedback"></div>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Trạng thái</label>
@@ -284,6 +305,9 @@
   <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
   <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
   <script src="../assets/js/main.js"></script>
+  <script src="../../js/toast-notification.js"></script>
+  <script src="../../js/form-validation.js"></script>
+  <script src="../../js/confirm-dialog.js"></script>
   <script src="../js/api.js"></script>
   <script src="../js/common-navbar.js"></script>
   <script src="../js/users-page.js"></script>

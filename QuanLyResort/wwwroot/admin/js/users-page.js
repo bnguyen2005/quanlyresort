@@ -31,8 +31,14 @@ function initUserPage() {
   console.log('✅ [initUserPage] Auth OK');
 
   if (user.role !== 'Admin' && user.role !== 'Manager') {
-    alert('Bạn không có quyền truy cập trang này!');
-    window.location.href = '/customer/index.html';
+    if (window.showToast) {
+      showToast('Bạn không có quyền truy cập trang này!', 'error');
+    } else {
+      alert('Bạn không có quyền truy cập trang này!');
+    }
+    setTimeout(() => {
+      window.location.href = '/customer/index.html';
+    }, 2000);
     return;
   }
 
@@ -137,7 +143,11 @@ async function loadUsers() {
 
   } catch (error) {
     console.error('Error loading users:', error);
-    alert('Lỗi khi tải danh sách users!');
+    if (window.showToast) {
+      showToast('Lỗi khi tải danh sách users!', 'error');
+    } else {
+      alert('Lỗi khi tải danh sách users!');
+    }
   }
 }
 
@@ -184,7 +194,11 @@ async function editUser(id) {
 
   } catch (error) {
     console.error('Error loading user:', error);
-    alert('Lỗi khi tải thông tin user!');
+    if (window.showToast) {
+      showToast('Lỗi khi tải thông tin user!', 'error');
+    } else {
+      alert('Lỗi khi tải thông tin user!');
+    }
   }
 }
 
@@ -214,9 +228,26 @@ async function saveUser() {
     // Create new user
     const password = document.getElementById('password').value;
     if (!password) {
-      alert('Vui lòng nhập mật khẩu!');
+      if (window.showToast) {
+        showToast('Vui lòng nhập mật khẩu!', 'warning');
+      } else {
+        alert('Vui lòng nhập mật khẩu!');
+      }
+      document.getElementById('password').focus();
       return;
     }
+    
+    // Validate password strength
+    if (password.length < 6) {
+      if (window.showToast) {
+        showToast('Mật khẩu phải có ít nhất 6 ký tự!', 'warning');
+      } else {
+        alert('Mật khẩu phải có ít nhất 6 ký tự!');
+      }
+      document.getElementById('password').focus();
+      return;
+    }
+    
     data.password = password;
   }
 
@@ -247,13 +278,36 @@ async function saveUser() {
     const result = await response.json();
     console.log('✅ [saveUser] Success:', result);
 
-    alert(userId ? 'Cập nhật user thành công!' : 'Tạo user thành công!');
-    bootstrap.Modal.getInstance(document.getElementById('userModal')).hide();
+    if (window.showToast) {
+      showToast(userId ? 'Cập nhật user thành công!' : 'Tạo user thành công!', 'success');
+    } else {
+      alert(userId ? 'Cập nhật user thành công!' : 'Tạo user thành công!');
+    }
+    
+    // Close modal properly
+    const modalEl = document.getElementById('userModal');
+    if (modalEl) {
+      const modal = bootstrap.Modal.getInstance(modalEl);
+      if (modal) {
+        modal.hide();
+      } else {
+        const newModal = new bootstrap.Modal(modalEl);
+        newModal.hide();
+      }
+    }
+    
+    // Reset form
+    form.reset();
+    document.getElementById('userId').value = '';
     loadUsers();
 
   } catch (error) {
     console.error('❌ [saveUser] Error:', error);
-    alert('Lỗi: ' + error.message);
+    if (window.showToast) {
+      showToast('Lỗi: ' + error.message, 'error');
+    } else {
+      alert('Lỗi: ' + error.message);
+    }
   }
 }
 
@@ -275,12 +329,33 @@ async function changePassword() {
   console.log('🔵 [changePassword] UserId:', userId);
 
   if (!newPassword || !confirmPassword) {
-    alert('Vui lòng nhập đầy đủ thông tin!');
+    if (window.showToast) {
+      showToast('Vui lòng nhập đầy đủ thông tin!', 'warning');
+    } else {
+      alert('Vui lòng nhập đầy đủ thông tin!');
+    }
     return;
   }
-
+  
+  // Validate password strength
+  if (newPassword.length < 6) {
+    if (window.showToast) {
+      showToast('Mật khẩu phải có ít nhất 6 ký tự!', 'warning');
+    } else {
+      alert('Mật khẩu phải có ít nhất 6 ký tự!');
+    }
+    document.getElementById('newPassword').focus();
+    return;
+  }
+  
+  // Validate password match
   if (newPassword !== confirmPassword) {
-    alert('Mật khẩu xác nhận không khớp!');
+    if (window.showToast) {
+      showToast('Mật khẩu xác nhận không khớp!', 'error');
+    } else {
+      alert('Mật khẩu xác nhận không khớp!');
+    }
+    document.getElementById('confirmPassword').focus();
     return;
   }
 
@@ -309,17 +384,43 @@ async function changePassword() {
     const result = await response.json();
     console.log('✅ [changePassword] Success:', result);
 
-    alert('Đổi mật khẩu thành công!');
-    bootstrap.Modal.getInstance(document.getElementById('changePasswordModal')).hide();
+    if (window.showToast) {
+      showToast('Đổi mật khẩu thành công!', 'success');
+    } else {
+      alert('Đổi mật khẩu thành công!');
+    }
+    
+    // Close modal properly
+    const modalEl = document.getElementById('changePasswordModal');
+    if (modalEl) {
+      const modal = bootstrap.Modal.getInstance(modalEl);
+      if (modal) {
+        modal.hide();
+      } else {
+        const newModal = new bootstrap.Modal(modalEl);
+        newModal.hide();
+      }
+    }
+    
+    // Reset form
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmPassword').value = '';
 
   } catch (error) {
     console.error('❌ [changePassword] Error:', error);
-    alert('Lỗi khi đổi mật khẩu: ' + error.message);
+    if (window.showToast) {
+      showToast('Lỗi khi đổi mật khẩu: ' + error.message, 'error');
+    } else {
+      alert('Lỗi khi đổi mật khẩu: ' + error.message);
+    }
   }
 }
 
 async function toggleActive(id, currentStatus) {
-  if (!confirm(`Bạn có chắc muốn ${currentStatus ? 'khóa' : 'mở khóa'} user này?`)) return;
+  const confirmed = window.showConfirm 
+    ? await showConfirm(`Bạn có chắc muốn ${currentStatus ? 'khóa' : 'mở khóa'} user này?`, 'Xác nhận thay đổi trạng thái')
+    : confirm(`Bạn có chắc muốn ${currentStatus ? 'khóa' : 'mở khóa'} user này?`);
+  if (!confirmed) return;
 
   try {
     const response = await fetch(`${API_BASE}/usermanagement/${id}/toggle-active`, {
@@ -331,17 +432,28 @@ async function toggleActive(id, currentStatus) {
 
     if (!response.ok) throw new Error('Failed to toggle status');
 
-    alert(`${currentStatus ? 'Khóa' : 'Mở khóa'} user thành công!`);
+    if (window.showToast) {
+      showToast(`${currentStatus ? 'Khóa' : 'Mở khóa'} user thành công!`, 'success');
+    } else {
+      alert(`${currentStatus ? 'Khóa' : 'Mở khóa'} user thành công!`);
+    }
     loadUsers();
 
   } catch (error) {
     console.error('Error toggling status:', error);
-    alert('Lỗi khi thay đổi trạng thái!');
+    if (window.showToast) {
+      showToast('Lỗi khi thay đổi trạng thái!', 'error');
+    } else {
+      alert('Lỗi khi thay đổi trạng thái!');
+    }
   }
 }
 
 async function deleteUser(id) {
-  if (!confirm('Bạn có chắc muốn xóa user này? Thao tác này không thể hoàn tác!')) return;
+  const confirmed = window.showConfirm 
+    ? await showConfirm('Bạn có chắc muốn xóa user này? Thao tác này không thể hoàn tác!', 'Xác nhận xóa')
+    : confirm('Bạn có chắc muốn xóa user này? Thao tác này không thể hoàn tác!');
+  if (!confirmed) return;
 
   try {
     const response = await fetch(`${API_BASE}/usermanagement/${id}`, {
@@ -353,12 +465,20 @@ async function deleteUser(id) {
 
     if (!response.ok) throw new Error('Failed to delete user');
 
-    alert('Xóa user thành công!');
+    if (window.showToast) {
+      showToast('Xóa user thành công!', 'success');
+    } else {
+      alert('Xóa user thành công!');
+    }
     loadUsers();
 
   } catch (error) {
     console.error('Error deleting user:', error);
-    alert('Lỗi khi xóa user!');
+    if (window.showToast) {
+      showToast('Lỗi khi xóa user!', 'error');
+    } else {
+      alert('Lỗi khi xóa user!');
+    }
   }
 }
 

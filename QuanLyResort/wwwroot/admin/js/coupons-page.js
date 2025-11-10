@@ -45,8 +45,14 @@ function initCouponsPage() {
   console.log('✅ [initCouponsPage] Auth OK');
 
   if (user.role !== 'Admin' && user.role !== 'Manager') {
-    alert('Bạn không có quyền truy cập trang này!');
-    window.location.href = '/customer/index.html';
+    if (window.showToast) {
+      showToast('Bạn không có quyền truy cập trang này!', 'error');
+    } else {
+      alert('Bạn không có quyền truy cập trang này!');
+    }
+    setTimeout(() => {
+      window.location.href = '/customer/index.html';
+    }, 2000);
     return;
   }
 
@@ -311,9 +317,26 @@ function editCoupon(id) {
 
 async function saveCoupon() {
   const form = document.getElementById('couponForm');
-  if (!form.checkValidity()) {
-    form.reportValidity();
-    return;
+  
+  // Use Validation utility if available
+  if (window.Validation) {
+    const result = Validation.validateForm(form);
+    if (!result.valid) {
+      if (result.errors.length > 0) {
+        const firstError = result.errors[0];
+        firstError.input.focus();
+        if (window.showToast) {
+          showToast(firstError.message, 'error');
+        }
+      }
+      return;
+    }
+  } else {
+    // Fallback to native validation
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
   }
 
   const couponData = {
@@ -382,8 +405,25 @@ async function saveCoupon() {
       throw new Error(errorMessage);
     }
 
-    showToast(`${isEdit ? 'Cập nhật' : 'Tạo'} mã giảm giá thành công!`, 'success');
-    bootstrap.Modal.getInstance(document.getElementById('couponModal')).hide();
+    if (window.showToast) {
+      showToast(`${isEdit ? 'Cập nhật' : 'Tạo'} mã giảm giá thành công!`, 'success');
+    }
+    
+    // Close modal properly
+    const modalEl = document.getElementById('couponModal');
+    if (modalEl) {
+      const modal = bootstrap.Modal.getInstance(modalEl);
+      if (modal) {
+        modal.hide();
+      } else {
+        const newModal = new bootstrap.Modal(modalEl);
+        newModal.hide();
+      }
+    }
+    
+    // Reset form
+    form.reset();
+    editingCouponId = null;
     loadCoupons();
   } catch (error) {
     console.error('Error saving coupon:', error);

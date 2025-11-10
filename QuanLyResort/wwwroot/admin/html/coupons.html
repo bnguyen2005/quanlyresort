@@ -180,48 +180,76 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <form id="couponForm">
+          <form id="couponForm" class="needs-validation" novalidate>
             <input type="hidden" id="couponId">
             <div class="row">
               <div class="col-md-6 mb-3">
                 <label class="form-label">Mã giảm giá <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" id="code" required placeholder="VD: SUMMER2024" style="text-transform:uppercase">
-                <small class="text-muted">Mã phải viết hoa, không dấu cách</small>
+                <input type="text" class="form-control" id="code" required 
+                       placeholder="VD: SUMMER2024" 
+                       pattern="^[A-Z0-9]+$"
+                       data-pattern-message="chỉ được chứa chữ cái và số, viết hoa"
+                       minlength="3" maxlength="50"
+                       data-label="Mã giảm giá"
+                       style="text-transform:uppercase">
+                <div class="invalid-feedback"></div>
+                <small class="text-muted">Mã phải viết hoa, không dấu cách, 3-50 ký tự</small>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Mô tả</label>
-                <input type="text" class="form-control" id="description" placeholder="VD: Giảm giá mùa hè">
+                <input type="text" class="form-control" id="description" 
+                       placeholder="VD: Giảm giá mùa hè"
+                       maxlength="255"
+                       data-label="Mô tả">
+                <div class="invalid-feedback"></div>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Loại giảm giá <span class="text-danger">*</span></label>
-                <select class="form-select" id="type" required>
+                <select class="form-select" id="type" required data-label="Loại giảm giá">
                   <option value="">-- Chọn loại --</option>
                   <option value="percent">Phần trăm (%)</option>
                   <option value="amount">Số tiền cố định (₫)</option>
                 </select>
+                <div class="invalid-feedback"></div>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Giá trị giảm <span class="text-danger">*</span></label>
-                <input type="number" class="form-control" id="value" required min="0" step="0.01" placeholder="10 hoặc 50000">
+                <input type="number" class="form-control" id="value" required 
+                       min="0.01" step="0.01" 
+                       placeholder="10 hoặc 50000"
+                       data-label="Giá trị giảm">
+                <div class="invalid-feedback"></div>
                 <small class="text-muted" id="valueHint">Nhập % (1-100) hoặc số tiền (₫)</small>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Giảm tối đa (₫)</label>
-                <input type="number" class="form-control" id="maxDiscount" min="0" placeholder="Chỉ áp dụng cho loại %">
+                <input type="number" class="form-control" id="maxDiscount" 
+                       min="0" step="0.01"
+                       placeholder="Chỉ áp dụng cho loại %"
+                       data-label="Giảm tối đa">
+                <div class="invalid-feedback"></div>
                 <small class="text-muted">Giới hạn số tiền giảm tối đa (chỉ cho giảm theo %)</small>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Số lần sử dụng tối đa</label>
-                <input type="number" class="form-control" id="maxUses" min="0" placeholder="0 = không giới hạn">
+                <input type="number" class="form-control" id="maxUses" 
+                       min="0" step="1"
+                       placeholder="0 = không giới hạn"
+                       data-label="Số lần sử dụng">
+                <div class="invalid-feedback"></div>
                 <small class="text-muted">Để 0 hoặc trống = không giới hạn</small>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Ngày bắt đầu <span class="text-danger">*</span></label>
-                <input type="datetime-local" class="form-control" id="startDate" required>
+                <input type="datetime-local" class="form-control" id="startDate" required
+                       data-label="Ngày bắt đầu">
+                <div class="invalid-feedback"></div>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Ngày kết thúc <span class="text-danger">*</span></label>
-                <input type="datetime-local" class="form-control" id="endDate" required>
+                <input type="datetime-local" class="form-control" id="endDate" required
+                       data-label="Ngày kết thúc">
+                <div class="invalid-feedback"></div>
               </div>
               <div class="col-md-6 mb-3">
                 <label class="form-label">Trạng thái</label>
