@@ -1936,7 +1936,13 @@
       console.log('[renderMenuItems] ✅ Rendered', items.length, 'items. HTML length:', html.length);
       
       // Attach event listeners using event delegation for better reliability
-      container.addEventListener('click', function(e) {
+      // Remove existing listener if any to avoid duplicates
+      const existingHandler = container._menuClickHandler;
+      if (existingHandler) {
+        container.removeEventListener('click', existingHandler);
+      }
+      
+      const clickHandler = function(e) {
         const target = e.target;
         
         // Handle quantity buttons
@@ -1956,29 +1962,36 @@
           }
         }
         
-        // Handle add to cart button
-        if (target.classList.contains('btn-add-to-cart')) {
+        // Handle add to cart button (check if clicked on button or its child span)
+        if (target.classList.contains('btn-add-to-cart') || target.closest('.btn-add-to-cart')) {
           e.preventDefault();
           e.stopPropagation();
-          const serviceId = parseInt(target.getAttribute('data-service-id'));
-          const serviceName = target.getAttribute('data-service-name') || '';
-          const price = parseInt(target.getAttribute('data-price')) || 0;
-          
-          if (serviceId && !isNaN(serviceId)) {
-            console.log('[renderMenuItems] Add to cart clicked:', { serviceId, serviceName, price });
-            if (typeof window.addToCart === 'function') {
-              window.addToCart(serviceId, serviceName, price);
-            } else {
-              console.error('[renderMenuItems] addToCart function not found');
-              if (window.showToast) {
-                showToast('Lỗi: Chức năng chưa sẵn sàng. Vui lòng tải lại trang.', 'error');
+          const btn = target.classList.contains('btn-add-to-cart') ? target : target.closest('.btn-add-to-cart');
+          if (btn) {
+            const serviceId = parseInt(btn.getAttribute('data-service-id'));
+            const serviceName = btn.getAttribute('data-service-name') || '';
+            const price = parseInt(btn.getAttribute('data-price')) || 0;
+            
+            if (serviceId && !isNaN(serviceId)) {
+              console.log('[renderMenuItems] Add to cart clicked:', { serviceId, serviceName, price });
+              if (typeof window.addToCart === 'function') {
+                window.addToCart(serviceId, serviceName, price);
               } else {
-                alert('Lỗi: Chức năng chưa sẵn sàng. Vui lòng tải lại trang.');
+                console.error('[renderMenuItems] addToCart function not found');
+                if (window.showToast) {
+                  showToast('Lỗi: Chức năng chưa sẵn sàng. Vui lòng tải lại trang.', 'error');
+                } else {
+                  alert('Lỗi: Chức năng chưa sẵn sàng. Vui lòng tải lại trang.');
+                }
               }
             }
           }
         }
-      });
+      };
+      
+      // Store handler reference and attach
+      container._menuClickHandler = clickHandler;
+      container.addEventListener('click', clickHandler);
       
       // Force display and grid layout
       container.style.display = 'flex';
