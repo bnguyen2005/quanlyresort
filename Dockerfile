@@ -13,9 +13,7 @@ WORKDIR /src
 # Copy csproj và restore dependencies (tối ưu cache)
 COPY ["QuanLyResort/QuanLyResort.csproj", "QuanLyResort/"]
 RUN dotnet restore "QuanLyResort/QuanLyResort.csproj" \
-    --verbosity minimal \
-    --runtime linux-x64 \
-    --no-self-contained
+    --verbosity minimal
 
 # Copy toàn bộ source code
 COPY QuanLyResort/ QuanLyResort/
