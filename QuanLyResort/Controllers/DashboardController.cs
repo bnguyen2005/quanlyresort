@@ -47,7 +47,8 @@ namespace QuanLyResort.Controllers
                 
                 // Cũng tính từ Bookings đã thanh toán hôm nay (nếu có PaymentStatus)
                 var todayPaidBookingsList = await _context.Bookings
-                    .Where(b => b.UpdatedAt.Date == today && 
+                    .Where(b => b.UpdatedAt.HasValue && 
+                               b.UpdatedAt.Value.Date == today && 
                                (b.Status == "Confirmed" || b.Status == "CheckedIn") &&
                                b.EstimatedTotalAmount > 0)
                     .Select(b => b.EstimatedTotalAmount)
@@ -160,7 +161,7 @@ namespace QuanLyResort.Controllers
                                i.Status == "Paid")
                     .Select(i => new
                     {
-                        date = i.PaidDate.Value.Date,
+                        date = i.PaidDate!.Value.Date,
                         amount = i.PaidAmount > 0 ? i.PaidAmount : i.TotalAmount
                     })
                     .ToListAsync();
