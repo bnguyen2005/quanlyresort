@@ -58,28 +58,29 @@ public class AIChatService
             _apiUrl = aiConfig["ApiUrl"] ?? "https://api.openai.com/v1/chat/completions";
         }
 
-            if (!string.IsNullOrEmpty(_apiKey) && _provider != "sample")
+        if (!string.IsNullOrEmpty(_apiKey) && _provider != "sample")
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
+            _httpClient.DefaultRequestHeaders.Add("User-Agent", "ResortDeluxe-AIChat/1.0");
+            
+            // Hugging Face cần header đặc biệt
+            if (_provider == "huggingface")
             {
-                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
-                _httpClient.DefaultRequestHeaders.Add("User-Agent", "ResortDeluxe-AIChat/1.0");
-                
-                // Hugging Face cần header đặc biệt
-                if (_provider == "huggingface")
-                {
-                    _httpClient.DefaultRequestHeaders.Add("X-API-Key", _apiKey);
-                }
-                
-                _logger.LogInformation("[AI Chat] ✅ API Key configured (length: {Length}, provider: {Provider})", _apiKey.Length, _provider);
+                _httpClient.DefaultRequestHeaders.Remove("Authorization");
+                _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_apiKey}");
             }
-            else
-            {
-                _logger.LogInformation("[AI Chat] 📝 Using sample responses (no API key or provider=sample)");
-            }
+            
+            _logger.LogInformation("[AI Chat] ✅ API Key configured (length: {Length}, provider: {Provider})", _apiKey.Length, _provider);
+        }
+        else
+        {
+            _logger.LogInformation("[AI Chat] 📝 Using sample responses (no API key or provider=sample)");
+        }
         
         // Set timeout
         _httpClient.Timeout = TimeSpan.FromSeconds(30);
 
-            _logger.LogInformation("[AI Chat] ✅ Service initialized - Provider: {Provider}, Model: {Model}, API URL: {ApiUrl}", _provider, _model, _apiUrl);
+        _logger.LogInformation("[AI Chat] ✅ Service initialized - Provider: {Provider}, Model: {Model}, API URL: {ApiUrl}", _provider, _model, _apiUrl);
     }
 
     /// <summary>
@@ -89,10 +90,10 @@ public class AIChatService
     {
         try
         {
-            // Nếu không có API key, trả về response mẫu
-            if (string.IsNullOrEmpty(_apiKey))
+            // Nếu không có API key hoặc provider là "sample", trả về response mẫu
+            if (string.IsNullOrEmpty(_apiKey) || _provider == "sample")
             {
-                _logger.LogWarning("[AI Chat] ⚠️ No API key configured, returning sample response");
+                _logger.LogInformation("[AI Chat] 📝 Using sample response mode");
                 return GetSampleResponse(userMessage);
             }
 
