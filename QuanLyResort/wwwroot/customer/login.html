@@ -643,18 +643,6 @@
         console.log('📧 Email:', email);
         console.log('🔑 Password:', password ? '***' : '(empty)');
         
-        // Validation
-        if (!email || !password) {
-          errorMessage.textContent = 'Vui lòng nhập đầy đủ thông tin!';
-          errorMessage.classList.remove('d-none');
-          successMessage.classList.add('d-none');
-          return;
-        }
-        
-        // Hide messages
-        errorMessage.classList.add('d-none');
-        successMessage.classList.add('d-none');
-        
         // Show loading
         btnText.classList.add('d-none');
         btnSpinner.classList.remove('d-none');
