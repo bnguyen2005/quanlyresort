@@ -1108,16 +1108,26 @@
     window.addToCart = function(serviceId, serviceName, price) {
       console.log('[addToCart] Called with:', { serviceId, serviceName, price });
       
-      const qtyEl = document.getElementById(`qty-${serviceId}`);
-      const quantity = parseInt(qtyEl?.textContent) || 0;
+      // Try to get quantity from main display or quick view modal
+      let qtyEl = document.getElementById(`qty-${serviceId}`);
+      let quickViewQtyEl = document.getElementById(`quickViewQty-${serviceId}`);
+      
+      // Priority: quick view modal quantity if modal is open, otherwise main display
+      let quantity = 0;
+      if (quickViewQtyEl && document.getElementById('quickViewModal')?.classList.contains('show')) {
+        quantity = parseInt(quickViewQtyEl.textContent) || 0;
+        qtyEl = quickViewQtyEl; // Use quick view for reset
+      } else if (qtyEl) {
+        quantity = parseInt(qtyEl.textContent) || 0;
+      }
       
       console.log('[addToCart] Quantity from element:', quantity, 'Element:', qtyEl);
       
       // Không cho phép thêm vào giỏ nếu số lượng = 0
       if (quantity <= 0) {
-        const message = 'Không thể thêm vào giỏ: Số lượng phải lớn hơn 0. Vui lòng chọn số lượng bằng nút + trước khi thêm vào giỏ.';
+        const message = 'Vui lòng chọn số lượng (bấm nút +) trước khi thêm vào giỏ.';
         console.warn('[addToCart] ⚠️ Quantity is 0, cannot add to cart');
-        if (typeof showToast === 'function') {
+        if (window.showToast) {
           showToast(message, 'warning');
         } else {
           alert(message);
@@ -1130,7 +1140,7 @@
         // Nếu đã có trong cart, cập nhật số lượng
         shoppingCart[existingIndex].quantity = quantity;
         console.log('[addToCart] ✅ Updated existing item in cart:', shoppingCart[existingIndex]);
-        if (typeof showToast === 'function') {
+        if (window.showToast) {
           showToast(`Đã cập nhật số lượng ${serviceName} trong giỏ hàng`, 'success');
         } else {
           alert(`Đã cập nhật số lượng ${serviceName} trong giỏ hàng`);
@@ -1145,7 +1155,7 @@
         };
         shoppingCart.push(newItem);
         console.log('[addToCart] ✅ Added new item to cart:', newItem);
-        if (typeof showToast === 'function') {
+        if (window.showToast) {
           showToast(`Đã thêm ${serviceName} vào giỏ hàng (${quantity} phần)`, 'success');
         } else {
           alert(`Đã thêm ${serviceName} vào giỏ hàng (${quantity} phần)`);
@@ -1226,7 +1236,7 @@
       
       // Không cho phép quantity < 0
       if (newQty < 0) {
-        if (typeof showToast === 'function') {
+        if (window.showToast) {
           showToast('Số lượng không thể nhỏ hơn 0', 'warning');
         }
         return;
@@ -1254,88 +1264,124 @@
     // Add to cart - Already defined above, this is just a reference
     // The actual function is defined before initMenuLoader() to ensure it's available when buttons are rendered
     
-    // Close cart modal helper
+    // Close cart modal helper (Bootstrap 4 compatible)
     window.closeCartModal = function() {
       const modalEl = document.getElementById('cartModal');
       if (modalEl) {
-        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-          const modal = bootstrap.Modal.getInstance(modalEl);
-          if (modal) {
-            modal.hide();
-          } else {
-            const newModal = new bootstrap.Modal(modalEl);
-            newModal.hide();
+        // Try Bootstrap 4/5 API
+        if (typeof jQuery !== 'undefined' && jQuery(modalEl).modal) {
+          jQuery(modalEl).modal('hide');
+        } else if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+          // Bootstrap 5
+          try {
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) {
+              modal.hide();
+            } else {
+              const newModal = new bootstrap.Modal(modalEl);
+              newModal.hide();
+            }
+          } catch (e) {
+            // Fallback: manual close
+            jQuery(modalEl).modal('hide');
           }
         } else {
           // Fallback: manual close
           modalEl.classList.remove('show');
           modalEl.style.display = 'none';
           modalEl.setAttribute('aria-hidden', 'true');
+          modalEl.removeAttribute('aria-modal');
           document.body.classList.remove('modal-open');
+          document.body.style.overflow = '';
+          document.body.style.paddingRight = '';
           const backdrop = document.querySelector('.modal-backdrop');
           if (backdrop) backdrop.remove();
         }
       }
     };
     
-    // Close quick view modal helper
+    // Close quick view modal helper (Bootstrap 4 compatible)
     window.closeQuickViewModal = function() {
       const modalEl = document.getElementById('quickViewModal');
       if (modalEl) {
-        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-          const modal = bootstrap.Modal.getInstance(modalEl);
-          if (modal) {
-            modal.hide();
-          } else {
-            const newModal = new bootstrap.Modal(modalEl);
-            newModal.hide();
+        // Try Bootstrap 4/5 API
+        if (typeof jQuery !== 'undefined' && jQuery(modalEl).modal) {
+          jQuery(modalEl).modal('hide');
+        } else if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+          // Bootstrap 5
+          try {
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) {
+              modal.hide();
+            } else {
+              const newModal = new bootstrap.Modal(modalEl);
+              newModal.hide();
+            }
+          } catch (e) {
+            // Fallback: manual close
+            jQuery(modalEl).modal('hide');
           }
         } else {
           // Fallback: manual close
           modalEl.classList.remove('show');
           modalEl.style.display = 'none';
           modalEl.setAttribute('aria-hidden', 'true');
+          modalEl.removeAttribute('aria-modal');
           document.body.classList.remove('modal-open');
+          document.body.style.overflow = '';
+          document.body.style.paddingRight = '';
           const backdrop = document.querySelector('.modal-backdrop');
           if (backdrop) backdrop.remove();
         }
       }
     };
     
-    // Show cart modal
+    // Show cart modal (Bootstrap 4 compatible)
     window.showCartModal = function() {
       const modal = document.getElementById('cartModal');
       if (!modal) {
         createCartModal();
         updateCartModalContent();
         const modalEl = document.getElementById('cartModal');
-        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        if (typeof jQuery !== 'undefined' && jQuery(modalEl).modal) {
+          jQuery(modalEl).modal('show');
+        } else if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
           new bootstrap.Modal(modalEl).show();
         } else {
           // Fallback
           modalEl.classList.add('show');
           modalEl.style.display = 'block';
           modalEl.setAttribute('aria-hidden', 'false');
+          modalEl.setAttribute('aria-modal', 'true');
           document.body.classList.add('modal-open');
+          document.body.style.overflow = 'hidden';
           const backdrop = document.createElement('div');
           backdrop.className = 'modal-backdrop fade show';
           document.body.appendChild(backdrop);
         }
       } else {
         updateCartModalContent();
-        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-          const existingModal = bootstrap.Modal.getInstance(modal);
-          if (existingModal) {
-            existingModal.show();
-          } else {
-            new bootstrap.Modal(modal).show();
+        if (typeof jQuery !== 'undefined' && jQuery(modal).modal) {
+          jQuery(modal).modal('show');
+        } else if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+          try {
+            const existingModal = bootstrap.Modal.getInstance(modal);
+            if (existingModal) {
+              existingModal.show();
+            } else {
+              new bootstrap.Modal(modal).show();
+            }
+          } catch (e) {
+            jQuery(modal).modal('show');
           }
         } else {
           // Fallback
           modal.classList.add('show');
           modal.style.display = 'block';
           modal.setAttribute('aria-hidden', 'false');
+          modal.setAttribute('aria-modal', 'true');
           document.body.classList.add('modal-open');
+          document.body.style.overflow = 'hidden';
           const backdrop = document.querySelector('.modal-backdrop');
           if (!backdrop) {
             const newBackdrop = document.createElement('div');
