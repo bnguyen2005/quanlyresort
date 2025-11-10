@@ -453,7 +453,7 @@
         if (params.toString()) url += '?' + params.toString();
 
         console.log('[loadOrders] Request URL:', url);
-        console.log('[loadOrders] Full API URL will be:', `${window.API_BASE || 'http://localhost:5130/api'}${url}`);
+        console.log('[loadOrders] Full API URL will be:', `${window.API_BASE || window.location.origin + '/api'}${url}`);
         console.log('[loadOrders] Token present:', !!localStorage.getItem('token'));
 
         // Add cache busting

@@ -3,7 +3,10 @@
  * Hàm hỗ trợ gọi API cho hệ thống quản lý resort
  */
 
-const API_BASE_URL = 'http://localhost:5130/api';
+// Auto-detect API base URL (production or development)
+const API_BASE_URL = (typeof window !== 'undefined' && window.location) 
+  ? `${window.location.origin}/api`
+  : 'http://localhost:5130/api';
 
 /**
  * Lấy token từ localStorage

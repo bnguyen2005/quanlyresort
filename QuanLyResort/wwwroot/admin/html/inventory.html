@@ -539,7 +539,7 @@
   <script src="../assets/js/main.js"></script>
 
   <script>
-    const API_BASE = 'http://localhost:5130/api/inventory';
+    const API_BASE = `${window.location.origin}/api/inventory`;
     let inventoryTable;
     let loadItemsVersion = 0; // prevent race conditions when reloading items
     let categories = [];

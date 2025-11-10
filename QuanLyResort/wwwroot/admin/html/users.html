@@ -289,28 +289,9 @@
   <script src="../js/users-page.js"></script>
   
   <script>
-    // Logout function
-    function logout() {
-      console.log('🚪 Logging out...');
-      
-      // Clear all tokens
-      localStorage.removeItem('adminToken');
-      localStorage.removeItem('token');
-      localStorage.removeItem('authToken');
-      
-      // Skip auth check
-    }
-
-    // Setup logout button
-    document.addEventListener('DOMContentLoaded', function() {
-      const logoutBtn = document.getElementById('logoutBtn');
-      if (logoutBtn) {
-        logoutBtn.addEventListener('click', function(e) {
-          e.preventDefault();
-          logout();
-        });
-      }
-    });
+    // Logout function đã được định nghĩa trong api.js và common-navbar.js
+    // Không cần định nghĩa lại ở đây để tránh conflict
+    // Setup logout button sẽ được xử lý bởi common-navbar.js
   </script>
 </body>
 </html>
