@@ -15,11 +15,13 @@ public class CustomerManagementController : ControllerBase
 {
     private readonly ResortDbContext _context;
     private readonly IAuditService _auditService;
+    private readonly ILogger<CustomerManagementController> _logger;
 
-    public CustomerManagementController(ResortDbContext context, IAuditService auditService)
+    public CustomerManagementController(ResortDbContext context, IAuditService auditService, ILogger<CustomerManagementController> logger)
     {
         _context = context;
         _auditService = auditService;
+        _logger = logger;
     }
 
     /// <summary>
@@ -79,6 +81,7 @@ public class CustomerManagementController : ControllerBase
 
     /// <summary>
     /// Lấy thông tin khách hàng của chính mình (từ JWT token)
+    /// Route này PHẢI đặt TRƯỚC route {id} để tránh conflict
     /// </summary>
     [HttpGet("my")]
     [Authorize(Roles = "Customer")]
@@ -86,11 +89,17 @@ public class CustomerManagementController : ControllerBase
     {
         try
         {
+            _logger.LogInformation("[GetMyCustomer] Request received");
+            
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
             var userCustomerId = User.FindFirst("CustomerId")?.Value;
             
+            _logger.LogInformation("[GetMyCustomer] UserEmail: {Email}, CustomerId from token: {CustomerId}", 
+                userEmail ?? "null", userCustomerId ?? "null");
+            
             if (string.IsNullOrEmpty(userEmail))
             {
+                _logger.LogWarning("[GetMyCustomer] No user email found");
                 return Unauthorized(new { message = "Không tìm thấy thông tin người dùng" });
             }
 
@@ -99,41 +108,70 @@ public class CustomerManagementController : ControllerBase
             // Thử lấy CustomerId từ token trước
             if (!string.IsNullOrEmpty(userCustomerId) && int.TryParse(userCustomerId, out int customerId))
             {
+                _logger.LogInformation("[GetMyCustomer] Trying to find customer by CustomerId: {Id}", customerId);
                 customer = await _context.Customers.AsNoTracking()
                     .FirstOrDefaultAsync(x => x.CustomerId == customerId);
+                if (customer != null)
+                {
+                    _logger.LogInformation("[GetMyCustomer] Found customer by CustomerId: {Id}, Email: {Email}", 
+                        customerId, customer.Email);
+                }
             }
 
             // Nếu không tìm thấy qua CustomerId, thử tìm qua email
             if (customer == null)
             {
+                _logger.LogInformation("[GetMyCustomer] Trying to find customer by email: {Email}", userEmail);
                 customer = await _context.Customers.AsNoTracking()
                     .FirstOrDefaultAsync(x => x.Email != null && x.Email.ToLower() == userEmail.ToLower());
+                if (customer != null)
+                {
+                    _logger.LogInformation("[GetMyCustomer] Found customer by email: {Email}, CustomerId: {Id}", 
+                        userEmail, customer.CustomerId);
+                }
             }
 
             // Nếu vẫn không tìm thấy, thử tìm User và lấy CustomerId từ đó
             if (customer == null)
             {
+                _logger.LogInformation("[GetMyCustomer] Trying to find User by email: {Email}", userEmail);
                 var user = await _context.Users
                     .FirstOrDefaultAsync(u => u.Email != null && u.Email.ToLower() == userEmail.ToLower());
                 
                 if (user == null)
                 {
                     // Thử tìm với username
+                    _logger.LogInformation("[GetMyCustomer] Trying to find User by username: {Email}", userEmail);
                     user = await _context.Users
                         .FirstOrDefaultAsync(u => u.Username != null && u.Username.ToLower() == userEmail.ToLower());
                 }
 
-                if (user != null && user.CustomerId.HasValue)
+                if (user != null)
                 {
-                    customer = await _context.Customers.AsNoTracking()
-                        .FirstOrDefaultAsync(x => x.CustomerId == user.CustomerId.Value);
+                    _logger.LogInformation("[GetMyCustomer] Found User: {Username}, CustomerId: {CustomerId}", 
+                        user.Username, user.CustomerId);
+                    
+                    if (user.CustomerId.HasValue)
+                    {
+                        customer = await _context.Customers.AsNoTracking()
+                            .FirstOrDefaultAsync(x => x.CustomerId == user.CustomerId.Value);
+                        if (customer != null)
+                        {
+                            _logger.LogInformation("[GetMyCustomer] Found customer via User.CustomerId: {Id}", 
+                                user.CustomerId.Value);
+                        }
+                    }
                 }
             }
 
             if (customer == null)
             {
+                _logger.LogWarning("[GetMyCustomer] Customer not found for email: {Email}", userEmail);
                 return NotFound(new { message = "Không tìm thấy thông tin khách hàng" });
             }
+            
+            _logger.LogInformation("[GetMyCustomer] Successfully found customer: {Id}, {Name}, {Email}", 
+                customer.CustomerId, customer.FullName, customer.Email);
 
             var bookings = await _context.Bookings.AsNoTracking()
                 .Where(b => b.CustomerId == customer.CustomerId)
