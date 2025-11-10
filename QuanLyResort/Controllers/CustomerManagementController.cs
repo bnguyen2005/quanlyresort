@@ -219,8 +219,9 @@ public class CustomerManagementController : ControllerBase
     /// <summary>
     /// Lấy thông tin khách hàng theo ID
     /// Customer có thể xem thông tin của chính họ
+    /// Route constraint: chỉ match số nguyên để tránh conflict với route "my"
     /// </summary>
-    [HttpGet("{id}")]
+    [HttpGet("{id:int}")]
     [Authorize(Roles = "Admin,Manager,FrontDesk,Business,Customer")]
     public async Task<IActionResult> GetCustomer(int id)
     {
