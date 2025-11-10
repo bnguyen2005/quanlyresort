@@ -18,6 +18,7 @@ public class AIChatService
     private readonly string? _apiKey;
     private readonly string _apiUrl;
     private readonly string _model;
+    private readonly string _provider; // "openai", "groq", "huggingface", "cohere", "sample"
 
     public AIChatService(
         IConfiguration configuration,
@@ -30,24 +31,55 @@ public class AIChatService
 
         var aiConfig = _configuration.GetSection("AIChat");
         _apiKey = aiConfig["ApiKey"];
-        _apiUrl = aiConfig["ApiUrl"] ?? "https://api.openai.com/v1/chat/completions";
+        _provider = aiConfig["Provider"] ?? "sample"; // Default to sample if no provider specified
         _model = aiConfig["Model"] ?? "gpt-3.5-turbo";
+        
+        // Set API URL based on provider
+        if (string.IsNullOrEmpty(_apiKey) || _provider == "sample")
+        {
+            _apiUrl = "";
+            _logger.LogInformation("[AI Chat] Using sample responses (no API key or provider=sample)");
+        }
+        else if (_provider == "groq")
+        {
+            _apiUrl = aiConfig["ApiUrl"] ?? "https://api.groq.com/openai/v1/chat/completions";
+            _model = aiConfig["Model"] ?? "llama-3.1-8b-instant"; // Groq free model
+        }
+        else if (_provider == "huggingface")
+        {
+            _apiUrl = aiConfig["ApiUrl"] ?? $"https://api-inference.huggingface.co/models/{_model}";
+        }
+        else if (_provider == "cohere")
+        {
+            _apiUrl = aiConfig["ApiUrl"] ?? "https://api.cohere.ai/v1/chat";
+        }
+        else // Default to OpenAI
+        {
+            _apiUrl = aiConfig["ApiUrl"] ?? "https://api.openai.com/v1/chat/completions";
+        }
 
-        if (!string.IsNullOrEmpty(_apiKey))
-        {
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
-            _httpClient.DefaultRequestHeaders.Add("User-Agent", "ResortDeluxe-AIChat/1.0");
-            _logger.LogInformation("[AI Chat] ✅ API Key configured (length: {Length})", _apiKey.Length);
-        }
-        else
-        {
-            _logger.LogWarning("[AI Chat] ⚠️ No API Key configured - will use sample responses");
-        }
+            if (!string.IsNullOrEmpty(_apiKey) && _provider != "sample")
+            {
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
+                _httpClient.DefaultRequestHeaders.Add("User-Agent", "ResortDeluxe-AIChat/1.0");
+                
+                // Hugging Face cần header đặc biệt
+                if (_provider == "huggingface")
+                {
+                    _httpClient.DefaultRequestHeaders.Add("X-API-Key", _apiKey);
+                }
+                
+                _logger.LogInformation("[AI Chat] ✅ API Key configured (length: {Length}, provider: {Provider})", _apiKey.Length, _provider);
+            }
+            else
+            {
+                _logger.LogInformation("[AI Chat] 📝 Using sample responses (no API key or provider=sample)");
+            }
         
         // Set timeout
         _httpClient.Timeout = TimeSpan.FromSeconds(30);
 
-        _logger.LogInformation("[AI Chat] ✅ Service initialized - Model: {Model}, API URL: {ApiUrl}", _model, _apiUrl);
+            _logger.LogInformation("[AI Chat] ✅ Service initialized - Provider: {Provider}, Model: {Model}, API URL: {ApiUrl}", _provider, _model, _apiUrl);
     }
 
     /// <summary>
@@ -90,13 +122,43 @@ Hãy trả lời ngắn gọn, thân thiện và hữu ích bằng tiếng Việ
             // Thêm user message
             messages.Add(new { role = "user", content = userMessage });
 
-            var requestBody = new
+            // Tạo request body tùy theo provider
+            object requestBody;
+            if (_provider == "cohere")
             {
-                model = _model,
-                messages = messages,
-                temperature = 0.7,
-                max_tokens = 500
-            };
+                // Cohere có format khác
+                requestBody = new
+                {
+                    message = userMessage,
+                    model = _model,
+                    temperature = 0.7,
+                    max_tokens = 500
+                };
+            }
+            else if (_provider == "huggingface")
+            {
+                // Hugging Face có format khác
+                requestBody = new
+                {
+                    inputs = userMessage,
+                    parameters = new
+                    {
+                        max_new_tokens = 500,
+                        temperature = 0.7
+                    }
+                };
+            }
+            else
+            {
+                // OpenAI/Groq format (standard)
+                requestBody = new
+                {
+                    model = _model,
+                    messages = messages,
+                    temperature = 0.7,
+                    max_tokens = 500
+                };
+            }
 
             var json = JsonSerializer.Serialize(requestBody);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -147,12 +209,37 @@ Hãy trả lời ngắn gọn, thân thiện và hữu ích bằng tiếng Việ
             _logger.LogInformation("[AI Chat] 📥 Response content length: {Length}", responseContent.Length);
             _logger.LogInformation("[AI Chat] 📥 Response preview: {Preview}", responseContent.Substring(0, Math.Min(200, responseContent.Length)));
 
-            var responseJson = JsonDocument.Parse(responseContent);
-            var aiResponse = responseJson.RootElement
-                .GetProperty("choices")[0]
-                .GetProperty("message")
-                .GetProperty("content")
-                .GetString();
+            // Parse response tùy theo provider
+            string? aiResponse = null;
+            
+            if (_provider == "cohere")
+            {
+                var responseJson = JsonDocument.Parse(responseContent);
+                aiResponse = responseJson.RootElement
+                    .GetProperty("text")
+                    .GetString();
+            }
+            else if (_provider == "huggingface")
+            {
+                var responseJson = JsonDocument.Parse(responseContent);
+                // Hugging Face trả về array
+                if (responseJson.RootElement.ValueKind == JsonValueKind.Array && responseJson.RootElement.GetArrayLength() > 0)
+                {
+                    aiResponse = responseJson.RootElement[0]
+                        .GetProperty("generated_text")
+                        .GetString();
+                }
+            }
+            else
+            {
+                // OpenAI/Groq format (standard)
+                var responseJson = JsonDocument.Parse(responseContent);
+                aiResponse = responseJson.RootElement
+                    .GetProperty("choices")[0]
+                    .GetProperty("message")
+                    .GetProperty("content")
+                    .GetString();
+            }
 
             _logger.LogInformation("[AI Chat] ✅ Successfully parsed AI response");
             _logger.LogInformation("[AI Chat] ✅ Response length: {Length}", aiResponse?.Length ?? 0);

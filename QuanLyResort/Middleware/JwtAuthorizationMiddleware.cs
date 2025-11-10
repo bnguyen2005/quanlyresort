@@ -40,6 +40,7 @@ public class JwtAuthorizationMiddleware
             "/api/payment/mbbank-webhook", // Allow MB Bank webhook without auth
             "/api/payment/bank-webhook", // Allow generic bank webhook without auth
             "/api/faqs", // Allow public access to FAQs
+            "/api/aichat", // Allow public access to AI Chat (no authentication required)
             "/swagger",
             "/swagger/",
             "/swagger/v1/swagger.json",
