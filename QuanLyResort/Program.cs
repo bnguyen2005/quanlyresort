@@ -343,69 +343,68 @@ using (var scope = app.Services.CreateScope())
 }
 
 // Configure the HTTP request pipeline
-if (app.Environment.IsDevelopment())
+
+// Add exception handling for Swagger generation
+// If Swagger generation fails, return a minimal valid Swagger document instead of 500
+app.Use(async (context, next) =>
 {
-    // Add exception handling for Swagger generation
-    // If Swagger generation fails, return a minimal valid Swagger document instead of 500
-    app.Use(async (context, next) =>
+    if (context.Request.Path.StartsWithSegments("/swagger") && 
+        context.Request.Path.Value?.Contains("/swagger.json") == true)
     {
-        if (context.Request.Path.StartsWithSegments("/swagger") && 
-            context.Request.Path.Value?.Contains("/swagger.json") == true)
-        {
-            try
-            {
-                await next();
-            }
-            catch (Exception ex)
-            {
-                var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
-                
-                // Log full exception details including inner exception
-                logger.LogError(ex, "Error generating Swagger documentation");
-                
-                if (ex.InnerException != null)
-                {
-                    logger.LogError(ex.InnerException, "Inner exception details");
-                }
-                
-                // Return a minimal valid Swagger document instead of error
-                // This allows Swagger UI to load even if some endpoints fail
-                var minimalSwagger = new
-                {
-                    openapi = "3.0.1",
-                    info = new
-                    {
-                        title = "Resort Management API",
-                        version = "v1",
-                        description = "API documentation (some endpoints excluded due to file upload support)"
-                    },
-                    paths = new { },
-                    components = new { }
-                };
-                
-                context.Response.StatusCode = 200;
-                context.Response.ContentType = "application/json";
-                await context.Response.WriteAsJsonAsync(minimalSwagger);
-            }
-        }
-        else
+        try
         {
             await next();
         }
-    });
-    
-    app.UseSwagger(c =>
+        catch (Exception ex)
+        {
+            var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+            
+            // Log full exception details including inner exception
+            logger.LogError(ex, "Error generating Swagger documentation");
+            
+            if (ex.InnerException != null)
+            {
+                logger.LogError(ex.InnerException, "Inner exception details");
+            }
+            
+            // Return a minimal valid Swagger document instead of error
+            // This allows Swagger UI to load even if some endpoints fail
+            var minimalSwagger = new
+            {
+                openapi = "3.0.1",
+                info = new
+                {
+                    title = "Resort Management API",
+                    version = "v1",
+                    description = "API documentation (some endpoints excluded due to file upload support)"
+                },
+                paths = new { },
+                components = new { }
+            };
+            
+            context.Response.StatusCode = 200;
+            context.Response.ContentType = "application/json";
+            await context.Response.WriteAsJsonAsync(minimalSwagger);
+        }
+    }
+    else
     {
-        c.RouteTemplate = "swagger/{documentName}/swagger.json";
-        c.SerializeAsV2 = false; // Use OpenAPI 3.0
-    });
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Resort Management API V1");
-        c.RoutePrefix = "swagger";
-        c.DisplayRequestDuration();
-    });
-}
+        await next();
+    }
+});
+
+// Enable Swagger for both Development and Production
+app.UseSwagger(c =>
+{
+    c.RouteTemplate = "swagger/{documentName}/swagger.json";
+    c.SerializeAsV2 = false; // Use OpenAPI 3.0
+});
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Resort Management API V1");
+    c.RoutePrefix = "swagger";
+    c.DisplayRequestDuration();
+});
 
 // app.UseHttpsRedirection(); // <- comment out only for local debug if needed
 
