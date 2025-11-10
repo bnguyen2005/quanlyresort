@@ -376,7 +376,10 @@
         },
         order: [[7, 'desc']], // Sort by created date
         pageLength: 25,
-        responsive: true
+        responsive: true,
+        columnDefs: [
+          { orderable: false, targets: 8 } // Disable sorting on Actions column
+        ]
       });
     }
 
@@ -431,9 +434,19 @@
 
       tbody.innerHTML = html;
       if (ticketsTable) {
-        ticketsTable.clear();
-        ticketsTable.rows.add($(html));
-        ticketsTable.draw();
+        // Destroy và khởi tạo lại DataTable với dữ liệu mới
+        ticketsTable.destroy();
+        ticketsTable = $('#ticketsTable').DataTable({
+          language: {
+            url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/vi.json'
+          },
+          order: [[7, 'desc']], // Sort by created date
+          pageLength: 25,
+          responsive: true,
+          columnDefs: [
+            { orderable: false, targets: 8 } // Disable sorting on Actions column
+          ]
+        });
       }
     }
 
