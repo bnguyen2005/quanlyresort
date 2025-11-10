@@ -593,6 +593,53 @@
         const errorMessage = document.getElementById('errorMessage');
         const successMessage = document.getElementById('successMessage');
         
+        // Clear previous errors
+        errorMessage.classList.add('d-none');
+        successMessage.classList.add('d-none');
+        
+        // Use Validation utility if available
+        if (window.Validation) {
+          const form = document.getElementById('loginForm');
+          const result = Validation.validateForm(form);
+          if (!result.valid) {
+            if (result.errors.length > 0) {
+              const firstError = result.errors[0];
+              firstError.input.focus();
+              if (window.showToast) {
+                showToast(firstError.message, 'error');
+              } else {
+                errorMessage.textContent = firstError.message;
+                errorMessage.classList.remove('d-none');
+              }
+            }
+            return;
+          }
+        } else {
+          // Fallback to basic validation
+          if (!email || !password) {
+            const msg = 'Vui lòng nhập đầy đủ email và mật khẩu';
+            if (window.showToast) {
+              showToast(msg, 'warning');
+            } else {
+              errorMessage.textContent = msg;
+              errorMessage.classList.remove('d-none');
+            }
+            return;
+          }
+          
+          if (password.length < 6) {
+            const msg = 'Mật khẩu phải có ít nhất 6 ký tự';
+            if (window.showToast) {
+              showToast(msg, 'warning');
+            } else {
+              errorMessage.textContent = msg;
+              errorMessage.classList.remove('d-none');
+            }
+            document.getElementById('password').focus();
+            return;
+          }
+        }
+        
         console.log('📧 Email:', email);
         console.log('🔑 Password:', password ? '***' : '(empty)');
         
