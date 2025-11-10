@@ -123,13 +123,27 @@ public class SupportTicketsController : ControllerBase
                 return Unauthorized(new { message = "Không tìm thấy thông tin người dùng" });
             }
 
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
-            Console.WriteLine($"[SupportTicketsController] User found: {user != null}, CustomerId: {user?.CustomerId}");
+            // Tìm user với email (case-insensitive)
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.Email != null && u.Email.ToLower() == userEmail.ToLower());
+            Console.WriteLine($"[SupportTicketsController] User found: {user != null}, CustomerId: {user?.CustomerId}, Email in DB: {user?.Email}");
             
             if (user == null)
             {
-                Console.WriteLine("[SupportTicketsController] User not found in database");
-                return NotFound(new { message = "Không tìm thấy thông tin người dùng" });
+                Console.WriteLine($"[SupportTicketsController] User not found in database for email: {userEmail}");
+                // Thử tìm với username nếu email không tìm thấy
+                var userByUsername = await _context.Users
+                    .FirstOrDefaultAsync(u => u.Username != null && u.Username.ToLower() == userEmail.ToLower());
+                if (userByUsername != null)
+                {
+                    Console.WriteLine($"[SupportTicketsController] Found user by username instead: {userByUsername.Username}");
+                    user = userByUsername;
+                }
+                else
+                {
+                    Console.WriteLine("[SupportTicketsController] User not found by email or username");
+                    return NotFound(new { message = "Không tìm thấy thông tin người dùng" });
+                }
             }
 
             if (!user.CustomerId.HasValue)
