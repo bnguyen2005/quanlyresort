@@ -319,15 +319,29 @@
               <div id="errorMessage" class="alert alert-danger d-none" role="alert"></div>
               <div id="successMessage" class="alert alert-success d-none" role="alert"></div>
               
-              <form id="loginForm" onsubmit="return false;">
+              <form id="loginForm" class="needs-validation" novalidate onsubmit="return false;">
                 <div class="form-group">
-                  <label for="email">Email / Tên đăng nhập</label>
-                  <input type="text" class="form-control" id="email" placeholder="Nhập email hoặc username" required autocomplete="username">
+                  <label for="email">Email / Tên đăng nhập <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" id="email" 
+                         placeholder="Nhập email hoặc username" 
+                         required 
+                         autocomplete="username"
+                         minlength="3"
+                         maxlength="255"
+                         data-label="Email / Tên đăng nhập">
+                  <div class="invalid-feedback"></div>
                 </div>
                 
                 <div class="form-group">
-                  <label for="password">Mật Khẩu</label>
-                  <input type="password" class="form-control" id="password" placeholder="Nhập mật khẩu" required autocomplete="current-password">
+                  <label for="password">Mật Khẩu <span class="text-danger">*</span></label>
+                  <input type="password" class="form-control" id="password" 
+                         placeholder="Nhập mật khẩu" 
+                         required 
+                         autocomplete="current-password"
+                         minlength="6"
+                         maxlength="100"
+                         data-label="Mật khẩu">
+                  <div class="invalid-feedback"></div>
                 </div>
                 
                 <div class="form-group form-check">
@@ -385,6 +399,10 @@
     <script src="js/bootstrap-datepicker.js"></script>
     <script src="js/scrollax.min.js"></script>
     <script src="js/main.js"></script>
+    
+    <!-- Toast Notification and Validation -->
+    <script src="/js/toast-notification.js"></script>
+    <script src="/js/form-validation.js"></script>
     
     <!-- Navbar Authentication Handler (chỉ để update navbar) -->
     <script>
@@ -610,8 +628,14 @@
             console.log('✅ Token saved. Verify:', localStorage.getItem('token') ? 'SUCCESS' : 'FAILED');
             
             // Show success
-            successMessage.textContent = 'Đăng nhập thành công! Đang chuyển hướng...';
+            const successMsg = 'Đăng nhập thành công! Đang chuyển hướng...';
+            successMessage.textContent = successMsg;
             successMessage.classList.remove('d-none');
+            
+            // Show toast if available
+            if (window.showToast) {
+              showToast('Đăng nhập thành công!', 'success');
+            }
             
             // Dispatch event for navbar
             window.dispatchEvent(new CustomEvent('userLoggedIn', { detail: result.user }));
@@ -641,8 +665,14 @@
           }
         } catch (error) {
           console.error('❌ Login error:', error);
-          errorMessage.textContent = error.message || 'Email/mật khẩu không đúng';
+          const errorMsg = error.message || 'Email/mật khẩu không đúng';
+          errorMessage.textContent = errorMsg;
           errorMessage.classList.remove('d-none');
+          
+          // Show toast if available
+          if (window.showToast) {
+            showToast(errorMsg, 'error');
+          }
           
           // Reset loading
           btnText.classList.remove('d-none');
@@ -750,7 +780,11 @@
           }
           
           console.log('✅ All cache cleared!');
-          alert('✅ Đã xóa tất cả cache!\n\nTrang sẽ reload sau 1 giây...');
+          if (window.showToast) {
+            showToast('Đã xóa tất cả cache! Trang sẽ reload sau 1 giây...', 'success', 2000);
+          } else {
+            alert('✅ Đã xóa tất cả cache!\n\nTrang sẽ reload sau 1 giây...');
+          }
           
           // Force reload from server (not from cache)
           setTimeout(() => {
@@ -759,7 +793,11 @@
           
         } catch (error) {
           console.error('❌ Error clearing cache:', error);
-          alert('❌ Có lỗi khi xóa cache: ' + error.message);
+          if (window.showToast) {
+            showToast('Có lỗi khi xóa cache: ' + error.message, 'error');
+          } else {
+            alert('❌ Có lỗi khi xóa cache: ' + error.message);
+          }
         }
       };
       
