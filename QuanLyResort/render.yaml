@@ -36,4 +36,11 @@ services:
         value: false
       - key: BankWebhook__PayOs__WebhookUrl
         value: https://quanlyresort-api.onrender.com/api/simplepayment/webhook
+      # AI Chat Settings
+      - key: AIChat__ApiKey
+        value: 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
+      - key: AIChat__ApiUrl
+        value: https://api.openai.com/v1/chat/completions
+      - key: AIChat__Model
+        value: gpt-3.5-turbo
 
