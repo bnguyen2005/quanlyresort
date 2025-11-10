@@ -24,9 +24,7 @@ RUN dotnet publish "QuanLyResort.csproj" \
     -c Release \
     -o /app/publish \
     --no-restore \
-    --verbosity minimal \
-    --runtime linux-x64 \
-    --self-contained false
+    --verbosity minimal
 
 FROM base AS final
 WORKDIR /app
