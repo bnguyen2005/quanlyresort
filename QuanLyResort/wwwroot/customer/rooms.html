@@ -2026,11 +2026,6 @@
       console.warn('⚠️ Could not load saved coupon:', e);
     }
   });
-
-  // Helper functions for coupons - must be defined before loadActiveCoupons uses them
-  function renderCoupons(coupons) {
-    console.log('🎨 [renderCoupons] Starting to render:', coupons);
-    const container = document.getElementById('promotionCards');
     if (!container) {
       console.error('❌ [renderCoupons] Container not found!');
       return;
