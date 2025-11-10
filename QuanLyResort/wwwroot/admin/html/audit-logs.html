@@ -341,7 +341,7 @@
         // Load common menu with cache busting
         (function() {
             const menuVersion = Date.now();
-            fetch('/admin/html/layout-menu.html?v=' + menuVersion)
+            fetch('layout-menu.html?v=' + menuVersion)
                 .then(response => response.text())
                 .then(html => {
                     document.getElementById('layout-menu').innerHTML = html;
