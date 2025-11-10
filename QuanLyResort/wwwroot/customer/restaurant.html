@@ -1935,6 +1935,51 @@
       
       console.log('[renderMenuItems] ✅ Rendered', items.length, 'items. HTML length:', html.length);
       
+      // Attach event listeners using event delegation for better reliability
+      container.addEventListener('click', function(e) {
+        const target = e.target;
+        
+        // Handle quantity buttons
+        if (target.classList.contains('btn-qty-plus') || target.classList.contains('btn-qty-minus')) {
+          e.preventDefault();
+          e.stopPropagation();
+          const serviceId = parseInt(target.getAttribute('data-service-id'));
+          const delta = parseInt(target.getAttribute('data-delta')) || (target.classList.contains('btn-qty-plus') ? 1 : -1);
+          
+          if (serviceId && !isNaN(serviceId)) {
+            console.log('[renderMenuItems] Quantity button clicked:', { serviceId, delta });
+            if (typeof window.adjustQuantity === 'function') {
+              window.adjustQuantity(serviceId, delta);
+            } else {
+              console.error('[renderMenuItems] adjustQuantity function not found');
+            }
+          }
+        }
+        
+        // Handle add to cart button
+        if (target.classList.contains('btn-add-to-cart')) {
+          e.preventDefault();
+          e.stopPropagation();
+          const serviceId = parseInt(target.getAttribute('data-service-id'));
+          const serviceName = target.getAttribute('data-service-name') || '';
+          const price = parseInt(target.getAttribute('data-price')) || 0;
+          
+          if (serviceId && !isNaN(serviceId)) {
+            console.log('[renderMenuItems] Add to cart clicked:', { serviceId, serviceName, price });
+            if (typeof window.addToCart === 'function') {
+              window.addToCart(serviceId, serviceName, price);
+            } else {
+              console.error('[renderMenuItems] addToCart function not found');
+              if (window.showToast) {
+                showToast('Lỗi: Chức năng chưa sẵn sàng. Vui lòng tải lại trang.', 'error');
+              } else {
+                alert('Lỗi: Chức năng chưa sẵn sàng. Vui lòng tải lại trang.');
+              }
+            }
+          }
+        }
+      });
+      
       // Force display and grid layout
       container.style.display = 'flex';
       container.style.flexWrap = 'wrap';
