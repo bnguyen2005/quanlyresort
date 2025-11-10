@@ -971,6 +971,18 @@
               <option value="5000000-999999999">Trên 5 triệu</option>
             </select>
           </div>
+          <div class="filter-group" style="border-top: 2px solid #e5e7eb; padding-top: 16px; margin-top: 8px;">
+            <label for="couponCodeInput">🎟️ Mã giảm giá</label>
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="couponCodeInput" class="form-control" placeholder="Nhập mã (VD: SUMMER2024)" style="flex: 1; text-transform: uppercase;" />
+              <button type="button" id="applyCouponBtn" class="btn btn-sm" style="background: linear-gradient(135deg, #c8a97e 0%, #b89968 100%); color: #fff; border: none; padding: 12px 16px; border-radius: 8px; white-space: nowrap; font-weight: 600; cursor: pointer;">Áp dụng</button>
+            </div>
+            <div id="couponMessage" class="small mt-2" style="min-height: 20px; color: #6b7280;"></div>
+            <div id="couponAppliedBadge" style="display: none; margin-top: 8px; padding: 8px 12px; background: #f0fdf4; border: 1px solid #86efac; border-radius: 8px; font-size: 13px;">
+              🎟️ Mã đã áp dụng: <strong id="appliedCouponCode">-</strong>
+              <button type="button" onclick="clearAppliedCoupon()" style="float: right; background: none; border: none; color: #ef4444; cursor: pointer; font-size: 12px;">✕ Xóa</button>
+            </div>
+          </div>
           <div class="filter-actions">
             <button id="btnSearch" class="btn-filter btn-filter-primary">
               <i class="icon-search"></i> Tìm phòng
@@ -1645,11 +1657,186 @@
         button.textContent = originalText;
         button.style.background = '';
       }, 2000);
+      // Auto-fill coupon input if exists
+      const couponInput = document.getElementById('couponCodeInput');
+      if (couponInput) {
+        couponInput.value = code;
+      }
     }).catch(function(err) {
       console.error('Failed to copy code:', err);
       alert('Không thể sao chép mã. Vui lòng sao chép thủ công: ' + code);
     });
   }
+
+  // Clear applied coupon
+  window.clearAppliedCoupon = function() {
+    try {
+      localStorage.removeItem('appliedCoupon');
+      const couponInput = document.getElementById('couponCodeInput');
+      const couponMsg = document.getElementById('couponMessage');
+      const badge = document.getElementById('couponAppliedBadge');
+      if (couponInput) couponInput.value = '';
+      if (couponMsg) {
+        couponMsg.textContent = '';
+        couponMsg.style.color = '#6b7280';
+      }
+      if (badge) badge.style.display = 'none';
+      console.log('✅ [clearAppliedCoupon] Coupon cleared');
+    } catch (e) {
+      console.error('❌ [clearAppliedCoupon] Error:', e);
+    }
+  }
+
+  // Apply coupon from sidebar input
+  async function applyCouponFromInput() {
+    const couponInput = document.getElementById('couponCodeInput');
+    const applyBtn = document.getElementById('applyCouponBtn');
+    const couponMsg = document.getElementById('couponMessage');
+    const badge = document.getElementById('couponAppliedBadge');
+    const codeDisplay = document.getElementById('appliedCouponCode');
+    
+    if (!couponInput || !applyBtn) return;
+    
+    let code = (couponInput.value || '').trim().toUpperCase().replace(/\s+/g, '');
+    if (!code) {
+      if (couponMsg) {
+        couponMsg.textContent = 'Vui lòng nhập mã giảm giá';
+        couponMsg.style.color = '#ef4444';
+      }
+      return;
+    }
+    
+    // Validate format
+    if (code.length < 3 || code.length > 50) {
+      if (couponMsg) {
+        couponMsg.textContent = 'Mã giảm giá phải có từ 3 đến 50 ký tự';
+        couponMsg.style.color = '#ef4444';
+      }
+      return;
+    }
+    
+    applyBtn.disabled = true;
+    applyBtn.textContent = 'Đang kiểm tra...';
+    if (couponMsg) {
+      couponMsg.textContent = 'Đang kiểm tra mã...';
+      couponMsg.style.color = '#6b7280';
+    }
+    
+    try {
+      const url = `${location.origin}/api/coupons/validate?code=${encodeURIComponent(code)}&_=${Date.now()}`;
+      const response = await fetch(url, { cache: 'no-store' });
+      
+      if (!response.ok) {
+        let message = 'Mã giảm giá không hợp lệ';
+        try {
+          const errorData = await response.json();
+          message = errorData.message || message;
+        } catch (_) {}
+        throw new Error(message);
+      }
+      
+      const couponData = await response.json();
+      
+      // Save to localStorage
+      const couponToSave = {
+        code: couponData.code || code,
+        type: couponData.type,
+        value: couponData.value,
+        maxDiscount: couponData.maxDiscount,
+        description: couponData.description,
+        validated: true,
+        appliedAt: new Date().toISOString()
+      };
+      
+      try {
+        localStorage.setItem('appliedCoupon', JSON.stringify(couponToSave));
+      } catch (e) {
+        console.warn('⚠️ [applyCouponFromInput] Could not save to localStorage:', e);
+      }
+      
+      // Show success message
+      if (couponMsg) {
+        const discountText = couponData.type === 'percent' 
+          ? `${couponData.value}%` 
+          : `${vnd(couponData.value)}`;
+        couponMsg.textContent = `✅ Mã "${code}" đã được áp dụng thành công (Giảm ${discountText})`;
+        couponMsg.style.color = '#10b981';
+      }
+      
+      // Show badge
+      if (badge) {
+        if (codeDisplay) codeDisplay.textContent = code;
+        badge.style.display = 'block';
+      }
+      
+      console.log('✅ [applyCouponFromInput] Coupon applied:', couponToSave);
+      
+    } catch (error) {
+      console.error('❌ [applyCouponFromInput] Error:', error);
+      if (couponMsg) {
+        couponMsg.textContent = error.message || 'Mã giảm giá không hợp lệ';
+        couponMsg.style.color = '#ef4444';
+      }
+      if (badge) badge.style.display = 'none';
+    } finally {
+      applyBtn.disabled = false;
+      applyBtn.textContent = 'Áp dụng';
+    }
+  }
+
+  // Initialize coupon functionality
+  document.addEventListener('DOMContentLoaded', function() {
+    // Load coupons.js if not already loaded
+    if (!window.coupons) {
+      const script = document.createElement('script');
+      script.src = 'js/coupons.js';
+      document.head.appendChild(script);
+    }
+    
+    // Setup apply button
+    const applyBtn = document.getElementById('applyCouponBtn');
+    const couponInput = document.getElementById('couponCodeInput');
+    
+    if (applyBtn) {
+      applyBtn.addEventListener('click', applyCouponFromInput);
+    }
+    
+    if (couponInput) {
+      // Auto uppercase on input
+      couponInput.addEventListener('input', function(e) {
+        e.target.value = e.target.value.toUpperCase().replace(/\s+/g, '');
+      });
+      
+      // Apply on Enter key
+      couponInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          applyCouponFromInput();
+        }
+      });
+    }
+    
+    // Check if there's already an applied coupon
+    try {
+      const saved = localStorage.getItem('appliedCoupon');
+      if (saved) {
+        const coupon = JSON.parse(saved);
+        if (coupon && coupon.code) {
+          const badge = document.getElementById('couponAppliedBadge');
+          const codeDisplay = document.getElementById('appliedCouponCode');
+          if (badge && codeDisplay) {
+            codeDisplay.textContent = coupon.code;
+            badge.style.display = 'block';
+          }
+          if (couponInput) {
+            couponInput.value = coupon.code;
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('⚠️ Could not load saved coupon:', e);
+    }
+  });
 
   // Load active coupons from API - make it global
   window.loadActiveCoupons = async function() {
