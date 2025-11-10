@@ -97,9 +97,20 @@ async function loadCoupons() {
     }
 
     const coupons = await response.json();
-    console.log('🔵 [loadCoupons] Coupons loaded:', coupons.length || 0, coupons);
+    console.log('🔵 [loadCoupons] Coupons response:', coupons);
     
-    renderCouponsTable(Array.isArray(coupons) ? coupons : []);
+    // Handle different response formats
+    let couponsArray = [];
+    if (Array.isArray(coupons)) {
+      couponsArray = coupons;
+    } else if (coupons && Array.isArray(coupons.items)) {
+      couponsArray = coupons.items;
+    } else if (coupons && Array.isArray(coupons.data)) {
+      couponsArray = coupons.data;
+    }
+    
+    console.log('🔵 [loadCoupons] Coupons array:', couponsArray.length || 0);
+    renderCouponsTable(couponsArray);
     
   } catch (error) {
     console.error('❌ [loadCoupons] Error:', error);

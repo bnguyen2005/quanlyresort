@@ -488,8 +488,17 @@
                 if (!response.ok) throw new Error('Failed to load audit logs');
 
                 const data = await response.json();
-                console.log('✅ Loaded audit logs:', data.logs.length);
-                console.log('🔍 First 3 logs:', data.logs.slice(0, 3));
+                console.log('✅ Loaded audit logs response:', data);
+                
+                // Handle different response formats
+                const logs = data.logs || data || [];
+                if (!Array.isArray(logs)) {
+                    console.error('❌ Invalid response format - logs is not an array:', logs);
+                    throw new Error('Invalid response format from API');
+                }
+                
+                console.log('✅ Loaded audit logs:', logs.length);
+                console.log('🔍 First 3 logs:', logs.slice(0, 3));
 
                 if (dataTable) {
                     console.log('🗑️ Destroying existing DataTable');
@@ -498,7 +507,12 @@
 
                 const tbody = document.querySelector('#auditLogsTable tbody');
                 console.log('📋 Table tbody found:', !!tbody);
-                tbody.innerHTML = data.logs.map(log => {
+                if (!tbody) {
+                    console.error('❌ Table tbody not found!');
+                    throw new Error('Table tbody element not found');
+                }
+                
+                tbody.innerHTML = logs.map(log => {
                     const timestamp = new Date(log.timestamp).toLocaleString('vi-VN');
                     const actionBadge = getActionBadge(log.action);
                     
