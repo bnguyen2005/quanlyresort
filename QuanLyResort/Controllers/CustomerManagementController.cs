@@ -78,6 +78,107 @@ public class CustomerManagementController : ControllerBase
     }
 
     /// <summary>
+    /// Lấy thông tin khách hàng của chính mình (từ JWT token)
+    /// </summary>
+    [HttpGet("my")]
+    [Authorize(Roles = "Customer")]
+    public async Task<IActionResult> GetMyCustomer()
+    {
+        try
+        {
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            var userCustomerId = User.FindFirst("CustomerId")?.Value;
+            
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                return Unauthorized(new { message = "Không tìm thấy thông tin người dùng" });
+            }
+
+            Customer? customer = null;
+
+            // Thử lấy CustomerId từ token trước
+            if (!string.IsNullOrEmpty(userCustomerId) && int.TryParse(userCustomerId, out int customerId))
+            {
+                customer = await _context.Customers.AsNoTracking()
+                    .FirstOrDefaultAsync(x => x.CustomerId == customerId);
+            }
+
+            // Nếu không tìm thấy qua CustomerId, thử tìm qua email
+            if (customer == null)
+            {
+                customer = await _context.Customers.AsNoTracking()
+                    .FirstOrDefaultAsync(x => x.Email != null && x.Email.ToLower() == userEmail.ToLower());
+            }
+
+            // Nếu vẫn không tìm thấy, thử tìm User và lấy CustomerId từ đó
+            if (customer == null)
+            {
+                var user = await _context.Users
+                    .FirstOrDefaultAsync(u => u.Email != null && u.Email.ToLower() == userEmail.ToLower());
+                
+                if (user == null)
+                {
+                    // Thử tìm với username
+                    user = await _context.Users
+                        .FirstOrDefaultAsync(u => u.Username != null && u.Username.ToLower() == userEmail.ToLower());
+                }
+
+                if (user != null && user.CustomerId.HasValue)
+                {
+                    customer = await _context.Customers.AsNoTracking()
+                        .FirstOrDefaultAsync(x => x.CustomerId == user.CustomerId.Value);
+                }
+            }
+
+            if (customer == null)
+            {
+                return NotFound(new { message = "Không tìm thấy thông tin khách hàng" });
+            }
+
+            var bookings = await _context.Bookings.AsNoTracking()
+                .Where(b => b.CustomerId == customer.CustomerId)
+                .OrderByDescending(b => b.CreatedAt)
+                .Select(b => new
+                {
+                    b.BookingId,
+                    b.BookingCode,
+                    BookingDate = b.CreatedAt,
+                    b.CheckInDate,
+                    b.CheckOutDate,
+                    b.Status,
+                    TotalAmount = b.EstimatedTotalAmount,
+                    RoomNumber = b.Room != null ? b.Room.RoomNumber : null
+                })
+                .Take(10)
+                .ToListAsync();
+
+            return Ok(new
+            {
+                customer.CustomerId,
+                customer.FullName,
+                customer.Email,
+                customer.PhoneNumber,
+                customer.PassportNumber,
+                customer.IdCardNumber,
+                customer.Nationality,
+                customer.CustomerType,
+                customer.Address,
+                customer.DateOfBirth,
+                customer.TotalSpent,
+                customer.LoyaltyPoints,
+                customer.Notes,
+                customer.CreatedAt,
+                customer.UpdatedAt,
+                Bookings = bookings
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Failed to load customer", error = ex.Message });
+        }
+    }
+
+    /// <summary>
     /// Lấy thông tin khách hàng theo ID
     /// Customer có thể xem thông tin của chính họ
     /// </summary>

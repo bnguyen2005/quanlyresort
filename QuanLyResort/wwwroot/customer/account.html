@@ -508,23 +508,47 @@
 
         showPageLoading('Đang tải thông tin...');
         
-        // Lấy thông tin customer từ API
-        const API_CUSTOMERS = location.origin + '/api/customermanagement/' + customerId + '?_=' + Date.now();
-        const resp = await fetch(API_CUSTOMERS, {
+        // Ưu tiên dùng endpoint /my để lấy thông tin từ JWT token
+        // Fallback về endpoint /{id} nếu cần
+        let API_CUSTOMERS = location.origin + '/api/customermanagement/my?_=' + Date.now();
+        let resp = await fetch(API_CUSTOMERS, {
           cache: 'no-store',
           headers: {
             'Authorization': `Bearer ${token}`
           }
         });
 
+        // Nếu endpoint /my không hoạt động (403 hoặc 404), thử endpoint /{id}
+        if (!resp.ok && customerId) {
+          console.log('⚠️ [loadProfile] /my endpoint failed, trying /{id} endpoint');
+          API_CUSTOMERS = location.origin + '/api/customermanagement/' + customerId + '?_=' + Date.now();
+          resp = await fetch(API_CUSTOMERS, {
+            cache: 'no-store',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+        }
+
         if (!resp.ok) {
           const errorText = await resp.text();
           console.error('API Error:', resp.status, errorText);
-          throw new Error('Không thể tải thông tin');
+          let errorMsg = 'Không thể tải thông tin';
+          try {
+            const errorData = JSON.parse(errorText);
+            errorMsg = errorData.message || errorMsg;
+          } catch(e) {
+            // Keep default errorMsg
+          }
+          throw new Error(errorMsg);
         }
 
         const customer = await resp.json();
         originalData = {...customer};
+        // Cập nhật customerId từ response nếu có
+        if (customer.customerId && !customerId) {
+          customerId = customer.customerId;
+        }
         renderProfile(customer);
         
       } catch(e) {
