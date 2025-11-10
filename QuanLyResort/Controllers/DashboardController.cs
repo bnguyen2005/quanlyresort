@@ -77,17 +77,21 @@ namespace QuanLyResort.Controllers
 
                 var occupancyRate = totalRooms > 0 ? (double)occupiedRooms / totalRooms * 100 : 0;
 
-                // This month vs last month
-                // SQLite không hỗ trợ SumAsync trên decimal trực tiếp -> chuyển sang client-side aggregation
+                // This month vs last month revenue - tính từ PaidDate
                 var thisMonthInvoicesList = await _context.Invoices
-                    .Where(i => i.IssueDate >= thisMonth && i.Status == "Paid")
-                    .Select(i => i.TotalAmount)
+                    .Where(i => i.PaidDate.HasValue && 
+                               i.PaidDate.Value >= thisMonth && 
+                               i.Status == "Paid")
+                    .Select(i => i.PaidAmount > 0 ? i.PaidAmount : i.TotalAmount)
                     .ToListAsync();
                 var thisMonthRevenue = thisMonthInvoicesList.Sum(i => (decimal?)i) ?? 0;
 
                 var lastMonthInvoicesList = await _context.Invoices
-                    .Where(i => i.IssueDate >= lastMonth && i.IssueDate < thisMonth && i.Status == "Paid")
-                    .Select(i => i.TotalAmount)
+                    .Where(i => i.PaidDate.HasValue && 
+                               i.PaidDate.Value >= lastMonth && 
+                               i.PaidDate.Value < thisMonth && 
+                               i.Status == "Paid")
+                    .Select(i => i.PaidAmount > 0 ? i.PaidAmount : i.TotalAmount)
                     .ToListAsync();
                 var lastMonthRevenue = lastMonthInvoicesList.Sum(i => (decimal?)i) ?? 0;
 
@@ -149,17 +153,29 @@ namespace QuanLyResort.Controllers
             {
                 var startDate = DateTime.Today.AddDays(-days);
                 
+                // Tính từ PaidDate (ngày thực tế thanh toán)
                 var dailyRevenue = await _context.Invoices
-                    .Where(i => i.IssueDate >= startDate && i.Status == "Paid")
-                    .GroupBy(i => i.IssueDate.Date)
+                    .Where(i => i.PaidDate.HasValue && 
+                               i.PaidDate.Value >= startDate && 
+                               i.Status == "Paid")
+                    .Select(i => new
+                    {
+                        date = i.PaidDate.Value.Date,
+                        amount = i.PaidAmount > 0 ? i.PaidAmount : i.TotalAmount
+                    })
+                    .ToListAsync();
+                
+                // Group by date manually (SQLite có thể không hỗ trợ GroupBy tốt)
+                var groupedRevenue = dailyRevenue
+                    .GroupBy(i => i.date)
                     .Select(g => new
                     {
                         date = g.Key,
-                        revenue = g.Sum(i => i.TotalAmount),
+                        revenue = g.Sum(i => (decimal?)i.amount) ?? 0,
                         invoiceCount = g.Count()
                     })
                     .OrderBy(x => x.date)
-                    .ToListAsync();
+                    .ToList();
 
                 // Fill missing dates with zero revenue
                 var result = new List<object>();
@@ -226,23 +242,20 @@ namespace QuanLyResort.Controllers
         {
             try
             {
-                var thisMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
-
-                var topCustomers = await _context.Invoices
-                    .Include(i => i.Customer)
-                    .Where(i => i.IssueDate >= thisMonth && i.Status == "Paid")
-                    .GroupBy(i => new { i.CustomerId, i.Customer.FullName, i.Customer.Email })
-                    .Select(g => new
-                    {
-                        customerId = g.Key.CustomerId,
-                        customerName = g.Key.FullName,
-                        email = g.Key.Email,
-                        totalSpent = g.Sum(i => i.TotalAmount),
-                        bookingCount = g.Count(),
-                        averageSpent = g.Average(i => i.TotalAmount)
-                    })
-                    .OrderByDescending(x => x.totalSpent)
+                // Lấy top customers từ Customer table (TotalSpent đã được cập nhật)
+                var topCustomers = await _context.Customers
+                    .Where(c => c.TotalSpent > 0)
+                    .OrderByDescending(c => c.TotalSpent)
                     .Take(limit)
+                    .Select(c => new
+                    {
+                        customerId = c.CustomerId,
+                        customerName = c.FullName,
+                        email = c.Email,
+                        totalSpent = c.TotalSpent,
+                        bookingCount = _context.Bookings.Count(b => b.CustomerId == c.CustomerId && b.Status != "Cancelled"),
+                        loyaltyPoints = c.LoyaltyPoints
+                    })
                     .ToListAsync();
 
                 return Ok(topCustomers);
