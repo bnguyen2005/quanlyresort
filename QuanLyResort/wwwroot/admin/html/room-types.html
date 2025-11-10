@@ -419,10 +419,16 @@
         console.log('🔵 Response status:', response.status);
 
         if (!response.ok) {
-          throw new Error('Failed to load room types');
+          const errorText = await response.text().catch(() => '');
+          console.error('❌ Failed to load room types:', response.status, errorText);
+          throw new Error(`Failed to load room types: ${response.status} ${errorText}`);
         }
 
         const roomTypes = await response.json();
+        if (!Array.isArray(roomTypes)) {
+            console.error('❌ Invalid response format - roomTypes is not an array:', roomTypes);
+            throw new Error('Invalid response format from API');
+        }
         console.log('✅ Room types loaded:', roomTypes.length);
         
         if (dataTable) {
