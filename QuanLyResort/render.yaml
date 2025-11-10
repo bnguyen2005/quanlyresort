@@ -36,11 +36,13 @@ services:
         value: false
       - key: BankWebhook__PayOs__WebhookUrl
         value: https://quanlyresort-api.onrender.com/api/simplepayment/webhook
-      # AI Chat Settings
+      # AI Chat Settings - Groq (Free Tier)
+      - key: AIChat__Provider
+        value: groq
       - key: AIChat__ApiKey
-        value: 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
+        value: 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
       - key: AIChat__ApiUrl
-        value: https://api.openai.com/v1/chat/completions
+        value: https://api.groq.com/openai/v1/chat/completions
       - key: AIChat__Model
-        value: gpt-3.5-turbo
+        value: llama-3.1-8b-instant
 
