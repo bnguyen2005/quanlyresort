@@ -332,7 +332,7 @@ public class CustomerManagementController : ControllerBase
     /// Cập nhật thông tin khách hàng
     /// Customer có thể cập nhật thông tin của chính họ
     /// </summary>
-    [HttpPut("{id}")]
+    [HttpPut("{id:int}")]
     [Authorize(Roles = "Admin,Manager,FrontDesk,Business,Customer")]
     public async Task<IActionResult> UpdateCustomer(int id, [FromBody] UpdateCustomerRequest request)
     {
@@ -444,7 +444,7 @@ public class CustomerManagementController : ControllerBase
     /// <summary>
     /// Thêm loyalty points
     /// </summary>
-    [HttpPost("{id}/add-points")]
+    [HttpPost("{id:int}/add-points")]
     public async Task<IActionResult> AddLoyaltyPoints(int id, [FromBody] AddPointsRequest request)
     {
         var customer = await _context.Customers.FindAsync(id);
@@ -478,7 +478,7 @@ public class CustomerManagementController : ControllerBase
     /// <summary>
     /// Xóa khách hàng
     /// </summary>
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:int}")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> DeleteCustomer(int id)
     {
