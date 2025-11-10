@@ -29,6 +29,16 @@ public class AIChatService
         _logger = logger;
         _httpClient = httpClient;
 
+        // Clear any existing BaseAddress để tránh conflict với absolute URLs
+        if (_httpClient.BaseAddress != null)
+        {
+            _logger.LogWarning("[AI Chat] ⚠️ HttpClient has BaseAddress: {BaseAddress}, clearing it", _httpClient.BaseAddress);
+            _httpClient.BaseAddress = null;
+        }
+        
+        // Clear default headers để tránh conflict
+        _httpClient.DefaultRequestHeaders.Clear();
+
         var aiConfig = _configuration.GetSection("AIChat");
         _apiKey = aiConfig["ApiKey"];
         _provider = aiConfig["Provider"] ?? "sample"; // Default to sample if no provider specified
@@ -80,6 +90,9 @@ public class AIChatService
         
         // Set timeout
         _httpClient.Timeout = TimeSpan.FromSeconds(30);
+        
+        // Log final HttpClient state
+        _logger.LogInformation("[AI Chat] 📋 HttpClient BaseAddress: {BaseAddress}", _httpClient.BaseAddress?.ToString() ?? "null");
 
         _logger.LogInformation("[AI Chat] ✅ Service initialized - Provider: {Provider}, Model: {Model}, API URL: {ApiUrl}", _provider, _model, _apiUrl);
     }
