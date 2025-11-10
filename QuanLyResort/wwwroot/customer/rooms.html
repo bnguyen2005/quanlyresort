@@ -1601,6 +1601,78 @@
       }
     });
 
+    // Load active coupons from API - define BEFORE initialization
+    window.loadActiveCoupons = async function() {
+      console.log('🔄 [loadActiveCoupons] Starting to load coupons...');
+      const loadingEl = document.getElementById('loadingCoupons');
+      const noCouponsEl = document.getElementById('noCouponsMessage');
+      const cardsContainer = document.getElementById('promotionCards');
+      
+      try {
+        const url = `${location.origin}/api/coupons/active?_=${Date.now()}`;
+        console.log('🔄 [loadActiveCoupons] Fetching from:', url);
+        
+        const response = await fetch(url, {
+          cache: 'no-store',
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+        
+        console.log('🔄 [loadActiveCoupons] Response status:', response.status, response.statusText);
+        
+        if (!response.ok) {
+          const errorText = await response.text().catch(() => '');
+          console.error('❌ [loadActiveCoupons] HTTP Error:', response.status, errorText);
+          throw new Error(`HTTP ${response.status}: ${errorText || response.statusText}`);
+        }
+        
+        const coupons = await response.json();
+        console.log('✅ [loadActiveCoupons] Received coupons:', coupons);
+        console.log('📊 [loadActiveCoupons] Coupons count:', coupons ? coupons.length : 0);
+        
+        // Hide loading
+        if (loadingEl) loadingEl.style.display = 'none';
+        
+        if (!coupons || !Array.isArray(coupons) || coupons.length === 0) {
+          console.log('ℹ️ [loadActiveCoupons] No coupons found');
+          if (noCouponsEl) {
+            noCouponsEl.innerHTML = `
+              <div style="text-align: center; padding: 40px; color: #6b7280;">
+                <span style="font-size: 48px; opacity: 0.5; display: block; margin-bottom: 12px;">🎟️</span>
+                <p style="font-size: 16px; font-weight: 500; margin-bottom: 8px;">Hiện tại chưa có mã giảm giá nào</p>
+                <p style="font-size: 14px; opacity: 0.7;">Vui lòng quay lại sau để xem các ưu đãi mới nhất.</p>
+              </div>
+            `;
+            noCouponsEl.style.display = 'block';
+          }
+          return;
+        }
+        
+        // Hide no coupons message
+        if (noCouponsEl) noCouponsEl.style.display = 'none';
+        
+        // Render coupons
+        console.log('🎨 [loadActiveCoupons] Rendering coupons...');
+        renderCoupons(coupons);
+        
+      } catch (error) {
+        console.error('❌ [loadActiveCoupons] Error:', error);
+        if (loadingEl) loadingEl.style.display = 'none';
+        if (noCouponsEl) {
+          noCouponsEl.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: #6b7280;">
+              <span style="font-size: 48px; opacity: 0.5; display: block; margin-bottom: 12px;">⚠️</span>
+              <p style="font-size: 16px; font-weight: 500; margin-bottom: 8px;">Không thể tải mã giảm giá</p>
+              <p style="font-size: 14px; opacity: 0.7;">${error.message || 'Vui lòng thử lại sau.'}</p>
+              <button onclick="loadActiveCoupons()" class="btn btn-sm btn-primary mt-3" style="padding: 8px 16px; border-radius: 4px; border: none; cursor: pointer;">Thử lại</button>
+            </div>
+          `;
+          noCouponsEl.style.display = 'block';
+        }
+      }
+    };
+
     // Initialize
     (function() {
       // Clear old data on page load
@@ -1614,18 +1686,12 @@
       loadRoomTypes();
       loadRooms();
       
-      // Load coupons from API - ensure function exists
+      // Load coupons from API
       if (typeof loadActiveCoupons === 'function') {
         console.log('🔄 [Init] Calling loadActiveCoupons...');
         loadActiveCoupons();
       } else {
         console.error('❌ [Init] loadActiveCoupons function not found!');
-        // Try to load after a delay
-        setTimeout(() => {
-          if (typeof loadActiveCoupons === 'function') {
-            loadActiveCoupons();
-          }
-        }, 1000);
       }
       
       // Auto-refresh every 60 seconds
@@ -1839,79 +1905,7 @@
     }
   });
 
-  // Load active coupons from API - make it global
-  window.loadActiveCoupons = async function() {
-    console.log('🔄 [loadActiveCoupons] Starting to load coupons...');
-    const loadingEl = document.getElementById('loadingCoupons');
-    const noCouponsEl = document.getElementById('noCouponsMessage');
-    const cardsContainer = document.getElementById('promotionCards');
-    
-    try {
-      const url = `${location.origin}/api/coupons/active?_=${Date.now()}`;
-      console.log('🔄 [loadActiveCoupons] Fetching from:', url);
-      
-      const response = await fetch(url, {
-        cache: 'no-store',
-        headers: {
-          'Accept': 'application/json'
-        }
-      });
-      
-      console.log('🔄 [loadActiveCoupons] Response status:', response.status, response.statusText);
-      
-      if (!response.ok) {
-        const errorText = await response.text().catch(() => '');
-        console.error('❌ [loadActiveCoupons] HTTP Error:', response.status, errorText);
-        throw new Error(`HTTP ${response.status}: ${errorText || response.statusText}`);
-      }
-      
-      const coupons = await response.json();
-      console.log('✅ [loadActiveCoupons] Received coupons:', coupons);
-      console.log('📊 [loadActiveCoupons] Coupons count:', coupons ? coupons.length : 0);
-      
-      // Hide loading
-      if (loadingEl) loadingEl.style.display = 'none';
-      
-      if (!coupons || !Array.isArray(coupons) || coupons.length === 0) {
-        console.log('ℹ️ [loadActiveCoupons] No coupons found');
-        // Show no coupons message
-        if (noCouponsEl) {
-          noCouponsEl.innerHTML = `
-            <div style="text-align: center; padding: 40px; color: #6b7280;">
-              <span style="font-size: 48px; opacity: 0.5; display: block; margin-bottom: 12px;">🎟️</span>
-              <p style="font-size: 16px; font-weight: 500; margin-bottom: 8px;">Hiện chưa có mã giảm giá nào</p>
-              <p style="font-size: 14px; opacity: 0.7;">Vui lòng quay lại sau để xem các ưu đãi mới nhất!</p>
-            </div>
-          `;
-          noCouponsEl.style.display = 'block';
-        }
-        return;
-      }
-      
-      // Hide no coupons message
-      if (noCouponsEl) noCouponsEl.style.display = 'none';
-      
-      // Render coupons
-      console.log('🎨 [loadActiveCoupons] Rendering coupons...');
-      renderCoupons(coupons);
-      
-    } catch (error) {
-      console.error('❌ [loadActiveCoupons] Error:', error);
-      if (loadingEl) loadingEl.style.display = 'none';
-      if (noCouponsEl) {
-        noCouponsEl.innerHTML = `
-          <div style="text-align: center; padding: 40px; color: #6b7280;">
-            <span style="font-size: 48px; opacity: 0.5; display: block; margin-bottom: 12px;">⚠️</span>
-            <p style="font-size: 16px; font-weight: 500; margin-bottom: 8px;">Không thể tải mã giảm giá</p>
-            <p style="font-size: 14px; opacity: 0.7;">${error.message || 'Vui lòng thử lại sau.'}</p>
-            <button onclick="loadActiveCoupons()" class="btn btn-sm btn-primary mt-3" style="padding: 8px 16px; border-radius: 4px; border: none; cursor: pointer;">Thử lại</button>
-          </div>
-        `;
-        noCouponsEl.style.display = 'block';
-      }
-    }
-  }
-
+  // Helper functions for coupons - must be defined before loadActiveCoupons uses them
   function renderCoupons(coupons) {
     console.log('🎨 [renderCoupons] Starting to render:', coupons);
     const container = document.getElementById('promotionCards');
