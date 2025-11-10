@@ -982,17 +982,25 @@
       const container = document.getElementById('topCustomersContainer');
       container.innerHTML = '';
 
+      if (!customers || customers.length === 0) {
+        container.innerHTML = '<div class="text-center text-muted py-4">Chưa có dữ liệu khách hàng</div>';
+        return;
+      }
+
       customers.forEach((customer, index) => {
         const customerDiv = document.createElement('div');
         customerDiv.className = 'customer-item';
+        const customerName = customer.customerName || customer.fullName || 'Khách hàng';
+        const totalSpent = customer.totalSpent || 0;
+        const bookingCount = customer.bookingCount || 0;
         customerDiv.innerHTML = `
           <div>
-            <strong>#${index + 1} ${customer.customerName}</strong>
+            <strong>#${index + 1} ${customerName}</strong>
             <br>
-            <small class="text-muted">${customer.bookingCount} đặt phòng</small>
+            <small class="text-muted">${bookingCount} đặt phòng</small>
           </div>
           <div class="text-end">
-            <strong class="text-success">${(window.formatCurrency || formatCurrency)(customer.totalSpent)}</strong>
+            <strong class="text-success">${(window.formatCurrency || formatCurrency)(totalSpent)}</strong>
           </div>
         `;
         container.appendChild(customerDiv);

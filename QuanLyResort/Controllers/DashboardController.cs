@@ -25,25 +25,44 @@ namespace QuanLyResort.Controllers
             try
             {
                 var today = DateTime.Today;
+                var todayStart = today;
+                var todayEnd = today.AddDays(1);
                 var thisMonth = new DateTime(today.Year, today.Month, 1);
                 var lastMonth = thisMonth.AddMonths(-1);
 
-                // Today's stats
+                // Today's bookings - đặt phòng được tạo hôm nay (không phải check-in hôm nay)
                 var todayBookings = await _context.Bookings
-                    .Where(b => b.CheckInDate.Date == today && b.Status != "Cancelled")
+                    .Where(b => b.CreatedAt.Date == today && b.Status != "Cancelled")
                     .CountAsync();
 
-                // SQLite không hỗ trợ SumAsync trên decimal trực tiếp -> chuyển sang client-side aggregation
+                // Today's revenue - tính từ:
+                // 1. Invoices đã thanh toán hôm nay (PaidDate = today)
+                // 2. Bookings đã thanh toán hôm nay (PaymentStatus = Paid và UpdatedAt = today)
                 var todayInvoicesList = await _context.Invoices
-                    .Where(i => i.IssueDate.Date == today && i.Status == "Paid")
-                    .Select(i => i.TotalAmount)
+                    .Where(i => i.PaidDate.HasValue && 
+                               i.PaidDate.Value.Date == today && 
+                               i.Status == "Paid")
+                    .Select(i => i.PaidAmount > 0 ? i.PaidAmount : i.TotalAmount)
                     .ToListAsync();
-                var todayRevenue = todayInvoicesList.Sum(i => (decimal?)i) ?? 0;
+                
+                // Cũng tính từ Bookings đã thanh toán hôm nay (nếu có PaymentStatus)
+                var todayPaidBookingsList = await _context.Bookings
+                    .Where(b => b.UpdatedAt.Date == today && 
+                               (b.Status == "Confirmed" || b.Status == "CheckedIn") &&
+                               b.EstimatedTotalAmount > 0)
+                    .Select(b => b.EstimatedTotalAmount)
+                    .ToListAsync();
+                
+                var todayRevenue = (todayInvoicesList.Sum(i => (decimal?)i) ?? 0) + 
+                                  (todayPaidBookingsList.Sum(b => (decimal?)b) ?? 0);
 
+                // Today's check-ins - bookings có CheckInDate = today và đã check-in
                 var todayCheckIns = await _context.Bookings
-                    .Where(b => b.CheckInDate.Date == today && b.Status == "CheckedIn")
+                    .Where(b => b.CheckInDate.Date == today && 
+                               (b.Status == "CheckedIn" || b.Status == "Confirmed"))
                     .CountAsync();
 
+                // Today's check-outs
                 var todayCheckOuts = await _context.Bookings
                     .Where(b => b.CheckOutDate.Date == today && b.Status == "CheckedOut")
                     .CountAsync();
@@ -146,7 +165,7 @@ namespace QuanLyResort.Controllers
                 var result = new List<object>();
                 for (var date = startDate; date <= DateTime.Today; date = date.AddDays(1))
                 {
-                    var dayData = dailyRevenue.FirstOrDefault(d => d.date == date);
+                    var dayData = groupedRevenue.FirstOrDefault(d => d.date == date);
                     result.Add(new
                     {
                         date = date.ToString("yyyy-MM-dd"),
