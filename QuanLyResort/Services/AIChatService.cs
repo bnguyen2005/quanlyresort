@@ -36,9 +36,18 @@ public class AIChatService
         if (!string.IsNullOrEmpty(_apiKey))
         {
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
+            _httpClient.DefaultRequestHeaders.Add("User-Agent", "ResortDeluxe-AIChat/1.0");
+            _logger.LogInformation("[AI Chat] ✅ API Key configured (length: {Length})", _apiKey.Length);
         }
+        else
+        {
+            _logger.LogWarning("[AI Chat] ⚠️ No API Key configured - will use sample responses");
+        }
+        
+        // Set timeout
+        _httpClient.Timeout = TimeSpan.FromSeconds(30);
 
-        _logger.LogInformation("[AI Chat] ✅ Service initialized with Model: {Model}", _model);
+        _logger.LogInformation("[AI Chat] ✅ Service initialized - Model: {Model}, API URL: {ApiUrl}", _model, _apiUrl);
     }
 
     /// <summary>
