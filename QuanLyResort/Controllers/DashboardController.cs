@@ -282,9 +282,9 @@ namespace QuanLyResort.Controllers
                         a.EntityName,
                         a.EntityId,
                         a.Action,
-                        a.PerformedBy,
+                        performedBy = a.PerformedBy ?? "System",
                         a.Timestamp,
-                        description = GetActivityDescription(a.EntityName, a.Action, a.EntityId)
+                        description = GetActivityDescription(a.EntityName ?? "Unknown", a.Action ?? "Unknown", a.EntityId)
                     })
                     .ToListAsync();
 
@@ -344,11 +344,11 @@ namespace QuanLyResort.Controllers
                 var serviceRevenue = await _context.Charges
                     .Include(c => c.Service)
                     .Where(c => c.ChargeDate >= startDate && c.Service != null)
-                    .GroupBy(c => new { c.Service.ServiceId, c.Service.ServiceName })
+                    .GroupBy(c => new { c.Service!.ServiceId, c.Service.ServiceName })
                     .Select(g => new
                     {
                         serviceId = g.Key.ServiceId,
-                        serviceName = g.Key.ServiceName,
+                        serviceName = g.Key.ServiceName ?? "Unknown Service",
                         totalRevenue = g.Sum(c => c.Amount),
                         usageCount = g.Count(),
                         averageAmount = g.Average(c => c.Amount)
