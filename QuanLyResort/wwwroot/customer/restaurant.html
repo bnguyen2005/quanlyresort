@@ -2031,13 +2031,32 @@
       
       document.body.insertAdjacentHTML('beforeend', modalHTML);
       
-      // Show modal
+      // Show modal (Bootstrap 4 compatible)
       const modalEl = document.getElementById('quickViewModal');
-      if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-        const modal = new bootstrap.Modal(modalEl);
-        modal.show();
-        
-        // Update quantity on modal show
+      if (typeof jQuery !== 'undefined' && jQuery(modalEl).modal) {
+        jQuery(modalEl).modal('show');
+        updateQuickViewQty(serviceId);
+      } else if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        try {
+          const modal = new bootstrap.Modal(modalEl);
+          modal.show();
+          updateQuickViewQty(serviceId);
+        } catch (e) {
+          jQuery(modalEl).modal('show');
+          updateQuickViewQty(serviceId);
+        }
+      } else {
+        // Fallback: manual show
+        modalEl.classList.add('show');
+        modalEl.style.display = 'block';
+        modalEl.setAttribute('aria-hidden', 'false');
+        modalEl.setAttribute('aria-modal', 'true');
+        document.body.classList.add('modal-open');
+        document.body.style.overflow = 'hidden';
+        const backdrop = document.createElement('div');
+        backdrop.className = 'modal-backdrop fade show';
+        backdrop.onclick = closeQuickViewModal;
+        document.body.appendChild(backdrop);
         updateQuickViewQty(serviceId);
       }
     };
