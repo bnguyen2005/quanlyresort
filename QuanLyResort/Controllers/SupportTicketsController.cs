@@ -44,7 +44,14 @@ public class SupportTicketsController : ControllerBase
                 userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
                 if (!string.IsNullOrEmpty(userEmail))
                 {
-                    var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
+                    var user = await _context.Users
+                        .FirstOrDefaultAsync(u => u.Email != null && u.Email.ToLower() == userEmail.ToLower());
+                    if (user == null)
+                    {
+                        // Thử tìm bằng username
+                        user = await _context.Users
+                            .FirstOrDefaultAsync(u => u.Username != null && u.Username.ToLower() == userEmail.ToLower());
+                    }
                     if (user != null && user.CustomerId.HasValue)
                     {
                         customerId = user.CustomerId.Value;
@@ -203,7 +210,14 @@ public class SupportTicketsController : ControllerBase
             // Customer chỉ xem được ticket của mình
             if (userRole == "Customer")
             {
-                var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
+                var user = await _context.Users
+                    .FirstOrDefaultAsync(u => u.Email != null && u.Email.ToLower() == userEmail.ToLower());
+                if (user == null && !string.IsNullOrEmpty(userEmail))
+                {
+                    // Thử tìm bằng username
+                    user = await _context.Users
+                        .FirstOrDefaultAsync(u => u.Username != null && u.Username.ToLower() == userEmail.ToLower());
+                }
                 if (user == null || !user.CustomerId.HasValue)
                 {
                     return Unauthorized(new { message = "Không tìm thấy thông tin khách hàng" });
@@ -288,7 +302,14 @@ public class SupportTicketsController : ControllerBase
             // Check permission: Customer chỉ có thể reply ticket của mình
             if (userRole == "Customer")
             {
-                var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
+                var user = await _context.Users
+                    .FirstOrDefaultAsync(u => u.Email != null && u.Email.ToLower() == userEmail.ToLower());
+                if (user == null && !string.IsNullOrEmpty(userEmail))
+                {
+                    // Thử tìm bằng username
+                    user = await _context.Users
+                        .FirstOrDefaultAsync(u => u.Username != null && u.Username.ToLower() == userEmail.ToLower());
+                }
                 if (user == null || !user.CustomerId.HasValue || ticket.CustomerId != user.CustomerId.Value)
                 {
                     return Forbid("Bạn không có quyền thêm tin nhắn vào ticket này");
