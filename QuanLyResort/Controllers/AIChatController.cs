@@ -50,8 +50,18 @@ public class AIChatController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "[AI Chat] ❌ Error processing chat message");
-            return StatusCode(500, new { error = "Đã xảy ra lỗi khi xử lý tin nhắn" });
+            _logger.LogError(ex, "[AI Chat] ❌ Error processing chat message: {Message}", ex.Message);
+            
+            // Trả về thông báo lỗi chi tiết hơn
+            var errorMessage = ex.Message.Contains("Unauthorized") || ex.Message.Contains("401")
+                ? "API key không hợp lệ hoặc đã hết hạn"
+                : "Đã xảy ra lỗi khi xử lý tin nhắn";
+                
+            return StatusCode(500, new { 
+                success = false,
+                error = errorMessage,
+                details = ex.Message
+            });
         }
     }
 

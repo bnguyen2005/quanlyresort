@@ -100,6 +100,20 @@ Hãy trả lời ngắn gọn, thân thiện và hữu ích bằng tiếng Việ
             if (!response.IsSuccessStatusCode)
             {
                 _logger.LogError("[AI Chat] ❌ API Error: {StatusCode} - {Response}", response.StatusCode, responseContent);
+                
+                // Xử lý các lỗi cụ thể
+                if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                {
+                    _logger.LogError("[AI Chat] ❌ Unauthorized - API Key có thể không hợp lệ hoặc đã hết hạn");
+                    return "Xin lỗi, API key không hợp lệ. Vui lòng liên hệ quản trị viên để cập nhật cấu hình.";
+                }
+                
+                if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+                {
+                    _logger.LogError("[AI Chat] ❌ Rate limit exceeded");
+                    return "Xin lỗi, hệ thống đang quá tải. Vui lòng thử lại sau vài phút.";
+                }
+                
                 return "Xin lỗi, tôi gặp sự cố khi xử lý câu hỏi của bạn. Vui lòng thử lại sau hoặc liên hệ bộ phận hỗ trợ.";
             }
 

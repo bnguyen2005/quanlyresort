@@ -305,19 +305,35 @@
         },
         body: JSON.stringify({ message: message })
       })
-      .then(res => res.json())
+      .then(async res => {
+        if (!res.ok) {
+          const errorText = await res.text();
+          console.error('[AI Chat] API Error:', res.status, errorText);
+          
+          if (res.status === 401) {
+            throw new Error('API key không hợp lệ. Vui lòng liên hệ quản trị viên.');
+          } else if (res.status === 429) {
+            throw new Error('Hệ thống đang quá tải. Vui lòng thử lại sau vài phút.');
+          } else if (res.status >= 500) {
+            throw new Error('Lỗi server. Vui lòng thử lại sau.');
+          } else {
+            throw new Error(`Lỗi ${res.status}: ${errorText}`);
+          }
+        }
+        return res.json();
+      })
       .then(data => {
         sendBtn.disabled = false;
         if (data.success) {
           addMessage(data.message, 'ai');
         } else {
-          addMessage('Xin lỗi, đã xảy ra lỗi. Vui lòng thử lại sau.', 'ai');
+          addMessage(data.error || 'Xin lỗi, đã xảy ra lỗi. Vui lòng thử lại sau.', 'ai');
         }
       })
       .catch(err => {
         console.error('[AI Chat] Error:', err);
         sendBtn.disabled = false;
-        addMessage('Xin lỗi, không thể kết nối đến server. Vui lòng thử lại sau.', 'ai');
+        addMessage(err.message || 'Xin lỗi, không thể kết nối đến server. Vui lòng thử lại sau.', 'ai');
       });
     };
 
