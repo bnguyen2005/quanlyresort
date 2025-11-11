@@ -108,12 +108,24 @@ public class InvoicesController : ControllerBase
     [Authorize(Roles = "Admin,Manager,Accounting")]
     public async Task<IActionResult> GetInvoiceStatistics()
     {
+        const string logPrefix = "[InvoicesController.GetInvoiceStatistics]";
+        var timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff");
+        Console.WriteLine($"{logPrefix} [{timestamp}] ========== START ==========");
+        
         try
         {
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
+            Console.WriteLine($"{logPrefix} [{timestamp}] User: {userEmail}, Role: {userRole}");
+            
             var totalInvoices = await _context.Invoices.CountAsync();
+            Console.WriteLine($"{logPrefix} [{timestamp}] Total invoices: {totalInvoices}");
+            
             var paidInvoices = await _context.Invoices.CountAsync(i => i.Status == "Paid");
             var pendingInvoices = await _context.Invoices.CountAsync(i => i.Status == "Issued" || i.Status == "PartiallyPaid");
             var cancelledInvoices = await _context.Invoices.CountAsync(i => i.Status == "Cancelled");
+            
+            Console.WriteLine($"{logPrefix} [{timestamp}] Paid: {paidInvoices}, Pending: {pendingInvoices}, Cancelled: {cancelledInvoices}");
             
             // SQLite không hỗ trợ SumAsync trên decimal trực tiếp -> chuyển sang client-side aggregation
             var paidInvoicesList = await _context.Invoices
@@ -128,6 +140,9 @@ public class InvoicesController : ControllerBase
                 .ToListAsync();
             var totalPending = pendingInvoicesList.Sum(i => (decimal?)i) ?? 0;
 
+            Console.WriteLine($"{logPrefix} [{timestamp}] Total revenue: {totalRevenue}, Total pending: {totalPending}");
+            Console.WriteLine($"{logPrefix} [{timestamp}] ========== END (SUCCESS) ==========");
+
             return Ok(new
             {
                 totalInvoices,
@@ -140,6 +155,11 @@ public class InvoicesController : ControllerBase
         }
         catch (Exception ex)
         {
+            Console.WriteLine($"{logPrefix} [{timestamp}] ❌ ========== ERROR ==========");
+            Console.WriteLine($"{logPrefix} [{timestamp}] ❌ Error message: {ex.Message}");
+            Console.WriteLine($"{logPrefix} [{timestamp}] ❌ Stack trace: {ex.StackTrace}");
+            Console.WriteLine($"{logPrefix} [{timestamp}] ❌ Inner exception: {ex.InnerException?.Message}");
+            Console.WriteLine($"{logPrefix} [{timestamp}] ========== END (ERROR) ==========");
             return StatusCode(500, new { message = "Failed to load invoice statistics", error = ex.Message });
         }
     }
