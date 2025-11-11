@@ -43,7 +43,7 @@ git push -u origin main
 
 **Khi được hỏi:**
 - **Username:** `Lamm123435469898`
-- **Password:** `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`
+- **Password:** `YOUR_GITHUB_PERSONAL_ACCESS_TOKEN_HERE`
 
 ## 🚀 Cách 2: Tạo Bằng GitHub CLI (Nếu Đã Cài)
 

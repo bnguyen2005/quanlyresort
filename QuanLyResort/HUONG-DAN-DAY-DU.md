@@ -55,7 +55,7 @@ Click nút **"Create repository"** (màu xanh lá)
 5. Click **"Generate token"**
 6. **⚠️ Copy token ngay** (chỉ hiện 1 lần!)
 
-**Token của bạn:** `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`
+**Token của bạn:** `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`
 
 ---
 
@@ -95,7 +95,7 @@ git push -u origin main
 
 **Khi được hỏi:**
 - **Username:** `Lamm123435469898`
-- **Password:** `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`
+- **Password:** `YOUR_GITHUB_PERSONAL_ACCESS_TOKEN_HERE`
 
 ### 3.5. Kết Quả Thành Công
 
