@@ -309,8 +309,11 @@
 
     // Initialize page
     document.addEventListener('DOMContentLoaded', () => {
-      loadTickets();
-      initializeDataTable();
+      // Đợi một chút để đảm bảo DOM đã sẵn sàng
+      setTimeout(() => {
+        loadTickets();
+        // Không khởi tạo DataTable ở đây vì sẽ được khởi tạo trong renderTickets()
+      }, 100);
       
       // Handle update form
       document.getElementById('updateTicketForm').addEventListener('submit', handleUpdateTicket);
