@@ -36,8 +36,9 @@ namespace QuanLyResort.Controllers
                     .CountAsync();
 
                 // Today's revenue - tính từ:
-                // 1. Invoices đã thanh toán hôm nay (PaidDate = today)
-                // 2. Bookings đã thanh toán hôm nay (PaymentStatus = Paid và UpdatedAt = today)
+                // 1. Invoices đã thanh toán hôm nay (PaidDate = today, Status = Paid)
+                // 2. Bookings có Status = "Paid" và UpdatedAt = today (đã thanh toán qua PayOs)
+                // 3. Charges đã thanh toán hôm nay (ChargeDate = today)
                 var todayInvoicesList = await _context.Invoices
                     .Where(i => i.PaidDate.HasValue && 
                                i.PaidDate.Value.Date == today && 
@@ -45,17 +46,25 @@ namespace QuanLyResort.Controllers
                     .Select(i => i.PaidAmount > 0 ? i.PaidAmount : i.TotalAmount)
                     .ToListAsync();
                 
-                // Cũng tính từ Bookings đã thanh toán hôm nay (nếu có PaymentStatus)
+                // Bookings đã thanh toán hôm nay (Status = "Paid" sau khi webhook xử lý)
                 var todayPaidBookingsList = await _context.Bookings
                     .Where(b => b.UpdatedAt.HasValue && 
                                b.UpdatedAt.Value.Date == today && 
-                               (b.Status == "Confirmed" || b.Status == "CheckedIn") &&
+                               b.Status == "Paid" &&
+                               b.EstimatedTotalAmount.HasValue &&
                                b.EstimatedTotalAmount > 0)
-                    .Select(b => b.EstimatedTotalAmount)
+                    .Select(b => b.EstimatedTotalAmount!.Value)
+                    .ToListAsync();
+                
+                // Charges (dịch vụ) đã thanh toán hôm nay
+                var todayChargesList = await _context.Charges
+                    .Where(c => c.ChargeDate.Date == today)
+                    .Select(c => c.TotalAmount)
                     .ToListAsync();
                 
                 var todayRevenue = (todayInvoicesList.Sum(i => (decimal?)i) ?? 0) + 
-                                  (todayPaidBookingsList.Sum(b => (decimal?)b) ?? 0);
+                                  (todayPaidBookingsList.Sum(b => (decimal?)b) ?? 0) +
+                                  (todayChargesList.Sum(c => (decimal?)c) ?? 0);
 
                 // Today's check-ins - bookings có CheckInDate = today và đã check-in
                 var todayCheckIns = await _context.Bookings
@@ -78,14 +87,34 @@ namespace QuanLyResort.Controllers
 
                 var occupancyRate = totalRooms > 0 ? (double)occupiedRooms / totalRooms * 100 : 0;
 
-                // This month vs last month revenue - tính từ PaidDate
+                // This month vs last month revenue - tính từ:
+                // 1. Invoices đã thanh toán (PaidDate, Status = Paid)
+                // 2. Bookings đã thanh toán (Status = Paid, UpdatedAt trong tháng)
+                // 3. Charges trong tháng
                 var thisMonthInvoicesList = await _context.Invoices
                     .Where(i => i.PaidDate.HasValue && 
                                i.PaidDate.Value >= thisMonth && 
                                i.Status == "Paid")
                     .Select(i => i.PaidAmount > 0 ? i.PaidAmount : i.TotalAmount)
                     .ToListAsync();
-                var thisMonthRevenue = thisMonthInvoicesList.Sum(i => (decimal?)i) ?? 0;
+                
+                var thisMonthPaidBookingsList = await _context.Bookings
+                    .Where(b => b.UpdatedAt.HasValue && 
+                               b.UpdatedAt.Value >= thisMonth && 
+                               b.Status == "Paid" &&
+                               b.EstimatedTotalAmount.HasValue &&
+                               b.EstimatedTotalAmount > 0)
+                    .Select(b => b.EstimatedTotalAmount!.Value)
+                    .ToListAsync();
+                
+                var thisMonthChargesList = await _context.Charges
+                    .Where(c => c.ChargeDate >= thisMonth)
+                    .Select(c => c.TotalAmount)
+                    .ToListAsync();
+                
+                var thisMonthRevenue = (thisMonthInvoicesList.Sum(i => (decimal?)i) ?? 0) +
+                                      (thisMonthPaidBookingsList.Sum(b => (decimal?)b) ?? 0) +
+                                      (thisMonthChargesList.Sum(c => (decimal?)c) ?? 0);
 
                 var lastMonthInvoicesList = await _context.Invoices
                     .Where(i => i.PaidDate.HasValue && 
@@ -94,7 +123,25 @@ namespace QuanLyResort.Controllers
                                i.Status == "Paid")
                     .Select(i => i.PaidAmount > 0 ? i.PaidAmount : i.TotalAmount)
                     .ToListAsync();
-                var lastMonthRevenue = lastMonthInvoicesList.Sum(i => (decimal?)i) ?? 0;
+                
+                var lastMonthPaidBookingsList = await _context.Bookings
+                    .Where(b => b.UpdatedAt.HasValue && 
+                               b.UpdatedAt.Value >= lastMonth && 
+                               b.UpdatedAt.Value < thisMonth && 
+                               b.Status == "Paid" &&
+                               b.EstimatedTotalAmount.HasValue &&
+                               b.EstimatedTotalAmount > 0)
+                    .Select(b => b.EstimatedTotalAmount!.Value)
+                    .ToListAsync();
+                
+                var lastMonthChargesList = await _context.Charges
+                    .Where(c => c.ChargeDate >= lastMonth && c.ChargeDate < thisMonth)
+                    .Select(c => c.TotalAmount)
+                    .ToListAsync();
+                
+                var lastMonthRevenue = (lastMonthInvoicesList.Sum(i => (decimal?)i) ?? 0) +
+                                      (lastMonthPaidBookingsList.Sum(b => (decimal?)b) ?? 0) +
+                                      (lastMonthChargesList.Sum(c => (decimal?)c) ?? 0);
 
                 var revenueGrowth = lastMonthRevenue > 0 ? 
                     ((thisMonthRevenue - lastMonthRevenue) / lastMonthRevenue * 100) : 0;
