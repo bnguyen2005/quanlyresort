@@ -76,8 +76,17 @@ public class ReportsController : ControllerBase
             .ToList();
         var invoicesRevenue = invoicesToday.Sum(i => (decimal?)i) ?? 0;
         
-        // Tổng doanh thu = charges + invoices
-        var totalRevenue = chargesRevenue + invoicesRevenue;
+        // Restaurant Orders đã thanh toán trong ngày
+        var restaurantOrdersToday = await _context.RestaurantOrders
+            .Where(o => o.PaymentStatus == "Paid" &&
+                       ((o.UpdatedAt.HasValue && o.UpdatedAt.Value.Date == targetDate) ||
+                        (!o.UpdatedAt.HasValue && o.CreatedAt.Date == targetDate)))
+            .Select(o => o.TotalAmount)
+            .ToListAsync();
+        var restaurantRevenue = restaurantOrdersToday.Sum(o => (decimal?)o) ?? 0;
+        
+        // Tổng doanh thu = charges + invoices + restaurant orders
+        var totalRevenue = chargesRevenue + invoicesRevenue + restaurantRevenue;
 
         // SQLite không hỗ trợ SumAsync trên decimal trực tiếp -> chuyển sang client-side aggregation
         var paymentsList = await _context.Invoices
@@ -94,6 +103,7 @@ public class ReportsController : ControllerBase
             totalRevenue,
             roomRevenue,
             serviceRevenue,
+            restaurantRevenue,
             totalPayments = payments,
             breakdown = charges.GroupBy(c => c.ChargeType).Select(g => new
             {

@@ -360,8 +360,12 @@
       // Render tickets
       function renderTickets(tickets) {
         const container = document.getElementById('ticketsList');
+        if (!container) {
+          console.error('[My Tickets] Container not found');
+          return;
+        }
 
-        if (tickets.length === 0) {
+        if (!tickets || tickets.length === 0) {
           container.innerHTML = `
             <div class="empty-state">
               <div class="empty-state-icon">📭</div>
