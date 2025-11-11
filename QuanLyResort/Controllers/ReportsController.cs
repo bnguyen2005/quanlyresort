@@ -433,13 +433,23 @@ public class ReportsController : ControllerBase
             .ToList();
         var invoicesRevenue = invoicesToday.Sum(i => (decimal?)i) ?? 0;
         
-        // Debug logging
-        _logger.LogInformation($"Today revenue calculation - Charges: {chargesRevenue}, Invoices: {invoicesRevenue}, Total: {chargesRevenue + invoicesRevenue}");
-        _logger.LogInformation($"Today UTC: {todayUtc}, Today Local: {todayLocal}");
-        _logger.LogInformation($"Total paid invoices: {allPaidInvoices.Count}, Invoices today: {invoicesToday.Count}");
+        // Restaurant Orders đã thanh toán hôm nay
+        // Tính từ UpdatedAt hoặc CreatedAt nếu PaymentStatus = "Paid"
+        var todayRestaurantOrdersList = await _context.RestaurantOrders
+            .Where(o => o.PaymentStatus == "Paid" && 
+                      ((o.UpdatedAt.HasValue && o.UpdatedAt.Value.Date == todayLocal) ||
+                       (!o.UpdatedAt.HasValue && o.CreatedAt.Date == todayLocal)))
+            .Select(o => o.TotalAmount)
+            .ToListAsync();
+        var restaurantRevenue = todayRestaurantOrdersList.Sum(o => (decimal?)o) ?? 0;
         
-        // Tổng doanh thu hôm nay
-        var todayRevenue = chargesRevenue + invoicesRevenue;
+        // Debug logging
+        _logger.LogInformation($"Today revenue calculation - Charges: {chargesRevenue}, Invoices: {invoicesRevenue}, Restaurant: {restaurantRevenue}, Total: {chargesRevenue + invoicesRevenue + restaurantRevenue}");
+        _logger.LogInformation($"Today UTC: {todayUtc}, Today Local: {todayLocal}");
+        _logger.LogInformation($"Total paid invoices: {allPaidInvoices.Count}, Invoices today: {invoicesToday.Count}, Restaurant orders today: {todayRestaurantOrdersList.Count}");
+        
+        // Tổng doanh thu hôm nay = Charges + Invoices + Restaurant Orders
+        var todayRevenue = chargesRevenue + invoicesRevenue + restaurantRevenue;
 
         // Calculate today occupancy directly
         var totalRooms = await _context.Rooms.CountAsync();
@@ -451,17 +461,61 @@ public class ReportsController : ControllerBase
         var todayOccupancyRate = totalRooms > 0 ? (decimal)occupiedRooms / totalRooms * 100 : 0;
 
         // This month stats - client-side aggregation
+        // Tính từ Charges, Invoices, và Restaurant Orders
         var thisMonthChargesList = await _context.Charges
             .Where(c => c.ChargeDate >= thisMonth && c.ChargeDate < thisMonth.AddMonths(1))
             .Select(c => c.TotalAmount)
             .ToListAsync();
-        var thisMonthRevenue = thisMonthChargesList.Sum(c => (decimal?)c) ?? 0;
+        var thisMonthChargesRevenue = thisMonthChargesList.Sum(c => (decimal?)c) ?? 0;
+        
+        // Invoices tháng này
+        var thisMonthInvoicesList = await _context.Invoices
+            .Where(i => i.PaidDate.HasValue && 
+                       i.PaidDate.Value >= thisMonth && 
+                       i.PaidDate.Value < thisMonth.AddMonths(1) &&
+                       i.Status == "Paid")
+            .Select(i => i.PaidAmount > 0 ? i.PaidAmount : i.TotalAmount)
+            .ToListAsync();
+        var thisMonthInvoicesRevenue = thisMonthInvoicesList.Sum(i => (decimal?)i) ?? 0;
+        
+        // Restaurant Orders tháng này
+        var thisMonthRestaurantOrdersList = await _context.RestaurantOrders
+            .Where(o => o.PaymentStatus == "Paid" &&
+                       ((o.UpdatedAt.HasValue && o.UpdatedAt.Value >= thisMonth && o.UpdatedAt.Value < thisMonth.AddMonths(1)) ||
+                        (!o.UpdatedAt.HasValue && o.CreatedAt >= thisMonth && o.CreatedAt < thisMonth.AddMonths(1))))
+            .Select(o => o.TotalAmount)
+            .ToListAsync();
+        var thisMonthRestaurantRevenue = thisMonthRestaurantOrdersList.Sum(o => (decimal?)o) ?? 0;
+        
+        var thisMonthRevenue = thisMonthChargesRevenue + thisMonthInvoicesRevenue + thisMonthRestaurantRevenue;
 
+        // Last month stats
         var lastMonthChargesList = await _context.Charges
             .Where(c => c.ChargeDate >= lastMonth && c.ChargeDate < thisMonth)
             .Select(c => c.TotalAmount)
             .ToListAsync();
-        var lastMonthRevenue = lastMonthChargesList.Sum(c => (decimal?)c) ?? 0;
+        var lastMonthChargesRevenue = lastMonthChargesList.Sum(c => (decimal?)c) ?? 0;
+        
+        // Invoices tháng trước
+        var lastMonthInvoicesList = await _context.Invoices
+            .Where(i => i.PaidDate.HasValue && 
+                       i.PaidDate.Value >= lastMonth && 
+                       i.PaidDate.Value < thisMonth &&
+                       i.Status == "Paid")
+            .Select(i => i.PaidAmount > 0 ? i.PaidAmount : i.TotalAmount)
+            .ToListAsync();
+        var lastMonthInvoicesRevenue = lastMonthInvoicesList.Sum(i => (decimal?)i) ?? 0;
+        
+        // Restaurant Orders tháng trước
+        var lastMonthRestaurantOrdersList = await _context.RestaurantOrders
+            .Where(o => o.PaymentStatus == "Paid" &&
+                       ((o.UpdatedAt.HasValue && o.UpdatedAt.Value >= lastMonth && o.UpdatedAt.Value < thisMonth) ||
+                        (!o.UpdatedAt.HasValue && o.CreatedAt >= lastMonth && o.CreatedAt < thisMonth)))
+            .Select(o => o.TotalAmount)
+            .ToListAsync();
+        var lastMonthRestaurantRevenue = lastMonthRestaurantOrdersList.Sum(o => (decimal?)o) ?? 0;
+        
+        var lastMonthRevenue = lastMonthChargesRevenue + lastMonthInvoicesRevenue + lastMonthRestaurantRevenue;
 
         var revenueGrowth = lastMonthRevenue > 0 
             ? Math.Round((thisMonthRevenue - lastMonthRevenue) / lastMonthRevenue * 100, 2)
