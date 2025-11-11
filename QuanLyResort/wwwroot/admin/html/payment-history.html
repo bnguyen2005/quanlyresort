@@ -258,22 +258,31 @@
     }
 
     // Use formatCurrency and formatDate from api.js if available, otherwise define fallback
-    const formatCurrency = window.formatCurrency || function(amount) {
-      if (!amount) return '0 ₫';
-      return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
-    };
+    // Check if already defined (from api.js) before declaring
+    if (typeof formatCurrency === 'undefined') {
+      window.formatCurrency = function(amount) {
+        if (!amount) return '0 ₫';
+        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+      };
+    }
     
-    const formatDate = window.formatDate || function(dateString) {
-      if (!dateString) return '-';
-      const date = new Date(dateString);
-      return date.toLocaleDateString('vi-VN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    };
+    if (typeof formatDate === 'undefined') {
+      window.formatDate = function(dateString) {
+        if (!dateString) return '-';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('vi-VN', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      };
+    }
+    
+    // Use the functions (from api.js or our fallback)
+    const formatCurrency = window.formatCurrency || (typeof formatCurrency !== 'undefined' ? formatCurrency : window.formatCurrency);
+    const formatDate = window.formatDate || (typeof formatDate !== 'undefined' ? formatDate : window.formatDate);
 
     async function loadStatistics() {
       const logPrefix = '💰 [PaymentHistory-Statistics]';
