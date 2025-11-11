@@ -337,7 +337,22 @@
         return;
       }
 
-      tbody.innerHTML = reviews.map(review => `
+      tbody.innerHTML = reviews.map(r => {
+        // Hỗ trợ cả camelCase và PascalCase từ API
+        const review = {
+          reviewId: r.reviewId ?? r.ReviewId,
+          customerName: r.customerName ?? r.CustomerName ?? 'Khách hàng',
+          roomNumber: r.roomNumber ?? r.RoomNumber ?? '-',
+          rating: r.rating ?? r.Rating ?? 0,
+          comment: r.comment ?? r.Comment ?? '',
+          response: r.response ?? r.Response ?? '',
+          respondedBy: r.respondedBy ?? r.RespondedBy ?? 'Admin',
+          isApproved: r.isApproved ?? r.IsApproved ?? false,
+          isVisible: r.isVisible ?? r.IsVisible ?? false,
+          createdAt: r.createdAt ?? r.CreatedAt ?? null,
+          responseDate: r.responseDate ?? r.ResponseDate ?? null
+        };
+        return `
         <tr>
           <td>${review.reviewId}</td>
           <td>${review.customerName || 'Khách hàng'}</td>
@@ -363,7 +378,8 @@
             </button>
           </td>
         </tr>
-      `).join('');
+      `;
+      }).join('');
 
       if (!reviewsTable) {
         reviewsTable = $('#reviewsTable').DataTable({
@@ -391,7 +407,18 @@
 
         if (!response.ok) throw new Error('Failed to load review');
 
-        const review = await response.json();
+        const data = await response.json();
+        // Chuẩn hóa key
+        const review = {
+          customerName: data.customerName ?? data.CustomerName ?? 'Khách hàng',
+          roomNumber: data.roomNumber ?? data.RoomNumber ?? '-',
+          rating: data.rating ?? data.Rating ?? 0,
+          comment: data.comment ?? data.Comment ?? '',
+          response: data.response ?? data.Response ?? '',
+          respondedBy: data.respondedBy ?? data.RespondedBy ?? 'Admin',
+          createdAt: data.createdAt ?? data.CreatedAt ?? null,
+          responseDate: data.responseDate ?? data.ResponseDate ?? null
+        };
         const modalContent = document.getElementById('reviewDetailContent');
         modalContent.innerHTML = `
           <div class="mb-3">
