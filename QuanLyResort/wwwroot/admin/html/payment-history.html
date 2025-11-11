@@ -257,12 +257,13 @@
       };
     }
 
-    function formatCurrency(amount) {
+    // Use formatCurrency and formatDate from api.js if available, otherwise define fallback
+    const formatCurrency = window.formatCurrency || function(amount) {
       if (!amount) return '0 ₫';
       return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
-    }
-
-    function formatDate(dateString) {
+    };
+    
+    const formatDate = window.formatDate || function(dateString) {
       if (!dateString) return '-';
       const date = new Date(dateString);
       return date.toLocaleDateString('vi-VN', {
@@ -272,7 +273,7 @@
         hour: '2-digit',
         minute: '2-digit'
       });
-    }
+    };
 
     async function loadStatistics() {
       const logPrefix = '💰 [PaymentHistory-Statistics]';
