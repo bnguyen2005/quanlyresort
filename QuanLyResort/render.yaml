@@ -40,7 +40,7 @@ services:
       - key: AIChat__Provider
         value: groq
       - key: AIChat__ApiKey
-        value: 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
+        value: YOUR_GROQ_API_KEY_HERE
       - key: AIChat__ApiUrl
         value: https://api.groq.com/openai/v1/chat/completions
       - key: AIChat__Model

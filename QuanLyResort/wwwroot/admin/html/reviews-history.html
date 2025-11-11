@@ -232,8 +232,7 @@
       };
     }
     
-    // Alias for backward compatibility
-    const formatDate = window.formatReviewDate;
+    // Luôn dùng trực tiếp window.formatReviewDate để tránh trùng tên với api.js
 
     window.loadReviews = async function() {
       const logPrefix = '⭐ [ReviewsHistory]';

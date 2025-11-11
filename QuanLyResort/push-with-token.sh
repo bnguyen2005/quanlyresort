@@ -9,7 +9,7 @@ echo ""
 cd "$(dirname "$0")/.." || exit 1
 
 # Token mới
-TOKEN="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"
+TOKEN="YOUR_GITHUB_PERSONAL_ACCESS_TOKEN_HERE"
 USERNAME="Lamm123435469898"
 REPO_URL="https://github.com/Lamm123435469898/quanlyresort.git"
 
