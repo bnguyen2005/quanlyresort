@@ -10,8 +10,8 @@ cd "$(dirname "$0")/.." || exit 1
 
 # Token mới
 TOKEN="YOUR_GITHUB_PERSONAL_ACCESS_TOKEN_HERE"
-USERNAME="Lamm123435469898"
-REPO_URL="https://github.com/Lamm123435469898/quanlyresort.git"
+USERNAME="bnguyen2005"
+REPO_URL="https://github.com/bnguyen2005/quanlyresortt.git"
 
 echo "📊 Kiểm tra trạng thái..."
 git status --short
@@ -26,7 +26,7 @@ git remote -v | head -1
 
 echo ""
 echo "🔄 Cấu hình remote với token..."
-git remote set-url origin "https://${USERNAME}:${TOKEN}@github.com/Lamm123435469898/quanlyresort.git"
+    git remote set-url origin "https://${USERNAME}:${TOKEN}@github.com/bnguyen2005/quanlyresortt.git"
 
 echo ""
 echo "📤 Đang push code..."
