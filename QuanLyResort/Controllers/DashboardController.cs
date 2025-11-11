@@ -201,8 +201,11 @@ namespace QuanLyResort.Controllers
             {
                 var startDate = DateTime.Today.AddDays(-days);
                 
-                // Tính từ PaidDate (ngày thực tế thanh toán)
-                var dailyRevenue = await _context.Invoices
+                // Tính từ:
+                // 1. Invoices đã thanh toán (PaidDate)
+                // 2. Bookings đã thanh toán (Status = Paid, UpdatedAt)
+                // 3. Charges (ChargeDate)
+                var dailyInvoices = await _context.Invoices
                     .Where(i => i.PaidDate.HasValue && 
                                i.PaidDate.Value >= startDate && 
                                i.Status == "Paid")
@@ -213,13 +216,42 @@ namespace QuanLyResort.Controllers
                     })
                     .ToListAsync();
                 
-                // Group by date manually (SQLite có thể không hỗ trợ GroupBy tốt)
-                var groupedRevenue = dailyRevenue
-                    .GroupBy(i => i.date)
+                var dailyBookings = await _context.Bookings
+                    .Where(b => b.UpdatedAt.HasValue && 
+                               b.UpdatedAt.Value >= startDate && 
+                               b.Status == "Paid" &&
+                               b.EstimatedTotalAmount.HasValue &&
+                               b.EstimatedTotalAmount > 0)
+                    .Select(b => new
+                    {
+                        date = b.UpdatedAt!.Value.Date,
+                        amount = b.EstimatedTotalAmount!.Value
+                    })
+                    .ToListAsync();
+                
+                var dailyCharges = await _context.Charges
+                    .Where(c => c.ChargeDate >= startDate)
+                    .Select(c => new
+                    {
+                        date = c.ChargeDate.Date,
+                        amount = c.TotalAmount
+                    })
+                    .ToListAsync();
+                
+                // Combine all revenue sources
+                var allDailyRevenue = dailyInvoices
+                    .Select(i => new { i.date, i.amount })
+                    .Concat(dailyBookings.Select(b => new { date = b.date, amount = b.amount }))
+                    .Concat(dailyCharges.Select(c => new { date = c.date, amount = c.amount }))
+                    .ToList();
+                
+                // Group by date manually
+                var groupedRevenue = allDailyRevenue
+                    .GroupBy(r => r.date)
                     .Select(g => new
                     {
                         date = g.Key,
-                        revenue = g.Sum(i => (decimal?)i.amount) ?? 0,
+                        revenue = g.Sum(r => (decimal?)r.amount) ?? 0,
                         invoiceCount = g.Count()
                     })
                     .OrderBy(x => x.date)
