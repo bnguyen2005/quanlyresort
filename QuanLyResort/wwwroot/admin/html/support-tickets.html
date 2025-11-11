@@ -366,21 +366,37 @@
 
     // Initialize DataTable
     function initializeDataTable() {
-      if (ticketsTable) {
-        ticketsTable.destroy();
+      const tableElement = document.getElementById('ticketsTable');
+      if (!tableElement) {
+        console.warn('[Tickets] Table element not found');
+        return;
       }
       
-      ticketsTable = $('#ticketsTable').DataTable({
-        language: {
-          url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/vi.json'
-        },
-        order: [[7, 'desc']], // Sort by created date
-        pageLength: 25,
-        responsive: true,
-        columnDefs: [
-          { orderable: false, targets: 8 } // Disable sorting on Actions column
-        ]
-      });
+      try {
+        if (ticketsTable && $.fn.DataTable.isDataTable('#ticketsTable')) {
+          ticketsTable.destroy();
+          ticketsTable = null;
+        }
+      } catch (e) {
+        console.warn('[Tickets] Error destroying DataTable:', e);
+        ticketsTable = null;
+      }
+      
+      try {
+        ticketsTable = $('#ticketsTable').DataTable({
+          language: {
+            url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/vi.json'
+          },
+          order: [[7, 'desc']], // Sort by created date
+          pageLength: 25,
+          responsive: true,
+          columnDefs: [
+            { orderable: false, targets: 8 } // Disable sorting on Actions column
+          ]
+        });
+      } catch (e) {
+        console.error('[Tickets] Error initializing DataTable:', e);
+      }
     }
 
     // Render tickets
@@ -433,9 +449,27 @@
       });
 
       tbody.innerHTML = html;
-      if (ticketsTable) {
-        // Destroy và khởi tạo lại DataTable với dữ liệu mới
-        ticketsTable.destroy();
+      
+      // Kiểm tra xem table có tồn tại trong DOM không
+      const tableElement = document.getElementById('ticketsTable');
+      if (!tableElement) {
+        console.error('[Tickets] Table element not found in DOM');
+        return;
+      }
+      
+      try {
+        // Destroy DataTable nếu đã được khởi tạo
+        if (ticketsTable && $.fn.DataTable.isDataTable('#ticketsTable')) {
+          ticketsTable.destroy();
+          ticketsTable = null;
+        }
+      } catch (e) {
+        console.warn('[Tickets] Error destroying DataTable:', e);
+        ticketsTable = null;
+      }
+      
+      // Khởi tạo lại DataTable với dữ liệu mới
+      try {
         ticketsTable = $('#ticketsTable').DataTable({
           language: {
             url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/vi.json'
@@ -447,6 +481,11 @@
             { orderable: false, targets: 8 } // Disable sorting on Actions column
           ]
         });
+      } catch (e) {
+        console.error('[Tickets] Error initializing DataTable:', e);
+        if (typeof showToast === 'function') {
+          showToast('Lỗi khi khởi tạo bảng dữ liệu', 'error');
+        }
       }
     }
 
