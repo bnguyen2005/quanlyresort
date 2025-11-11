@@ -257,32 +257,25 @@
       };
     }
 
-    // Use formatCurrency and formatDate from api.js if available, otherwise define fallback
-    // Check if already defined (from api.js) before declaring
-    if (typeof formatCurrency === 'undefined') {
-      window.formatCurrency = function(amount) {
-        if (!amount) return '0 ₫';
-        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
-      };
-    }
+    // formatCurrency and formatDate are already defined in api.js (loaded before this script)
+    // Create local aliases to avoid redeclaration errors
+    // If api.js functions are not available, define fallbacks
+    const formatCurrencyLocal = (typeof formatCurrency !== 'undefined' && formatCurrency) || function(amount) {
+      if (!amount) return '0 ₫';
+      return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+    };
     
-    if (typeof formatDate === 'undefined') {
-      window.formatDate = function(dateString) {
-        if (!dateString) return '-';
-        const date = new Date(dateString);
-        return date.toLocaleDateString('vi-VN', {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit'
-        });
-      };
-    }
-    
-    // Use the functions (from api.js or our fallback)
-    const formatCurrency = window.formatCurrency || (typeof formatCurrency !== 'undefined' ? formatCurrency : window.formatCurrency);
-    const formatDate = window.formatDate || (typeof formatDate !== 'undefined' ? formatDate : window.formatDate);
+    const formatDateLocal = (typeof formatDate !== 'undefined' && formatDate) || function(dateString) {
+      if (!dateString) return '-';
+      const date = new Date(dateString);
+      return date.toLocaleDateString('vi-VN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    };
 
     async function loadStatistics() {
       const logPrefix = '💰 [PaymentHistory-Statistics]';
@@ -329,7 +322,7 @@
         document.getElementById('totalInvoices').textContent = data.totalInvoices || 0;
         document.getElementById('paidInvoices').textContent = data.paidInvoices || 0;
         document.getElementById('pendingInvoices').textContent = data.pendingInvoices || 0;
-        document.getElementById('totalRevenue').textContent = formatCurrency(data.totalRevenue || 0);
+        document.getElementById('totalRevenue').textContent = formatCurrencyLocal(data.totalRevenue || 0);
         
         console.log(`${logPrefix} [${timestamp}] ========== END loadStatistics (SUCCESS) ==========`);
       } catch (error) {
@@ -442,16 +435,16 @@
       tbody.innerHTML = invoices.map(invoice => {
         const statusBadge = getStatusBadge(invoice.status);
         const paymentMethod = invoice.paymentMethod || '-';
-        const paidDate = invoice.paidDate ? formatDate(invoice.paidDate) : '-';
+        const paidDate = invoice.paidDate ? formatDateLocal(invoice.paidDate) : '-';
 
         return `
           <tr>
             <td><strong>${invoice.invoiceNumber || '-'}</strong></td>
             <td>${invoice.customer?.fullName || 'N/A'}</td>
-            <td>${formatDate(invoice.issueDate)}</td>
-            <td><strong>${formatCurrency(invoice.totalAmount)}</strong></td>
-            <td>${formatCurrency(invoice.paidAmount)}</td>
-            <td><strong>${formatCurrency(invoice.balanceDue)}</strong></td>
+            <td>${formatDateLocal(invoice.issueDate)}</td>
+            <td><strong>${formatCurrencyLocal(invoice.totalAmount)}</strong></td>
+            <td>${formatCurrencyLocal(invoice.paidAmount)}</td>
+            <td><strong>${formatCurrencyLocal(invoice.balanceDue)}</strong></td>
             <td>${paymentMethod}</td>
             <td>${paidDate}</td>
             <td>${statusBadge}</td>
