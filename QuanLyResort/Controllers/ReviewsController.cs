@@ -357,6 +357,129 @@ public class ReviewsController : ControllerBase
     }
 
     /// <summary>
+    /// Lấy tất cả đánh giá cho admin (bao gồm cả chưa approved)
+    /// GET /api/reviews/admin?status=all&roomId=1&rating=5
+    /// </summary>
+    [HttpGet("admin")]
+    [Authorize(Roles = "Admin,Manager")]
+    public async Task<IActionResult> GetAllReviewsForAdmin(
+        [FromQuery] string? status = "all", // all, approved, pending, hidden
+        [FromQuery] int? roomId = null,
+        [FromQuery] int? rating = null,
+        [FromQuery] string? search = null,
+        [FromQuery] DateTime? fromDate = null,
+        [FromQuery] DateTime? toDate = null)
+    {
+        var query = _context.Reviews
+            .Include(r => r.Customer)
+            .Include(r => r.Room)
+            .AsQueryable();
+
+        // Filter by status
+        if (status == "approved")
+        {
+            query = query.Where(r => r.IsApproved && r.IsVisible);
+        }
+        else if (status == "pending")
+        {
+            query = query.Where(r => !r.IsApproved);
+        }
+        else if (status == "hidden")
+        {
+            query = query.Where(r => !r.IsVisible);
+        }
+        // "all" - no filter
+
+        if (roomId.HasValue)
+        {
+            query = query.Where(r => r.RoomId == roomId.Value);
+        }
+
+        if (rating.HasValue && rating.Value >= 1 && rating.Value <= 5)
+        {
+            query = query.Where(r => r.Rating == rating.Value);
+        }
+
+        if (!string.IsNullOrEmpty(search))
+        {
+            query = query.Where(r => 
+                (r.Customer != null && r.Customer.FullName != null && r.Customer.FullName.Contains(search)) ||
+                (r.Comment != null && r.Comment.Contains(search)) ||
+                (r.Room != null && r.Room.RoomNumber != null && r.Room.RoomNumber.Contains(search)));
+        }
+
+        if (fromDate.HasValue)
+        {
+            query = query.Where(r => r.CreatedAt >= fromDate.Value);
+        }
+
+        if (toDate.HasValue)
+        {
+            query = query.Where(r => r.CreatedAt <= toDate.Value);
+        }
+
+        var reviews = await query
+            .OrderByDescending(r => r.CreatedAt)
+            .Select(r => new
+            {
+                r.ReviewId,
+                r.Rating,
+                r.Comment,
+                r.Response,
+                r.ResponseDate,
+                r.RespondedBy,
+                r.IsApproved,
+                r.IsVisible,
+                r.CreatedAt,
+                r.UpdatedAt,
+                CustomerName = r.Customer != null ? 
+                    (r.Customer.FullName ?? "Khách hàng") : 
+                    "Khách hàng",
+                CustomerEmail = r.Customer != null ? r.Customer.Email : null,
+                RoomNumber = r.Room != null ? r.Room.RoomNumber : null,
+                RoomType = r.Room != null ? r.Room.RoomType : null
+            })
+            .ToListAsync();
+
+        return Ok(new
+        {
+            reviews,
+            total = reviews.Count
+        });
+    }
+
+    /// <summary>
+    /// Cập nhật trạng thái đánh giá (approve/hide/delete)
+    /// PUT /api/reviews/{id}/status
+    /// </summary>
+    [HttpPut("{id}/status")]
+    [Authorize(Roles = "Admin,Manager")]
+    public async Task<IActionResult> UpdateReviewStatus(int id, [FromBody] UpdateReviewStatusRequest request)
+    {
+        var review = await _context.Reviews.FindAsync(id);
+        if (review == null)
+        {
+            return NotFound(new { message = "Review not found." });
+        }
+
+        if (request.IsApproved.HasValue)
+        {
+            review.IsApproved = request.IsApproved.Value;
+        }
+
+        if (request.IsVisible.HasValue)
+        {
+            review.IsVisible = request.IsVisible.Value;
+        }
+
+        review.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+
+        return Ok(new { message = "Review status updated successfully.", review });
+    }
+
+    /// <summary>
     /// Helper method to get initials from full name
     /// </summary>
     private static string GetInitials(string? fullName)
@@ -397,5 +520,11 @@ public class ReviewResponseRequest
     [Required]
     [StringLength(500)]
     public string Response { get; set; } = string.Empty;
+}
+
+public class UpdateReviewStatusRequest
+{
+    public bool? IsApproved { get; set; }
+    public bool? IsVisible { get; set; }
 }
 

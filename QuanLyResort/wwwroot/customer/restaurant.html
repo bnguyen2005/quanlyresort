@@ -1410,27 +1410,39 @@
                     <strong id="cartTotal" style="font-size: 20px; color: var(--color-primary-main, #C8A97E);">0 ₫</strong>
                   </div>
                 </div>
-                <div id="orderForm" class="mt-4">
+                <div id="orderForm" class="mt-4 needs-validation" novalidate>
                   <h6 class="mb-3">Thông tin đặt món</h6>
                   <div class="mb-3">
-                    <label class="form-label">Địa chỉ giao hàng (Số phòng hoặc địa chỉ)</label>
-                    <input type="text" id="orderDeliveryAddress" class="form-control" placeholder="VD: Phòng 101 hoặc Nhà hàng">
+                    <label class="form-label">Địa chỉ giao hàng <span class="text-danger">*</span></label>
+                    <input type="text" id="orderDeliveryAddress" class="form-control" 
+                           placeholder="VD: Phòng 101 hoặc Nhà hàng" 
+                           required 
+                           minlength="3" 
+                           maxlength="500"
+                           data-label="Địa chỉ giao hàng">
+                    <div class="invalid-feedback"></div>
                   </div>
                   <div class="mb-3">
                     <label class="form-label">Thời gian mong muốn nhận món (tùy chọn)</label>
                     <input type="datetime-local" id="orderDeliveryTime" class="form-control">
+                    <small class="text-muted">Thời gian phải sau thời điểm hiện tại</small>
                   </div>
                   <div class="mb-3">
                     <label class="form-label">Ghi chú đặc biệt (tùy chọn)</label>
-                    <textarea id="orderSpecialRequests" class="form-control" rows="2" placeholder="VD: Không cay, không hành..."></textarea>
+                    <textarea id="orderSpecialRequests" class="form-control" rows="2" 
+                              placeholder="VD: Không cay, không hành..." 
+                              maxlength="500"></textarea>
+                    <small class="text-muted">Tối đa 500 ký tự</small>
                   </div>
                   <div class="mb-3">
-                    <label class="form-label">Phương thức thanh toán</label>
-                    <select id="orderPaymentMethod" class="form-select">
+                    <label class="form-label">Phương thức thanh toán <span class="text-danger">*</span></label>
+                    <select id="orderPaymentMethod" class="form-select" required data-label="Phương thức thanh toán">
+                      <option value="">-- Chọn phương thức thanh toán --</option>
                       <option value="Cash">💵 Thanh toán tại nhà hàng</option>
                       <option value="QR">💳 Chuyển khoản QR</option>
                       <option value="RoomCharge">🏨 Charge vào phòng (nếu có booking)</option>
                     </select>
+                    <div class="invalid-feedback"></div>
                   </div>
                 </div>
               </div>
@@ -1449,6 +1461,13 @@
     
     // Update cart modal content
     function updateCartModalContent() {
+      // Set min datetime for delivery time input
+      const deliveryTimeInput = document.getElementById('orderDeliveryTime');
+      if (deliveryTimeInput) {
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        deliveryTimeInput.min = now.toISOString().slice(0, 16);
+      }
       const cartItemsList = document.getElementById('cartItemsList');
       const cartTotal = document.getElementById('cartTotal');
       
@@ -1623,16 +1642,91 @@
           throw new Error('Không có món nào hợp lệ để đặt hàng. Tất cả món đều có số lượng bằng 0.');
         }
         
+        // Validate form using Validation utility
+        const orderForm = document.getElementById('orderForm');
+        if (orderForm && typeof window.Validation !== 'undefined') {
+          const validationResult = window.Validation.validateForm(orderForm);
+          if (!validationResult.valid) {
+            const firstError = validationResult.errors[0];
+            if (typeof showToast === 'function') {
+              showToast(firstError.message, 'error');
+            } else {
+              alert(firstError.message);
+            }
+            firstError.input.focus();
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.innerHTML = '<i class="icon-check"></i> Đặt món ngay';
+            }
+            return;
+          }
+        }
+        
         // Validate delivery address (required for ordering)
         const deliveryAddress = document.getElementById('orderDeliveryAddress')?.value?.trim() || '';
-        if (!deliveryAddress) {
-          const message = 'Vui lòng nhập địa chỉ giao hàng (VD: Phòng 101 hoặc Nhà hàng)';
+        if (!deliveryAddress || deliveryAddress.length < 3) {
+          const message = 'Vui lòng nhập địa chỉ giao hàng (tối thiểu 3 ký tự, VD: Phòng 101 hoặc Nhà hàng)';
           if (typeof showToast === 'function') {
             showToast(message, 'warning');
           } else {
             alert(message);
           }
           document.getElementById('orderDeliveryAddress')?.focus();
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="icon-check"></i> Đặt món ngay';
+          }
+          return;
+        }
+        
+        // Validate payment method
+        const paymentMethod = document.getElementById('orderPaymentMethod')?.value || '';
+        if (!paymentMethod) {
+          const message = 'Vui lòng chọn phương thức thanh toán';
+          if (typeof showToast === 'function') {
+            showToast(message, 'warning');
+          } else {
+            alert(message);
+          }
+          document.getElementById('orderPaymentMethod')?.focus();
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="icon-check"></i> Đặt món ngay';
+          }
+          return;
+        }
+        
+        // Validate delivery time (if provided, must be in the future)
+        const deliveryTimeInput = document.getElementById('orderDeliveryTime');
+        if (deliveryTimeInput?.value) {
+          const deliveryTime = new Date(deliveryTimeInput.value);
+          const now = new Date();
+          if (deliveryTime <= now) {
+            const message = 'Thời gian nhận món phải sau thời điểm hiện tại';
+            if (typeof showToast === 'function') {
+              showToast(message, 'warning');
+            } else {
+              alert(message);
+            }
+            deliveryTimeInput.focus();
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.innerHTML = '<i class="icon-check"></i> Đặt món ngay';
+            }
+            return;
+          }
+        }
+        
+        // Validate special requests length
+        const specialRequests = document.getElementById('orderSpecialRequests')?.value || '';
+        if (specialRequests.length > 500) {
+          const message = 'Ghi chú đặc biệt không được vượt quá 500 ký tự';
+          if (typeof showToast === 'function') {
+            showToast(message, 'warning');
+          } else {
+            alert(message);
+          }
+          document.getElementById('orderSpecialRequests')?.focus();
           if (submitBtn) {
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<i class="icon-check"></i> Đặt món ngay';
