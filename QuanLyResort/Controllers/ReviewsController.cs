@@ -370,10 +370,23 @@ public class ReviewsController : ControllerBase
         [FromQuery] DateTime? fromDate = null,
         [FromQuery] DateTime? toDate = null)
     {
-        var query = _context.Reviews
-            .Include(r => r.Customer)
-            .Include(r => r.Room)
-            .AsQueryable();
+        const string logPrefix = "[ReviewsController.GetAllReviewsForAdmin]";
+        var timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff");
+        Console.WriteLine($"{logPrefix} [{timestamp}] ========== START ==========");
+        Console.WriteLine($"{logPrefix} [{timestamp}] Request params: status={status}, roomId={roomId}, rating={rating}, search={search}, fromDate={fromDate}, toDate={toDate}");
+        
+        try
+        {
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
+            Console.WriteLine($"{logPrefix} [{timestamp}] User: {userEmail}, Role: {userRole}");
+            
+            var query = _context.Reviews
+                .Include(r => r.Customer)
+                .Include(r => r.Room)
+                .AsQueryable();
+            
+            Console.WriteLine($"{logPrefix} [{timestamp}] Initial query count: {await query.CountAsync()}");
 
         // Filter by status
         if (status == "approved")
@@ -418,34 +431,47 @@ public class ReviewsController : ControllerBase
             query = query.Where(r => r.CreatedAt <= toDate.Value);
         }
 
-        var reviews = await query
-            .OrderByDescending(r => r.CreatedAt)
-            .Select(r => new
-            {
-                r.ReviewId,
-                r.Rating,
-                r.Comment,
-                r.Response,
-                r.ResponseDate,
-                r.RespondedBy,
-                r.IsApproved,
-                r.IsVisible,
-                r.CreatedAt,
-                r.UpdatedAt,
-                CustomerName = r.Customer != null ? 
-                    (r.Customer.FullName ?? "Khách hàng") : 
-                    "Khách hàng",
-                CustomerEmail = r.Customer != null ? r.Customer.Email : null,
-                RoomNumber = r.Room != null ? r.Room.RoomNumber : null,
-                RoomType = r.Room != null ? r.Room.RoomType : null
-            })
-            .ToListAsync();
+            var reviews = await query
+                .OrderByDescending(r => r.CreatedAt)
+                .Select(r => new
+                {
+                    r.ReviewId,
+                    r.Rating,
+                    r.Comment,
+                    r.Response,
+                    r.ResponseDate,
+                    r.RespondedBy,
+                    r.IsApproved,
+                    r.IsVisible,
+                    r.CreatedAt,
+                    r.UpdatedAt,
+                    CustomerName = r.Customer != null ? 
+                        (r.Customer.FullName ?? "Khách hàng") : 
+                        "Khách hàng",
+                    CustomerEmail = r.Customer != null ? r.Customer.Email : null,
+                    RoomNumber = r.Room != null ? r.Room.RoomNumber : null,
+                    RoomType = r.Room != null ? r.Room.RoomType : null
+                })
+                .ToListAsync();
 
-        return Ok(new
+            Console.WriteLine($"{logPrefix} [{timestamp}] ✅ Found {reviews.Count} reviews");
+            Console.WriteLine($"{logPrefix} [{timestamp}] ========== END (SUCCESS) ==========");
+            
+            return Ok(new
+            {
+                reviews,
+                total = reviews.Count
+            });
+        }
+        catch (Exception ex)
         {
-            reviews,
-            total = reviews.Count
-        });
+            Console.WriteLine($"{logPrefix} [{timestamp}] ❌ ========== ERROR ==========");
+            Console.WriteLine($"{logPrefix} [{timestamp}] ❌ Error message: {ex.Message}");
+            Console.WriteLine($"{logPrefix} [{timestamp}] ❌ Stack trace: {ex.StackTrace}");
+            Console.WriteLine($"{logPrefix} [{timestamp}] ❌ Inner exception: {ex.InnerException?.Message}");
+            Console.WriteLine($"{logPrefix} [{timestamp}] ========== END (ERROR) ==========");
+            return StatusCode(500, new { message = "Lỗi khi tải đánh giá", error = ex.Message });
+        }
     }
 
     /// <summary>

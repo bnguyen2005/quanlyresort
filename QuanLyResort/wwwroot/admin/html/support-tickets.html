@@ -324,9 +324,18 @@
 
     // Load tickets
     async function loadTickets() {
+      const logPrefix = '🔵 [SupportTickets]';
+      const timestamp = new Date().toISOString();
+      console.log(`${logPrefix} [${timestamp}] ========== START loadTickets ==========`);
+      
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('token') || localStorage.getItem('adminToken');
+        console.log(`${logPrefix} [${timestamp}] Token exists:`, !!token);
+        console.log(`${logPrefix} [${timestamp}] Token length:`, token ? token.length : 0);
+        console.log(`${logPrefix} [${timestamp}] Token preview:`, token ? token.substring(0, 20) + '...' : 'null');
+        
         if (!token) {
+          console.error(`${logPrefix} [${timestamp}] ❌ No token found, redirecting to login`);
           window.location.href = 'auth-login-basic.html';
           return;
         }
@@ -337,32 +346,69 @@
         const category = document.getElementById('filterCategory')?.value;
         const search = document.getElementById('filterSearch')?.value;
 
+        console.log(`${logPrefix} [${timestamp}] Filters:`, { status, priority, category, search });
+
         if (status) params.append('status', status);
         if (priority) params.append('priority', priority);
         if (category) params.append('category', category);
         if (search) params.append('search', search);
 
         const url = `${API_BASE}/supporttickets${params.toString() ? '?' + params.toString() : ''}`;
+        console.log(`${logPrefix} [${timestamp}] Request URL:`, url);
+        console.log(`${logPrefix} [${timestamp}] API_BASE:`, API_BASE);
+        
+        const requestHeaders = {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        };
+        console.log(`${logPrefix} [${timestamp}] Request headers:`, { ...requestHeaders, 'Authorization': 'Bearer ***' });
+        
         const response = await fetch(url, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
+          headers: requestHeaders
         });
 
+        console.log(`${logPrefix} [${timestamp}] Response status:`, response.status, response.statusText);
+        console.log(`${logPrefix} [${timestamp}] Response ok:`, response.ok);
+        console.log(`${logPrefix} [${timestamp}] Response headers:`, Object.fromEntries(response.headers.entries()));
+
         if (!response.ok) {
+          const errorText = await response.text().catch(() => 'Cannot read error');
+          console.error(`${logPrefix} [${timestamp}] ❌ Response error:`, {
+            status: response.status,
+            statusText: response.statusText,
+            body: errorText
+          });
+          
           if (response.status === 401) {
+            console.error(`${logPrefix} [${timestamp}] ❌ Unauthorized, redirecting to login`);
             window.location.href = 'auth-login-basic.html';
             return;
           }
-          throw new Error('Failed to load tickets');
+          throw new Error(`HTTP ${response.status}: ${response.statusText}. ${errorText}`);
         }
 
-        allTickets = await response.json();
+        const responseData = await response.json();
+        console.log(`${logPrefix} [${timestamp}] ✅ Response data type:`, Array.isArray(responseData) ? 'Array' : typeof responseData);
+        console.log(`${logPrefix} [${timestamp}] ✅ Response data length:`, Array.isArray(responseData) ? responseData.length : 'N/A');
+        console.log(`${logPrefix} [${timestamp}] ✅ Response data preview:`, JSON.stringify(responseData).substring(0, 200));
+        
+        allTickets = Array.isArray(responseData) ? responseData : (responseData.items || responseData.data || []);
+        console.log(`${logPrefix} [${timestamp}] ✅ Processed tickets count:`, allTickets.length);
+        
         renderTickets();
+        console.log(`${logPrefix} [${timestamp}] ========== END loadTickets (SUCCESS) ==========`);
       } catch (error) {
-        console.error('[Tickets] Error loading tickets:', error);
+        console.error(`${logPrefix} [${timestamp}] ❌ ========== ERROR in loadTickets ==========`);
+        console.error(`${logPrefix} [${timestamp}] ❌ Error name:`, error.name);
+        console.error(`${logPrefix} [${timestamp}] ❌ Error message:`, error.message);
+        console.error(`${logPrefix} [${timestamp}] ❌ Error stack:`, error.stack);
+        console.error(`${logPrefix} [${timestamp}] ❌ Full error:`, error);
+        console.error(`${logPrefix} [${timestamp}] ========== END loadTickets (ERROR) ==========`);
+        
         if (typeof showToast === 'function') {
           showToast('Lỗi khi tải tickets: ' + error.message, 'danger');
+        } else {
+          alert('Lỗi khi tải tickets: ' + error.message);
         }
       }
     }

@@ -360,11 +360,22 @@ public class SupportTicketsController : ControllerBase
         [FromQuery] string? priority = null,
         [FromQuery] string? search = null)
     {
+        const string logPrefix = "[SupportTicketsController.GetAllTickets]";
+        var timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff");
+        Console.WriteLine($"{logPrefix} [{timestamp}] ========== START ==========");
+        Console.WriteLine($"{logPrefix} [{timestamp}] Request params: status={status}, category={category}, priority={priority}, search={search}");
+        
         try
         {
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+            var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
+            Console.WriteLine($"{logPrefix} [{timestamp}] User: {userEmail}, Role: {userRole}");
+            
             var query = _context.SupportTickets
                 .Include(t => t.Customer)
                 .AsQueryable();
+            
+            Console.WriteLine($"{logPrefix} [{timestamp}] Initial query count: {await query.CountAsync()}");
 
             if (!string.IsNullOrEmpty(status))
                 query = query.Where(t => t.Status == status);

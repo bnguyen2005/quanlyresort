@@ -275,35 +275,73 @@
     }
 
     async function loadStatistics() {
+      const logPrefix = '💰 [PaymentHistory-Statistics]';
+      const timestamp = new Date().toISOString();
+      console.log(`${logPrefix} [${timestamp}] ========== START loadStatistics ==========`);
+      
       try {
         const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
-        const response = await fetch(`${API_BASE}/invoices/statistics`, {
+        console.log(`${logPrefix} [${timestamp}] Token exists:`, !!token);
+        
+        const url = `${API_BASE}/invoices/statistics`;
+        console.log(`${logPrefix} [${timestamp}] Request URL:`, url);
+        console.log(`${logPrefix} [${timestamp}] API_BASE:`, API_BASE);
+        
+        const response = await fetch(url, {
           headers: {
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
           }
         });
 
+        console.log(`${logPrefix} [${timestamp}] Response status:`, response.status, response.statusText);
+
         if (response.status === 401) {
+          const errorText = await response.text().catch(() => 'Cannot read error');
+          console.error(`${logPrefix} [${timestamp}] ❌ Unauthorized:`, errorText);
           window.location.href = 'login.html';
           return;
         }
 
-        if (!response.ok) throw new Error('Failed to load statistics');
+        if (!response.ok) {
+          const errorText = await response.text().catch(() => 'Cannot read error');
+          console.error(`${logPrefix} [${timestamp}] ❌ Response error:`, {
+            status: response.status,
+            statusText: response.statusText,
+            body: errorText
+          });
+          throw new Error(`HTTP ${response.status}: ${response.statusText}. ${errorText}`);
+        }
 
         const data = await response.json();
+        console.log(`${logPrefix} [${timestamp}] ✅ Response data:`, data);
+        
         document.getElementById('totalInvoices').textContent = data.totalInvoices || 0;
         document.getElementById('paidInvoices').textContent = data.paidInvoices || 0;
         document.getElementById('pendingInvoices').textContent = data.pendingInvoices || 0;
         document.getElementById('totalRevenue').textContent = formatCurrency(data.totalRevenue || 0);
+        
+        console.log(`${logPrefix} [${timestamp}] ========== END loadStatistics (SUCCESS) ==========`);
       } catch (error) {
-        console.error('[Payments] Error loading statistics:', error);
+        console.error(`${logPrefix} [${timestamp}] ❌ ========== ERROR in loadStatistics ==========`);
+        console.error(`${logPrefix} [${timestamp}] ❌ Error:`, error);
+        console.error(`${logPrefix} [${timestamp}] ========== END loadStatistics (ERROR) ==========`);
       }
     }
 
     async function loadPayments() {
+      const logPrefix = '💰 [PaymentHistory]';
+      const timestamp = new Date().toISOString();
+      console.log(`${logPrefix} [${timestamp}] ========== START loadPayments ==========`);
+      
       try {
         const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
+        console.log(`${logPrefix} [${timestamp}] Token exists:`, !!token);
+        console.log(`${logPrefix} [${timestamp}] Token length:`, token ? token.length : 0);
+        console.log(`${logPrefix} [${timestamp}] Token preview:`, token ? token.substring(0, 20) + '...' : 'null');
+        
         if (!token) {
+          console.error(`${logPrefix} [${timestamp}] ❌ No token found, redirecting to login`);
           window.location.href = 'login.html';
           return;
         }
@@ -313,31 +351,67 @@
         const fromDate = document.getElementById('filterFromDate').value;
         const toDate = document.getElementById('filterToDate').value;
 
+        console.log(`${logPrefix} [${timestamp}] Filters:`, { search, status, fromDate, toDate });
+
         let url = `${API_BASE}/invoices?`;
         if (search) url += `search=${encodeURIComponent(search)}&`;
         if (status) url += `status=${encodeURIComponent(status)}&`;
         if (fromDate) url += `fromDate=${fromDate}&`;
         if (toDate) url += `toDate=${toDate}&`;
 
+        console.log(`${logPrefix} [${timestamp}] Request URL:`, url);
+        console.log(`${logPrefix} [${timestamp}] API_BASE:`, API_BASE);
+        
+        const requestHeaders = {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        };
+        console.log(`${logPrefix} [${timestamp}] Request headers:`, { ...requestHeaders, 'Authorization': 'Bearer ***' });
+
         const response = await fetch(url, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
+          headers: requestHeaders
         });
 
+        console.log(`${logPrefix} [${timestamp}] Response status:`, response.status, response.statusText);
+        console.log(`${logPrefix} [${timestamp}] Response ok:`, response.ok);
+        console.log(`${logPrefix} [${timestamp}] Response headers:`, Object.fromEntries(response.headers.entries()));
+
         if (response.status === 401) {
+          const errorText = await response.text().catch(() => 'Cannot read error');
+          console.error(`${logPrefix} [${timestamp}] ❌ Unauthorized:`, errorText);
           window.location.href = 'login.html';
           return;
         }
 
-        if (!response.ok) throw new Error('Failed to load payments');
+        if (!response.ok) {
+          const errorText = await response.text().catch(() => 'Cannot read error');
+          console.error(`${logPrefix} [${timestamp}] ❌ Response error:`, {
+            status: response.status,
+            statusText: response.statusText,
+            body: errorText
+          });
+          throw new Error(`HTTP ${response.status}: ${response.statusText}. ${errorText}`);
+        }
 
         const invoices = await response.json();
+        console.log(`${logPrefix} [${timestamp}] ✅ Response data type:`, Array.isArray(invoices) ? 'Array' : typeof invoices);
+        console.log(`${logPrefix} [${timestamp}] ✅ Invoices count:`, Array.isArray(invoices) ? invoices.length : 'N/A');
+        console.log(`${logPrefix} [${timestamp}] ✅ Response data preview:`, JSON.stringify(invoices).substring(0, 300));
+        
         renderPayments(Array.isArray(invoices) ? invoices : []);
+        console.log(`${logPrefix} [${timestamp}] ========== END loadPayments (SUCCESS) ==========`);
       } catch (error) {
-        console.error('[Payments] Error loading payments:', error);
+        console.error(`${logPrefix} [${timestamp}] ❌ ========== ERROR in loadPayments ==========`);
+        console.error(`${logPrefix} [${timestamp}] ❌ Error name:`, error.name);
+        console.error(`${logPrefix} [${timestamp}] ❌ Error message:`, error.message);
+        console.error(`${logPrefix} [${timestamp}] ❌ Error stack:`, error.stack);
+        console.error(`${logPrefix} [${timestamp}] ❌ Full error:`, error);
+        console.error(`${logPrefix} [${timestamp}] ========== END loadPayments (ERROR) ==========`);
+        
         if (typeof showToast === 'function') {
           showToast('Lỗi khi tải lịch sử thanh toán: ' + error.message, 'error');
+        } else {
+          alert('Lỗi khi tải lịch sử thanh toán: ' + error.message);
         }
       }
     }
