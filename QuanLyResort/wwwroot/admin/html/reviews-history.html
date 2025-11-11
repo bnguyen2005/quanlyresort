@@ -442,7 +442,7 @@
         if (typeof showToast === 'function') {
           showToast('Đã duyệt đánh giá thành công', 'success');
         }
-        loadReviews();
+        if (window.loadReviews) window.loadReviews();
       } catch (error) {
         console.error('[Reviews] Error approving review:', error);
         if (typeof showToast === 'function') {
@@ -468,7 +468,7 @@
         if (typeof showToast === 'function') {
           showToast(`Đã ${isVisible ? 'hiển thị' : 'ẩn'} đánh giá`, 'success');
         }
-        loadReviews();
+        if (window.loadReviews) window.loadReviews();
       } catch (error) {
         console.error('[Reviews] Error toggling visibility:', error);
         if (typeof showToast === 'function') {
