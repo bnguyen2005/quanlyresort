@@ -511,8 +511,8 @@
             </div>
             <div class="col-md-6">
               <strong>Phòng:</strong> ${roomInfo}<br>
-              <strong>Ngày phát hành:</strong> ${formatDate(invoice.issueDate)}<br>
-              <strong>Ngày thanh toán:</strong> ${invoice.paidDate ? formatDate(invoice.paidDate) : '-'}<br>
+              <strong>Ngày phát hành:</strong> ${formatDateLocal(invoice.issueDate)}<br>
+              <strong>Ngày thanh toán:</strong> ${invoice.paidDate ? formatDateLocal(invoice.paidDate) : '-'}<br>
               <strong>Trạng thái:</strong> ${getStatusBadge(invoice.status)}
             </div>
           </div>
@@ -521,15 +521,15 @@
               <table class="table table-bordered">
                 <tr>
                   <th>Tổng tiền</th>
-                  <td><strong>${formatCurrency(invoice.totalAmount)}</strong></td>
+                  <td><strong>${formatCurrencyLocal(invoice.totalAmount)}</strong></td>
                 </tr>
                 <tr>
                   <th>Đã thanh toán</th>
-                  <td>${formatCurrency(invoice.paidAmount)}</td>
+                  <td>${formatCurrencyLocal(invoice.paidAmount)}</td>
                 </tr>
                 <tr>
                   <th>Còn lại</th>
-                  <td><strong>${formatCurrency(invoice.balanceDue)}</strong></td>
+                  <td><strong>${formatCurrencyLocal(invoice.balanceDue)}</strong></td>
                 </tr>
                 <tr>
                   <th>Phương thức thanh toán</th>
