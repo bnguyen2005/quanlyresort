@@ -406,7 +406,16 @@
 
       if (allTickets.length === 0) {
         tbody.innerHTML = '<tr><td colspan="9" class="text-center py-4">Không có ticket nào</td></tr>';
-        if (ticketsTable) ticketsTable.clear().draw();
+        try {
+          if (ticketsTable && $.fn.DataTable.isDataTable('#ticketsTable')) {
+            ticketsTable.clear().draw();
+          } else {
+            // Nếu DataTable chưa được khởi tạo, khởi tạo nó
+            initializeDataTable();
+          }
+        } catch (e) {
+          console.warn('[Tickets] Error clearing DataTable:', e);
+        }
         return;
       }
 
