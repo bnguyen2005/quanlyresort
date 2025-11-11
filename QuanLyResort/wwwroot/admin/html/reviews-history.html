@@ -97,7 +97,7 @@
                 <div class="row g-3">
                   <div class="col-md-3">
                     <label class="form-label">Trạng thái</label>
-                    <select class="form-select" id="filterStatus" onchange="loadReviews()">
+                    <select class="form-select" id="filterStatus" onchange="window.loadReviews && window.loadReviews()">
                       <option value="all">Tất cả</option>
                       <option value="approved">Đã duyệt</option>
                       <option value="pending">Chờ duyệt</option>
@@ -106,7 +106,7 @@
                   </div>
                   <div class="col-md-3">
                     <label class="form-label">Đánh giá</label>
-                    <select class="form-select" id="filterRating" onchange="loadReviews()">
+                    <select class="form-select" id="filterRating" onchange="window.loadReviews && window.loadReviews()">
                       <option value="">Tất cả</option>
                       <option value="5">5 sao</option>
                       <option value="4">4 sao</option>
@@ -117,15 +117,15 @@
                   </div>
                   <div class="col-md-3">
                     <label class="form-label">Từ ngày</label>
-                    <input type="date" class="form-control" id="filterFromDate" onchange="loadReviews()">
+                    <input type="date" class="form-control" id="filterFromDate" onchange="window.loadReviews && window.loadReviews()">
                   </div>
                   <div class="col-md-3">
                     <label class="form-label">Đến ngày</label>
-                    <input type="date" class="form-control" id="filterToDate" onchange="loadReviews()">
+                    <input type="date" class="form-control" id="filterToDate" onchange="window.loadReviews && window.loadReviews()">
                   </div>
                   <div class="col-md-6">
                     <label class="form-label">Tìm kiếm</label>
-                    <input type="text" class="form-control" id="filterSearch" placeholder="Tên khách hàng, phòng, nội dung..." onkeyup="debounce(loadReviews, 300)()">
+                    <input type="text" class="form-control" id="filterSearch" placeholder="Tên khách hàng, phòng, nội dung..." onkeyup="debounce(() => window.loadReviews && window.loadReviews(), 300)()">
                   </div>
                 </div>
               </div>
@@ -217,19 +217,25 @@
       return '⭐'.repeat(rating) + '☆'.repeat(5 - rating);
     }
 
-    function formatDate(dateString) {
-      if (!dateString) return '-';
-      const date = new Date(dateString);
-      return date.toLocaleDateString('vi-VN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
+    // Format date function - check if already exists to avoid conflicts
+    if (typeof window.formatReviewDate === 'undefined') {
+      window.formatReviewDate = function(dateString) {
+        if (!dateString) return '-';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('vi-VN', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      };
     }
+    
+    // Alias for backward compatibility
+    const formatDate = window.formatReviewDate;
 
-    async function loadReviews() {
+    window.loadReviews = async function() {
       const logPrefix = '⭐ [ReviewsHistory]';
       const timestamp = new Date().toISOString();
       console.log(`${logPrefix} [${timestamp}] ========== START loadReviews ==========`);
@@ -344,7 +350,7 @@
               ${review.isApproved && review.isVisible ? 'Đã duyệt' : review.isApproved ? 'Đã ẩn' : 'Chờ duyệt'}
             </span>
           </td>
-          <td>${formatDate(review.createdAt)}</td>
+          <td>${window.formatReviewDate(review.createdAt)}</td>
           <td>
             <button class="btn btn-sm btn-info" onclick="viewReview(${review.reviewId})">
               <i class="bx bx-show"></i>
@@ -392,7 +398,7 @@
             <strong>Khách hàng:</strong> ${review.customerName || 'Khách hàng'}<br>
             <strong>Phòng:</strong> ${review.roomNumber || '-'}<br>
             <strong>Đánh giá:</strong> ${getStars(review.rating)} (${review.rating}/5)<br>
-            <strong>Ngày tạo:</strong> ${formatDate(review.createdAt)}
+            <strong>Ngày tạo:</strong> ${window.formatReviewDate(review.createdAt)}
           </div>
           <div class="mb-3">
             <strong>Nội dung:</strong>
@@ -402,7 +408,7 @@
             <div class="mb-3">
               <strong>Phản hồi từ ${review.respondedBy || 'Admin'}:</strong>
               <p class="mt-2">${review.response}</p>
-              <small class="text-muted">${formatDate(review.responseDate)}</small>
+              <small class="text-muted">${window.formatReviewDate(review.responseDate)}</small>
             </div>
           ` : ''}
         `;
@@ -473,7 +479,9 @@
 
     // Initialize
     document.addEventListener('DOMContentLoaded', function() {
-      loadReviews();
+      if (window.loadReviews) {
+        window.loadReviews();
+      }
     });
   </script>
 </body>
