@@ -422,11 +422,17 @@ public class SupportTicketsController : ControllerBase
                 })
                 .ToListAsync();
 
+            Console.WriteLine($"{logPrefix} [{timestamp}] ✅ Found {tickets.Count} tickets");
+            Console.WriteLine($"{logPrefix} [{timestamp}] ========== END (SUCCESS) ==========");
             return Ok(tickets);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[SupportTicketsController] Error: {ex.Message}");
+            Console.WriteLine($"{logPrefix} [{timestamp}] ❌ ========== ERROR ==========");
+            Console.WriteLine($"{logPrefix} [{timestamp}] ❌ Error message: {ex.Message}");
+            Console.WriteLine($"{logPrefix} [{timestamp}] ❌ Stack trace: {ex.StackTrace}");
+            Console.WriteLine($"{logPrefix} [{timestamp}] ❌ Inner exception: {ex.InnerException?.Message}");
+            Console.WriteLine($"{logPrefix} [{timestamp}] ========== END (ERROR) ==========");
             return StatusCode(500, new { message = "Lỗi khi tải tickets", error = ex.Message });
         }
     }
