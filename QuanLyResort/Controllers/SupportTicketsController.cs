@@ -430,7 +430,7 @@ public class SupportTicketsController : ControllerBase
         catch (Exception ex)
         {
             // Only log errors, not verbose debug info
-            _logger.LogError(ex, "Error getting support tickets");
+            Console.WriteLine($"[SupportTicketsController.GetAllTickets] ❌ Error: {ex.Message}");
             return StatusCode(500, new { message = "Lỗi khi tải tickets", error = ex.Message });
         }
     }

@@ -80,7 +80,7 @@ public class InvoicesController : ControllerBase
         catch (Exception ex)
         {
             // Only log errors, not verbose debug info
-            _logger.LogError(ex, "Error getting invoices");
+            Console.WriteLine($"[InvoicesController.GetAllInvoices] ❌ Error: {ex.Message}");
             return StatusCode(500, new { message = "Failed to load invoices", error = ex.Message });
         }
     }
