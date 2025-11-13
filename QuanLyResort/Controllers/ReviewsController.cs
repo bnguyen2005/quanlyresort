@@ -370,23 +370,24 @@ public class ReviewsController : ControllerBase
         [FromQuery] DateTime? fromDate = null,
         [FromQuery] DateTime? toDate = null)
     {
-        const string logPrefix = "[ReviewsController.GetAllReviewsForAdmin]";
-        var timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff");
-        Console.WriteLine($"{logPrefix} [{timestamp}] ========== START ==========");
-        Console.WriteLine($"{logPrefix} [{timestamp}] Request params: status={status}, roomId={roomId}, rating={rating}, search={search}, fromDate={fromDate}, toDate={toDate}");
+        // Reduced logging to avoid Railway rate limit (500 logs/sec)
+        // const string logPrefix = "[ReviewsController.GetAllReviewsForAdmin]";
+        // var timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff");
+        // Console.WriteLine($"{logPrefix} [{timestamp}] ========== START ==========");
+        // Console.WriteLine($"{logPrefix} [{timestamp}] Request params: status={status}, roomId={roomId}, rating={rating}, search={search}, fromDate={fromDate}, toDate={toDate}");
         
         try
         {
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
             var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
-            Console.WriteLine($"{logPrefix} [{timestamp}] User: {userEmail}, Role: {userRole}");
+            // Console.WriteLine($"{logPrefix} [{timestamp}] User: {userEmail}, Role: {userRole}");
             
             var query = _context.Reviews
                 .Include(r => r.Customer)
                 .Include(r => r.Room)
                 .AsQueryable();
             
-            Console.WriteLine($"{logPrefix} [{timestamp}] Initial query count: {await query.CountAsync()}");
+            // Console.WriteLine($"{logPrefix} [{timestamp}] Initial query count: {await query.CountAsync()}");
 
         // Filter by status
         if (status == "approved")
@@ -454,8 +455,8 @@ public class ReviewsController : ControllerBase
                 })
                 .ToListAsync();
 
-            Console.WriteLine($"{logPrefix} [{timestamp}] ✅ Found {reviews.Count} reviews");
-            Console.WriteLine($"{logPrefix} [{timestamp}] ========== END (SUCCESS) ==========");
+            // Console.WriteLine($"{logPrefix} [{timestamp}] ✅ Found {reviews.Count} reviews");
+            // Console.WriteLine($"{logPrefix} [{timestamp}] ========== END (SUCCESS) ==========");
             
             return Ok(new
             {
@@ -465,11 +466,8 @@ public class ReviewsController : ControllerBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"{logPrefix} [{timestamp}] ❌ ========== ERROR ==========");
-            Console.WriteLine($"{logPrefix} [{timestamp}] ❌ Error message: {ex.Message}");
-            Console.WriteLine($"{logPrefix} [{timestamp}] ❌ Stack trace: {ex.StackTrace}");
-            Console.WriteLine($"{logPrefix} [{timestamp}] ❌ Inner exception: {ex.InnerException?.Message}");
-            Console.WriteLine($"{logPrefix} [{timestamp}] ========== END (ERROR) ==========");
+            // Only log errors, not verbose debug info
+            _logger.LogError(ex, "Error getting reviews for admin");
             return StatusCode(500, new { message = "Lỗi khi tải đánh giá", error = ex.Message });
         }
     }

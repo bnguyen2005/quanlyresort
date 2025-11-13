@@ -3,8 +3,10 @@
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
+# PORT sẽ được đọc từ environment variable khi runtime
+# Sử dụng giá trị mặc định 10000 nếu không được set
+ENV PORT=10000
 EXPOSE 10000
-ENV ASPNETCORE_URLS=http://0.0.0.0:10000
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
@@ -28,5 +30,8 @@ RUN dotnet publish "QuanLyResort.csproj" \
 FROM base AS final
 WORKDIR /app
 COPY --from=build /app/publish .
-ENTRYPOINT ["dotnet", "QuanLyResort.dll"]
+# Copy entrypoint script
+COPY QuanLyResort/docker-entrypoint.sh /app/docker-entrypoint.sh
+RUN chmod +x /app/docker-entrypoint.sh
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
 

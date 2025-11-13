@@ -28,16 +28,17 @@ public class InvoicesController : ControllerBase
     [Authorize(Roles = "Admin,Manager,Accounting")]
     public async Task<IActionResult> GetAllInvoices([FromQuery] string? search = null, [FromQuery] string? status = null, [FromQuery] DateTime? fromDate = null, [FromQuery] DateTime? toDate = null)
     {
-        const string logPrefix = "[InvoicesController.GetAllInvoices]";
-        var timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff");
-        Console.WriteLine($"{logPrefix} [{timestamp}] ========== START ==========");
-        Console.WriteLine($"{logPrefix} [{timestamp}] Request params: search={search}, status={status}, fromDate={fromDate}, toDate={toDate}");
+        // Reduced logging to avoid Railway rate limit (500 logs/sec)
+        // const string logPrefix = "[InvoicesController.GetAllInvoices]";
+        // var timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff");
+        // Console.WriteLine($"{logPrefix} [{timestamp}] ========== START ==========");
+        // Console.WriteLine($"{logPrefix} [{timestamp}] Request params: search={search}, status={status}, fromDate={fromDate}, toDate={toDate}");
         
         try
         {
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
             var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
-            Console.WriteLine($"{logPrefix} [{timestamp}] User: {userEmail}, Role: {userRole}");
+            // Console.WriteLine($"{logPrefix} [{timestamp}] User: {userEmail}, Role: {userRole}");
             
             var query = _context.Invoices
                 .AsNoTracking()
@@ -47,7 +48,7 @@ public class InvoicesController : ControllerBase
                 .Include(i => i.Customer)
                 .AsQueryable();
             
-            Console.WriteLine($"{logPrefix} [{timestamp}] Initial query count: {await query.CountAsync()}");
+            // Console.WriteLine($"{logPrefix} [{timestamp}] Initial query count: {await query.CountAsync()}");
 
             if (!string.IsNullOrEmpty(search))
             {
@@ -72,17 +73,14 @@ public class InvoicesController : ControllerBase
 
             var invoices = await query.OrderByDescending(i => i.IssueDate).ToListAsync();
             
-            Console.WriteLine($"{logPrefix} [{timestamp}] ✅ Found {invoices.Count} invoices");
-            Console.WriteLine($"{logPrefix} [{timestamp}] ========== END (SUCCESS) ==========");
+            // Console.WriteLine($"{logPrefix} [{timestamp}] ✅ Found {invoices.Count} invoices");
+            // Console.WriteLine($"{logPrefix} [{timestamp}] ========== END (SUCCESS) ==========");
             return Ok(invoices);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"{logPrefix} [{timestamp}] ❌ ========== ERROR ==========");
-            Console.WriteLine($"{logPrefix} [{timestamp}] ❌ Error message: {ex.Message}");
-            Console.WriteLine($"{logPrefix} [{timestamp}] ❌ Stack trace: {ex.StackTrace}");
-            Console.WriteLine($"{logPrefix} [{timestamp}] ❌ Inner exception: {ex.InnerException?.Message}");
-            Console.WriteLine($"{logPrefix} [{timestamp}] ========== END (ERROR) ==========");
+            // Only log errors, not verbose debug info
+            _logger.LogError(ex, "Error getting invoices");
             return StatusCode(500, new { message = "Failed to load invoices", error = ex.Message });
         }
     }

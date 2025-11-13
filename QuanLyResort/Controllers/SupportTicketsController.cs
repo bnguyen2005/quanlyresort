@@ -360,22 +360,23 @@ public class SupportTicketsController : ControllerBase
         [FromQuery] string? priority = null,
         [FromQuery] string? search = null)
     {
-        const string logPrefix = "[SupportTicketsController.GetAllTickets]";
-        var timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff");
-        Console.WriteLine($"{logPrefix} [{timestamp}] ========== START ==========");
-        Console.WriteLine($"{logPrefix} [{timestamp}] Request params: status={status}, category={category}, priority={priority}, search={search}");
+        // Reduced logging to avoid Railway rate limit (500 logs/sec)
+        // const string logPrefix = "[SupportTicketsController.GetAllTickets]";
+        // var timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff");
+        // Console.WriteLine($"{logPrefix} [{timestamp}] ========== START ==========");
+        // Console.WriteLine($"{logPrefix} [{timestamp}] Request params: status={status}, category={category}, priority={priority}, search={search}");
         
         try
         {
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
             var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
-            Console.WriteLine($"{logPrefix} [{timestamp}] User: {userEmail}, Role: {userRole}");
+            // Console.WriteLine($"{logPrefix} [{timestamp}] User: {userEmail}, Role: {userRole}");
             
             var query = _context.SupportTickets
                 .Include(t => t.Customer)
                 .AsQueryable();
             
-            Console.WriteLine($"{logPrefix} [{timestamp}] Initial query count: {await query.CountAsync()}");
+            // Console.WriteLine($"{logPrefix} [{timestamp}] Initial query count: {await query.CountAsync()}");
 
             if (!string.IsNullOrEmpty(status))
                 query = query.Where(t => t.Status == status);
@@ -422,17 +423,14 @@ public class SupportTicketsController : ControllerBase
                 })
                 .ToListAsync();
 
-            Console.WriteLine($"{logPrefix} [{timestamp}] ✅ Found {tickets.Count} tickets");
-            Console.WriteLine($"{logPrefix} [{timestamp}] ========== END (SUCCESS) ==========");
+            // Console.WriteLine($"{logPrefix} [{timestamp}] ✅ Found {tickets.Count} tickets");
+            // Console.WriteLine($"{logPrefix} [{timestamp}] ========== END (SUCCESS) ==========");
             return Ok(tickets);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"{logPrefix} [{timestamp}] ❌ ========== ERROR ==========");
-            Console.WriteLine($"{logPrefix} [{timestamp}] ❌ Error message: {ex.Message}");
-            Console.WriteLine($"{logPrefix} [{timestamp}] ❌ Stack trace: {ex.StackTrace}");
-            Console.WriteLine($"{logPrefix} [{timestamp}] ❌ Inner exception: {ex.InnerException?.Message}");
-            Console.WriteLine($"{logPrefix} [{timestamp}] ========== END (ERROR) ==========");
+            // Only log errors, not verbose debug info
+            _logger.LogError(ex, "Error getting support tickets");
             return StatusCode(500, new { message = "Lỗi khi tải tickets", error = ex.Message });
         }
     }

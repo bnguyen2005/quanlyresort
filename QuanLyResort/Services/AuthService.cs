@@ -37,57 +37,39 @@ public class AuthService : IAuthService
         // Tìm user theo email HOẶC username
         var user = await _unitOfWork.Users.FirstOrDefaultAsync(u => u.Email == emailOrUsername || u.Username == emailOrUsername);
         
-        Console.WriteLine($"[LoginAsync] ========== LOGIN ATTEMPT ==========");
-        Console.WriteLine($"[LoginAsync] EmailOrUsername: {emailOrUsername}");
-        Console.WriteLine($"[LoginAsync] Requested Role: {role ?? "(any)"}");
-        Console.WriteLine($"[LoginAsync] User found: {user != null}");
+        // Reduced logging to avoid Railway rate limit (500 logs/sec)
+        // Console.WriteLine($"[LoginAsync] ========== LOGIN ATTEMPT ==========");
+        // Console.WriteLine($"[LoginAsync] EmailOrUsername: {emailOrUsername}");
+        // Console.WriteLine($"[LoginAsync] Requested Role: {role ?? "(any)"}");
+        // Console.WriteLine($"[LoginAsync] User found: {user != null}");
         
         if (user == null)
         {
-            Console.WriteLine($"[LoginAsync] ❌ User not found in database");
-            // Log user count for debugging (without listing all users to avoid performance issues)
-            try
-            {
-                var allUsers = await _unitOfWork.Users.GetAllAsync();
-                var userList = allUsers.ToList();
-                Console.WriteLine($"[LoginAsync] Total users in database: {userList.Count}");
-                if (userList.Count > 0 && userList.Count <= 10)
-                {
-                    // Only log if there are few users (for debugging)
-                    foreach (var u in userList)
-                    {
-                        Console.WriteLine($"[LoginAsync]   - User: {u.Username} ({u.Email}), Role: {u.Role}, Active: {u.IsActive}");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[LoginAsync] Could not retrieve user list: {ex.Message}");
-            }
+            // Console.WriteLine($"[LoginAsync] ❌ User not found in database");
             return (false, null, null);
         }
         
         if (!user.IsActive)
         {
-            Console.WriteLine($"[LoginAsync] ❌ User is inactive");
+            // Console.WriteLine($"[LoginAsync] ❌ User is inactive");
             return (false, null, null);
         }
 
-        Console.WriteLine($"[LoginAsync] ✅ User found: Id={user.UserId}, Username={user.Username}, Email={user.Email}, Role={user.Role}, Active={user.IsActive}");
-        Console.WriteLine($"[LoginAsync] Password length: {password.Length}");
-        Console.WriteLine($"[LoginAsync] Hash prefix: {user.PasswordHash?.Substring(0, Math.Min(20, user.PasswordHash.Length))}...");
+        // Console.WriteLine($"[LoginAsync] ✅ User found: Id={user.UserId}, Username={user.Username}, Email={user.Email}, Role={user.Role}, Active={user.IsActive}");
+        // Console.WriteLine($"[LoginAsync] Password length: {password.Length}");
+        // Console.WriteLine($"[LoginAsync] Hash prefix: {user.PasswordHash?.Substring(0, Math.Min(20, user.PasswordHash.Length))}...");
 
         // Verify password first
         var verifyResult = BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
-        Console.WriteLine($"[LoginAsync] Password verification: {verifyResult}");
+        // Console.WriteLine($"[LoginAsync] Password verification: {verifyResult}");
         
         if (!verifyResult)
         {
-            Console.WriteLine($"[LoginAsync] ❌ Password verification failed");
+            // Console.WriteLine($"[LoginAsync] ❌ Password verification failed");
             return (false, null, null);
         }
         
-        Console.WriteLine($"[LoginAsync] ✅ Password verified successfully");
+        // Console.WriteLine($"[LoginAsync] ✅ Password verified successfully");
 
         // Check role if specified (case-insensitive comparison)
         if (!string.IsNullOrEmpty(role))
@@ -95,14 +77,14 @@ public class AuthService : IAuthService
             var requestedRole = role.Trim();
             var userRole = user.Role?.Trim() ?? "";
             
-            Console.WriteLine($"[LoginAsync] Role check: requested='{requestedRole}', user.Role='{userRole}'");
+            // Console.WriteLine($"[LoginAsync] Role check: requested='{requestedRole}', user.Role='{userRole}'");
             
             // Normalize roles for comparison (case-insensitive)
             var normalizedRequested = requestedRole.Equals("admin", StringComparison.OrdinalIgnoreCase) ? "Admin" 
                                     : requestedRole.Equals("customer", StringComparison.OrdinalIgnoreCase) ? "Customer"
                                     : requestedRole;
             
-            Console.WriteLine($"[LoginAsync] Normalized requested role: '{normalizedRequested}'");
+            // Console.WriteLine($"[LoginAsync] Normalized requested role: '{normalizedRequested}'");
             
             // Check if user role matches requested role (case-insensitive)
             var roleMatches = userRole.Equals(normalizedRequested, StringComparison.OrdinalIgnoreCase) || 
@@ -110,7 +92,7 @@ public class AuthService : IAuthService
             
             if (!roleMatches)
             {
-                Console.WriteLine($"[LoginAsync] ❌ Role mismatch: required='{requestedRole}' (normalized: '{normalizedRequested}'), actual='{userRole}'");
+                // Console.WriteLine($"[LoginAsync] ❌ Role mismatch: required='{requestedRole}' (normalized: '{normalizedRequested}'), actual='{userRole}'");
                 return (false, null, null);
             }
             
@@ -118,11 +100,11 @@ public class AuthService : IAuthService
             // Only allow Admin role users to login with admin role request
             if (normalizedRequested == "Admin" && userRole != "Admin")
             {
-                Console.WriteLine($"[LoginAsync] ❌ Admin role required but user role is '{userRole}'");
+                // Console.WriteLine($"[LoginAsync] ❌ Admin role required but user role is '{userRole}'");
                 return (false, null, null);
             }
             
-            Console.WriteLine($"[LoginAsync] ✅ Role check passed");
+            // Console.WriteLine($"[LoginAsync] ✅ Role check passed");
         }
 
         user.LastLoginAt = DateTime.UtcNow;
