@@ -109,7 +109,10 @@ public class SePayService
             }
 
             // SePay API endpoint: POST /userapi/{bankCode}/{accountId}/orders
+            // Log URL để debug
             var url = $"{_apiBaseUrl}/{_bankCode}/{_accountId}/orders";
+            _logger.LogInformation("[SEPAY] 🔍 API URL: {Url}, AccountId: {AccountId}, BankCode: {BankCode}", 
+                url, _accountId, _bankCode);
 
             var requestBody = new
             {
