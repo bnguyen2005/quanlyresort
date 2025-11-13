@@ -180,8 +180,8 @@ public class SimplePaymentController : ControllerBase
                         AllowTrailingCommas = true
                     };
                     simpleRequest = System.Text.Json.JsonSerializer.Deserialize<SimpleWebhookRequest>(rawRequestJson, jsonOptions);
-                    _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Simple deserialization result: Content={Content}, Amount={Amount}", 
-                        webhookId, simpleRequest?.Content ?? "NULL", simpleRequest?.Amount ?? 0);
+                    _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Simple deserialization result: Content={Content}, Amount={Amount}, TransferAmount={TransferAmount}", 
+                        webhookId, simpleRequest?.Content ?? "NULL", simpleRequest?.Amount ?? 0, simpleRequest?.TransferAmount?.ToString() ?? "NULL");
                 }
                 catch (Exception ex)
                 {
@@ -1026,10 +1026,15 @@ public class SimpleWebhookRequest
     public string? TransactionId { get; set; } // Mã giao dịch (optional)
     
     // SePay format fields
+    [JsonPropertyName("description")]
     public string? Description { get; set; } // Mô tả (SePay format): "BOOKING4"
+    [JsonPropertyName("id")]
     public string? Id { get; set; } // ID giao dịch (SePay format)
+    [JsonPropertyName("referenceCode")]
     public string? ReferenceCode { get; set; } // Mã tham chiếu (SePay format)
+    [JsonPropertyName("transferType")]
     public string? TransferType { get; set; } // Loại giao dịch: "IN", "OUT" (SePay format)
+    [JsonPropertyName("transferAmount")]
     public decimal? TransferAmount { get; set; } // Số tiền giao dịch (SePay format)
     public string? AccountNumber { get; set; } // Số tài khoản
     public string? BankName { get; set; } // Tên ngân hàng
