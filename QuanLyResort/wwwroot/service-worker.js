@@ -1,5 +1,5 @@
 // Service Worker for Resort Management System
-const CACHE_NAME = 'resort-cache-v34'; // Force update - Fix CORS by clearing old cached JS files
+const CACHE_NAME = 'resort-cache-v35'; // Force update - Fix API fetch errors by not intercepting API calls
 const urlsToCache = [
   '/customer/index.html',
   // REMOVED: '/customer/login.html' - KHÔNG cache trang login!
@@ -85,29 +85,11 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Bypass API calls: trả trực tiếp network (không cache) và bắt lỗi
+  // Bypass API calls: KHÔNG intercept, để browser xử lý trực tiếp
+  // Service worker không nên can thiệp vào API calls để tránh lỗi CORS và network
   if (url.pathname.startsWith('/api/')) {
-    event.respondWith(
-      fetch(event.request)
-        .then(response => {
-          return response;
-        })
-        .catch(async err => {
-          console.error('[Service Worker] network error for API:', url.href, err);
-          // trả cache nếu có (GET), ngược lại trả JSON lỗi để client xử lý
-          try {
-            const cached = await caches.match(event.request);
-            if (cached) return cached;
-          } catch (e) {
-            // ignore cache errors
-          }
-          return new Response(JSON.stringify({ error: 'Service Worker: network error' }), {
-            status: 503,
-            headers: { 'Content-Type': 'application/json' }
-          });
-        })
-    );
-    return; // dừng xử lý tiếp cho request này
+    // Không intercept - để browser xử lý trực tiếp
+    return;
   }
 
   // Skip non-GET requests
