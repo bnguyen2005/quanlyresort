@@ -1,5 +1,5 @@
 // Service Worker for Resort Management System
-const CACHE_NAME = 'resort-cache-v35'; // Force update - Fix API fetch errors by not intercepting API calls
+const CACHE_NAME = 'resort-cache-v36'; // Force update - Switch from PayOs to SePay for QR code generation
 const urlsToCache = [
   '/customer/index.html',
   // REMOVED: '/customer/login.html' - KHÔNG cache trang login!
@@ -28,6 +28,8 @@ const NEVER_CACHE_URLS = [
       '/customer/js/customer-register.js',  // NEVER cache - có API URL động
       '/customer/js/navbar-auth.js',
   '/customer/js/load-header.js',  // Header loader script
+  '/customer/js/simple-payment.js',  // NEVER cache - payment logic (PayOs → SePay)
+  '/customer/js/restaurant-payment.js',  // NEVER cache - payment logic (PayOs → SePay)
   '/customer/components/header.html',  // Header component - NEVER cache
   '/admin/',  // KHÔNG cache TẤT CẢ admin pages
   '/admin/html/',  // KHÔNG cache admin HTML pages
