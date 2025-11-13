@@ -18,17 +18,20 @@ public class SimplePaymentController : ControllerBase
 {
     private readonly IBookingService _bookingService;
     private readonly PayOsService _payOsService;
+    private readonly SePayService? _sePayService;
     private readonly ILogger<SimplePaymentController> _logger;
     private readonly ResortDbContext _context;
 
     public SimplePaymentController(
         IBookingService bookingService,
         PayOsService payOsService,
+        SePayService? sePayService,
         ILogger<SimplePaymentController> logger,
         ResortDbContext context)
     {
         _bookingService = bookingService;
         _payOsService = payOsService;
+        _sePayService = sePayService;
         _logger = logger;
         _context = context;
     }
@@ -1136,4 +1139,165 @@ public class CreateRestaurantPaymentLinkRequest
 {
     public int OrderId { get; set; }
 }
+
+    /// <summary>
+    /// Tạo QR code động cho booking bằng SePay API
+    /// </summary>
+    [HttpPost("create-qr-booking")]
+    [Authorize]
+    public async Task<IActionResult> CreateBookingQRCode([FromBody] CreatePaymentLinkRequest request)
+    {
+        try
+        {
+            if (_sePayService == null)
+            {
+                _logger.LogWarning("[BACKEND] ⚠️ [CreateBookingQRCode] SePayService chưa được cấu hình");
+                return BadRequest(new { message = "SePay service chưa được cấu hình. Vui lòng cấu hình SePay API credentials." });
+            }
+
+            _logger.LogInformation("[BACKEND] 🔄 [CreateBookingQRCode] Tạo QR code SePay cho booking {BookingId}", request.BookingId);
+
+            // Get booking
+            var booking = await _bookingService.GetBookingByIdAsync(request.BookingId);
+            if (booking == null)
+            {
+                return NotFound(new { message = $"Booking {request.BookingId} không tồn tại" });
+            }
+
+            // Check if already paid
+            if (booking.Status == "Paid")
+            {
+                return BadRequest(new { message = "Đặt phòng này đã được thanh toán" });
+            }
+
+            // Get amount
+            var amount = booking.EstimatedTotalAmount ?? 0;
+            if (amount <= 0)
+            {
+                return BadRequest(new { message = "Số tiền thanh toán không hợp lệ" });
+            }
+
+            // Tạo đơn hàng và QR code qua SePay API
+            // Duration: 24 giờ (86400 giây)
+            var sepayOrder = await _sePayService.CreateBookingOrderAsync(request.BookingId, amount, durationSeconds: 86400);
+
+            if (sepayOrder == null)
+            {
+                _logger.LogError("[BACKEND] ❌ [CreateBookingQRCode] SePay service returned null");
+                return StatusCode(500, new { 
+                    message = "Không thể tạo QR code. Vui lòng kiểm tra cấu hình SePay API hoặc thử lại sau.",
+                    error = "SePay service returned null"
+                });
+            }
+
+            _logger.LogInformation("[BACKEND] ✅ [CreateBookingQRCode] QR code tạo thành công: OrderId={OrderId}, OrderCode={OrderCode}", 
+                sepayOrder.OrderId, sepayOrder.OrderCode);
+
+            return Ok(new
+            {
+                success = true,
+                orderId = sepayOrder.OrderId,
+                orderCode = sepayOrder.OrderCode,
+                qrCode = sepayOrder.QrCode, // Base64 image
+                qrCodeUrl = sepayOrder.QrCodeUrl, // URL to QR code
+                amount = sepayOrder.Amount,
+                accountNumber = sepayOrder.AccountNumber,
+                accountName = sepayOrder.AccountHolderName,
+                bankName = sepayOrder.BankName,
+                vaNumber = sepayOrder.VaNumber,
+                expiredAt = sepayOrder.ExpiredAt,
+                description = $"BOOKING{request.BookingId}"
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[BACKEND] ❌ [CreateBookingQRCode] Lỗi khi tạo QR code cho booking {BookingId}", request.BookingId);
+            return StatusCode(500, new { 
+                message = "Lỗi khi tạo QR code. Vui lòng thử lại.",
+                error = ex.Message
+            });
+        }
+    }
+
+    /// <summary>
+    /// Tạo QR code động cho restaurant order bằng SePay API
+    /// </summary>
+    [HttpPost("create-qr-restaurant")]
+    [Authorize]
+    public async Task<IActionResult> CreateRestaurantQRCode([FromBody] CreateRestaurantPaymentLinkRequest request)
+    {
+        try
+        {
+            if (_sePayService == null)
+            {
+                _logger.LogWarning("[BACKEND] ⚠️ [CreateRestaurantQRCode] SePayService chưa được cấu hình");
+                return BadRequest(new { message = "SePay service chưa được cấu hình. Vui lòng cấu hình SePay API credentials." });
+            }
+
+            _logger.LogInformation("[BACKEND] 🔄 [CreateRestaurantQRCode] Tạo QR code SePay cho restaurant order {OrderId}", request.OrderId);
+
+            // Get restaurant order
+            var order = await _context.RestaurantOrders
+                .Include(o => o.OrderItems)
+                .FirstOrDefaultAsync(o => o.OrderId == request.OrderId);
+
+            if (order == null)
+            {
+                return NotFound(new { message = $"Restaurant order {request.OrderId} không tồn tại" });
+            }
+
+            // Check if already paid
+            if (order.Status == "Paid" || order.Status == "Completed")
+            {
+                return BadRequest(new { message = "Đơn hàng này đã được thanh toán" });
+            }
+
+            // Get amount
+            var amount = order.TotalAmount ?? 0;
+            if (amount <= 0)
+            {
+                return BadRequest(new { message = "Số tiền thanh toán không hợp lệ" });
+            }
+
+            // Tạo đơn hàng và QR code qua SePay API
+            // Duration: 24 giờ (86400 giây)
+            var sepayOrder = await _sePayService.CreateRestaurantOrderAsync(request.OrderId, amount, durationSeconds: 86400);
+
+            if (sepayOrder == null)
+            {
+                _logger.LogError("[BACKEND] ❌ [CreateRestaurantQRCode] SePay service returned null");
+                return StatusCode(500, new { 
+                    message = "Không thể tạo QR code. Vui lòng kiểm tra cấu hình SePay API hoặc thử lại sau.",
+                    error = "SePay service returned null"
+                });
+            }
+
+            _logger.LogInformation("[BACKEND] ✅ [CreateRestaurantQRCode] QR code tạo thành công: OrderId={OrderId}, OrderCode={OrderCode}", 
+                sepayOrder.OrderId, sepayOrder.OrderCode);
+
+            return Ok(new
+            {
+                success = true,
+                orderId = sepayOrder.OrderId,
+                orderCode = sepayOrder.OrderCode,
+                qrCode = sepayOrder.QrCode, // Base64 image
+                qrCodeUrl = sepayOrder.QrCodeUrl, // URL to QR code
+                amount = sepayOrder.Amount,
+                accountNumber = sepayOrder.AccountNumber,
+                accountName = sepayOrder.AccountHolderName,
+                bankName = sepayOrder.BankName,
+                vaNumber = sepayOrder.VaNumber,
+                expiredAt = sepayOrder.ExpiredAt,
+                description = $"ORDER{request.OrderId}"
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[BACKEND] ❌ [CreateRestaurantQRCode] Lỗi khi tạo QR code cho restaurant order {OrderId}", request.OrderId);
+            return StatusCode(500, new { 
+                message = "Lỗi khi tạo QR code. Vui lòng thử lại.",
+                error = ex.Message
+            });
+        }
+    }
 
