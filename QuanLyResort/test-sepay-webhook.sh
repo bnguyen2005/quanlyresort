@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Script test PayOs webhook với dữ liệu mẫu
-# Sử dụng dữ liệu mẫu từ PayOs API documentation
+# Script test SePay webhook với dữ liệu mẫu
+# Dựa trên SePay documentation và format tương tự các payment gateway khác
 
 # Màu sắc cho output
 RED='\033[0;31m'
@@ -15,39 +15,27 @@ NC='\033[0m' # No Color
 WEBHOOK_URL="https://quanlyresort-production.up.railway.app/api/simplepayment/webhook"
 
 echo -e "${BLUE}═══════════════════════════════════════════════════════════${NC}"
-echo -e "${BLUE}🧪 TEST PAYOS WEBHOOK VỚI DỮ LIỆU MẪU${NC}"
+echo -e "${BLUE}🧪 TEST SEPAY WEBHOOK VỚI DỮ LIỆU MẪU${NC}"
 echo -e "${BLUE}═══════════════════════════════════════════════════════════${NC}"
 echo ""
 
-# Test 1: Dữ liệu mẫu từ PayOs API documentation
-echo -e "${CYAN}📋 Test 1: Dữ liệu mẫu từ PayOs API documentation${NC}"
-echo "   Description: VQRIO123"
+# Test 1: Format có thể của SePay (dựa trên các payment gateway khác)
+echo -e "${CYAN}📋 Test 1: Format SePay có thể (với id, referenceCode, transferAmount)${NC}"
+echo "   Description: BOOKING4"
 echo ""
 
 PAYLOAD1=$(cat <<EOF
 {
-  "code": "00",
-  "desc": "success",
-  "success": true,
-  "data": {
-    "orderCode": 123,
-    "amount": 3000,
-    "description": "VQRIO123",
-    "accountNumber": "12345678",
-    "reference": "TF230204212323",
-    "transactionDateTime": "2023-02-04 18:25:00",
-    "currency": "VND",
-    "paymentLinkId": "124c33293c43417ab7879e14c8d9eb18",
-    "code": "00",
-    "desc": "Thành công",
-    "counterAccountBankId": "",
-    "counterAccountBankName": "",
-    "counterAccountName": "",
-    "counterAccountNumber": "",
-    "virtualAccountName": "",
-    "virtualAccountNumber": ""
-  },
-  "signature": "8d8640d802576397a1ce45ebda7f835055768ac7ad2e0bfb77f9b8f12cca4c7f"
+  "id": "sepay-$(date +%s)",
+  "referenceCode": "REF-$(date +%s)",
+  "transferType": "IN",
+  "transferAmount": 5000,
+  "content": "BOOKING4",
+  "accountNumber": "0901329227",
+  "accountName": "Resort Deluxe",
+  "bankName": "MB",
+  "transactionDate": "2025-11-13T12:30:00Z",
+  "description": "BOOKING4"
 }
 EOF
 )
@@ -68,40 +56,30 @@ echo ""
 
 if [ "$HTTP_CODE1" == "200" ]; then
     echo -e "${GREEN}   ✅ Test 1 thành công!${NC}"
+    
+    # Kiểm tra xem có extract được booking ID không
+    if echo "$BODY1" | grep -q "bookingId.*4\|message.*thanh toán"; then
+        echo -e "${GREEN}   ✅ Đã xử lý webhook thành công${NC}"
+    else
+        echo -e "${YELLOW}   ⚠️  Webhook được nhận nhưng chưa thấy booking ID = 4${NC}"
+    fi
 else
     echo -e "${RED}   ❌ Test 1 thất bại (HTTP $HTTP_CODE1)${NC}"
 fi
 echo ""
 
-# Test 2: Dữ liệu với description = "BOOKING4"
-echo -e "${CYAN}📋 Test 2: Dữ liệu với description = BOOKING4${NC}"
-echo "   Description: BOOKING4"
+# Test 2: Format Simple (content, amount)
+echo -e "${CYAN}📋 Test 2: Format Simple (content, amount)${NC}"
+echo "   Content: BOOKING4, Amount: 5000"
 echo ""
 
 PAYLOAD2=$(cat <<EOF
 {
-  "code": "00",
-  "desc": "success",
-  "success": true,
-  "data": {
-    "orderCode": 40043,
-    "amount": 5000,
-    "description": "BOOKING4",
-    "accountNumber": "0901329227",
-    "reference": "TF230204212323",
-    "transactionDateTime": "2025-11-13 18:25:00",
-    "currency": "VND",
-    "paymentLinkId": "124c33293c43417ab7879e14c8d9eb18",
-    "code": "00",
-    "desc": "Thành công",
-    "counterAccountBankId": "",
-    "counterAccountBankName": "",
-    "counterAccountName": "",
-    "counterAccountNumber": "",
-    "virtualAccountName": "",
-    "virtualAccountNumber": ""
-  },
-  "signature": "8d8640d802576397a1ce45ebda7f835055768ac7ad2e0bfb77f9b8f12cca4c7f"
+  "content": "BOOKING4",
+  "amount": 5000,
+  "transactionId": "SEPAY-$(date +%s)",
+  "accountNumber": "0901329227",
+  "transactionDate": "2025-11-13T12:30:00Z"
 }
 EOF
 )
@@ -123,7 +101,6 @@ echo ""
 if [ "$HTTP_CODE2" == "200" ]; then
     echo -e "${GREEN}   ✅ Test 2 thành công!${NC}"
     
-    # Kiểm tra xem có extract được booking ID không
     if echo "$BODY2" | grep -q "bookingId.*4"; then
         echo -e "${GREEN}   ✅ Đã extract được booking ID = 4${NC}"
     else
@@ -134,35 +111,22 @@ else
 fi
 echo ""
 
-# Test 3: Dữ liệu với description = "ORDER7" (restaurant order)
-echo -e "${CYAN}📋 Test 3: Dữ liệu với description = ORDER7 (restaurant order)${NC}"
-echo "   Description: ORDER7"
+# Test 3: Format với description (tương tự PayOs)
+echo -e "${CYAN}📋 Test 3: Format với description (tương tự PayOs)${NC}"
+echo "   Description: BOOKING4"
 echo ""
 
 PAYLOAD3=$(cat <<EOF
 {
-  "code": "00",
-  "desc": "success",
-  "success": true,
-  "data": {
-    "orderCode": 20000007,
-    "amount": 150000,
-    "description": "ORDER7",
-    "accountNumber": "0901329227",
-    "reference": "TF230204212324",
-    "transactionDateTime": "2025-11-13 18:30:00",
-    "currency": "VND",
-    "paymentLinkId": "124c33293c43417ab7879e14c8d9eb19",
-    "code": "00",
-    "desc": "Thành công",
-    "counterAccountBankId": "",
-    "counterAccountBankName": "",
-    "counterAccountName": "",
-    "counterAccountNumber": "",
-    "virtualAccountName": "",
-    "virtualAccountNumber": ""
-  },
-  "signature": "8d8640d802576397a1ce45ebda7f835055768ac7ad2e0bfb77f9b8f12cca4c7f"
+  "id": "sepay-$(date +%s)",
+  "referenceCode": "REF-$(date +%s)",
+  "transferType": "IN",
+  "transferAmount": 5000,
+  "description": "BOOKING4",
+  "accountNumber": "0901329227",
+  "accountName": "Resort Deluxe",
+  "bankName": "MB",
+  "transactionDate": "2025-11-13T12:30:00Z"
 }
 EOF
 )
@@ -184,40 +148,33 @@ echo ""
 if [ "$HTTP_CODE3" == "200" ]; then
     echo -e "${GREEN}   ✅ Test 3 thành công!${NC}"
     
-    # Kiểm tra xem có extract được order ID không
-    if echo "$BODY3" | grep -q "orderId.*7\|orderNumber"; then
-        echo -e "${GREEN}   ✅ Đã extract được restaurant order ID = 7${NC}"
+    if echo "$BODY3" | grep -q "bookingId.*4"; then
+        echo -e "${GREEN}   ✅ Đã extract được booking ID = 4${NC}"
     else
-        echo -e "${YELLOW}   ⚠️  Không thấy restaurant order ID = 7 trong response${NC}"
+        echo -e "${YELLOW}   ⚠️  Không thấy booking ID = 4 trong response${NC}"
     fi
 else
     echo -e "${RED}   ❌ Test 3 thất bại (HTTP $HTTP_CODE3)${NC}"
 fi
 echo ""
 
-# Test 4: Dữ liệu với code != "00" (lỗi)
-echo -e "${CYAN}📋 Test 4: Dữ liệu với code != 00 (lỗi)${NC}"
-echo "   Code: 01 (lỗi)"
+# Test 4: Restaurant Order (ORDER7)
+echo -e "${CYAN}📋 Test 4: Restaurant Order (ORDER7)${NC}"
+echo "   Description: ORDER7"
 echo ""
 
 PAYLOAD4=$(cat <<EOF
 {
-  "code": "01",
-  "desc": "Payment failed",
-  "success": false,
-  "data": {
-    "orderCode": 123,
-    "amount": 3000,
-    "description": "BOOKING4",
-    "accountNumber": "12345678",
-    "reference": "TF230204212323",
-    "transactionDateTime": "2023-02-04 18:25:00",
-    "currency": "VND",
-    "paymentLinkId": "124c33293c43417ab7879e14c8d9eb18",
-    "code": "01",
-    "desc": "Thanh toán thất bại"
-  },
-  "signature": "8d8640d802576397a1ce45ebda7f835055768ac7ad2e0bfb77f9b8f12cca4c7f"
+  "id": "sepay-$(date +%s)",
+  "referenceCode": "REF-$(date +%s)",
+  "transferType": "IN",
+  "transferAmount": 150000,
+  "description": "ORDER7",
+  "content": "ORDER7",
+  "accountNumber": "0901329227",
+  "accountName": "Resort Deluxe",
+  "bankName": "MB",
+  "transactionDate": "2025-11-13T12:35:00Z"
 }
 EOF
 )
@@ -237,11 +194,12 @@ echo "   Body: $BODY4"
 echo ""
 
 if [ "$HTTP_CODE4" == "200" ]; then
-    echo -e "${GREEN}   ✅ Test 4 thành công! (Webhook xử lý lỗi đúng)${NC}"
+    echo -e "${GREEN}   ✅ Test 4 thành công!${NC}"
     
-    # Kiểm tra xem có message về payment failed không
-    if echo "$BODY4" | grep -qi "failed\|lỗi\|error"; then
-        echo -e "${GREEN}   ✅ Đã xử lý lỗi đúng${NC}"
+    if echo "$BODY4" | grep -q "orderId.*7\|orderNumber"; then
+        echo -e "${GREEN}   ✅ Đã extract được restaurant order ID = 7${NC}"
+    else
+        echo -e "${YELLOW}   ⚠️  Không thấy restaurant order ID = 7 trong response${NC}"
     fi
 else
     echo -e "${RED}   ❌ Test 4 thất bại (HTTP $HTTP_CODE4)${NC}"
@@ -249,7 +207,7 @@ fi
 echo ""
 
 # Test 5: Empty body (verification request)
-echo -e "${CYAN}📋 Test 5: Empty body (PayOs verification request)${NC}"
+echo -e "${CYAN}📋 Test 5: Empty body (SePay verification request)${NC}"
 echo "   Body: (empty)"
 echo ""
 
@@ -270,7 +228,6 @@ echo ""
 if [ "$HTTP_CODE5" == "200" ]; then
     echo -e "${GREEN}   ✅ Test 5 thành công! (Verification request được xử lý)${NC}"
     
-    # Kiểm tra xem có status = "active" không
     if echo "$BODY5" | grep -q "active\|ready"; then
         echo -e "${GREEN}   ✅ Endpoint trả về status active${NC}"
     fi
@@ -300,8 +257,19 @@ echo ""
 
 if [ $FAILED -eq 0 ]; then
     echo -e "${GREEN}🎉 Tất cả tests đều thành công!${NC}"
+    echo ""
+    echo -e "${YELLOW}💡 Lưu ý:${NC}"
+    echo "   - Các test này dùng format dự đoán của SePay"
+    echo "   - Cần xem SePay documentation để biết format chính xác"
+    echo "   - Sau khi setup SePay webhook, test với giao dịch thật"
     exit 0
 else
-    echo -e "${YELLOW}⚠️  Một số tests thất bại. Kiểm tra lại webhook endpoint.${NC}"
+    echo -e "${YELLOW}⚠️  Một số tests thất bại.${NC}"
+    echo ""
+    echo -e "${YELLOW}💡 Lưu ý:${NC}"
+    echo "   - Format webhook của SePay có thể khác"
+    echo "   - Cần xem SePay documentation: https://docs.sepay.vn"
+    echo "   - Cần xem SePay webhook logs để biết format thực tế"
     exit 1
 fi
+

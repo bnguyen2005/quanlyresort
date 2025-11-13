@@ -188,12 +188,41 @@ public class SimplePaymentController : ControllerBase
                     _logger.LogWarning("[WEBHOOK] ⚠️ [WEBHOOK-{WebhookId}] Failed to deserialize as Simple format: {Error}", webhookId, ex.Message);
                 }
                 
-                if (simpleRequest != null && (!string.IsNullOrEmpty(simpleRequest.Content) || simpleRequest.Amount > 0))
+                if (simpleRequest != null)
                 {
-                    _logger.LogInformation("[WEBHOOK] 📋 [WEBHOOK-{WebhookId}] Detected Simple format", webhookId);
-                    content = simpleRequest.Content;
-                    amount = simpleRequest.Amount;
-                    transactionId = simpleRequest.TransactionId;
+                    _logger.LogInformation("[WEBHOOK] 📋 [WEBHOOK-{WebhookId}] Detected Simple/SePay format", webhookId);
+                    _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Simple request fields: Content='{Content}', Description='{Description}', Amount={Amount}, TransferAmount={TransferAmount}", 
+                        webhookId, simpleRequest.Content ?? "NULL", simpleRequest.Description ?? "NULL", simpleRequest.Amount, simpleRequest.TransferAmount?.ToString() ?? "NULL");
+                    
+                    // Ưu tiên dùng Content, nếu không có thì dùng Description (SePay format)
+                    if (!string.IsNullOrEmpty(simpleRequest.Content))
+                    {
+                        content = simpleRequest.Content;
+                        _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Using Content field: '{Content}'", webhookId, content);
+                    }
+                    else if (!string.IsNullOrEmpty(simpleRequest.Description))
+                    {
+                        _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Using Description field (SePay format): '{Description}'", webhookId, simpleRequest.Description);
+                        content = simpleRequest.Description;
+                    }
+                    
+                    // Ưu tiên dùng Amount, nếu không có thì dùng TransferAmount (SePay format)
+                    if (simpleRequest.Amount > 0)
+                    {
+                        amount = simpleRequest.Amount;
+                        _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Using Amount field: {Amount}", webhookId, amount);
+                    }
+                    else if (simpleRequest.TransferAmount.HasValue && simpleRequest.TransferAmount.Value > 0)
+                    {
+                        _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Using TransferAmount field (SePay format): {Amount}", webhookId, simpleRequest.TransferAmount.Value);
+                        amount = simpleRequest.TransferAmount.Value;
+                    }
+                    
+                    // Transaction ID
+                    transactionId = simpleRequest.TransactionId ?? simpleRequest.ReferenceCode ?? simpleRequest.Id;
+                    
+                    _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Final extracted: Content='{Content}', Amount={Amount}, TransactionId='{TransactionId}'", 
+                        webhookId, content ?? "NULL", amount, transactionId ?? "NULL");
                 }
             }
             
@@ -988,12 +1017,23 @@ public class SimplePaymentController : ControllerBase
 
 /// <summary>
 /// Request model cho webhook đơn giản (Simple format)
+/// Hỗ trợ cả Simple format và SePay format
 /// </summary>
 public class SimpleWebhookRequest
 {
     public string Content { get; set; } = string.Empty; // Nội dung chuyển khoản: "BOOKING-39"
     public decimal Amount { get; set; } // Số tiền
     public string? TransactionId { get; set; } // Mã giao dịch (optional)
+    
+    // SePay format fields
+    public string? Description { get; set; } // Mô tả (SePay format): "BOOKING4"
+    public string? Id { get; set; } // ID giao dịch (SePay format)
+    public string? ReferenceCode { get; set; } // Mã tham chiếu (SePay format)
+    public string? TransferType { get; set; } // Loại giao dịch: "IN", "OUT" (SePay format)
+    public decimal? TransferAmount { get; set; } // Số tiền giao dịch (SePay format)
+    public string? AccountNumber { get; set; } // Số tài khoản
+    public string? BankName { get; set; } // Tên ngân hàng
+    public string? TransactionDate { get; set; } // Ngày giao dịch
 }
 
 /// <summary>
@@ -1020,32 +1060,60 @@ public class PayOsWebhookRequest
 
 /// <summary>
 /// Data trong PayOs webhook
+/// Format theo PayOs API documentation: https://payos.vn/docs/api/
 /// </summary>
 public class PayOsWebhookData
 {
     [JsonPropertyName("orderCode")]
-    public long? OrderCode { get; set; } // Order code (PayOs gửi long, ví dụ: 43843)
+    public long? OrderCode { get; set; } // Order code (PayOs gửi long, ví dụ: 123)
     
     [JsonPropertyName("amount")]
-    public decimal Amount { get; set; } // Số tiền
+    public decimal Amount { get; set; } // Số tiền (ví dụ: 3000)
     
     [JsonPropertyName("description")]
-    public string? Description { get; set; } // Mô tả (có thể chứa booking ID: "BOOKING7")
+    public string? Description { get; set; } // Mô tả (có thể chứa booking ID: "BOOKING7" hoặc "VQRIO123")
     
     [JsonPropertyName("accountNumber")]
-    public string? AccountNumber { get; set; }
+    public string? AccountNumber { get; set; } // Số tài khoản (ví dụ: "12345678")
     
     [JsonPropertyName("reference")]
-    public string? Reference { get; set; } // Mã tham chiếu giao dịch
+    public string? Reference { get; set; } // Mã tham chiếu giao dịch (ví dụ: "TF230204212323")
     
     [JsonPropertyName("transactionDateTime")]
-    public string? TransactionDateTime { get; set; }
+    public string? TransactionDateTime { get; set; } // Thời gian giao dịch (ví dụ: "2023-02-04 18:25:00")
     
     [JsonPropertyName("currency")]
-    public string? Currency { get; set; }
+    public string? Currency { get; set; } // Loại tiền tệ (ví dụ: "VND")
     
     [JsonPropertyName("paymentLinkId")]
-    public string? PaymentLinkId { get; set; }
+    public string? PaymentLinkId { get; set; } // ID của payment link (ví dụ: "124c33293c43417ab7879e14c8d9eb18")
+    
+    // Các trường nested trong data (theo PayOs API documentation)
+    [JsonPropertyName("code")]
+    public string? Code { get; set; } // Code trong data (ví dụ: "00")
+    
+    [JsonPropertyName("desc")]
+    public string? Desc { get; set; } // Mô tả trong data (ví dụ: "Thành công")
+    
+    // Thông tin tài khoản đối tác (counter account)
+    [JsonPropertyName("counterAccountBankId")]
+    public string? CounterAccountBankId { get; set; }
+    
+    [JsonPropertyName("counterAccountBankName")]
+    public string? CounterAccountBankName { get; set; }
+    
+    [JsonPropertyName("counterAccountName")]
+    public string? CounterAccountName { get; set; }
+    
+    [JsonPropertyName("counterAccountNumber")]
+    public string? CounterAccountNumber { get; set; }
+    
+    // Thông tin tài khoản ảo (virtual account)
+    [JsonPropertyName("virtualAccountName")]
+    public string? VirtualAccountName { get; set; }
+    
+    [JsonPropertyName("virtualAccountNumber")]
+    public string? VirtualAccountNumber { get; set; }
 }
 
 /// <summary>

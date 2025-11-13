@@ -55,9 +55,10 @@ public class PayOsService
             // Convert amount to integer (PayOs expects integer/long)
             var amountLong = (long)Math.Round(amount);
 
-            // PayOs signature format: FIXED ORDER (not alphabetical!)
+            // PayOs signature format: SORT THEO ALPHABET (alphabetical order)
             // Format: amount={amount}&cancelUrl={cancelUrl}&description={description}&orderCode={orderCode}&returnUrl={returnUrl}
-            // Reference: PayOs official library - CreateSignatureOfPaymentRequest
+            // Reference: PayOs API Documentation - https://payos.vn/docs/api/
+            // "data theo định dạng được sort theo alphabet: amount=$amount&cancelUrl=$cancelUrl&description=$description&orderCode=$orderCode&returnUrl=$returnUrl"
             var signatureString = $"amount={amountLong}&cancelUrl={cancelUrl}&description={description}&orderCode={orderCode}&returnUrl={returnUrl}";
             
             _logger.LogInformation("🔐 [PAYOS] Signature string: {SignatureString}", signatureString);
