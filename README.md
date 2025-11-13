@@ -542,4 +542,3 @@ dotnet ef database update --environment Production
 **🎉 Chúc bạn thành công với Resort Management System!**
 
 _Last updated: October 20, 2025_
-
