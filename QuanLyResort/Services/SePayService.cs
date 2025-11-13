@@ -30,10 +30,20 @@ public class SePayService
         _httpClient.Timeout = TimeSpan.FromSeconds(30);
 
         // Load configuration from appsettings.json
-        _apiBaseUrl = _configuration["SePay:ApiBaseUrl"] ?? "https://my.sepay.vn/userapi";
+        // SePay API có thể dùng:
+        // - Production: https://pgapi.sepay.vn
+        // - User API: https://my.sepay.vn/userapi
+        _apiBaseUrl = _configuration["SePay:ApiBaseUrl"] ?? "https://pgapi.sepay.vn";
         _apiToken = _configuration["SePay:ApiToken"];
         _accountId = _configuration["SePay:AccountId"];
         _bankCode = _configuration["SePay:BankCode"] ?? "MB"; // Default to MB
+        
+        // MERCHANT ID (có thể khác Account ID)
+        var merchantId = _configuration["SePay:MerchantId"];
+        if (!string.IsNullOrEmpty(merchantId))
+        {
+            _logger.LogInformation("[SEPAY] 🔍 Merchant ID configured: {MerchantId}", merchantId);
+        }
 
         if (string.IsNullOrEmpty(_apiToken))
         {
@@ -108,11 +118,40 @@ public class SePayService
                 return null;
             }
 
-            // SePay API endpoint: POST /userapi/{bankCode}/{accountId}/orders
-            // Log URL để debug
-            var url = $"{_apiBaseUrl}/{_bankCode}/{_accountId}/orders";
-            _logger.LogInformation("[SEPAY] 🔍 API URL: {Url}, AccountId: {AccountId}, BankCode: {BankCode}", 
-                url, _accountId, _bankCode);
+            // SePay API endpoint: Có thể có nhiều format
+            // Option 1: POST /api/v1/orders (pgapi.sepay.vn - Production API)
+            // Option 2: POST /userapi/{bankCode}/{accountId}/orders (my.sepay.vn - User API)
+            // Option 3: POST /userapi/{merchantId}/orders (không có bankCode)
+            
+            string url;
+            if (_apiBaseUrl.Contains("pgapi.sepay.vn"))
+            {
+                // Production API: https://pgapi.sepay.vn/api/v1/orders
+                url = $"{_apiBaseUrl}/api/v1/orders";
+            }
+            else if (_apiBaseUrl.Contains("my.sepay.vn"))
+            {
+                // User API: https://my.sepay.vn/userapi/{bankCode}/{accountId}/orders
+                url = $"{_apiBaseUrl}/{_bankCode}/{_accountId}/orders";
+            }
+            else
+            {
+                // Fallback: thử format userapi
+                url = $"{_apiBaseUrl}/{_bankCode}/{_accountId}/orders";
+            }
+            
+            _logger.LogInformation("[SEPAY] 🔍 API URL: {Url}, AccountId: {AccountId}, BankCode: {BankCode}, ApiBaseUrl: {ApiBaseUrl}", 
+                url, _accountId, _bankCode, _apiBaseUrl);
+            
+            // Log request body để debug
+            var requestBodyJson = JsonSerializer.Serialize(new
+            {
+                amount = (long)(amount),
+                order_code = orderCode,
+                duration = durationSeconds,
+                with_qrcode = true
+            });
+            _logger.LogInformation("[SEPAY] 🔍 Request body: {Body}", requestBodyJson);
 
             var requestBody = new
             {
@@ -129,7 +168,22 @@ public class SePayService
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             _httpClient.DefaultRequestHeaders.Clear();
-            _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_apiToken}");
+            
+            // SePay có thể dùng Bearer token hoặc Basic Auth
+            // Thử Bearer token trước (format: spsk_live_...)
+            if (_apiToken.StartsWith("spsk_"))
+            {
+                // Bearer token format
+                _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_apiToken}");
+            }
+            else
+            {
+                // Fallback: Bearer token
+                _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_apiToken}");
+            }
+            
+            _logger.LogInformation("[SEPAY] 🔍 Authorization header: Bearer {TokenPrefix}...", 
+                _apiToken?.Substring(0, Math.Min(20, _apiToken?.Length ?? 0)) ?? "NULL");
 
             var response = await _httpClient.PostAsync(url, content);
 
