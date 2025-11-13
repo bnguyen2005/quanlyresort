@@ -1130,7 +1130,7 @@ public class SimplePaymentController : ControllerBase
             }
 
             // Get amount
-            var amount = order.TotalAmount ?? 0;
+            var amount = order.TotalAmount;
             if (amount <= 0)
             {
                 return BadRequest(new { message = "Số tiền thanh toán không hợp lệ" });
