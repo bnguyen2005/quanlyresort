@@ -1179,7 +1179,7 @@
         }
         
         const bookingCode = b.bookingCode || `BKG${bookingId}`;
-        const info = `BOOKING-${bookingId}`;
+        const info = `BOOKING${bookingId}`;
         
         // CRITICAL: Ensure amount is not multiplied by 100
         // VietQR expects amount in VND (e.g., 5000 for 5,000 VND, NOT 500000)

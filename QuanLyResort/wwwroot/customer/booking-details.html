@@ -565,7 +565,7 @@
           
           const amount = Number(b?.estimatedTotalAmount ?? b?.totalAmount ?? 0);
           const bookingCode = b.bookingCode || `BKG${bookingId}`;
-          const info = `BOOKING-${bookingId}`;
+          const info = `BOOKING${bookingId}`;
           // Use global BANK_CODE, BANK_ACCOUNT, BANK_ACCOUNT_NAME from simple-payment.js
           const bankCode = window.BANK_CODE || 'MB';
           const bankAccount = window.BANK_ACCOUNT || '0901329227';
