@@ -1,5 +1,5 @@
 /**
- * Hệ thống thanh toán PayOs cho Restaurant Orders
+ * Hệ thống thanh toán SePay cho Restaurant Orders
  * Tương tự simple-payment.js nhưng cho restaurant orders
  */
 
@@ -100,7 +100,7 @@ async function openRestaurantPayment(orderId) {
 }
 
 /**
- * Update modal content - Tạo PayOs payment link
+ * Update modal content - Tạo SePay QR code động
  */
 async function updateRestaurantPaymentModal(orderId, orderNumber, amount) {
   // Order number
@@ -143,15 +143,15 @@ async function updateRestaurantPaymentModal(orderId, orderNumber, amount) {
     }
 
   try {
-    // Call PayOs API to create payment link
+    // Call SePay API to create dynamic QR code
     const token = localStorage.getItem('token');
     if (!token) {
       throw new Error('Không tìm thấy token đăng nhập');
     }
 
-    console.log("[FRONTEND] 🔄 [updateRestaurantPaymentModal] Creating PayOs payment link for order:", orderId);
+    console.log("[FRONTEND] 🔄 [updateRestaurantPaymentModal] Creating SePay QR code for order:", orderId);
     
-    const response = await fetch(`${location.origin}/api/simplepayment/create-link-restaurant`, {
+    const response = await fetch(`${location.origin}/api/simplepayment/create-qr-restaurant`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -166,18 +166,20 @@ async function updateRestaurantPaymentModal(orderId, orderNumber, amount) {
     }
 
     const result = await response.json();
-    console.log("[FRONTEND] ✅ [updateRestaurantPaymentModal] PayOs payment link created:", result);
+    console.log("[FRONTEND] ✅ [updateRestaurantPaymentModal] SePay QR code created:", result);
 
-    // Check if we have QR code
-    let qrCodeData = result.qrCode || result.data?.qrCode || result.qrCodeBase64;
+    // Check if we have QR code - SePay có thể trả về:
+    // 1. qrCodeUrl: "https://..."
+    // 2. qrCode: Base64 image
+    let qrCodeData = result.qrCode || result.qrCodeUrl;
     console.log("[FRONTEND] 🔍 [updateRestaurantPaymentModal] QR Code data type:", typeof qrCodeData);
     console.log("[FRONTEND] 🔍 [updateRestaurantPaymentModal] QR Code data preview:", qrCodeData?.substring(0, 50) || 'NULL');
 
     if (!result.success) {
-      throw new Error(`PayOs API error: ${result.desc || result.message || 'Unknown error'}`);
+      throw new Error(`SePay API error: ${result.message || 'Unknown error'}`);
     }
 
-    // Display QR code from PayOs (tương tự simple-payment.js)
+    // Display QR code from SePay
     if (qrImg) {
       if (qrCodeData) {
         // Case 1: QR code là URL
@@ -185,13 +187,13 @@ async function updateRestaurantPaymentModal(orderId, orderNumber, amount) {
           console.log("[FRONTEND] 🌐 [updateRestaurantPaymentModal] QR Code is URL:", qrCodeData);
           qrImg.src = qrCodeData;
           qrImg.style.display = 'block';
-          qrImg.alt = `PayOs QR - ${orderNumber}`;
+          qrImg.alt = `SePay QR - ${orderNumber}`;
           
           qrImg.onerror = function(e) {
             console.error("[FRONTEND] ❌ [updateRestaurantPaymentModal] QR URL failed to load:", e);
             qrImg.style.display = 'none';
             if (waitingEl) {
-              waitingEl.textContent = 'Không thể tải QR code từ PayOs. Vui lòng thử lại.';
+              waitingEl.textContent = 'Không thể tải QR code từ SePay. Vui lòng thử lại.';
               waitingEl.className = 'text-center mt-4 text-danger';
             }
           };
@@ -209,82 +211,32 @@ async function updateRestaurantPaymentModal(orderId, orderNumber, amount) {
           
           qrImg.src = qrSrc;
           qrImg.style.display = 'block';
-          qrImg.alt = `PayOs QR - ${orderNumber}`;
+          qrImg.alt = `SePay QR - ${orderNumber}`;
           
           qrImg.onerror = function(e) {
             console.error("[FRONTEND] ❌ [updateRestaurantPaymentModal] QR Base64 failed to load:", e);
             qrImg.style.display = 'none';
             if (waitingEl) {
-              waitingEl.textContent = 'Không thể tải QR code từ PayOs. Vui lòng thử lại.';
+              waitingEl.textContent = 'Không thể tải QR code từ SePay. Vui lòng thử lại.';
               waitingEl.className = 'text-center mt-4 text-danger';
             }
           };
         }
-        // Case 3: QR code là QR data string (EMV format)
-        else if (/^[0-9A-Za-z\s]+$/.test(qrCodeData.trim()) && qrCodeData.trim().length > 50 && qrCodeData.trim().startsWith('000201')) {
-          console.log("[FRONTEND] 📱 [updateRestaurantPaymentModal] QR Code is QR data string (EMV format)");
-          
-          // Generate QR code image từ QR data string bằng QRCode.js
-          const tempContainer = document.createElement('div');
-          tempContainer.style.position = 'absolute';
-          tempContainer.style.left = '-9999px';
-          tempContainer.style.width = '256px';
-          tempContainer.style.height = '256px';
-          document.body.appendChild(tempContainer);
-          
-          try {
-            tempContainer.innerHTML = '';
-            const qrDataToUse = qrCodeData.trim();
-            console.log("[FRONTEND] 📱 [updateRestaurantPaymentModal] Using QR data from PayOs:", qrDataToUse.substring(0, 100) + '...');
-            
-            const qr = new QRCode(tempContainer, {
-              text: qrDataToUse,
-              width: 256,
-              height: 256,
-              colorDark: '#000000',
-              colorLight: '#ffffff',
-              correctLevel: QRCode.CorrectLevel.H
-            });
-            
-            const canvas = tempContainer.querySelector('canvas');
-            if (canvas) {
-              const dataUrl = canvas.toDataURL('image/png');
-              qrImg.src = dataUrl;
-              qrImg.style.display = 'block';
-              qrImg.alt = `PayOs QR - ${orderNumber}`;
-              qrImg.style.border = '4px solid #e9ecef';
-              
-              console.log("[FRONTEND] ✅ [updateRestaurantPaymentModal] QR code generated from QR data string");
-              document.body.removeChild(tempContainer);
-            } else {
-              throw new Error('QRCode.js không tạo được canvas');
-            }
-          } catch (error) {
-            console.error("[FRONTEND] ❌ [updateRestaurantPaymentModal] Error generating QR from data string:", error);
-            if (tempContainer.parentNode) {
-              document.body.removeChild(tempContainer);
-            }
-            qrImg.style.display = 'none';
-            if (waitingEl) {
-              waitingEl.textContent = 'Không thể tạo QR code từ dữ liệu PayOs. Vui lòng thử lại.';
-              waitingEl.className = 'text-center mt-4 text-danger';
-            }
-          }
-        }
+        // Case 3: Không nhận diện được format
         else {
           console.error("[FRONTEND] ❌ [updateRestaurantPaymentModal] Không nhận diện được format QR code");
           qrImg.style.display = 'none';
           if (waitingEl) {
-            waitingEl.textContent = 'Định dạng QR code không hợp lệ từ PayOs. Vui lòng thử lại.';
+            waitingEl.textContent = 'Định dạng QR code không hợp lệ từ SePay. Vui lòng thử lại.';
             waitingEl.className = 'text-center mt-4 text-danger';
           }
         }
       } 
       else {
-        console.warn("[FRONTEND] ⚠️ [updateRestaurantPaymentModal] PayOs không trả về QR code");
+        console.warn("[FRONTEND] ⚠️ [updateRestaurantPaymentModal] SePay không trả về QR code");
         qrImg.style.display = 'none';
         if (waitingEl) {
-          waitingEl.textContent = 'PayOs không trả về QR code. Vui lòng thử lại hoặc liên hệ hỗ trợ.';
+          waitingEl.textContent = 'SePay không trả về QR code. Vui lòng thử lại hoặc liên hệ hỗ trợ.';
           waitingEl.className = 'text-center mt-4 text-danger';
         }
       }
@@ -296,22 +248,12 @@ async function updateRestaurantPaymentModal(orderId, orderNumber, amount) {
       console.log("[FRONTEND] ✅ [updateRestaurantPaymentModal] QR section displayed");
     }
 
-    // Update bank info
-    const expectedAccountNumber = '0901329227';
+    // Update bank info from SePay response
     if (result.accountNumber) {
       const bankAccEl = document.getElementById('rpBankAccount');
       if (bankAccEl) {
         bankAccEl.textContent = result.accountNumber;
-        if (result.accountNumber !== expectedAccountNumber) {
-          console.warn("[FRONTEND] ⚠️ [updateRestaurantPaymentModal] Account Number mismatch!");
-        } else {
-          console.log("[FRONTEND] ✅ [updateRestaurantPaymentModal] Account Number verified:", result.accountNumber);
-        }
-      }
-    } else {
-      const bankAccEl = document.getElementById('rpBankAccount');
-      if (bankAccEl) {
-        bankAccEl.textContent = expectedAccountNumber;
+        console.log("[FRONTEND] ✅ [updateRestaurantPaymentModal] Account Number:", result.accountNumber);
       }
     }
     
@@ -319,20 +261,24 @@ async function updateRestaurantPaymentModal(orderId, orderNumber, amount) {
       const bankNameEl = document.getElementById('rpBankName');
       if (bankNameEl) {
         bankNameEl.textContent = result.accountName;
+        console.log("[FRONTEND] ✅ [updateRestaurantPaymentModal] Account Name:", result.accountName);
       }
-    } else {
+    }
+    
+    if (result.bankName) {
       const bankNameEl = document.getElementById('rpBankName');
-      if (bankNameEl) {
-        bankNameEl.textContent = 'MB Bank';
+      if (bankNameEl && !result.accountName) {
+        bankNameEl.textContent = result.bankName;
+        console.log("[FRONTEND] ✅ [updateRestaurantPaymentModal] Bank Name:", result.bankName);
       }
     }
 
-    // Update amount from PayOs response
+    // Update amount from SePay response
     if (result.amount && result.amount > 0) {
       const amountEl = document.getElementById('rpAmount');
       if (amountEl) {
         amountEl.textContent = formatCurrency(result.amount);
-        console.log("[FRONTEND] ✅ [updateRestaurantPaymentModal] Amount updated from PayOs:", result.amount);
+        console.log("[FRONTEND] ✅ [updateRestaurantPaymentModal] Amount updated from SePay:", result.amount);
       }
     }
 
@@ -364,15 +310,15 @@ async function updateRestaurantPaymentModal(orderId, orderNumber, amount) {
       console.log("[FRONTEND] ✅ [updateRestaurantPaymentModal] Success message hidden after QR creation");
     }
 
-    // Store payment link info
+    // Store payment info for later use
     window._currentRestaurantPaymentLink = {
-      paymentLinkId: result.paymentLinkId,
+      orderId: result.orderId,
       orderCode: result.orderCode,
-      checkoutUrl: result.checkoutUrl
+      vaNumber: result.vaNumber
     };
 
   } catch (error) {
-    console.error("[FRONTEND] ❌ [updateRestaurantPaymentModal] Error creating PayOs payment link:", error);
+    console.error("[FRONTEND] ❌ [updateRestaurantPaymentModal] Error creating SePay QR code:", error);
     
     if (waitingEl) {
       waitingEl.style.display = 'block';

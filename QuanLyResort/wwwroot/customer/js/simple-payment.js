@@ -190,7 +190,7 @@ async function openSimplePayment(bookingId) {
 }
 
 /**
- * Update modal content - Tạo PayOs payment link
+ * Update modal content - Tạo SePay QR code động
  */
 async function updatePaymentModal(bookingId, bookingCode, amount) {
   // Booking code
@@ -216,15 +216,15 @@ async function updatePaymentModal(bookingId, bookingCode, amount) {
   if (qrSection) qrSection.style.display = 'none';
 
   try {
-    // Call PayOs API to create payment link
+    // Call SePay API to create dynamic QR code
     const token = localStorage.getItem('token');
     if (!token) {
       throw new Error('Không tìm thấy token đăng nhập');
     }
 
-    console.log("[FRONTEND] " + '🔄 [updatePaymentModal] Creating PayOs payment link for booking:', bookingId);
+    console.log("[FRONTEND] " + '🔄 [updatePaymentModal] Creating SePay QR code for booking:', bookingId);
     
-    const response = await fetch(`${location.origin}/api/simplepayment/create-link`, {
+    const response = await fetch(`${location.origin}/api/simplepayment/create-qr-booking`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -239,24 +239,23 @@ async function updatePaymentModal(bookingId, bookingCode, amount) {
     }
 
     const result = await response.json();
-    console.log("[FRONTEND] " + '✅ [updatePaymentModal] PayOs payment link created:', result);
-    console.log("[FRONTEND] " + '🔍 [updatePaymentModal] Full PayOs response:', JSON.stringify(result, null, 2));
+    console.log("[FRONTEND] " + '✅ [updatePaymentModal] SePay QR code created:', result);
+    console.log("[FRONTEND] " + '🔍 [updatePaymentModal] Full SePay response:', JSON.stringify(result, null, 2));
 
-    // Check if we have QR code - PayOs có thể trả về:
-    // 1. URL QR: "https://img.vietqr.io/image/..."
-    // 2. Base64: "iVBORw0KGgoAAAANSUhEUgAA..."
-    // 3. Không có QR code, chỉ có checkoutUrl
-    let qrCodeData = result.qrCode || result.data?.qrCode || result.qrCodeBase64;
+    // Check if we have QR code - SePay có thể trả về:
+    // 1. qrCodeUrl: "https://..."
+    // 2. qrCode: Base64 image
+    let qrCodeData = result.qrCode || result.qrCodeUrl;
     console.log("[FRONTEND] " + '🔍 [updatePaymentModal] QR Code data type:', typeof qrCodeData);
     console.log("[FRONTEND] " + '🔍 [updatePaymentModal] QR Code data length:', qrCodeData?.length || 0);
     console.log("[FRONTEND] " + '🔍 [updatePaymentModal] QR Code data preview:', qrCodeData?.substring(0, 50) || 'NULL');
     console.log("[FRONTEND] " + '🔍 [updatePaymentModal] Has checkoutUrl:', !!result.checkoutUrl);
 
     if (!result.success) {
-      throw new Error(`PayOs API error: ${result.desc || result.message || 'Unknown error'}`);
+      throw new Error(`SePay API error: ${result.message || 'Unknown error'}`);
     }
 
-    // Display QR code from PayOs
+    // Display QR code from SePay
     if (qrImg) {
       if (qrCodeData) {
         // Case 1: QR code là URL (https://...)
@@ -264,14 +263,14 @@ async function updatePaymentModal(bookingId, bookingCode, amount) {
           console.log("[FRONTEND] " + '🌐 [updatePaymentModal] QR Code is URL:', qrCodeData);
           qrImg.src = qrCodeData;
           qrImg.style.display = 'block';
-          qrImg.alt = `PayOs QR - ${bookingCode}`;
+          qrImg.alt = `SePay QR - ${bookingCode}`;
           
           qrImg.onerror = function(e) {
             console.error("[FRONTEND] " + '❌ [updatePaymentModal] QR URL failed to load:', e);
             console.error("[FRONTEND] " + '❌ [updatePaymentModal] QR URL:', qrCodeData);
             qrImg.style.display = 'none';
             if (waitingEl) {
-              waitingEl.textContent = 'Không thể tải QR code từ PayOs. Vui lòng thử lại.';
+              waitingEl.textContent = 'Không thể tải QR code từ SePay. Vui lòng thử lại.';
               waitingEl.className = 'text-center mt-4 text-danger';
             }
           };
@@ -300,14 +299,14 @@ async function updatePaymentModal(bookingId, bookingCode, amount) {
           
           qrImg.src = qrSrc;
           qrImg.style.display = 'block';
-          qrImg.alt = `PayOs QR - ${bookingCode}`;
+          qrImg.alt = `SePay QR - ${bookingCode}`;
           
           qrImg.onerror = function(e) {
             console.error("[FRONTEND] " + '❌ [updatePaymentModal] QR Base64 failed to load:', e);
             console.error("[FRONTEND] " + '❌ [updatePaymentModal] Failed src (first 200 chars):', qrSrc.substring(0, 200));
             qrImg.style.display = 'none';
             if (waitingEl) {
-              waitingEl.textContent = 'Không thể tải QR code từ PayOs. Vui lòng thử lại.';
+              waitingEl.textContent = 'Không thể tải QR code từ SePay. Vui lòng thử lại.';
               waitingEl.className = 'text-center mt-4 text-danger';
             }
           };
@@ -317,139 +316,24 @@ async function updatePaymentModal(bookingId, bookingCode, amount) {
             qrImg.style.border = '4px solid #e9ecef';
           };
         }
-        // Case 3: QR code là QR data string (EMV QR format - bắt đầu bằng số)
-        // PayOs QR data có thể chứa space, nên cần remove space trước khi test
-        else if (/^[0-9A-Za-z\s]+$/.test(qrCodeData.trim()) && qrCodeData.trim().length > 50 && qrCodeData.trim().startsWith('000201')) {
-          console.log("[FRONTEND] " + '📱 [updatePaymentModal] QR Code is QR data string (EMV format)');
-          console.log("[FRONTEND] " + '📱 [updatePaymentModal] QR data string length:', qrCodeData.length);
-          
-          // Generate QR code image từ QR data string bằng QRCode.js
-          // Tạo container tạm để generate QR
-          const tempContainer = document.createElement('div');
-          tempContainer.style.position = 'absolute';
-          tempContainer.style.left = '-9999px';
-          tempContainer.style.width = '256px';
-          tempContainer.style.height = '256px';
-          document.body.appendChild(tempContainer);
-          
-          try {
-            // Clear container trước khi generate
-            tempContainer.innerHTML = '';
-            
-            // Sử dụng QR data string trực tiếp từ PayOs (không remove space)
-            // PayOs trả về EMV QR format, space có thể là một phần của format hoặc description
-            // Việc remove space có thể làm hỏng format và ngân hàng không nhận diện được
-            const qrDataToUse = qrCodeData.trim();
-            console.log("[FRONTEND] " + '📱 [updatePaymentModal] Using QR data from PayOs (preserving format):', qrDataToUse.substring(0, 100) + '...');
-            console.log("[FRONTEND] " + '📱 [updatePaymentModal] QR data length:', qrDataToUse.length);
-            console.log("[FRONTEND] " + '📱 [updatePaymentModal] QR data has spaces:', qrDataToUse.includes(' '));
-            
-            // Generate QR code từ QR data string (giữ nguyên format từ PayOs)
-            const qr = new QRCode(tempContainer, {
-              text: qrDataToUse,
-              width: 256,
-              height: 256,
-              colorDark: '#000000',
-              colorLight: '#ffffff',
-              correctLevel: QRCode.CorrectLevel.H
-            });
-            
-            // Lấy canvas từ QRCode.js
-            const canvas = tempContainer.querySelector('canvas');
-            if (canvas) {
-              // Convert canvas to data URL
-              const dataUrl = canvas.toDataURL('image/png');
-              qrImg.src = dataUrl;
-              qrImg.style.display = 'block';
-              qrImg.alt = `PayOs QR - ${bookingCode}`;
-              qrImg.style.border = '4px solid #e9ecef';
-              
-              console.log("[FRONTEND] " + '✅ [updatePaymentModal] QR code generated from QR data string');
-              
-              // Remove temp container
-              document.body.removeChild(tempContainer);
-            } else {
-              throw new Error('QRCode.js không tạo được canvas');
-            }
-          } catch (error) {
-            console.error("[FRONTEND] " + '❌ [updatePaymentModal] Error generating QR from data string:', error);
-            if (tempContainer.parentNode) {
-              document.body.removeChild(tempContainer);
-            }
-            qrImg.style.display = 'none';
-            if (waitingEl) {
-              waitingEl.textContent = 'Không thể tạo QR code từ dữ liệu PayOs. Vui lòng thử lại.';
-              waitingEl.className = 'text-center mt-4 text-danger';
-            }
-          }
-        }
-        // Case 4: Không nhận diện được format
+        // Case 3: Không nhận diện được format
         else {
           console.error("[FRONTEND] " + '❌ [updatePaymentModal] Không nhận diện được format QR code');
-          console.error("[FRONTEND] " + '❌ [updatePaymentModal] QR data preview:', qrCodeData.substring(0, 100));
+          console.error("[FRONTEND] " + '❌ [updatePaymentModal] QR data preview:', qrCodeData?.substring(0, 100) || 'NULL');
           qrImg.style.display = 'none';
           if (waitingEl) {
-            waitingEl.textContent = 'Định dạng QR code không hợp lệ từ PayOs. Vui lòng thử lại.';
+            waitingEl.textContent = 'Định dạng QR code không hợp lệ từ SePay. Vui lòng thử lại.';
             waitingEl.className = 'text-center mt-4 text-danger';
           }
         }
       } 
-      // Case 5: Không có QR code từ PayOs - thử dùng checkoutUrl
+      // Case 4: Không có QR code từ SePay
       else {
-        console.warn("[FRONTEND] " + '⚠️ [updatePaymentModal] PayOs không trả về QR code');
-        console.warn("[FRONTEND] " + '⚠️ [updatePaymentModal] PaymentLinkId:', result.paymentLinkId);
-        console.warn("[FRONTEND] " + '⚠️ [updatePaymentModal] CheckoutUrl:', result.checkoutUrl);
-        
-        // Thử generate QR từ checkoutUrl nếu có
-        if (result.checkoutUrl) {
-          console.log("[FRONTEND] " + '🔄 [updatePaymentModal] Generating QR from checkoutUrl...');
-          const tempContainer = document.createElement('div');
-          tempContainer.style.position = 'absolute';
-          tempContainer.style.left = '-9999px';
-          tempContainer.style.width = '256px';
-          tempContainer.style.height = '256px';
-          document.body.appendChild(tempContainer);
-          
-          try {
-            tempContainer.innerHTML = '';
-            const qr = new QRCode(tempContainer, {
-              text: result.checkoutUrl,
-              width: 256,
-              height: 256,
-              colorDark: '#000000',
-              colorLight: '#ffffff',
-              correctLevel: QRCode.CorrectLevel.H
-            });
-            
-            const canvas = tempContainer.querySelector('canvas');
-            if (canvas) {
-              const dataUrl = canvas.toDataURL('image/png');
-              qrImg.src = dataUrl;
-              qrImg.style.display = 'block';
-              qrImg.alt = `PayOs QR - ${bookingCode}`;
-              qrImg.style.border = '4px solid #e9ecef';
-              console.log("[FRONTEND] " + '✅ [updatePaymentModal] QR code generated from checkoutUrl');
-              document.body.removeChild(tempContainer);
-            } else {
-              throw new Error('QRCode.js không tạo được canvas');
-            }
-          } catch (error) {
-            console.error("[FRONTEND] " + '❌ [updatePaymentModal] Error generating QR from checkoutUrl:', error);
-            if (tempContainer.parentNode) {
-              document.body.removeChild(tempContainer);
-            }
-            qrImg.style.display = 'none';
-            if (waitingEl) {
-              waitingEl.textContent = 'Không thể tạo QR code. Vui lòng thử lại hoặc liên hệ hỗ trợ.';
-              waitingEl.className = 'text-center mt-4 text-danger';
-            }
-          }
-        } else {
-          qrImg.style.display = 'none';
-          if (waitingEl) {
-            waitingEl.textContent = 'PayOs không trả về QR code. Vui lòng thử lại hoặc liên hệ hỗ trợ.';
-            waitingEl.className = 'text-center mt-4 text-danger';
-          }
+        console.warn("[FRONTEND] " + '⚠️ [updatePaymentModal] SePay không trả về QR code');
+        qrImg.style.display = 'none';
+        if (waitingEl) {
+          waitingEl.textContent = 'SePay không trả về QR code. Vui lòng thử lại hoặc liên hệ hỗ trợ.';
+          waitingEl.className = 'text-center mt-4 text-danger';
         }
       }
     }
@@ -460,25 +344,12 @@ async function updatePaymentModal(bookingId, bookingCode, amount) {
       console.log("[FRONTEND] " + '✅ [updatePaymentModal] QR section displayed');
     }
 
-    // Update bank info if available - đảm bảo hiển thị đúng tài khoản MB Bank
-    const expectedAccountNumber = '0901329227';
+    // Update bank info from SePay response
     if (result.accountNumber) {
       const bankAccEl = document.getElementById('spBankAccount');
       if (bankAccEl) {
         bankAccEl.textContent = result.accountNumber;
-        // Validate account number
-        if (result.accountNumber !== expectedAccountNumber) {
-          console.warn("[FRONTEND] " + '⚠️ [updatePaymentModal] Account Number mismatch! Expected: ' + expectedAccountNumber + ', Got: ' + result.accountNumber);
-        } else {
-          console.log("[FRONTEND] " + '✅ [updatePaymentModal] Account Number verified: ' + result.accountNumber + ' (MB Bank)');
-        }
-      }
-    } else {
-      // Fallback to default if PayOs doesn't return account number
-      const bankAccEl = document.getElementById('spBankAccount');
-      if (bankAccEl) {
-        bankAccEl.textContent = expectedAccountNumber;
-        console.warn("[FRONTEND] " + '⚠️ [updatePaymentModal] PayOs did not return accountNumber, using default: ' + expectedAccountNumber);
+        console.log("[FRONTEND] " + '✅ [updatePaymentModal] Account Number: ' + result.accountNumber);
       }
     }
     
@@ -488,22 +359,22 @@ async function updatePaymentModal(bookingId, bookingCode, amount) {
         bankNameEl.textContent = result.accountName;
         console.log("[FRONTEND] " + '✅ [updatePaymentModal] Account Name: ' + result.accountName);
       }
-    } else {
-      // Fallback to default if PayOs doesn't return account name
+    }
+    
+    if (result.bankName) {
       const bankNameEl = document.getElementById('spBankName');
-      if (bankNameEl) {
-        bankNameEl.textContent = 'MB Bank';
-        console.warn("[FRONTEND] " + '⚠️ [updatePaymentModal] PayOs did not return accountName, using default: MB Bank');
+      if (bankNameEl && !result.accountName) {
+        bankNameEl.textContent = result.bankName;
+        console.log("[FRONTEND] " + '✅ [updatePaymentModal] Bank Name: ' + result.bankName);
       }
     }
 
-    // Update amount from PayOs response (to ensure accuracy)
+    // Update amount from SePay response
     if (result.amount && result.amount > 0) {
       const amountEl = document.getElementById('spAmount');
       if (amountEl) {
-        // PayOs returns amount in VND (integer)
         amountEl.textContent = formatCurrency(result.amount);
-        console.log("[FRONTEND] " + '✅ [updatePaymentModal] Amount updated from PayOs:', result.amount);
+        console.log("[FRONTEND] " + '✅ [updatePaymentModal] Amount updated from SePay:', result.amount);
       }
     }
 
@@ -518,15 +389,15 @@ async function updatePaymentModal(bookingId, bookingCode, amount) {
       waitingEl.className = 'text-center mt-4';
     }
 
-    // Store payment link info for later use
+    // Store payment info for later use
     window._currentPaymentLink = {
-      paymentLinkId: result.paymentLinkId,
+      orderId: result.orderId,
       orderCode: result.orderCode,
-      checkoutUrl: result.checkoutUrl
+      vaNumber: result.vaNumber
     };
 
   } catch (error) {
-    console.error("[FRONTEND] " + '❌ [updatePaymentModal] Error creating PayOs payment link:', error);
+    console.error("[FRONTEND] " + '❌ [updatePaymentModal] Error creating SePay QR code:', error);
     
     // Show error message
     if (waitingEl) {
@@ -541,7 +412,7 @@ async function updatePaymentModal(bookingId, bookingCode, amount) {
 
 /**
  * Generate QR code from checkoutUrl using QRCode.js library
- * Fallback khi PayOs không trả về QR code
+ * Fallback khi SePay không trả về QR code
  */
 function generateQRFromCheckoutUrl(checkoutUrl, container) {
   if (!checkoutUrl) {
@@ -563,7 +434,7 @@ function generateQRFromCheckoutUrl(checkoutUrl, container) {
     container.innerHTML = `
       <div class="text-center">
         <a href="${checkoutUrl}" target="_blank" class="btn btn-primary btn-lg">
-          <i class="icon-credit-card"></i> Click để thanh toán qua PayOs
+          <i class="icon-credit-card"></i> Click để thanh toán qua SePay
         </a>
         <p class="mt-2 text-muted">QR code không khả dụng. Vui lòng click nút trên để thanh toán.</p>
       </div>
@@ -609,7 +480,7 @@ function generateQRFromCheckoutUrl(checkoutUrl, container) {
     container.innerHTML = `
       <div class="text-center">
         <a href="${checkoutUrl}" target="_blank" class="btn btn-primary btn-lg">
-          <i class="icon-credit-card"></i> Click để thanh toán qua PayOs
+          <i class="icon-credit-card"></i> Click để thanh toán qua SePay
         </a>
         <p class="mt-2 text-muted">QR code không khả dụng. Vui lòng click nút trên để thanh toán.</p>
       </div>
