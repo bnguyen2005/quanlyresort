@@ -18,6 +18,7 @@ public class SePayService
     private readonly string? _apiToken;
     private readonly string? _accountId;
     private readonly string? _bankCode;
+    private readonly string? _merchantId;
 
     public SePayService(
         ILogger<SePayService> logger,
