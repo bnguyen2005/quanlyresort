@@ -401,8 +401,15 @@ public class SimplePaymentController : ControllerBase
             var booking = await _bookingService.GetBookingByIdAsync(bookingId.Value);
             if (booking == null)
             {
-                _logger.LogWarning("[WEBHOOK] ⚠️ [WEBHOOK-{WebhookId}] Booking {BookingId} not found", webhookId, bookingId.Value);
-                return NotFound(new { message = $"Booking {bookingId.Value} không tồn tại", webhookId });
+                _logger.LogWarning("[WEBHOOK] ⚠️ [WEBHOOK-{WebhookId}] Booking {BookingId} not found in database", webhookId, bookingId.Value);
+                _logger.LogWarning("[WEBHOOK] ⚠️ [WEBHOOK-{WebhookId}] Webhook extract được booking ID = {BookingId} nhưng booking này không tồn tại trong database", webhookId, bookingId.Value);
+                _logger.LogWarning("[WEBHOOK] ⚠️ [WEBHOOK-{WebhookId}] Có thể: 1) Booking đã bị xóa, 2) Booking ID trong nội dung chuyển khoản sai, 3) Database không có booking này", webhookId);
+                return NotFound(new { 
+                    message = $"Booking {bookingId.Value} không tồn tại trong database. Vui lòng kiểm tra booking ID trong nội dung chuyển khoản.", 
+                    webhookId,
+                    extractedBookingId = bookingId.Value,
+                    suggestion = "Kiểm tra: 1) Booking có tồn tại không, 2) Nội dung chuyển khoản có đúng format BOOKING{id} không"
+                });
             }
 
             _logger.LogInformation("[WEBHOOK] ✅ [WEBHOOK-{WebhookId}] Booking found: Code={BookingCode}, Status={Status}, Amount={Amount:N0} VND", 
