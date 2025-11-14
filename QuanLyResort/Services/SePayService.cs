@@ -39,10 +39,10 @@ public class SePayService
         _bankCode = _configuration["SePay:BankCode"] ?? "MB"; // Default to MB
         
         // MERCHANT ID (có thể khác Account ID)
-        var merchantId = _configuration["SePay:MerchantId"];
-        if (!string.IsNullOrEmpty(merchantId))
+        _merchantId = _configuration["SePay:MerchantId"];
+        if (!string.IsNullOrEmpty(_merchantId))
         {
-            _logger.LogInformation("[SEPAY] 🔍 Merchant ID configured: {MerchantId}", merchantId);
+            _logger.LogInformation("[SEPAY] 🔍 Merchant ID configured: {MerchantId}", _merchantId);
         }
 
         if (string.IsNullOrEmpty(_apiToken))
@@ -153,13 +153,40 @@ public class SePayService
             });
             _logger.LogInformation("[SEPAY] 🔍 Request body: {Body}", requestBodyJson);
 
-            var requestBody = new
+            // SePay API request body - có thể cần format khác tùy endpoint
+            object requestBody;
+            
+            if (_apiBaseUrl.Contains("pgapi.sepay.vn"))
             {
-                amount = (long)(amount), // SePay expects amount in VND (long)
-                order_code = orderCode,
-                duration = durationSeconds, // Thời gian hiệu lực (giây)
-                with_qrcode = true // Yêu cầu tạo QR code
-            };
+                // Production API format - có thể cần merchant_id, description, etc.
+                var prodBody = new Dictionary<string, object>
+                {
+                    { "amount", (long)(amount) },
+                    { "order_code", orderCode },
+                    { "description", description },
+                    { "duration", durationSeconds },
+                    { "with_qrcode", true }
+                };
+                
+                // Thêm merchant_id nếu có
+                if (!string.IsNullOrEmpty(_merchantId))
+                {
+                    prodBody["merchant_id"] = _merchantId;
+                }
+                
+                requestBody = prodBody;
+            }
+            else
+            {
+                // User API format
+                requestBody = new
+                {
+                    amount = (long)(amount), // SePay expects amount in VND (long)
+                    order_code = orderCode,
+                    duration = durationSeconds, // Thời gian hiệu lực (giây)
+                    with_qrcode = true // Yêu cầu tạo QR code
+                };
+            }
 
             _logger.LogInformation("[SEPAY] 🔄 Tạo đơn hàng SePay: OrderCode={OrderCode}, Amount={Amount}, Duration={Duration}s", 
                 orderCode, amount, durationSeconds);
