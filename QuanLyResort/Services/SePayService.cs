@@ -19,6 +19,9 @@ public class SePayService
     private readonly string? _accountId;
     private readonly string? _bankCode;
     private readonly string? _merchantId;
+    
+    // SePay Static QR Code configuration
+    private readonly string? _bankAccountNumber; // Số tài khoản ngân hàng
 
     public SePayService(
         ILogger<SePayService> logger,
@@ -45,6 +48,13 @@ public class SePayService
         {
             _logger.LogInformation("[SEPAY] 🔍 Merchant ID configured: {MerchantId}", _merchantId);
         }
+        
+        // Bank Account Number (cho static QR code)
+        _bankAccountNumber = _configuration["SePay:BankAccountNumber"];
+        if (string.IsNullOrEmpty(_bankAccountNumber))
+        {
+            _logger.LogWarning("[SEPAY] ⚠️ SePay Bank Account Number chưa được cấu hình. Static QR code sẽ không hoạt động.");
+        }
 
         if (string.IsNullOrEmpty(_apiToken))
         {
@@ -64,21 +74,31 @@ public class SePayService
     {
         try
         {
-            if (string.IsNullOrEmpty(_apiToken) || string.IsNullOrEmpty(_accountId))
+            var orderCode = $"BOOKING{bookingId}";
+            var description = $"BOOKING{bookingId}"; // Format ngắn gọn cho QR code
+
+            // Thử gọi API trước
+            if (!string.IsNullOrEmpty(_apiToken) && !string.IsNullOrEmpty(_accountId))
             {
-                _logger.LogError("[SEPAY] ❌ API Token hoặc Account ID chưa được cấu hình");
-                return null;
+                var result = await CreateOrderAsync(orderCode, amount, description, durationSeconds);
+                if (result != null)
+                {
+                    return result;
+                }
             }
 
-            var orderCode = $"BOOKING{bookingId}";
-            var description = $"Thanh toán đặt phòng {bookingId}";
-
-            return await CreateOrderAsync(orderCode, amount, description, durationSeconds);
+            // Fallback: Tạo QR code tĩnh nếu API không hoạt động hoặc chưa cấu hình
+            _logger.LogInformation("[SEPAY] 🔄 Fallback sang static QR code cho booking {BookingId}", bookingId);
+            return CreateStaticQRCodeResponse(orderCode, amount, description);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "[SEPAY] ❌ Lỗi khi tạo đơn hàng booking {BookingId}", bookingId);
-            return null;
+            
+            // Fallback: Tạo QR code tĩnh
+            var orderCode = $"BOOKING{bookingId}";
+            var description = $"BOOKING{bookingId}";
+            return CreateStaticQRCodeResponse(orderCode, amount, description);
         }
     }
 
@@ -89,21 +109,31 @@ public class SePayService
     {
         try
         {
-            if (string.IsNullOrEmpty(_apiToken) || string.IsNullOrEmpty(_accountId))
+            var orderCode = $"ORDER{orderId}";
+            var description = $"ORDER{orderId}"; // Format ngắn gọn cho QR code
+
+            // Thử gọi API trước
+            if (!string.IsNullOrEmpty(_apiToken) && !string.IsNullOrEmpty(_accountId))
             {
-                _logger.LogError("[SEPAY] ❌ API Token hoặc Account ID chưa được cấu hình");
-                return null;
+                var result = await CreateOrderAsync(orderCode, amount, description, durationSeconds);
+                if (result != null)
+                {
+                    return result;
+                }
             }
 
-            var orderCode = $"ORDER{orderId}";
-            var description = $"Thanh toán đơn hàng nhà hàng {orderId}";
-
-            return await CreateOrderAsync(orderCode, amount, description, durationSeconds);
+            // Fallback: Tạo QR code tĩnh nếu API không hoạt động hoặc chưa cấu hình
+            _logger.LogInformation("[SEPAY] 🔄 Fallback sang static QR code cho restaurant order {OrderId}", orderId);
+            return CreateStaticQRCodeResponse(orderCode, amount, description);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "[SEPAY] ❌ Lỗi khi tạo đơn hàng restaurant {OrderId}", orderId);
-            return null;
+            
+            // Fallback: Tạo QR code tĩnh
+            var orderCode = $"ORDER{orderId}";
+            var description = $"ORDER{orderId}";
+            return CreateStaticQRCodeResponse(orderCode, amount, description);
         }
     }
 
@@ -220,7 +250,10 @@ public class SePayService
                 var errorContent = await response.Content.ReadAsStringAsync();
                 _logger.LogError("[SEPAY] ❌ SePay API error: Status={Status}, Response={Response}", 
                     response.StatusCode, errorContent);
-                return null;
+                
+                // Fallback: Tạo QR code tĩnh nếu API không hoạt động
+                _logger.LogWarning("[SEPAY] ⚠️ SePay API không hoạt động, fallback sang static QR code");
+                return CreateStaticQRCodeResponse(orderCode, amount, description);
             }
 
             var responseContent = await response.Content.ReadAsStringAsync();
@@ -242,12 +275,67 @@ public class SePayService
             {
                 _logger.LogError("[SEPAY] ❌ SePay API trả về lỗi: Status={Status}, Message={Message}", 
                     sepayResponse?.Status, sepayResponse?.Message);
-                return null;
+                
+                // Fallback: Tạo QR code tĩnh nếu API trả về lỗi
+                _logger.LogWarning("[SEPAY] ⚠️ SePay API trả về lỗi, fallback sang static QR code");
+                return CreateStaticQRCodeResponse(orderCode, amount, description);
             }
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "[SEPAY] ❌ Lỗi khi gọi SePay API");
+            
+            // Fallback: Tạo QR code tĩnh nếu có lỗi
+            _logger.LogWarning("[SEPAY] ⚠️ SePay API lỗi, fallback sang static QR code");
+            return CreateStaticQRCodeResponse(orderCode, amount, description);
+        }
+    }
+
+    /// <summary>
+    /// Tạo QR code tĩnh từ SePay URL (fallback khi API không hoạt động)
+    /// Format: https://qr.sepay.vn/img?acc=SO_TAI_KHOAN&bank=NGAN_HANG&amount=SO_TIEN&des=NOI_DUNG
+    /// QR code này vẫn ĐỘNG về số tiền vì amount thay đổi theo booking/order
+    /// </summary>
+    private SePayOrderResponse? CreateStaticQRCodeResponse(string orderCode, decimal amount, string description)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(_bankAccountNumber))
+            {
+                _logger.LogError("[SEPAY] ❌ Bank Account Number chưa được cấu hình. Không thể tạo static QR code.");
+                return null;
+            }
+
+            // URL encode các tham số
+            var encodedDescription = Uri.EscapeDataString(description);
+            var bankCodeForUrl = _bankCode ?? "MB";
+            
+            // Tạo QR code URL tĩnh (nhưng số tiền vẫn động)
+            // Format: https://qr.sepay.vn/img?acc=SO_TAI_KHOAN&bank=NGAN_HANG&amount=SO_TIEN&des=NOI_DUNG
+            var qrCodeUrl = $"https://qr.sepay.vn/img?acc={_bankAccountNumber}&bank={bankCodeForUrl}&amount={(long)amount}&des={encodedDescription}";
+            
+            _logger.LogInformation("[SEPAY] 📸 Tạo static QR code URL (amount động): {Url}", qrCodeUrl);
+
+            // Tạo response tương tự API response
+            return new SePayOrderResponse
+            {
+                OrderId = Guid.NewGuid().ToString(),
+                OrderCode = orderCode,
+                VaNumber = orderCode,
+                VaHolderName = "Resort Deluxe",
+                Amount = (long)amount,
+                Status = "pending",
+                BankName = bankCodeForUrl,
+                AccountHolderName = "Resort Deluxe",
+                AccountNumber = _bankAccountNumber,
+                ExpiredAt = DateTime.UtcNow.AddHours(24).ToString("yyyy-MM-dd HH:mm:ss"),
+                QrCode = null, // Static QR code không có base64
+                QrCodeUrl = qrCodeUrl // URL để hiển thị QR code (số tiền động)
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[SEPAY] ❌ Lỗi khi tạo static QR code");
             return null;
         }
     }
