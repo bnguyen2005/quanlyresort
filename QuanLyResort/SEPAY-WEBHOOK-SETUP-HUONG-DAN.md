@@ -29,8 +29,44 @@
    - **URL:** `https://quanlyresort-production.up.railway.app/api/simplepayment/webhook`
    - **Events:** Chọn tất cả events (hoặc ít nhất: `transfer.in`, `transfer.success`)
    - **Status:** Bật (Active/Enabled)
+   - **Cấu hình chứng thực WebHooks:** Có 3 tùy chọn:
+     - ✅ **Không cần chứng thực** (Đơn giản nhất - Khuyến nghị cho test)
+     - ✅ **API Key** (An toàn hơn - Cần tạo API Token)
+     - ✅ **OAuth 2.0** (An toàn nhất - Phức tạp hơn)
 
 5. **Lưu cấu hình**
+
+### 🔐 Tùy Chọn: Tạo API Token (Nếu chọn "API Key")
+
+**API Token là TÙY CHỌN - không bắt buộc!**
+
+Nếu bạn chọn phương thức "Không cần chứng thực" → **Bỏ qua bước này**
+
+Nếu bạn chọn phương thức "API Key" → Làm theo các bước sau:
+
+1. **Vào phần API Access:**
+   - SePay Dashboard → **Cấu hình Công ty** → **API Access**
+   - Hoặc truy cập: https://my.sepay.vn/api-access
+
+2. **Tạo API Token:**
+   - Click **"+ Thêm API"** (góc trên bên phải)
+   - Điền thông tin:
+     - **Tên:** `Resort Payment Webhook` (hoặc tên bất kỳ)
+     - **Trạng thái:** Chọn **Hoạt động**
+   - Click **"Thêm"**
+
+3. **Copy API Token:**
+   - Sau khi tạo, API Token sẽ hiển thị trong danh sách
+   - **Copy token này** (chỉ hiển thị 1 lần, lưu lại cẩn thận!)
+
+4. **Cấu hình trong Webhook:**
+   - Khi thêm webhook, chọn phương thức: **"API Key"**
+   - Nhập API Token vào trường **"API Key"**
+
+**Lưu ý:**
+- API Token có toàn quyền truy cập (SePay chưa hỗ trợ phân quyền)
+- Nếu mất token, phải tạo lại
+- Backend hiện tại hỗ trợ cả 3 phương thức (không cần code thay đổi)
 
 ### Bước 2: Kiểm Tra Webhook Hoạt Động
 
