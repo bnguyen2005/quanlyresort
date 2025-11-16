@@ -339,16 +339,17 @@ async function updatePaymentModal(bookingId, bookingCode, amount) {
             waitingEl.textContent = 'Định dạng QR code không hợp lệ. Vui lòng thử lại.';
             waitingEl.className = 'text-center mt-4 text-danger';
           }
-        } 
-        // Case 4: Không có QR code
-        else {
-          console.warn("[FRONTEND] " + '⚠️ [updatePaymentModal] Không trả về QR code');
-          qrImg.style.display = 'none';
-          if (waitingEl) {
-            waitingEl.textContent = 'Không trả về QR code. Vui lòng thử lại hoặc liên hệ hỗ trợ.';
-            waitingEl.className = 'text-center mt-4 text-danger';
-          }
         }
+      }
+      // Case 4: Không có QR code
+      else {
+        console.warn("[FRONTEND] " + '⚠️ [updatePaymentModal] Không trả về QR code');
+        qrImg.style.display = 'none';
+        if (waitingEl) {
+          waitingEl.textContent = 'Không trả về QR code. Vui lòng thử lại hoặc liên hệ hỗ trợ.';
+          waitingEl.className = 'text-center mt-4 text-danger';
+        }
+      }
     }
 
     // Show QR section
