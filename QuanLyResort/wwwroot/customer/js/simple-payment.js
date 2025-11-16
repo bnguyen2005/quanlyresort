@@ -25,10 +25,6 @@ let paymentPollingInterval = window.paymentPollingInterval;
  * Mở modal thanh toán
  */
 async function openSimplePayment(bookingId) {
-  // Ensure function is available globally immediately
-  if (!window.openSimplePayment) {
-    window.openSimplePayment = openSimplePayment;
-  }
   try {
     // Get booking từ list
     const bookings = window._bookings || [];
@@ -860,6 +856,9 @@ function showSimpleToast(message, type) {
   }
 }
 
+// Export for global use - MUST be after function definition
+window.openSimplePayment = openSimplePayment;
+
 // Stop polling when modal is closed
 document.addEventListener('DOMContentLoaded', () => {
   const modal = document.getElementById('simplePaymentModal');
@@ -869,7 +868,4 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
-
-// Export for global use
-window.openSimplePayment = openSimplePayment;
 
