@@ -222,6 +222,23 @@ public class SePayService
             {
                 endpoints.Add(($"{_apiBaseUrl}/api/v1/accounts/{_accountId}/orders", "Production Account"));
             }
+            
+            // Option 4: Thử User API nếu Production API không hoạt động
+            // User API có thể hoạt động ngay cả khi dùng Production base URL
+            if (!string.IsNullOrEmpty(_bankCode) && !string.IsNullOrEmpty(_accountId))
+            {
+                endpoints.Add(($"https://my.sepay.vn/userapi/{_bankCode}/{_accountId}/orders", "User API Bank+Account (Fallback)"));
+            }
+            
+            if (!string.IsNullOrEmpty(_merchantId))
+            {
+                endpoints.Add(($"https://my.sepay.vn/userapi/{_merchantId}/orders", "User API Merchant (Fallback)"));
+            }
+            
+            if (!string.IsNullOrEmpty(_accountId))
+            {
+                endpoints.Add(($"https://my.sepay.vn/userapi/{_accountId}/orders", "User API Account (Fallback)"));
+            }
         }
         else if (_apiBaseUrl.Contains("my.sepay.vn"))
         {
@@ -363,9 +380,20 @@ public class SePayService
             
             return prodBody;
         }
+        else if (endpointType.Contains("User API"))
+        {
+            // User API format - không cần description và merchant_id
+            return new
+            {
+                amount = (long)(amount),
+                order_code = orderCode,
+                duration = durationSeconds,
+                with_qrcode = true
+            };
+        }
         else
         {
-            // User API format
+            // Fallback format
             return new
             {
                 amount = (long)(amount),
