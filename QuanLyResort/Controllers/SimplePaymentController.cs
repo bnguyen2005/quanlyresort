@@ -1290,14 +1290,14 @@ public class SimplePaymentController : ControllerBase
                 success = true,
                 orderId = $"BOOKING{request.BookingId}",
                 orderCode = $"BOOKING{request.BookingId}",
-                qrCode = null, // VietQR không có base64, chỉ có URL
+                qrCode = (string?)null, // VietQR không có base64, chỉ có URL
                 qrCodeUrl = qrCodeUrl, // URL to QR code image
                 amount = (long)amount,
                 accountNumber = _vietQRService.GetBankAccountNumber(),
                 accountName = _vietQRService.GetBankAccountName(),
                 bankName = _vietQRService.GetBankCode(),
-                vaNumber = null,
-                expiredAt = null,
+                vaNumber = (string?)null,
+                expiredAt = (string?)null,
                 description = $"BOOKING{request.BookingId}"
             });
         }
@@ -1371,14 +1371,14 @@ public class SimplePaymentController : ControllerBase
                 success = true,
                 orderId = $"ORDER{request.OrderId}",
                 orderCode = $"ORDER{request.OrderId}",
-                qrCode = null, // VietQR không có base64, chỉ có URL
+                qrCode = (string?)null, // VietQR không có base64, chỉ có URL
                 qrCodeUrl = qrCodeUrl, // URL to QR code image
                 amount = (long)amount,
                 accountNumber = _vietQRService.GetBankAccountNumber(),
                 accountName = _vietQRService.GetBankAccountName(),
                 bankName = _vietQRService.GetBankCode(),
-                vaNumber = null,
-                expiredAt = null,
+                vaNumber = (string?)null,
+                expiredAt = (string?)null,
                 description = $"ORDER{request.OrderId}"
             });
         }
