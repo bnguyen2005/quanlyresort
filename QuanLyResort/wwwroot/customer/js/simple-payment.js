@@ -638,7 +638,7 @@ function startSimplePolling(bookingId) {
         bookingId: bookingId
       });
     }
-  }, 2000); // Poll mỗi 2 giây
+  }, 1000); // Poll mỗi 1 giây để detect payment nhanh hơn
   
   // Update local variable
   paymentPollingInterval = window.paymentPollingInterval;
