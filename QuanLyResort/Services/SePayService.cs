@@ -211,10 +211,15 @@ public class SePayService
                     { "with_qrcode", true }
                 };
                 
-                // Thêm merchant_id nếu có
+                // Thêm merchant_id nếu có (QUAN TRỌNG cho Production API!)
                 if (!string.IsNullOrEmpty(_merchantId))
                 {
                     prodBody["merchant_id"] = _merchantId;
+                    _logger.LogInformation("[SEPAY] 🔍 Added merchant_id to request: {MerchantId}", _merchantId);
+                }
+                else
+                {
+                    _logger.LogWarning("[SEPAY] ⚠️ merchant_id chưa được cấu hình. Production API có thể yêu cầu merchant_id!");
                 }
                 
                 requestBody = prodBody;
