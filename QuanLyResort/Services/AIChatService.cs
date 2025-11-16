@@ -481,6 +481,136 @@ Hãy trả lời ngắn gọn, thân thiện và hữu ích bằng tiếng Việ
                     _logger.LogWarning(ex, "[AI Chat] ⚠️ Error fetching bookings");
                 }
             }
+
+            // Detect intent: Hỏi về nhà hàng / menu
+            if (lowerMessage.Contains("nhà hàng") || lowerMessage.Contains("restaurant") || 
+                lowerMessage.Contains("menu") || lowerMessage.Contains("món ăn") ||
+                lowerMessage.Contains("đồ ăn") || lowerMessage.Contains("thức ăn"))
+            {
+                _logger.LogInformation("[AI Chat] 🔍 Detected restaurant-related query, fetching menu data...");
+
+                if (_context != null)
+                {
+                    try
+                    {
+                        var menuItems = await _context.Services
+                            .Where(s => s.ServiceType == "Restaurant" && s.IsActive)
+                            .OrderBy(s => s.ServiceName)
+                            .Take(20)
+                            .ToListAsync();
+
+                        if (menuItems.Any())
+                        {
+                            dataContext.AppendLine($"\n🍽️ Menu nhà hàng: {menuItems.Count} món");
+                            foreach (var item in menuItems)
+                            {
+                                var price = item.Price > 0 
+                                    ? $"{item.Price:N0} VND" 
+                                    : "Liên hệ";
+                                var unit = !string.IsNullOrEmpty(item.Unit) ? $" / {item.Unit}" : "";
+                                dataContext.AppendLine($"  • {item.ServiceName}: {price}{unit}");
+                                if (!string.IsNullOrEmpty(item.Description) && item.Description.Length <= 80)
+                                {
+                                    dataContext.AppendLine($"    ({item.Description})");
+                                }
+                            }
+                            if (menuItems.Count == 20)
+                            {
+                                dataContext.AppendLine($"  ... và nhiều món khác");
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "[AI Chat] ⚠️ Error fetching restaurant menu");
+                    }
+                }
+            }
+
+            // Detect intent: Hỏi về đánh giá / reviews
+            if (lowerMessage.Contains("đánh giá") || lowerMessage.Contains("review") || 
+                lowerMessage.Contains("nhận xét") || lowerMessage.Contains("comment") ||
+                lowerMessage.Contains("sao") || lowerMessage.Contains("rating"))
+            {
+                _logger.LogInformation("[AI Chat] 🔍 Detected review-related query, fetching reviews data...");
+
+                if (_context != null)
+                {
+                    try
+                    {
+                        // Lấy reviews mới nhất và có rating cao
+                        var recentReviews = await _context.Reviews
+                            .Include(r => r.Customer)
+                            .Include(r => r.Room)
+                            .Where(r => r.IsVisible && r.IsApproved)
+                            .OrderByDescending(r => r.CreatedAt)
+                            .Take(10)
+                            .Select(r => new
+                            {
+                                r.Rating,
+                                r.Comment,
+                                CustomerName = r.Customer != null ? (r.Customer.FullName ?? "Khách hàng") : "Khách hàng",
+                                RoomNumber = r.Room != null ? r.Room.RoomNumber : null
+                            })
+                            .ToListAsync();
+
+                        // Tính toán thống kê
+                        var stats = await _context.Reviews
+                            .Where(r => r.IsVisible && r.IsApproved)
+                            .GroupBy(r => r.Rating)
+                            .Select(g => new
+                            {
+                                Rating = g.Key,
+                                Count = g.Count()
+                            })
+                            .ToListAsync();
+
+                        var totalReviews = stats.Sum(s => s.Count);
+                        var avgRating = totalReviews > 0 
+                            ? stats.Sum(s => s.Rating * s.Count) / (double)totalReviews 
+                            : 0;
+
+                        if (totalReviews > 0)
+                        {
+                            dataContext.AppendLine($"\n⭐ Đánh giá của khách hàng:");
+                            dataContext.AppendLine($"  • Tổng số đánh giá: {totalReviews}");
+                            dataContext.AppendLine($"  • Điểm trung bình: {avgRating:F1}/5.0 sao");
+                            
+                            // Thống kê theo sao
+                            foreach (var stat in stats.OrderByDescending(s => s.Rating))
+                            {
+                                var stars = new string('⭐', stat.Rating);
+                                dataContext.AppendLine($"  • {stars} ({stat.Rating} sao): {stat.Count} đánh giá");
+                            }
+
+                            // Một số reviews mới nhất
+                            if (recentReviews.Any())
+                            {
+                                dataContext.AppendLine($"\n  📝 Một số đánh giá gần đây:");
+                                foreach (var review in recentReviews.Take(5))
+                                {
+                                    var stars = new string('⭐', review.Rating);
+                                    var roomInfo = !string.IsNullOrEmpty(review.RoomNumber) 
+                                        ? $" (Phòng {review.RoomNumber})" 
+                                        : "";
+                                    var comment = !string.IsNullOrEmpty(review.Comment) && review.Comment.Length > 60
+                                        ? review.Comment.Substring(0, 60) + "..."
+                                        : review.Comment ?? "";
+                                    dataContext.AppendLine($"    • {stars} {review.CustomerName}{roomInfo}: {comment}");
+                                }
+                            }
+                        }
+                        else
+                        {
+                            dataContext.AppendLine($"\n⭐ Chưa có đánh giá nào");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "[AI Chat] ⚠️ Error fetching reviews");
+                    }
+                }
+            }
         }
         catch (Exception ex)
         {
@@ -528,6 +658,24 @@ Hãy trả lời ngắn gọn, thân thiện và hữu ích bằng tiếng Việ
             response.AppendLine("Thông tin booking của bạn:");
             response.AppendLine(realData);
             response.AppendLine("\nBạn có thể xem chi tiết trên trang 'Đặt phòng của tôi'.");
+            return response.ToString();
+        }
+
+        if ((lowerMessage.Contains("nhà hàng") || lowerMessage.Contains("restaurant") || 
+             lowerMessage.Contains("menu") || lowerMessage.Contains("món ăn")) && !string.IsNullOrEmpty(realData))
+        {
+            response.AppendLine("Thông tin menu nhà hàng:");
+            response.AppendLine(realData);
+            response.AppendLine("\nBạn có thể xem chi tiết và đặt món trên trang 'Nhà hàng' của website.");
+            return response.ToString();
+        }
+
+        if ((lowerMessage.Contains("đánh giá") || lowerMessage.Contains("review") || 
+             lowerMessage.Contains("nhận xét") || lowerMessage.Contains("sao")) && !string.IsNullOrEmpty(realData))
+        {
+            response.AppendLine("Thông tin đánh giá:");
+            response.AppendLine(realData);
+            response.AppendLine("\nBạn có thể xem tất cả đánh giá trên trang 'Đánh giá' của website.");
             return response.ToString();
         }
 
