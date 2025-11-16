@@ -80,6 +80,7 @@ builder.Services.AddHttpClient<PayOsService>();
 builder.Services.AddScoped<PayOsService>();
 builder.Services.AddHttpClient<SePayService>();
 builder.Services.AddScoped<SePayService>();
+builder.Services.AddScoped<VietQRService>();
 builder.Services.AddHttpClient<AIChatService>();
 builder.Services.AddScoped<AIChatService>();
 

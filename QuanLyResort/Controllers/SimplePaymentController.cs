@@ -19,6 +19,7 @@ public class SimplePaymentController : ControllerBase
     private readonly IBookingService _bookingService;
     private readonly PayOsService _payOsService;
     private readonly SePayService? _sePayService;
+    private readonly VietQRService? _vietQRService;
     private readonly ILogger<SimplePaymentController> _logger;
     private readonly ResortDbContext _context;
 
@@ -26,12 +27,14 @@ public class SimplePaymentController : ControllerBase
         IBookingService bookingService,
         PayOsService payOsService,
         SePayService? sePayService,
+        VietQRService? vietQRService,
         ILogger<SimplePaymentController> logger,
         ResortDbContext context)
     {
         _bookingService = bookingService;
         _payOsService = payOsService;
         _sePayService = sePayService;
+        _vietQRService = vietQRService;
         _logger = logger;
         _context = context;
     }
@@ -1223,6 +1226,165 @@ public class SimplePaymentController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "[BACKEND] ❌ [CreateRestaurantQRCode] Lỗi khi tạo QR code cho restaurant order {OrderId}", request.OrderId);
+            return StatusCode(500, new { 
+                message = "Lỗi khi tạo QR code. Vui lòng thử lại.",
+                error = ex.Message
+            });
+        }
+    }
+
+    /// <summary>
+    /// Tạo QR code động cho booking bằng VietQR (Miễn phí)
+    /// </summary>
+    [HttpPost("create-qr-booking-vietqr")]
+    [Authorize]
+    public async Task<IActionResult> CreateBookingQRCodeVietQR([FromBody] CreatePaymentLinkRequest request)
+    {
+        try
+        {
+            if (_vietQRService == null)
+            {
+                _logger.LogWarning("[BACKEND] ⚠️ [CreateBookingQRCodeVietQR] VietQRService chưa được cấu hình");
+                return BadRequest(new { message = "VietQR service chưa được cấu hình. Vui lòng cấu hình bank account number." });
+            }
+
+            _logger.LogInformation("[BACKEND] 🔄 [CreateBookingQRCodeVietQR] Tạo QR code VietQR cho booking {BookingId}", request.BookingId);
+
+            // Get booking
+            var booking = await _bookingService.GetBookingByIdAsync(request.BookingId);
+            if (booking == null)
+            {
+                return NotFound(new { message = $"Booking {request.BookingId} không tồn tại" });
+            }
+
+            // Check if already paid
+            if (booking.Status == "Paid")
+            {
+                return BadRequest(new { message = "Đặt phòng này đã được thanh toán" });
+            }
+
+            // Get amount
+            var amount = booking.EstimatedTotalAmount ?? 0;
+            if (amount <= 0)
+            {
+                return BadRequest(new { message = "Số tiền thanh toán không hợp lệ" });
+            }
+
+            // Tạo QR code URL bằng VietQR (miễn phí)
+            var qrCodeUrl = _vietQRService.CreateBookingQRCode(request.BookingId, amount);
+
+            if (string.IsNullOrEmpty(qrCodeUrl))
+            {
+                _logger.LogError("[BACKEND] ❌ [CreateBookingQRCodeVietQR] VietQR service returned null");
+                return StatusCode(500, new { 
+                    message = "Không thể tạo QR code. Vui lòng kiểm tra cấu hình bank account number.",
+                    error = "VietQR service returned null"
+                });
+            }
+
+            _logger.LogInformation("[BACKEND] ✅ [CreateBookingQRCodeVietQR] QR code tạo thành công: BookingId={BookingId}, Amount={Amount:N0} VND", 
+                request.BookingId, amount);
+
+            return Ok(new
+            {
+                success = true,
+                orderId = $"BOOKING{request.BookingId}",
+                orderCode = $"BOOKING{request.BookingId}",
+                qrCode = null, // VietQR không có base64, chỉ có URL
+                qrCodeUrl = qrCodeUrl, // URL to QR code image
+                amount = (long)amount,
+                accountNumber = _vietQRService.GetBankAccountNumber(),
+                accountName = _vietQRService.GetBankAccountName(),
+                bankName = _vietQRService.GetBankCode(),
+                vaNumber = null,
+                expiredAt = null,
+                description = $"BOOKING{request.BookingId}"
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[BACKEND] ❌ [CreateBookingQRCodeVietQR] Lỗi khi tạo QR code cho booking {BookingId}", request.BookingId);
+            return StatusCode(500, new { 
+                message = "Lỗi khi tạo QR code. Vui lòng thử lại.",
+                error = ex.Message
+            });
+        }
+    }
+
+    /// <summary>
+    /// Tạo QR code động cho restaurant order bằng VietQR (Miễn phí)
+    /// </summary>
+    [HttpPost("create-qr-restaurant-vietqr")]
+    [Authorize]
+    public async Task<IActionResult> CreateRestaurantQRCodeVietQR([FromBody] CreateRestaurantPaymentLinkRequest request)
+    {
+        try
+        {
+            if (_vietQRService == null)
+            {
+                _logger.LogWarning("[BACKEND] ⚠️ [CreateRestaurantQRCodeVietQR] VietQRService chưa được cấu hình");
+                return BadRequest(new { message = "VietQR service chưa được cấu hình. Vui lòng cấu hình bank account number." });
+            }
+
+            _logger.LogInformation("[BACKEND] 🔄 [CreateRestaurantQRCodeVietQR] Tạo QR code VietQR cho restaurant order {OrderId}", request.OrderId);
+
+            // Get restaurant order
+            var order = await _context.RestaurantOrders
+                .Include(o => o.OrderItems)
+                .FirstOrDefaultAsync(o => o.OrderId == request.OrderId);
+
+            if (order == null)
+            {
+                return NotFound(new { message = $"Restaurant order {request.OrderId} không tồn tại" });
+            }
+
+            // Check if already paid
+            if (order.Status == "Paid" || order.Status == "Completed")
+            {
+                return BadRequest(new { message = "Đơn hàng này đã được thanh toán" });
+            }
+
+            // Get amount
+            var amount = order.TotalAmount;
+            if (amount <= 0)
+            {
+                return BadRequest(new { message = "Số tiền thanh toán không hợp lệ" });
+            }
+
+            // Tạo QR code URL bằng VietQR (miễn phí)
+            var qrCodeUrl = _vietQRService.CreateRestaurantOrderQRCode(request.OrderId, amount);
+
+            if (string.IsNullOrEmpty(qrCodeUrl))
+            {
+                _logger.LogError("[BACKEND] ❌ [CreateRestaurantQRCodeVietQR] VietQR service returned null");
+                return StatusCode(500, new { 
+                    message = "Không thể tạo QR code. Vui lòng kiểm tra cấu hình bank account number.",
+                    error = "VietQR service returned null"
+                });
+            }
+
+            _logger.LogInformation("[BACKEND] ✅ [CreateRestaurantQRCodeVietQR] QR code tạo thành công: OrderId={OrderId}, Amount={Amount:N0} VND", 
+                request.OrderId, amount);
+
+            return Ok(new
+            {
+                success = true,
+                orderId = $"ORDER{request.OrderId}",
+                orderCode = $"ORDER{request.OrderId}",
+                qrCode = null, // VietQR không có base64, chỉ có URL
+                qrCodeUrl = qrCodeUrl, // URL to QR code image
+                amount = (long)amount,
+                accountNumber = _vietQRService.GetBankAccountNumber(),
+                accountName = _vietQRService.GetBankAccountName(),
+                bankName = _vietQRService.GetBankCode(),
+                vaNumber = null,
+                expiredAt = null,
+                description = $"ORDER{request.OrderId}"
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[BACKEND] ❌ [CreateRestaurantQRCodeVietQR] Lỗi khi tạo QR code cho restaurant order {OrderId}", request.OrderId);
             return StatusCode(500, new { 
                 message = "Lỗi khi tạo QR code. Vui lòng thử lại.",
                 error = ex.Message

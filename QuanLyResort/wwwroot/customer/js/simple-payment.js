@@ -222,9 +222,10 @@ async function updatePaymentModal(bookingId, bookingCode, amount) {
       throw new Error('Không tìm thấy token đăng nhập');
     }
 
-    console.log("[FRONTEND] " + '🔄 [updatePaymentModal] Creating SePay QR code for booking:', bookingId);
+    console.log("[FRONTEND] " + '🔄 [updatePaymentModal] Creating VietQR QR code for booking:', bookingId);
     
-    const response = await fetch(`${location.origin}/api/simplepayment/create-qr-booking`, {
+    // Ưu tiên dùng VietQR (miễn phí), nếu không có thì fallback sang SePay
+    let response = await fetch(`${location.origin}/api/simplepayment/create-qr-booking-vietqr`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -233,14 +234,27 @@ async function updatePaymentModal(bookingId, bookingCode, amount) {
       body: JSON.stringify({ bookingId: bookingId })
     });
 
+    // Nếu VietQR không có hoặc lỗi, fallback sang SePay
+    if (!response.ok) {
+      console.log("[FRONTEND] " + '⚠️ [updatePaymentModal] VietQR không khả dụng, fallback sang SePay...');
+      response = await fetch(`${location.origin}/api/simplepayment/create-qr-booking`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ bookingId: bookingId })
+      });
+    }
+
     if (!response.ok) {
       const error = await response.json().catch(() => ({ message: 'Lỗi không xác định' }));
       throw new Error(error.message || `HTTP ${response.status}`);
     }
 
     const result = await response.json();
-    console.log("[FRONTEND] " + '✅ [updatePaymentModal] SePay QR code created:', result);
-    console.log("[FRONTEND] " + '🔍 [updatePaymentModal] Full SePay response:', JSON.stringify(result, null, 2));
+    console.log("[FRONTEND] " + '✅ [updatePaymentModal] QR code created:', result);
+    console.log("[FRONTEND] " + '🔍 [updatePaymentModal] Full response:', JSON.stringify(result, null, 2));
 
     // Check if we have QR code - SePay có thể trả về:
     // 1. qrCodeUrl: "https://..."
@@ -252,25 +266,25 @@ async function updatePaymentModal(bookingId, bookingCode, amount) {
     console.log("[FRONTEND] " + '🔍 [updatePaymentModal] Has checkoutUrl:', !!result.checkoutUrl);
 
     if (!result.success) {
-      throw new Error(`SePay API error: ${result.message || 'Unknown error'}`);
+      throw new Error(`QR code API error: ${result.message || 'Unknown error'}`);
     }
 
-    // Display QR code from SePay
+    // Display QR code (VietQR hoặc SePay)
     if (qrImg) {
       if (qrCodeData) {
-        // Case 1: QR code là URL (https://...)
+        // Case 1: QR code là URL (https://...) - VietQR hoặc SePay
         if (qrCodeData.startsWith('http://') || qrCodeData.startsWith('https://')) {
           console.log("[FRONTEND] " + '🌐 [updatePaymentModal] QR Code is URL:', qrCodeData);
           qrImg.src = qrCodeData;
           qrImg.style.display = 'block';
-          qrImg.alt = `SePay QR - ${bookingCode}`;
+          qrImg.alt = `QR Code - ${bookingCode}`;
           
           qrImg.onerror = function(e) {
             console.error("[FRONTEND] " + '❌ [updatePaymentModal] QR URL failed to load:', e);
             console.error("[FRONTEND] " + '❌ [updatePaymentModal] QR URL:', qrCodeData);
             qrImg.style.display = 'none';
             if (waitingEl) {
-              waitingEl.textContent = 'Không thể tải QR code từ SePay. Vui lòng thử lại.';
+              waitingEl.textContent = 'Không thể tải QR code. Vui lòng thử lại.';
               waitingEl.className = 'text-center mt-4 text-danger';
             }
           };
@@ -280,11 +294,11 @@ async function updatePaymentModal(bookingId, bookingCode, amount) {
             qrImg.style.border = '4px solid #e9ecef';
           };
         }
-        // Case 2: QR code là Base64 image (PNG/JPEG)
+        // Case 2: QR code là Base64 image (PNG/JPEG) - SePay
         else if (qrCodeData.startsWith('iVBORw0KGgo') || qrCodeData.startsWith('/9j/4AAQ') || 
                  qrCodeData.startsWith('data:image/') || 
                  /^[A-Za-z0-9+/=]{100,}$/.test(qrCodeData.trim())) {
-          console.log("[FRONTEND] " + '📦 [updatePaymentModal] QR Code is Base64 image');
+          console.log("[FRONTEND] " + '📦 [updatePaymentModal] QR Code is Base64 image (SePay)');
           // Remove any whitespace/newlines from base64 string
           qrCodeData = qrCodeData.trim().replace(/\s/g, '');
           
@@ -299,7 +313,7 @@ async function updatePaymentModal(bookingId, bookingCode, amount) {
           
           qrImg.src = qrSrc;
           qrImg.style.display = 'block';
-          qrImg.alt = `SePay QR - ${bookingCode}`;
+          qrImg.alt = `QR Code - ${bookingCode}`;
           
           qrImg.onerror = function(e) {
             console.error("[FRONTEND] " + '❌ [updatePaymentModal] QR Base64 failed to load:', e);
@@ -322,20 +336,19 @@ async function updatePaymentModal(bookingId, bookingCode, amount) {
           console.error("[FRONTEND] " + '❌ [updatePaymentModal] QR data preview:', qrCodeData?.substring(0, 100) || 'NULL');
           qrImg.style.display = 'none';
           if (waitingEl) {
-            waitingEl.textContent = 'Định dạng QR code không hợp lệ từ SePay. Vui lòng thử lại.';
+            waitingEl.textContent = 'Định dạng QR code không hợp lệ. Vui lòng thử lại.';
+            waitingEl.className = 'text-center mt-4 text-danger';
+          }
+        } 
+        // Case 4: Không có QR code
+        else {
+          console.warn("[FRONTEND] " + '⚠️ [updatePaymentModal] Không trả về QR code');
+          qrImg.style.display = 'none';
+          if (waitingEl) {
+            waitingEl.textContent = 'Không trả về QR code. Vui lòng thử lại hoặc liên hệ hỗ trợ.';
             waitingEl.className = 'text-center mt-4 text-danger';
           }
         }
-      } 
-      // Case 4: Không có QR code từ SePay
-      else {
-        console.warn("[FRONTEND] " + '⚠️ [updatePaymentModal] SePay không trả về QR code');
-        qrImg.style.display = 'none';
-        if (waitingEl) {
-          waitingEl.textContent = 'SePay không trả về QR code. Vui lòng thử lại hoặc liên hệ hỗ trợ.';
-          waitingEl.className = 'text-center mt-4 text-danger';
-        }
-      }
     }
 
     // Show QR section
@@ -369,12 +382,12 @@ async function updatePaymentModal(bookingId, bookingCode, amount) {
       }
     }
 
-    // Update amount from SePay response
+    // Update amount from response
     if (result.amount && result.amount > 0) {
       const amountEl = document.getElementById('spAmount');
       if (amountEl) {
         amountEl.textContent = formatCurrency(result.amount);
-        console.log("[FRONTEND] " + '✅ [updatePaymentModal] Amount updated from SePay:', result.amount);
+        console.log("[FRONTEND] " + '✅ [updatePaymentModal] Amount updated:', result.amount);
       }
     }
 
@@ -397,7 +410,7 @@ async function updatePaymentModal(bookingId, bookingCode, amount) {
     };
 
   } catch (error) {
-    console.error("[FRONTEND] " + '❌ [updatePaymentModal] Error creating SePay QR code:', error);
+    console.error("[FRONTEND] " + '❌ [updatePaymentModal] Error creating QR code:', error);
     
     // Show error message
     if (waitingEl) {

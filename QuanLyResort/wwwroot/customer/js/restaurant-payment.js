@@ -149,9 +149,10 @@ async function updateRestaurantPaymentModal(orderId, orderNumber, amount) {
       throw new Error('Không tìm thấy token đăng nhập');
     }
 
-    console.log("[FRONTEND] 🔄 [updateRestaurantPaymentModal] Creating SePay QR code for order:", orderId);
+    console.log("[FRONTEND] 🔄 [updateRestaurantPaymentModal] Creating VietQR QR code for order:", orderId);
     
-    const response = await fetch(`${location.origin}/api/simplepayment/create-qr-restaurant`, {
+    // Ưu tiên dùng VietQR (miễn phí), nếu không có thì fallback sang SePay
+    let response = await fetch(`${location.origin}/api/simplepayment/create-qr-restaurant-vietqr`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -160,13 +161,26 @@ async function updateRestaurantPaymentModal(orderId, orderNumber, amount) {
       body: JSON.stringify({ orderId: orderId })
     });
 
+    // Nếu VietQR không có hoặc lỗi, fallback sang SePay
+    if (!response.ok) {
+      console.log("[FRONTEND] " + '⚠️ [updateRestaurantPaymentModal] VietQR không khả dụng, fallback sang SePay...');
+      response = await fetch(`${location.origin}/api/simplepayment/create-qr-restaurant`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ orderId: orderId })
+      });
+    }
+
     if (!response.ok) {
       const error = await response.json().catch(() => ({ message: 'Lỗi không xác định' }));
       throw new Error(error.message || `HTTP ${response.status}`);
     }
 
     const result = await response.json();
-    console.log("[FRONTEND] ✅ [updateRestaurantPaymentModal] SePay QR code created:", result);
+    console.log("[FRONTEND] ✅ [updateRestaurantPaymentModal] QR code created:", result);
 
     // Check if we have QR code - SePay có thể trả về:
     // 1. qrCodeUrl: "https://..."
@@ -176,7 +190,7 @@ async function updateRestaurantPaymentModal(orderId, orderNumber, amount) {
     console.log("[FRONTEND] 🔍 [updateRestaurantPaymentModal] QR Code data preview:", qrCodeData?.substring(0, 50) || 'NULL');
 
     if (!result.success) {
-      throw new Error(`SePay API error: ${result.message || 'Unknown error'}`);
+      throw new Error(`QR code API error: ${result.message || 'Unknown error'}`);
     }
 
     // Display QR code from SePay
@@ -227,16 +241,16 @@ async function updateRestaurantPaymentModal(orderId, orderNumber, amount) {
           console.error("[FRONTEND] ❌ [updateRestaurantPaymentModal] Không nhận diện được format QR code");
           qrImg.style.display = 'none';
           if (waitingEl) {
-            waitingEl.textContent = 'Định dạng QR code không hợp lệ từ SePay. Vui lòng thử lại.';
+            waitingEl.textContent = 'Định dạng QR code không hợp lệ. Vui lòng thử lại.';
             waitingEl.className = 'text-center mt-4 text-danger';
           }
         }
       } 
       else {
-        console.warn("[FRONTEND] ⚠️ [updateRestaurantPaymentModal] SePay không trả về QR code");
+        console.warn("[FRONTEND] ⚠️ [updateRestaurantPaymentModal] Không trả về QR code");
         qrImg.style.display = 'none';
         if (waitingEl) {
-          waitingEl.textContent = 'SePay không trả về QR code. Vui lòng thử lại hoặc liên hệ hỗ trợ.';
+          waitingEl.textContent = 'Không trả về QR code. Vui lòng thử lại hoặc liên hệ hỗ trợ.';
           waitingEl.className = 'text-center mt-4 text-danger';
         }
       }
@@ -273,12 +287,12 @@ async function updateRestaurantPaymentModal(orderId, orderNumber, amount) {
       }
     }
 
-    // Update amount from SePay response
+    // Update amount from response
     if (result.amount && result.amount > 0) {
       const amountEl = document.getElementById('rpAmount');
       if (amountEl) {
         amountEl.textContent = formatCurrency(result.amount);
-        console.log("[FRONTEND] ✅ [updateRestaurantPaymentModal] Amount updated from SePay:", result.amount);
+        console.log("[FRONTEND] ✅ [updateRestaurantPaymentModal] Amount updated:", result.amount);
       }
     }
 
@@ -318,7 +332,7 @@ async function updateRestaurantPaymentModal(orderId, orderNumber, amount) {
     };
 
   } catch (error) {
-    console.error("[FRONTEND] ❌ [updateRestaurantPaymentModal] Error creating SePay QR code:", error);
+    console.error("[FRONTEND] ❌ [updateRestaurantPaymentModal] Error creating QR code:", error);
     
     if (waitingEl) {
       waitingEl.style.display = 'block';
