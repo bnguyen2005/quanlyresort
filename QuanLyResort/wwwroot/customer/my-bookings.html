@@ -354,6 +354,15 @@
   <!-- payment-websocket.js removed - using simple-payment.js instead -->
   <script src="js/simple-payment.js"></script>
   <script>
+    // Đảm bảo openSimplePayment được định nghĩa trước khi sử dụng
+    if (typeof openSimplePayment === 'undefined') {
+      console.warn('⚠️ [my-bookings] openSimplePayment not found, waiting for script to load...');
+      // Fallback: define a temporary function
+      window.openSimplePayment = function(bookingId) {
+        console.error('❌ [my-bookings] openSimplePayment not loaded yet');
+        alert('Hệ thống thanh toán đang tải, vui lòng thử lại sau');
+      };
+    }
     let customerId = null;
     // BANK_CODE, BANK_ACCOUNT, BANK_ACCOUNT_NAME are defined in simple-payment.js
 
@@ -918,7 +927,7 @@
             <div class="booking-actions">
               ${canPayBooking(booking) ? `
                 <button class=\"btn btn-outline-danger\" onclick=\"cancelBooking(${booking.bookingId})\">Hủy đặt phòng</button>
-                <button class=\"btn btn-primary\" onclick=\"openSimplePayment(${booking.bookingId})\">
+                <button class=\"btn btn-primary\" onclick=\"if(typeof openSimplePayment==='function'){openSimplePayment(${booking.bookingId});}else{console.error('openSimplePayment not loaded');alert('Hệ thống thanh toán đang tải, vui lòng thử lại sau');}\">
                   <span class=\"oi oi-credit-card mr-2\"></span>Thanh toán
                 </button>
               ` : booking.status === 'Pending' || booking.status === 'Confirmed' ? `

@@ -25,6 +25,10 @@ let paymentPollingInterval = window.paymentPollingInterval;
  * Mở modal thanh toán
  */
 async function openSimplePayment(bookingId) {
+  // Ensure function is available globally immediately
+  if (!window.openSimplePayment) {
+    window.openSimplePayment = openSimplePayment;
+  }
   try {
     // Get booking từ list
     const bookings = window._bookings || [];
