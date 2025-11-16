@@ -22,6 +22,11 @@ public class SePayService
     
     // SePay Static QR Code configuration
     private readonly string? _bankAccountNumber; // Số tài khoản ngân hàng
+    
+    // Rate limiting: SePay giới hạn 2 requests/second
+    private static readonly SemaphoreSlim _rateLimiter = new SemaphoreSlim(2, 2);
+    private static DateTime _lastRequestTime = DateTime.MinValue;
+    private static readonly TimeSpan _minRequestInterval = TimeSpan.FromMilliseconds(500); // 500ms = 2 requests/second
 
     public SePayService(
         ILogger<SePayService> logger,
@@ -161,150 +166,230 @@ public class SePayService
                 return null;
             }
 
-            // SePay API endpoint: Có thể có nhiều format
-            // Option 1: POST /api/v1/orders (pgapi.sepay.vn - Production API)
-            // Option 2: POST /userapi/{bankCode}/{accountId}/orders (my.sepay.vn - User API)
-            // Option 3: POST /userapi/{merchantId}/orders (không có bankCode)
+            // Rate limiting: Đảm bảo không vượt quá 2 requests/second
+            await EnforceRateLimitAsync();
+
+            // Thử các endpoint khác nhau nếu endpoint đầu tiên không hoạt động
+            var endpoints = GetApiEndpoints();
             
-            string url;
-            if (_apiBaseUrl.Contains("pgapi.sepay.vn"))
+            foreach (var endpoint in endpoints)
             {
-                // Production API: https://pgapi.sepay.vn/api/v1/orders
-                url = $"{_apiBaseUrl}/api/v1/orders";
+                var result = await TryCreateOrderAsync(endpoint, orderCode, amount, description, durationSeconds);
+                if (result != null)
+                {
+                    return result;
+                }
             }
-            else if (_apiBaseUrl.Contains("my.sepay.vn"))
+            
+            // Nếu tất cả endpoints đều thất bại, return null để fallback sang static QR
+            return null;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[SEPAY] ❌ Lỗi khi tạo đơn hàng: OrderCode={OrderCode}", orderCode);
+            return null;
+        }
+    }
+    
+    /// <summary>
+    /// Lấy danh sách các API endpoints để thử (theo thứ tự ưu tiên)
+    /// </summary>
+    private List<(string Url, string Type)> GetApiEndpoints()
+    {
+        var endpoints = new List<(string Url, string Type)>();
+        
+        if (_apiBaseUrl.Contains("pgapi.sepay.vn"))
+        {
+            // Production API endpoints (thử nhiều format)
+            
+            // Option 1: Standard endpoint
+            endpoints.Add(($"{_apiBaseUrl}/api/v1/orders", "Production Standard"));
+            
+            // Option 2: Với merchant_id trong path (nếu có)
+            if (!string.IsNullOrEmpty(_merchantId))
             {
-                // User API: https://my.sepay.vn/userapi/{bankCode}/{accountId}/orders
-                url = $"{_apiBaseUrl}/{_bankCode}/{_accountId}/orders";
+                endpoints.Add(($"{_apiBaseUrl}/api/v1/merchants/{_merchantId}/orders", "Production Merchant"));
+            }
+            
+            // Option 3: Với account_id trong path
+            if (!string.IsNullOrEmpty(_accountId))
+            {
+                endpoints.Add(($"{_apiBaseUrl}/api/v1/accounts/{_accountId}/orders", "Production Account"));
+            }
+        }
+        else if (_apiBaseUrl.Contains("my.sepay.vn"))
+        {
+            // User API endpoints
+            
+            // Option 1: Với bankCode và accountId
+            if (!string.IsNullOrEmpty(_bankCode) && !string.IsNullOrEmpty(_accountId))
+            {
+                endpoints.Add(($"{_apiBaseUrl}/userapi/{_bankCode}/{_accountId}/orders", "User API Bank+Account"));
+            }
+            
+            // Option 2: Với merchant_id (nếu có)
+            if (!string.IsNullOrEmpty(_merchantId))
+            {
+                endpoints.Add(($"{_apiBaseUrl}/userapi/{_merchantId}/orders", "User API Merchant"));
+            }
+            
+            // Option 3: Chỉ với accountId
+            if (!string.IsNullOrEmpty(_accountId))
+            {
+                endpoints.Add(($"{_apiBaseUrl}/userapi/{_accountId}/orders", "User API Account"));
+            }
+        }
+        else
+        {
+            // Fallback: thử format userapi
+            if (!string.IsNullOrEmpty(_bankCode) && !string.IsNullOrEmpty(_accountId))
+            {
+                endpoints.Add(($"{_apiBaseUrl}/userapi/{_bankCode}/{_accountId}/orders", "Fallback UserAPI"));
+            }
+        }
+        
+        return endpoints;
+    }
+    
+    /// <summary>
+    /// Thử tạo order với một endpoint cụ thể
+    /// </summary>
+    private async Task<SePayOrderResponse?> TryCreateOrderAsync((string Url, string Type) endpoint, string orderCode, decimal amount, string description, int durationSeconds)
+    {
+        try
+        {
+            _logger.LogInformation("[SEPAY] 🔄 Thử endpoint: {Type} - {Url}", endpoint.Type, endpoint.Url);
+            
+            // Tạo request body
+            var requestBody = CreateRequestBody(orderCode, amount, description, durationSeconds, endpoint.Type);
+            
+            var json = JsonSerializer.Serialize(requestBody);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            _httpClient.DefaultRequestHeaders.Clear();
+            _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_apiToken}");
+            
+            _logger.LogInformation("[SEPAY] 🔍 Request body: {Body}", json);
+
+            var response = await _httpClient.PostAsync(endpoint.Url, content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                };
+
+                var sepayResponse = JsonSerializer.Deserialize<SePayApiResponse>(responseContent, options);
+
+                if (sepayResponse?.Status == "success" && sepayResponse.Data != null)
+                {
+                    _logger.LogInformation("[SEPAY] ✅ Đơn hàng tạo thành công với endpoint {Type}: OrderId={OrderId}, OrderCode={OrderCode}", 
+                        endpoint.Type, sepayResponse.Data.OrderId, sepayResponse.Data.OrderCode);
+                    return sepayResponse.Data;
+                }
+                else
+                {
+                    _logger.LogWarning("[SEPAY] ⚠️ Endpoint {Type} trả về nhưng status không phải success: {Status}, Message={Message}", 
+                        endpoint.Type, sepayResponse?.Status, sepayResponse?.Message);
+                }
             }
             else
             {
-                // Fallback: thử format userapi
-                url = $"{_apiBaseUrl}/{_bankCode}/{_accountId}/orders";
+                var errorContent = await response.Content.ReadAsStringAsync();
+                
+                // Nếu là 404, thử endpoint tiếp theo
+                if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    _logger.LogWarning("[SEPAY] ⚠️ Endpoint {Type} trả về 404, thử endpoint tiếp theo", endpoint.Type);
+                    return null; // Thử endpoint tiếp theo
+                }
+                
+                // Nếu là 429 (Rate Limit), đợi và retry
+                if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+                {
+                    _logger.LogWarning("[SEPAY] ⚠️ Rate limit (429) từ endpoint {Type}, đợi 1 giây và retry...", endpoint.Type);
+                    await Task.Delay(1000);
+                    return null; // Retry với endpoint này
+                }
+                
+                _logger.LogError("[SEPAY] ❌ Endpoint {Type} error: Status={Status}, Response={Response}", 
+                    endpoint.Type, response.StatusCode, errorContent);
             }
             
-            _logger.LogInformation("[SEPAY] 🔍 API URL: {Url}, AccountId: {AccountId}, BankCode: {BankCode}, ApiBaseUrl: {ApiBaseUrl}", 
-                url, _accountId, _bankCode, _apiBaseUrl);
+            return null;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[SEPAY] ❌ Lỗi khi thử endpoint {Type}: {Url}", endpoint.Type, endpoint.Url);
+            return null;
+        }
+    }
+    
+    /// <summary>
+    /// Tạo request body tùy theo endpoint type
+    /// </summary>
+    private object CreateRequestBody(string orderCode, decimal amount, string description, int durationSeconds, string endpointType)
+    {
+        if (endpointType.Contains("Production"))
+        {
+            // Production API format
+            var prodBody = new Dictionary<string, object>
+            {
+                { "amount", (long)(amount) },
+                { "order_code", orderCode },
+                { "description", description },
+                { "duration", durationSeconds },
+                { "with_qrcode", true }
+            };
             
-            // Log request body để debug
-            var requestBodyJson = JsonSerializer.Serialize(new
+            // Thêm merchant_id nếu có (QUAN TRỌNG cho Production API!)
+            if (!string.IsNullOrEmpty(_merchantId))
+            {
+                prodBody["merchant_id"] = _merchantId;
+                _logger.LogInformation("[SEPAY] 🔍 Added merchant_id to request: {MerchantId}", _merchantId);
+            }
+            else
+            {
+                _logger.LogWarning("[SEPAY] ⚠️ merchant_id chưa được cấu hình. Production API có thể yêu cầu merchant_id!");
+            }
+            
+            return prodBody;
+        }
+        else
+        {
+            // User API format
+            return new
             {
                 amount = (long)(amount),
                 order_code = orderCode,
                 duration = durationSeconds,
                 with_qrcode = true
-            });
-            _logger.LogInformation("[SEPAY] 🔍 Request body: {Body}", requestBodyJson);
-
-            // SePay API request body - có thể cần format khác tùy endpoint
-            object requestBody;
-            
-            if (_apiBaseUrl.Contains("pgapi.sepay.vn"))
-            {
-                // Production API format - có thể cần merchant_id, description, etc.
-                var prodBody = new Dictionary<string, object>
-                {
-                    { "amount", (long)(amount) },
-                    { "order_code", orderCode },
-                    { "description", description },
-                    { "duration", durationSeconds },
-                    { "with_qrcode", true }
-                };
-                
-                // Thêm merchant_id nếu có (QUAN TRỌNG cho Production API!)
-                if (!string.IsNullOrEmpty(_merchantId))
-                {
-                    prodBody["merchant_id"] = _merchantId;
-                    _logger.LogInformation("[SEPAY] 🔍 Added merchant_id to request: {MerchantId}", _merchantId);
-                }
-                else
-                {
-                    _logger.LogWarning("[SEPAY] ⚠️ merchant_id chưa được cấu hình. Production API có thể yêu cầu merchant_id!");
-                }
-                
-                requestBody = prodBody;
-            }
-            else
-            {
-                // User API format
-                requestBody = new
-                {
-                    amount = (long)(amount), // SePay expects amount in VND (long)
-                    order_code = orderCode,
-                    duration = durationSeconds, // Thời gian hiệu lực (giây)
-                    with_qrcode = true // Yêu cầu tạo QR code
-                };
-            }
-
-            _logger.LogInformation("[SEPAY] 🔄 Tạo đơn hàng SePay: OrderCode={OrderCode}, Amount={Amount}, Duration={Duration}s", 
-                orderCode, amount, durationSeconds);
-
-            var json = JsonSerializer.Serialize(requestBody);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-            _httpClient.DefaultRequestHeaders.Clear();
-            
-            // SePay có thể dùng Bearer token hoặc Basic Auth
-            // Thử Bearer token trước (format: spsk_live_...)
-            if (_apiToken.StartsWith("spsk_"))
-            {
-                // Bearer token format
-                _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_apiToken}");
-            }
-            else
-            {
-                // Fallback: Bearer token
-                _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_apiToken}");
-            }
-            
-            _logger.LogInformation("[SEPAY] 🔍 Authorization header: Bearer {TokenPrefix}...", 
-                _apiToken?.Substring(0, Math.Min(20, _apiToken?.Length ?? 0)) ?? "NULL");
-
-            var response = await _httpClient.PostAsync(url, content);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                var errorContent = await response.Content.ReadAsStringAsync();
-                _logger.LogError("[SEPAY] ❌ SePay API error: Status={Status}, Response={Response}", 
-                    response.StatusCode, errorContent);
-                
-                // Fallback: Tạo QR code tĩnh nếu API không hoạt động
-                _logger.LogWarning("[SEPAY] ⚠️ SePay API không hoạt động, fallback sang static QR code");
-                return CreateStaticQRCodeResponse(orderCode, amount, description);
-            }
-
-            var responseContent = await response.Content.ReadAsStringAsync();
-            var options = new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
             };
-
-            var sepayResponse = JsonSerializer.Deserialize<SePayApiResponse>(responseContent, options);
-
-            if (sepayResponse?.Status == "success" && sepayResponse.Data != null)
-            {
-                _logger.LogInformation("[SEPAY] ✅ Đơn hàng tạo thành công: OrderId={OrderId}, OrderCode={OrderCode}, VA={VaNumber}", 
-                    sepayResponse.Data.OrderId, sepayResponse.Data.OrderCode, sepayResponse.Data.VaNumber);
-
-                return sepayResponse.Data;
-            }
-            else
-            {
-                _logger.LogError("[SEPAY] ❌ SePay API trả về lỗi: Status={Status}, Message={Message}", 
-                    sepayResponse?.Status, sepayResponse?.Message);
-                
-                // Fallback: Tạo QR code tĩnh nếu API trả về lỗi
-                _logger.LogWarning("[SEPAY] ⚠️ SePay API trả về lỗi, fallback sang static QR code");
-                return CreateStaticQRCodeResponse(orderCode, amount, description);
-            }
         }
-        catch (Exception ex)
+    }
+    
+    /// <summary>
+    /// Enforce rate limiting: Đảm bảo không vượt quá 2 requests/second
+    /// </summary>
+    private async Task EnforceRateLimitAsync()
+    {
+        await _rateLimiter.WaitAsync();
+        try
         {
-            _logger.LogError(ex, "[SEPAY] ❌ Lỗi khi gọi SePay API");
-            
-            // Fallback: Tạo QR code tĩnh nếu có lỗi
-            _logger.LogWarning("[SEPAY] ⚠️ SePay API lỗi, fallback sang static QR code");
-            return CreateStaticQRCodeResponse(orderCode, amount, description);
+            var timeSinceLastRequest = DateTime.UtcNow - _lastRequestTime;
+            if (timeSinceLastRequest < _minRequestInterval)
+            {
+                var delay = _minRequestInterval - timeSinceLastRequest;
+                _logger.LogDebug("[SEPAY] ⏱️ Rate limiting: Đợi {Delay}ms để đảm bảo không vượt quá 2 requests/second", delay.TotalMilliseconds);
+                await Task.Delay(delay);
+            }
+            _lastRequestTime = DateTime.UtcNow;
+        }
+        finally
+        {
+            _rateLimiter.Release();
         }
     }
 
