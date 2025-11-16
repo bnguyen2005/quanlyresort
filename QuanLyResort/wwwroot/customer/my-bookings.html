@@ -1778,11 +1778,11 @@
 
 
     loadBookings();
-    // Auto-refresh dữ liệu mỗi 10 giây để detect payment nhanh hơn (giảm từ 60s xuống 10s)
+    // Auto-refresh dữ liệu mỗi 5 giây để detect payment nhanh hơn (giảm từ 10s xuống 5s)
     setInterval(() => {
       console.log('🔄 [Auto-refresh] Reloading bookings...');
       loadBookings();
-    }, 10000); // 10 giây thay vì 60 giây để detect payment nhanh hơn
+    }, 5000); // 5 giây để detect payment nhanh hơn
   </script>
 </body>
 </html>
