@@ -200,37 +200,69 @@ public class SimplePaymentController : ControllerBase
                 if (simpleRequest != null)
                 {
                     _logger.LogInformation("[WEBHOOK] 📋 [WEBHOOK-{WebhookId}] Detected Simple/SePay format", webhookId);
-                    _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Simple request fields: Content='{Content}', Description='{Description}', Amount={Amount}, TransferAmount={TransferAmount}", 
-                        webhookId, simpleRequest.Content ?? "NULL", simpleRequest.Description ?? "NULL", simpleRequest.Amount, simpleRequest.TransferAmount?.ToString() ?? "NULL");
+                    _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] SePay request fields: Id={Id}, Gateway={Gateway}, Content='{Content}', Description='{Description}', TransferAmount={TransferAmount}, TransferType={TransferType}, ReferenceCode={ReferenceCode}", 
+                        webhookId, simpleRequest.Id?.ToString() ?? "NULL", simpleRequest.Gateway ?? "NULL", 
+                        simpleRequest.Content ?? "NULL", simpleRequest.Description ?? "NULL", 
+                        simpleRequest.TransferAmount?.ToString() ?? "NULL", simpleRequest.TransferType ?? "NULL",
+                        simpleRequest.ReferenceCode ?? "NULL");
                     
-                    // Ưu tiên dùng Content, nếu không có thì dùng Description (SePay format)
+                    // SePay format: Ưu tiên dùng Content (nội dung chuyển khoản), nếu không có thì dùng Description
+                    // Content thường chứa "BOOKING4", "ORDER7", etc.
                     if (!string.IsNullOrEmpty(simpleRequest.Content))
                     {
-                        content = simpleRequest.Content;
-                        _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Using Content field: '{Content}'", webhookId, content);
+                        content = simpleRequest.Content.Trim();
+                        _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Using Content field (SePay): '{Content}'", webhookId, content);
                     }
                     else if (!string.IsNullOrEmpty(simpleRequest.Description))
                     {
-                        _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Using Description field (SePay format): '{Description}'", webhookId, simpleRequest.Description);
-                        content = simpleRequest.Description;
+                        content = simpleRequest.Description.Trim();
+                        _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Using Description field (SePay fallback): '{Description}'", webhookId, content);
                     }
                     
-                    // Ưu tiên dùng Amount, nếu không có thì dùng TransferAmount (SePay format)
-                    if (simpleRequest.Amount > 0)
+                    // SePay format: Ưu tiên dùng TransferAmount, nếu không có thì dùng Amount (legacy)
+                    if (simpleRequest.TransferAmount.HasValue && simpleRequest.TransferAmount.Value > 0)
+                    {
+                        amount = simpleRequest.TransferAmount.Value;
+                        _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Using TransferAmount field (SePay): {Amount:N0} VND", webhookId, amount);
+                    }
+                    else if (simpleRequest.Amount > 0)
                     {
                         amount = simpleRequest.Amount;
-                        _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Using Amount field: {Amount}", webhookId, amount);
+                        _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Using Amount field (legacy fallback): {Amount:N0} VND", webhookId, amount);
                     }
-                    else if (simpleRequest.TransferAmount.HasValue && simpleRequest.TransferAmount.Value > 0)
+                    
+                    // Transaction ID: Ưu tiên dùng Id (int), sau đó ReferenceCode, sau đó TransactionId (legacy)
+                    if (simpleRequest.Id.HasValue)
                     {
-                        _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Using TransferAmount field (SePay format): {Amount}", webhookId, simpleRequest.TransferAmount.Value);
-                        amount = simpleRequest.TransferAmount.Value;
+                        transactionId = simpleRequest.Id.Value.ToString();
+                        _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Using Id field (SePay): {TransactionId}", webhookId, transactionId);
+                    }
+                    else if (!string.IsNullOrEmpty(simpleRequest.ReferenceCode))
+                    {
+                        transactionId = simpleRequest.ReferenceCode;
+                        _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Using ReferenceCode field (SePay): {TransactionId}", webhookId, transactionId);
+                    }
+                    else if (!string.IsNullOrEmpty(simpleRequest.TransactionId))
+                    {
+                        transactionId = simpleRequest.TransactionId;
+                        _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Using TransactionId field (legacy fallback): {TransactionId}", webhookId, transactionId);
                     }
                     
-                    // Transaction ID
-                    transactionId = simpleRequest.TransactionId ?? simpleRequest.ReferenceCode ?? simpleRequest.Id;
+                    // Log thông tin bổ sung từ SePay
+                    if (!string.IsNullOrEmpty(simpleRequest.Gateway))
+                    {
+                        _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Bank Gateway: {Gateway}", webhookId, simpleRequest.Gateway);
+                    }
+                    if (!string.IsNullOrEmpty(simpleRequest.AccountNumber))
+                    {
+                        _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Account Number: {AccountNumber}", webhookId, simpleRequest.AccountNumber);
+                    }
+                    if (!string.IsNullOrEmpty(simpleRequest.TransferType))
+                    {
+                        _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Transfer Type: {TransferType}", webhookId, simpleRequest.TransferType);
+                    }
                     
-                    _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Final extracted: Content='{Content}', Amount={Amount}, TransactionId='{TransactionId}'", 
+                    _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] Final extracted: Content='{Content}', Amount={Amount:N0} VND, TransactionId='{TransactionId}'", 
                         webhookId, content ?? "NULL", amount, transactionId ?? "NULL");
                 }
             }
@@ -1202,27 +1234,65 @@ public class SimplePaymentController : ControllerBase
 /// <summary>
 /// Request model cho webhook đơn giản (Simple format)
 /// Hỗ trợ cả Simple format và SePay format
+/// Format SePay thực tế:
+/// {
+///     "id": 92704,
+///     "gateway": "Vietcombank",
+///     "transactionDate": "2023-03-25 14:02:37",
+///     "accountNumber": "0123499999",
+///     "code": null,
+///     "content": "chuyen tien mua iphone",
+///     "transferType": "in",
+///     "transferAmount": 2277000,
+///     "accumulated": 19077000,
+///     "subAccount": null,
+///     "referenceCode": "MBVCB.3278907687",
+///     "description": ""
+/// }
 /// </summary>
 public class SimpleWebhookRequest
 {
-    public string Content { get; set; } = string.Empty; // Nội dung chuyển khoản: "BOOKING-39"
-    public decimal Amount { get; set; } // Số tiền
-    public string? TransactionId { get; set; } // Mã giao dịch (optional)
-    
-    // SePay format fields
-    [JsonPropertyName("description")]
-    public string? Description { get; set; } // Mô tả (SePay format): "BOOKING4"
+    // SePay format fields (theo format thực tế từ SePay)
     [JsonPropertyName("id")]
-    public string? Id { get; set; } // ID giao dịch (SePay format)
-    [JsonPropertyName("referenceCode")]
-    public string? ReferenceCode { get; set; } // Mã tham chiếu (SePay format)
+    public int? Id { get; set; } // ID giao dịch trên SePay (ví dụ: 92704)
+    
+    [JsonPropertyName("gateway")]
+    public string? Gateway { get; set; } // Brand name của ngân hàng (ví dụ: "Vietcombank")
+    
+    [JsonPropertyName("transactionDate")]
+    public string? TransactionDate { get; set; } // Thời gian xảy ra giao dịch (ví dụ: "2023-03-25 14:02:37")
+    
+    [JsonPropertyName("accountNumber")]
+    public string? AccountNumber { get; set; } // Số tài khoản ngân hàng (ví dụ: "0123499999")
+    
+    [JsonPropertyName("code")]
+    public string? Code { get; set; } // Mã code thanh toán (sepay tự nhận diện, có thể null)
+    
+    [JsonPropertyName("content")]
+    public string? Content { get; set; } // Nội dung chuyển khoản (ví dụ: "BOOKING4")
+    
     [JsonPropertyName("transferType")]
-    public string? TransferType { get; set; } // Loại giao dịch: "IN", "OUT" (SePay format)
+    public string? TransferType { get; set; } // Loại giao dịch: "in" (tiền vào), "out" (tiền ra)
+    
     [JsonPropertyName("transferAmount")]
-    public decimal? TransferAmount { get; set; } // Số tiền giao dịch (SePay format)
-    public string? AccountNumber { get; set; } // Số tài khoản
-    public string? BankName { get; set; } // Tên ngân hàng
-    public string? TransactionDate { get; set; } // Ngày giao dịch
+    public decimal? TransferAmount { get; set; } // Số tiền giao dịch (ví dụ: 2277000)
+    
+    [JsonPropertyName("accumulated")]
+    public decimal? Accumulated { get; set; } // Số dư tài khoản (lũy kế) (ví dụ: 19077000)
+    
+    [JsonPropertyName("subAccount")]
+    public string? SubAccount { get; set; } // Tài khoản ngân hàng phụ (tài khoản định danh), có thể null
+    
+    [JsonPropertyName("referenceCode")]
+    public string? ReferenceCode { get; set; } // Mã tham chiếu của tin nhắn sms (ví dụ: "MBVCB.3278907687")
+    
+    [JsonPropertyName("description")]
+    public string? Description { get; set; } // Toàn bộ nội dung tin nhắn sms (có thể rỗng)
+    
+    // Legacy fields (để tương thích với format cũ)
+    public decimal Amount { get; set; } // Số tiền (fallback nếu không có transferAmount)
+    public string? TransactionId { get; set; } // Mã giao dịch (fallback nếu không có id)
+    public string? BankName { get; set; } // Tên ngân hàng (fallback nếu không có gateway)
 }
 
 /// <summary>
