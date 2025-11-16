@@ -3,6 +3,8 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
+using QuanLyResort.Data;
 
 namespace QuanLyResort.Services;
 
@@ -15,6 +17,9 @@ public class AIChatService
     private readonly IConfiguration _configuration;
     private readonly ILogger<AIChatService> _logger;
     private readonly HttpClient _httpClient;
+    private readonly IBookingService? _bookingService;
+    private readonly IRoomService? _roomService;
+    private readonly ResortDbContext? _context;
     private readonly string? _apiKey;
     private readonly string _apiUrl;
     private readonly string _model;
@@ -23,11 +28,17 @@ public class AIChatService
     public AIChatService(
         IConfiguration configuration,
         ILogger<AIChatService> logger,
-        HttpClient httpClient)
+        HttpClient httpClient,
+        IBookingService? bookingService = null,
+        IRoomService? roomService = null,
+        ResortDbContext? context = null)
     {
         _configuration = configuration;
         _logger = logger;
         _httpClient = httpClient;
+        _bookingService = bookingService;
+        _roomService = roomService;
+        _context = context;
 
         // Clear any existing BaseAddress để tránh conflict với absolute URLs
         if (_httpClient.BaseAddress != null)
@@ -100,19 +111,22 @@ public class AIChatService
     /// <summary>
     /// Gửi message đến AI và nhận response
     /// </summary>
-    public async Task<string> SendMessageAsync(string userMessage, string? conversationContext = null)
+    public async Task<string> SendMessageAsync(string userMessage, string? conversationContext = null, int? customerId = null)
     {
         try
         {
-            // Nếu không có API key hoặc provider là "sample", trả về response mẫu
+            // Fetch real data từ database dựa trên user message
+            var realData = await FetchRealDataAsync(userMessage, customerId);
+            
+            // Nếu không có API key hoặc provider là "sample", trả về response mẫu với dữ liệu thật
             if (string.IsNullOrEmpty(_apiKey) || _provider == "sample")
             {
-                _logger.LogInformation("[AI Chat] 📝 Using sample response mode");
-                return GetSampleResponse(userMessage);
+                _logger.LogInformation("[AI Chat] 📝 Using sample response mode with real data");
+                return GetSampleResponseWithRealData(userMessage, realData);
             }
 
-            // Tạo system prompt cho resort context
-            var systemPrompt = @"Bạn là trợ lý AI thân thiện của Resort Deluxe. 
+            // Tạo system prompt cho resort context với dữ liệu thật
+            var systemPrompt = $@"Bạn là trợ lý AI thân thiện của Resort Deluxe. 
 Bạn giúp khách hàng với các câu hỏi về:
 - Đặt phòng và booking
 - Dịch vụ resort (nhà hàng, spa, hồ bơi, v.v.)
@@ -121,7 +135,10 @@ Bạn giúp khách hàng với các câu hỏi về:
 - Thông tin về phòng và tiện nghi
 - Hướng dẫn sử dụng website
 
-Hãy trả lời ngắn gọn, thân thiện và hữu ích bằng tiếng Việt.";
+Dữ liệu thật từ website:
+{realData}
+
+Hãy trả lời ngắn gọn, thân thiện và hữu ích bằng tiếng Việt, dựa trên dữ liệu thật ở trên.";
 
             var messages = new List<object>
             {
@@ -346,6 +363,176 @@ Hãy trả lời ngắn gọn, thân thiện và hữu ích bằng tiếng Việ
                "• Hướng dẫn thanh toán\n" +
                "• Chính sách hủy/đổi\n\n" +
                "Bạn có câu hỏi gì không?";
+    }
+
+    /// <summary>
+    /// Lấy dữ liệu thật từ database dựa trên user message
+    /// </summary>
+    private async Task<string> FetchRealDataAsync(string userMessage, int? customerId = null)
+    {
+        var dataContext = new StringBuilder();
+        var lowerMessage = userMessage.ToLower();
+
+        try
+        {
+            // Detect intent: Hỏi về phòng
+            if (lowerMessage.Contains("phòng") || lowerMessage.Contains("room") || 
+                lowerMessage.Contains("giá") || lowerMessage.Contains("price") ||
+                lowerMessage.Contains("còn trống") || lowerMessage.Contains("available"))
+            {
+                _logger.LogInformation("[AI Chat] 🔍 Detected room-related query, fetching room data...");
+
+                // Lấy available rooms
+                if (_roomService != null)
+                {
+                    try
+                    {
+                        var rooms = await _roomService.GetAvailableRoomsAsync();
+                        if (rooms != null && rooms.Any())
+                        {
+                            dataContext.AppendLine($"\n📋 Phòng còn trống: {rooms.Count()} phòng");
+                            foreach (var room in rooms.Take(10))
+                            {
+                                var price = room.PricePerNight > 0 
+                                    ? $"{room.PricePerNight:N0} VND/đêm" 
+                                    : "Liên hệ";
+                                dataContext.AppendLine($"  • Phòng {room.RoomNumber} ({room.RoomType}): {price}");
+                            }
+                            if (rooms.Count() > 10)
+                            {
+                                dataContext.AppendLine($"  ... và {rooms.Count() - 10} phòng khác");
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "[AI Chat] ⚠️ Error fetching available rooms");
+                    }
+                }
+
+                // Lấy room types và prices
+                if (_context != null)
+                {
+                    try
+                    {
+                        var roomTypes = await _context.RoomTypes
+                            .Where(rt => rt.IsActive)
+                            .OrderBy(rt => rt.BasePrice)
+                            .ToListAsync();
+                        
+                        if (roomTypes.Any())
+                        {
+                            dataContext.AppendLine($"\n💰 Loại phòng và giá:");
+                            foreach (var rt in roomTypes)
+                            {
+                                dataContext.AppendLine($"  • {rt.TypeName}: {rt.BasePrice:N0} VND/đêm");
+                                if (!string.IsNullOrEmpty(rt.Description))
+                                {
+                                    var shortDesc = rt.Description.Length > 100 
+                                        ? rt.Description.Substring(0, 100) + "..." 
+                                        : rt.Description;
+                                    dataContext.AppendLine($"    ({shortDesc})");
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "[AI Chat] ⚠️ Error fetching room types");
+                    }
+                }
+            }
+
+            // Detect intent: Hỏi về booking
+            if ((lowerMessage.Contains("booking") || lowerMessage.Contains("đặt phòng") || 
+                 lowerMessage.Contains("đơn đặt") || lowerMessage.Contains("reservation")) &&
+                customerId.HasValue && _bookingService != null)
+            {
+                _logger.LogInformation("[AI Chat] 🔍 Detected booking-related query, fetching booking data for customer {CustomerId}...", customerId);
+                
+                try
+                {
+                    var bookings = await _bookingService.GetBookingsByCustomerAsync(customerId.Value);
+                    if (bookings != null && bookings.Any())
+                    {
+                        dataContext.AppendLine($"\n📅 Booking của bạn: {bookings.Count()} booking");
+                        foreach (var booking in bookings.Take(5).OrderByDescending(b => b.CreatedAt))
+                        {
+                            var status = booking.Status ?? "Chưa xác định";
+                            var amount = booking.EstimatedTotalAmount > 0 
+                                ? $"{booking.EstimatedTotalAmount:N0} VND" 
+                                : "Chưa tính";
+                            var checkIn = booking.CheckInDate.ToString("dd/MM/yyyy");
+                            var checkOut = booking.CheckOutDate.ToString("dd/MM/yyyy");
+                            dataContext.AppendLine($"  • {booking.BookingCode}: {status}, {checkIn} - {checkOut}, {amount}");
+                        }
+                        if (bookings.Count() > 5)
+                        {
+                            dataContext.AppendLine($"  ... và {bookings.Count() - 5} booking khác");
+                        }
+                    }
+                    else
+                    {
+                        dataContext.AppendLine($"\n📅 Bạn chưa có booking nào");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "[AI Chat] ⚠️ Error fetching bookings");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[AI Chat] ❌ Error in FetchRealDataAsync");
+        }
+
+        var result = dataContext.ToString();
+        if (!string.IsNullOrEmpty(result))
+        {
+            _logger.LogInformation("[AI Chat] ✅ Fetched real data: {Length} characters", result.Length);
+        }
+        
+        return result;
+    }
+
+    /// <summary>
+    /// Trả về response mẫu với dữ liệu thật
+    /// </summary>
+    private string GetSampleResponseWithRealData(string userMessage, string realData)
+    {
+        var lowerMessage = userMessage.ToLower();
+        var response = new StringBuilder();
+
+        if (lowerMessage.Contains("phòng") || lowerMessage.Contains("room") || 
+            lowerMessage.Contains("giá") || lowerMessage.Contains("price") ||
+            lowerMessage.Contains("còn trống") || lowerMessage.Contains("available"))
+        {
+            if (!string.IsNullOrEmpty(realData))
+            {
+                response.AppendLine("Thông tin phòng từ hệ thống:");
+                response.AppendLine(realData);
+                response.AppendLine("\nBạn có thể xem chi tiết và đặt phòng trên trang 'Phòng' của website.");
+            }
+            else
+            {
+                response.AppendLine("Hiện tại tôi không thể lấy thông tin phòng từ hệ thống.");
+                response.AppendLine("Vui lòng xem trên trang 'Phòng' của website hoặc liên hệ hotline: 1900-xxxx");
+            }
+            return response.ToString();
+        }
+
+        if ((lowerMessage.Contains("booking") || lowerMessage.Contains("đặt phòng") || 
+             lowerMessage.Contains("đơn đặt")) && !string.IsNullOrEmpty(realData))
+        {
+            response.AppendLine("Thông tin booking của bạn:");
+            response.AppendLine(realData);
+            response.AppendLine("\nBạn có thể xem chi tiết trên trang 'Đặt phòng của tôi'.");
+            return response.ToString();
+        }
+
+        // Fallback to normal sample response
+        return GetSampleResponse(userMessage);
     }
 }
 

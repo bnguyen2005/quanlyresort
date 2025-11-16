@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using QuanLyResort.Services;
+using System.Security.Claims;
 
 namespace QuanLyResort.Controllers;
 
@@ -42,7 +43,21 @@ public class AIChatController : ControllerBase
             _logger.LogInformation("[AI Chat Controller] 📨 Message preview: {Message}", request.Message?.Substring(0, Math.Min(50, request.Message?.Length ?? 0)) ?? "");
             _logger.LogInformation("[AI Chat Controller] 📨 Has context: {HasContext}", !string.IsNullOrEmpty(request.Context));
 
-            var response = await _aiChatService.SendMessageAsync(request.Message, request.Context);
+            // Get customer ID from JWT token if available
+            int? customerId = null;
+            var customerIdClaim = User.FindFirst("CustomerId")?.Value;
+            if (string.IsNullOrEmpty(customerIdClaim))
+            {
+                // Try alternative claim name
+                customerIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            }
+            if (!string.IsNullOrEmpty(customerIdClaim) && int.TryParse(customerIdClaim, out var id))
+            {
+                customerId = id;
+                _logger.LogInformation("[AI Chat Controller] 📨 Customer ID from token: {CustomerId}", customerId);
+            }
+
+            var response = await _aiChatService.SendMessageAsync(request.Message, request.Context, customerId);
             
             _logger.LogInformation("[AI Chat Controller] ✅ Got response from service");
             _logger.LogInformation("[AI Chat Controller] ✅ Response length: {Length}", response?.Length ?? 0);
