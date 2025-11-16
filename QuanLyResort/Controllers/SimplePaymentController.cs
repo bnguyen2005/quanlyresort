@@ -62,8 +62,10 @@ public class SimplePaymentController : ControllerBase
             if (string.IsNullOrWhiteSpace(rawRequestJson))
             {
                 _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] PayOs verification request (empty body)", webhookId);
-                return Ok(new
+                // SePay yêu cầu response có success: true và HTTP Status Code 201 (hoặc 200)
+                return StatusCode(201, new
                 {
+                    success = true,
                     status = "active",
                     endpoint = "/api/simplepayment/webhook",
                     message = "Webhook endpoint is ready",
@@ -233,8 +235,10 @@ public class SimplePaymentController : ControllerBase
             if (string.IsNullOrEmpty(content) && amount == 0)
             {
                 _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] PayOs verification request (empty data)", webhookId);
-                return Ok(new
+                // SePay yêu cầu response có success: true và HTTP Status Code 201 (hoặc 200)
+                return StatusCode(201, new
                 {
+                    success = true,
                     status = "active",
                     endpoint = "/api/simplepayment/webhook",
                     message = "Webhook endpoint is ready",
@@ -330,7 +334,8 @@ public class SimplePaymentController : ControllerBase
                 if (order.PaymentStatus == "Paid")
                 {
                     _logger.LogInformation("[WEBHOOK] ✅ [WEBHOOK-{WebhookId}] Restaurant order {OrderId} already paid, ignoring duplicate", webhookId, restaurantOrderId.Value);
-                    return Ok(new { message = "Đã thanh toán rồi", orderId = restaurantOrderId.Value, webhookId });
+                    // SePay yêu cầu response có success: true và HTTP Status Code 201 (hoặc 200)
+                    return StatusCode(201, new { success = true, message = "Đã thanh toán rồi", orderId = restaurantOrderId.Value, webhookId });
                 }
                 
                 // Verify amount
@@ -371,7 +376,8 @@ public class SimplePaymentController : ControllerBase
                 _logger.LogInformation("[WEBHOOK] ⏱️ [WEBHOOK-{WebhookId}] Processing time: {Duration}ms", webhookId, restaurantDuration);
                 _logger.LogInformation("═══════════════════════════════════════════════════════════");
                 
-                return Ok(new
+                // SePay yêu cầu response có success: true và HTTP Status Code 201 (hoặc 200)
+                return StatusCode(201, new
                 {
                     success = true,
                     message = "Thanh toán thành công",
@@ -419,7 +425,8 @@ public class SimplePaymentController : ControllerBase
             if (booking.Status == "Paid")
             {
                 _logger.LogInformation("[WEBHOOK] ✅ [WEBHOOK-{WebhookId}] Booking {BookingId} already paid, ignoring duplicate", webhookId, bookingId.Value);
-                return Ok(new { message = "Đã thanh toán rồi", bookingId = bookingId.Value, webhookId });
+                // SePay yêu cầu response có success: true và HTTP Status Code 201 (hoặc 200)
+                return StatusCode(201, new { success = true, message = "Đã thanh toán rồi", bookingId = bookingId.Value, webhookId });
             }
 
             // Verify amount (optional - có thể bỏ qua nếu muốn đơn giản hơn)
@@ -502,7 +509,9 @@ public class SimplePaymentController : ControllerBase
             _logger.LogInformation("[WEBHOOK] ⏱️ [WEBHOOK-{WebhookId}] Processing time: {Duration}ms", webhookId, duration);
             _logger.LogInformation("═══════════════════════════════════════════════════════════");
 
-            return Ok(new
+            // SePay yêu cầu response có success: true và HTTP Status Code 201 (hoặc 200)
+            // Dùng StatusCode(201) để đảm bảo SePay nhận được response thành công
+            return StatusCode(201, new
             {
                 success = true,
                 message = "Thanh toán thành công",
