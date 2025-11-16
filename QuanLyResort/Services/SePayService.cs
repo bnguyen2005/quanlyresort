@@ -60,10 +60,16 @@ public class SePayService
         _bankCode = _configuration["SePay:BankCode"] ?? "MB"; // Default to MB
         
         // MERCHANT ID (có thể khác Account ID)
-        _merchantId = _configuration["SePay:MerchantId"];
+        // Hỗ trợ cả format đúng (SePay__MerchantId) và format sai (SePayMerchantId) để tương thích
+        _merchantId = _configuration["SePay:MerchantId"]
+                   ?? _configuration["SePayMerchantId"]; // Fallback cho format sai (không có __)
         if (!string.IsNullOrEmpty(_merchantId))
         {
             _logger.LogInformation("[SEPAY] 🔍 Merchant ID configured: {MerchantId}", _merchantId);
+        }
+        else
+        {
+            _logger.LogWarning("[SEPAY] ⚠️ Merchant ID chưa được cấu hình. Vui lòng thêm 'SePay__MerchantId' (với 2 dấu gạch dưới) vào Railway variables.");
         }
         
         // Bank Account Number (cho static QR code)
