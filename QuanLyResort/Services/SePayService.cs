@@ -33,13 +33,25 @@ public class SePayService
         _httpClient = httpClientFactory.CreateClient();
         _httpClient.Timeout = TimeSpan.FromSeconds(30);
 
-        // Load configuration from appsettings.json
+        // Load configuration from appsettings.json hoặc environment variables
         // SePay API có thể dùng:
         // - Production: https://pgapi.sepay.vn
         // - User API: https://my.sepay.vn/userapi
-        _apiBaseUrl = _configuration["SePay:ApiBaseUrl"] ?? "https://pgapi.sepay.vn";
-        _apiToken = _configuration["SePay:ApiToken"];
-        _accountId = _configuration["SePay:AccountId"];
+        
+        // Hỗ trợ cả format cũ (SePay:*) và format mới (SEPAY_*)
+        _apiBaseUrl = _configuration["SePay:ApiBaseUrl"] 
+                   ?? _configuration["SEPAY_API_BASE_URL"] 
+                   ?? "https://pgapi.sepay.vn";
+        
+        // API_KEY: Khóa bí mật để call API (format cũ: SePay:ApiToken, format mới: SEPAY_API_KEY)
+        _apiToken = _configuration["SePay:ApiToken"] 
+                 ?? _configuration["SEPAY_API_KEY"];
+        
+        // CLIENT_ID: Mã định danh ứng dụng (format cũ: SePay:AccountId, format mới: SEPAY_CLIENT_ID)
+        _accountId = _configuration["SePay:AccountId"] 
+                  ?? _configuration["SePay:ClientId"]
+                  ?? _configuration["SEPAY_CLIENT_ID"];
+        
         _bankCode = _configuration["SePay:BankCode"] ?? "MB"; // Default to MB
         
         // MERCHANT ID (có thể khác Account ID)
@@ -58,12 +70,12 @@ public class SePayService
 
         if (string.IsNullOrEmpty(_apiToken))
         {
-            _logger.LogWarning("[SEPAY] ⚠️ SePay API Token chưa được cấu hình. Vui lòng thêm 'SePay:ApiToken' vào appsettings.json hoặc environment variables.");
+            _logger.LogWarning("[SEPAY] ⚠️ SePay API Key chưa được cấu hình. Vui lòng thêm 'SePay:ApiToken' hoặc 'SEPAY_API_KEY' vào environment variables.");
         }
 
         if (string.IsNullOrEmpty(_accountId))
         {
-            _logger.LogWarning("[SEPAY] ⚠️ SePay Account ID chưa được cấu hình. Vui lòng thêm 'SePay:AccountId' vào appsettings.json hoặc environment variables.");
+            _logger.LogWarning("[SEPAY] ⚠️ SePay Client ID chưa được cấu hình. Vui lòng thêm 'SePay:AccountId' hoặc 'SEPAY_CLIENT_ID' vào environment variables.");
         }
     }
 

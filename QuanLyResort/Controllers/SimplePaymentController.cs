@@ -79,6 +79,10 @@ public class SimplePaymentController : ControllerBase
             _logger.LogInformation("[WEBHOOK]    IP Address: {RemoteIp}", HttpContext.Connection.RemoteIpAddress?.ToString());
             _logger.LogInformation("[WEBHOOK]    User-Agent: {UserAgent}", Request.Headers["User-Agent"].ToString());
             
+            // TODO: Verify SePay webhook signature nếu có SECRET_KEY
+            // SePay có thể gửi signature trong header hoặc body
+            // Cần implement signature verification khi có SECRET_KEY
+            
             // Parse request - hỗ trợ cả PayOs format và Simple format
             string? content = null;
             decimal amount = 0;
