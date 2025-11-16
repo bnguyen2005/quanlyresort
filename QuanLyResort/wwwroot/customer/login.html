@@ -506,12 +506,12 @@
         if (shouldTryAdminFirst) {
           console.log('🔵 Strategy: Try ADMIN first (based on hint)');
           
-          // Try admin/staff login first
+          // Try admin/staff login first - KHÔNG hardcode role, để server tự detect
           try {
-            console.log('👨‍💼 Trying admin/staff login...');
+            console.log('👨‍💼 Trying admin/staff login (no role specified)...');
             const adminData = await apiCall('/auth/login', {
               method: 'POST',
-              body: JSON.stringify({ email, password, role: 'Admin' })
+              body: JSON.stringify({ email, password, role: '' })
             });
             
             if (adminData && adminData.token) {
@@ -521,6 +521,26 @@
           } catch (adminError) {
             console.log('❌ Admin/staff login failed:', adminError.message);
             lastError = adminError;
+          }
+          
+          // Fallback: Try với các roles phổ biến
+          const adminRoles = ['Admin', 'Manager', 'FrontDesk', 'Business', 'Cashier'];
+          for (const role of adminRoles) {
+            try {
+              console.log(`👨‍💼 Trying admin/staff login with role: ${role}...`);
+              const adminData = await apiCall('/auth/login', {
+                method: 'POST',
+                body: JSON.stringify({ email, password, role: role })
+              });
+              
+              if (adminData && adminData.token) {
+                console.log(`✅ Admin/staff login successful with role: ${role}!`);
+                return adminData;
+              }
+            } catch (roleError) {
+              console.log(`❌ Login failed for role ${role}:`, roleError.message);
+              // Continue to next role
+            }
           }
           
           // Fallback: Try customer login
@@ -559,12 +579,12 @@
             lastError = customerError;
           }
           
-          // Fallback: Try admin login
+          // Fallback: Try admin login - KHÔNG hardcode role
           try {
-            console.log('👨‍💼 Fallback: Trying admin/staff login...');
+            console.log('👨‍💼 Fallback: Trying admin/staff login (no role specified)...');
             const adminData = await apiCall('/auth/login', {
               method: 'POST',
-              body: JSON.stringify({ email, password, role: 'Admin' })
+              body: JSON.stringify({ email, password, role: '' })
             });
             
             if (adminData && adminData.token) {
@@ -572,8 +592,28 @@
               return adminData;
             }
           } catch (adminError) {
-            console.log('❌ Admin/staff login also failed:', adminError.message);
+            console.log('❌ Admin/staff login failed:', adminError.message);
             lastError = adminError;
+          }
+          
+          // Fallback: Try với các roles phổ biến
+          const adminRoles = ['Admin', 'Manager', 'FrontDesk', 'Business', 'Cashier'];
+          for (const role of adminRoles) {
+            try {
+              console.log(`👨‍💼 Fallback: Trying admin/staff login with role: ${role}...`);
+              const adminData = await apiCall('/auth/login', {
+                method: 'POST',
+                body: JSON.stringify({ email, password, role: role })
+              });
+              
+              if (adminData && adminData.token) {
+                console.log(`✅ Admin/staff login successful with role: ${role}!`);
+                return adminData;
+              }
+            } catch (roleError) {
+              console.log(`❌ Login failed for role ${role}:`, roleError.message);
+              // Continue to next role
+            }
           }
         }
         
