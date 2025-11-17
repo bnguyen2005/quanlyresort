@@ -1340,124 +1340,62 @@
     window.showCartModal = function() {
       const modal = document.getElementById('cartModal');
       if (!modal) {
-        createCartModal();
-        updateCartModalContent();
-        const modalEl = document.getElementById('cartModal');
-        if (typeof jQuery !== 'undefined' && jQuery(modalEl).modal) {
-          jQuery(modalEl).modal('show');
-        } else if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-          new bootstrap.Modal(modalEl).show();
+        console.error('[showCartModal] Cart modal not found in DOM');
+        if (typeof showToast === 'function') {
+          showToast('Lỗi: Không tìm thấy modal giỏ hàng. Vui lòng tải lại trang.', 'error');
         } else {
-          // Fallback
-          modalEl.classList.add('show');
-          modalEl.style.display = 'block';
-          modalEl.setAttribute('aria-hidden', 'false');
-          modalEl.setAttribute('aria-modal', 'true');
-          document.body.classList.add('modal-open');
-          document.body.style.overflow = 'hidden';
-          const backdrop = document.createElement('div');
-          backdrop.className = 'modal-backdrop fade show';
-          document.body.appendChild(backdrop);
+          alert('Lỗi: Không tìm thấy modal giỏ hàng. Vui lòng tải lại trang.');
+        }
+        return;
+      }
+      
+      updateCartModalContent();
+      if (typeof jQuery !== 'undefined' && jQuery(modal).modal) {
+        jQuery(modal).modal('show');
+      } else if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        try {
+          const existingModal = bootstrap.Modal.getInstance(modal);
+          if (existingModal) {
+            existingModal.show();
+          } else {
+            new bootstrap.Modal(modal).show();
+          }
+        } catch (e) {
+          console.error('[showCartModal] Bootstrap modal error:', e);
+          if (typeof jQuery !== 'undefined' && jQuery(modal).modal) {
+            jQuery(modal).modal('show');
+          } else {
+            // Fallback
+            modal.classList.add('show');
+            modal.style.display = 'block';
+            modal.setAttribute('aria-hidden', 'false');
+            modal.setAttribute('aria-modal', 'true');
+            document.body.classList.add('modal-open');
+            document.body.style.overflow = 'hidden';
+            const backdrop = document.querySelector('.modal-backdrop');
+            if (!backdrop) {
+              const newBackdrop = document.createElement('div');
+              newBackdrop.className = 'modal-backdrop fade show';
+              document.body.appendChild(newBackdrop);
+            }
+          }
         }
       } else {
-        updateCartModalContent();
-        if (typeof jQuery !== 'undefined' && jQuery(modal).modal) {
-          jQuery(modal).modal('show');
-        } else if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-          try {
-            const existingModal = bootstrap.Modal.getInstance(modal);
-            if (existingModal) {
-              existingModal.show();
-            } else {
-              new bootstrap.Modal(modal).show();
-            }
-          } catch (e) {
-            jQuery(modal).modal('show');
-          }
-        } else {
-          // Fallback
-          modal.classList.add('show');
-          modal.style.display = 'block';
-          modal.setAttribute('aria-hidden', 'false');
-          modal.setAttribute('aria-modal', 'true');
-          document.body.classList.add('modal-open');
-          document.body.style.overflow = 'hidden';
-          const backdrop = document.querySelector('.modal-backdrop');
-          if (!backdrop) {
-            const newBackdrop = document.createElement('div');
-            newBackdrop.className = 'modal-backdrop fade show';
-            document.body.appendChild(newBackdrop);
-          }
+        // Fallback
+        modal.classList.add('show');
+        modal.style.display = 'block';
+        modal.setAttribute('aria-hidden', 'false');
+        modal.setAttribute('aria-modal', 'true');
+        document.body.classList.add('modal-open');
+        document.body.style.overflow = 'hidden';
+        const backdrop = document.querySelector('.modal-backdrop');
+        if (!backdrop) {
+          const newBackdrop = document.createElement('div');
+          newBackdrop.className = 'modal-backdrop fade show';
+          document.body.appendChild(newBackdrop);
         }
       }
     };
-    
-    // Create cart modal HTML
-    function createCartModal() {
-      const modalHTML = `
-        <div class="modal fade" id="cartModal" tabindex="-1">
-          <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title">🛒 Giỏ hàng của bạn</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="closeCartModal()"></button>
-              </div>
-              <div class="modal-body">
-                <div id="cartItemsList"></div>
-                <div class="cart-summary mt-4 pt-3 border-top">
-                  <div class="d-flex justify-content-between align-items-center mb-3">
-                    <strong style="font-size: 18px;">Tổng tiền:</strong>
-                    <strong id="cartTotal" style="font-size: 20px; color: var(--color-primary-main, #C8A97E);">0 ₫</strong>
-                  </div>
-                </div>
-                <div id="orderForm" class="mt-4 needs-validation" novalidate>
-                  <h6 class="mb-3">Thông tin đặt món</h6>
-                  <div class="mb-3">
-                    <label class="form-label">Địa chỉ giao hàng <span class="text-danger">*</span></label>
-                    <input type="text" id="orderDeliveryAddress" class="form-control" 
-                           placeholder="VD: Phòng 101 hoặc Nhà hàng" 
-                           required 
-                           minlength="3" 
-                           maxlength="500"
-                           data-label="Địa chỉ giao hàng">
-                    <div class="invalid-feedback"></div>
-                  </div>
-                  <div class="mb-3">
-                    <label class="form-label">Thời gian mong muốn nhận món (tùy chọn)</label>
-                    <input type="datetime-local" id="orderDeliveryTime" class="form-control">
-                    <small class="text-muted">Thời gian phải sau thời điểm hiện tại</small>
-                  </div>
-                  <div class="mb-3">
-                    <label class="form-label">Ghi chú đặc biệt (tùy chọn)</label>
-                    <textarea id="orderSpecialRequests" class="form-control" rows="2" 
-                              placeholder="VD: Không cay, không hành..." 
-                              maxlength="500"></textarea>
-                    <small class="text-muted">Tối đa 500 ký tự</small>
-                  </div>
-                  <div class="mb-3">
-                    <label class="form-label">Phương thức thanh toán <span class="text-danger">*</span></label>
-                    <select id="orderPaymentMethod" class="form-select" required data-label="Phương thức thanh toán">
-                      <option value="">-- Chọn phương thức thanh toán --</option>
-                      <option value="Cash">💵 Thanh toán tại nhà hàng</option>
-                      <option value="QR">💳 Chuyển khoản QR</option>
-                      <option value="RoomCharge">🏨 Charge vào phòng (nếu có booking)</option>
-                    </select>
-                    <div class="invalid-feedback"></div>
-                  </div>
-                </div>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="closeCartModal()">Đóng</button>
-                <button type="button" class="btn btn-primary" onclick="submitOrder()" id="submitOrderBtn">
-                  <i class="icon-check"></i> Đặt món ngay
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
-      document.body.insertAdjacentHTML('beforeend', modalHTML);
-    }
     
     // Update cart modal content
     function updateCartModalContent() {
@@ -2275,6 +2213,68 @@
     });
   </script>
   
+  <!-- Cart Modal -->
+  <div class="modal fade" id="cartModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">🛒 Giỏ hàng của bạn</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="closeCartModal()"></button>
+        </div>
+        <div class="modal-body">
+          <div id="cartItemsList"><p class="text-center text-muted py-4">Giỏ hàng trống</p></div>
+          <div class="cart-summary mt-4 pt-3 border-top">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <strong style="font-size: 18px;">Tổng tiền:</strong>
+              <strong id="cartTotal" style="font-size: 20px; color: var(--color-primary-main, #C8A97E);">0 ₫</strong>
+            </div>
+          </div>
+          <div id="orderForm" class="mt-4 needs-validation" novalidate>
+            <h6 class="mb-3">Thông tin đặt món</h6>
+            <div class="mb-3">
+              <label class="form-label">Địa chỉ giao hàng <span class="text-danger">*</span></label>
+              <input type="text" id="orderDeliveryAddress" class="form-control" 
+                     placeholder="VD: Phòng 101 hoặc Nhà hàng" 
+                     required 
+                     minlength="3" 
+                     maxlength="500"
+                     data-label="Địa chỉ giao hàng">
+              <div class="invalid-feedback"></div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Thời gian mong muốn nhận món (tùy chọn)</label>
+              <input type="datetime-local" id="orderDeliveryTime" class="form-control">
+              <small class="text-muted">Thời gian phải sau thời điểm hiện tại</small>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Ghi chú đặc biệt (tùy chọn)</label>
+              <textarea id="orderSpecialRequests" class="form-control" rows="2" 
+                        placeholder="VD: Không cay, không hành..." 
+                        maxlength="500"></textarea>
+              <small class="text-muted">Tối đa 500 ký tự</small>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Phương thức thanh toán <span class="text-danger">*</span></label>
+              <select id="orderPaymentMethod" class="form-select" required data-label="Phương thức thanh toán">
+                <option value="">-- Chọn phương thức thanh toán --</option>
+                <option value="Cash">💵 Thanh toán tại nhà hàng</option>
+                <option value="QR">💳 Chuyển khoản QR</option>
+                <option value="RoomCharge">🏨 Charge vào phòng (nếu có booking)</option>
+              </select>
+              <div class="invalid-feedback"></div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="closeCartModal()">Đóng</button>
+          <button type="button" class="btn btn-primary" onclick="submitOrder()" id="submitOrderBtn">
+            <i class="icon-check"></i> Đặt món ngay
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification and Validation -->
   <script src="/js/toast-notification.js"></script>
   <script src="/js/form-validation.js"></script>
