@@ -113,17 +113,29 @@ public class JwtAuthorizationMiddleware
 
         // Cho phép các admin public endpoints (seed, check-admin, reset-admin-password, force-create-admin, check-users)
         // Check TRƯỚC khi kiểm tra token - CRITICAL: Must be BEFORE any auth checks
+        // Note: path đã được lowercase ở trên, nên check với lowercase
         if (path.StartsWith("/api/admin/"))
         {
-            if (path == "/api/admin/seed" && method == "POST" ||
-                path == "/api/admin/check-admin" && method == "GET" ||
-                path == "/api/admin/reset-admin-password" && method == "POST" ||
-                path == "/api/admin/force-create-admin" && method == "POST" ||
-                path == "/api/admin/check-users" && method == "GET")
+            _logger.LogInformation("[Authorization] Checking admin endpoint: {Path} (lowercase: {LowerPath}), Method: {Method}", rawPath, path, method);
+            
+            var isPublicAdminEndpoint = 
+                (path == "/api/admin/seed" && method == "POST") ||
+                (path == "/api/admin/check-admin" && method == "GET") ||
+                (path == "/api/admin/reset-admin-password" && method == "POST") ||
+                (path == "/api/admin/force-create-admin" && method == "POST") ||
+                (path == "/api/admin/check-users" && method == "GET");
+            
+            _logger.LogInformation("[Authorization] Is public admin endpoint: {IsPublic}", isPublicAdminEndpoint);
+            
+            if (isPublicAdminEndpoint)
             {
                 _logger.LogInformation("[Authorization] ✅ Allowing public admin endpoint: {Path} (Method: {Method})", rawPath, method);
                 await _next(context);
                 return;
+            }
+            else
+            {
+                _logger.LogInformation("[Authorization] ❌ Admin endpoint requires auth: {Path} (Method: {Method})", rawPath, method);
             }
         }
 
