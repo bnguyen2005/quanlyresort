@@ -1289,15 +1289,19 @@
         
         // Set default payment method to BankTransfer (QR) and ensure QR section is visible
         const paymentMethodSelect = document.getElementById('plPaymentMethod');
+        const bankSection = document.getElementById('plBankSection');
+        const cashSection = document.getElementById('plCashSection');
+        
         if (paymentMethodSelect) {
           paymentMethodSelect.value = 'BankTransfer';
+          // Ensure sections are in correct state
+          if (bankSection) bankSection.style.display = 'block';
+          if (cashSection) cashSection.style.display = 'none';
           // Trigger change event to show QR immediately
           paymentMethodSelect.dispatchEvent(new Event('change'));
         } else {
           // Fallback: ensure QR section is visible
-          const bankSection = document.getElementById('plBankSection');
           if (bankSection) bankSection.style.display = 'block';
-          const cashSection = document.getElementById('plCashSection');
           if (cashSection) cashSection.style.display = 'none';
         }
         

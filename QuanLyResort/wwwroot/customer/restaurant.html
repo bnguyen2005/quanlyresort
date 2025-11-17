@@ -1993,7 +1993,7 @@
         
         html += `
           <div class="col-lg-4 col-md-6 col-sm-6 mb-4" style="display: block !important; visibility: visible !important; opacity: 1 !important; box-sizing: border-box; padding-left: 12px; padding-right: 12px; margin-bottom: 16px; flex: 0 0 auto;">
-            <div class="menu-card ftco-animate" data-service-id="${item.serviceId}" style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: transform 0.3s, box-shadow 0.3s; height: 100%; display: flex !important; flex-direction: column; visibility: visible !important; opacity: 1 !important; position: relative; z-index: 1;">
+            <div class="menu-card ftco-animate" data-service-id="${item.serviceId}" style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: transform 0.3s, box-shadow 0.3s; height: 100%; display: flex !important; flex-direction: column; visibility: visible !important; opacity: 1 !important; position: relative; z-index: 1; cursor: pointer;" title="Click để thêm vào giỏ hàng">
               <div class="menu-card-image" style="width: 100%; height: 200px; background-image: url(${img}); background-size: cover; background-position: center; position: relative; overflow: hidden;">
                 <button class="menu-card-quick-view" onclick="showQuickView(${item.serviceId}, event)" title="Xem nhanh">
                   <i class="icon-eye"></i>
@@ -2039,6 +2039,11 @@
       const clickHandler = function(e) {
         const target = e.target;
         
+        // Skip if clicking on quick view button or its icon
+        if (target.closest('.menu-card-quick-view') || target.classList.contains('icon-eye')) {
+          return; // Let quick view handle its own click
+        }
+        
         // Handle quantity buttons
         if (target.classList.contains('btn-qty-plus') || target.classList.contains('btn-qty-minus')) {
           e.preventDefault();
@@ -2054,6 +2059,7 @@
               console.error('[renderMenuItems] adjustQuantity function not found');
             }
           }
+          return;
         }
         
         // Handle add to cart button (check if clicked on button or its child span)
@@ -2077,6 +2083,43 @@
                 } else {
                   alert('Lỗi: Chức năng chưa sẵn sàng. Vui lòng tải lại trang.');
                 }
+              }
+            }
+          }
+          return;
+        }
+        
+        // Handle click on menu card (outside buttons) - add to cart with quantity 1
+        const menuCard = target.closest('.menu-card');
+        if (menuCard) {
+          e.preventDefault();
+          e.stopPropagation();
+          const serviceId = parseInt(menuCard.getAttribute('data-service-id'));
+          
+          if (serviceId && !isNaN(serviceId)) {
+            // Find item data from the rendered items
+            const item = items.find(i => i.serviceId === serviceId);
+            if (item) {
+              const serviceName = item.serviceName || item.name || 'Món ăn';
+              const price = item.price || 0;
+              
+              // Set quantity to 1 if it's 0
+              const qtyEl = document.getElementById(`qty-${serviceId}`);
+              if (qtyEl) {
+                const currentQty = parseInt(qtyEl.textContent) || 0;
+                if (currentQty === 0) {
+                  qtyEl.textContent = '1';
+                  if (typeof window.adjustQuantity === 'function') {
+                    window.adjustQuantity(serviceId, 1);
+                  }
+                }
+              }
+              
+              console.log('[renderMenuItems] Menu card clicked (outside buttons):', { serviceId, serviceName, price });
+              if (typeof window.addToCart === 'function') {
+                window.addToCart(serviceId, serviceName, price);
+              } else {
+                console.error('[renderMenuItems] addToCart function not found');
               }
             }
           }

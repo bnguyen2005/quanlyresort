@@ -254,14 +254,15 @@
                 <span>🎟️</span> Mã giảm giá (tùy chọn)
               </label>
               <div class="d-flex gap-2" style="display:flex;gap:8px;align-items:center">
-                <input type="text" id="couponCode" class="form-control" placeholder="Nhập mã (ví dụ: SUMMER2024)" style="flex:1">
-                <button type="button" id="applyCouponBtn" class="btn btn-outline-primary" style="white-space:nowrap">Áp dụng</button>
+                <input type="text" id="couponCode" class="form-control" placeholder="Nhập mã (ví dụ: SUMMER2024)" style="flex:1;min-height:48px;font-size:16px;padding:12px 16px;text-transform:uppercase">
+                <button type="button" id="applyCouponBtn" class="btn btn-outline-primary" style="white-space:nowrap;min-height:48px;padding:12px 20px;font-size:15px;font-weight:600">Áp dụng</button>
               </div>
-              <div id="couponMessage" class="small" style="margin-top:6px;color:#6b7280"></div>
-              <div id="couponAppliedBadge" style="display:none;margin-top:8px;">
-                <span class="badge bg-warning text-dark" style="font-size:13px;padding:6px 12px;">
-                  🎟️ Mã đã nhập: <strong id="appliedCouponCode">-</strong> (Sẽ được kiểm tra khi đặt phòng)
-                </span>
+              <div id="couponMessage" class="small" style="margin-top:8px;min-height:24px;color:#6b7280;font-size:14px;line-height:1.4"></div>
+              <div id="couponAppliedBadge" style="display:none;margin-top:10px;padding:10px 14px;background:#f0fdf4;border:1px solid #86efac;border-radius:8px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                  <span style="font-size:14px;">🎟️ Mã đã áp dụng: <strong id="appliedCouponCode" style="color:#059669;font-size:16px;">-</strong></span>
+                  <button type="button" onclick="clearAppliedCoupon()" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:14px;padding:4px 8px;font-weight:600">✕ Xóa</button>
+                </div>
               </div>
             </div>
           </form>
@@ -1470,6 +1471,33 @@
         roomId: null
       };
       
+      // Clear applied coupon function
+      window.clearAppliedCoupon = function() {
+        try {
+          const couponInput = document.getElementById('couponCode');
+          const couponMsg = document.getElementById('couponMessage');
+          const badge = document.getElementById('couponAppliedBadge');
+          const codeDisplay = document.getElementById('appliedCouponCode');
+          
+          if (couponInput) couponInput.value = '';
+          if (couponMsg) {
+            couponMsg.textContent = '';
+            couponMsg.style.color = '#6b7280';
+          }
+          if (badge) badge.style.display = 'none';
+          if (codeDisplay) codeDisplay.textContent = '-';
+          
+          // Clear from localStorage if using coupons.js
+          if (window.coupons?.clearAppliedCoupon) {
+            window.coupons.clearAppliedCoupon();
+          }
+          
+          console.log('✅ [clearAppliedCoupon] Coupon cleared');
+        } catch (e) {
+          console.error('❌ [clearAppliedCoupon] Error:', e);
+        }
+      };
+
       function clearCouponIfBookingChanged() {
         const currentCheckin = checkin.value;
         const currentCheckout = checkout.value;
