@@ -544,25 +544,40 @@
         ticketsTable = null;
       }
       
-      // Khởi tạo lại DataTable với dữ liệu mới
-      try {
-        ticketsTable = $('#ticketsTable').DataTable({
-          language: {
-            url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/vi.json'
-          },
-          order: [[7, 'desc']], // Sort by created date
-          pageLength: 25,
-          responsive: true,
-          columnDefs: [
-            { orderable: false, targets: 8 } // Disable sorting on Actions column
-          ]
-        });
-      } catch (e) {
-        console.error('[Tickets] Error initializing DataTable:', e);
-        if (typeof showToast === 'function') {
-          showToast('Lỗi khi khởi tạo bảng dữ liệu', 'error');
+      // Đợi một chút để đảm bảo DOM đã được cập nhật
+      setTimeout(() => {
+        // Khởi tạo lại DataTable với dữ liệu mới
+        try {
+          // Đảm bảo table có đủ cột
+          const headerCols = document.querySelectorAll('#ticketsTable thead th').length;
+          const firstRow = document.querySelector('#ticketsTable tbody tr');
+          if (firstRow) {
+            const bodyCols = firstRow.querySelectorAll('td').length;
+            if (headerCols !== bodyCols) {
+              console.error(`[Tickets] Column mismatch: Header has ${headerCols} columns, but body has ${bodyCols} columns`);
+              return;
+            }
+          }
+          
+          ticketsTable = $('#ticketsTable').DataTable({
+            language: {
+              url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/vi.json'
+            },
+            order: [[7, 'desc']], // Sort by created date
+            pageLength: 25,
+            responsive: true,
+            columnDefs: [
+              { orderable: false, targets: 8 } // Disable sorting on Actions column
+            ]
+          });
+        } catch (e) {
+          console.error('[Tickets] Error initializing DataTable:', e);
+          console.error('[Tickets] Error details:', e.stack);
+          if (typeof showToast === 'function') {
+            showToast('Lỗi khi khởi tạo bảng dữ liệu', 'error');
+          }
         }
-      }
+      }, 100);
     }
 
     // Get status badge
