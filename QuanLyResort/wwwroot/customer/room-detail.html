@@ -1986,16 +1986,25 @@
       const userStr = localStorage.getItem('user');
       if (!token || !userStr) {
         showToast('Vui lòng đăng nhập để đặt phòng', 'warning');
-        setTimeout(() => window.location.href = '../admin/html/login.html', 2000);
+        // Lưu URL hiện tại để redirect lại sau khi login
+        const currentUrl = window.location.href;
+        setTimeout(() => {
+          window.location.href = `login.html?redirect=${encodeURIComponent(currentUrl)}`;
+        }, 1500);
         return;
       }
       
       let user;
       try {
         user = JSON.parse(userStr);
+        if (!user || !user.customerId) {
+          throw new Error('Invalid user data');
+        }
       } catch(e) {
         showToast('Thông tin người dùng không hợp lệ. Vui lòng đăng nhập lại', 'danger');
-        setTimeout(() => window.location.href = '../admin/html/login.html', 2000);
+        setTimeout(() => {
+          window.location.href = 'login.html';
+        }, 1500);
         return;
       }
 

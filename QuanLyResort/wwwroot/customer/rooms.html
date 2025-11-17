@@ -1603,6 +1603,43 @@
     }
 
     function bookNow(id) {
+      // Kiểm tra authentication trước khi đặt phòng
+      const token = localStorage.getItem('token');
+      const userStr = localStorage.getItem('user');
+      
+      if (!token || !userStr) {
+        if (typeof showToast === 'function') {
+          showToast('Vui lòng đăng nhập để đặt phòng', 'warning');
+        } else {
+          alert('Vui lòng đăng nhập để đặt phòng');
+        }
+        // Lưu URL hiện tại để redirect lại sau khi login
+        const currentUrl = window.location.href;
+        setTimeout(() => {
+          window.location.href = `login.html?redirect=${encodeURIComponent(currentUrl)}`;
+        }, 1500);
+        return;
+      }
+      
+      // Kiểm tra user object hợp lệ
+      try {
+        const user = JSON.parse(userStr);
+        if (!user || !user.customerId) {
+          throw new Error('Invalid user data');
+        }
+      } catch (e) {
+        if (typeof showToast === 'function') {
+          showToast('Thông tin người dùng không hợp lệ. Vui lòng đăng nhập lại', 'danger');
+        } else {
+          alert('Thông tin người dùng không hợp lệ. Vui lòng đăng nhập lại');
+        }
+        setTimeout(() => {
+          window.location.href = 'login.html';
+        }, 1500);
+        return;
+      }
+      
+      // Đã đăng nhập, cho phép đặt phòng
       window.location.href = 'room-detail.html?id=' + encodeURIComponent(id);
     }
 

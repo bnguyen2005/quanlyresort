@@ -715,16 +715,37 @@
             // Dispatch event for navbar
             window.dispatchEvent(new CustomEvent('userLoggedIn', { detail: result.user }));
             
-            // Determine redirect URL based on role
+            // Check for redirect parameter first
+            const urlParams = new URLSearchParams(window.location.search);
+            const redirectParam = urlParams.get('redirect');
+            
+            // Determine redirect URL
             const role = result.user?.role;
             let redirectUrl;
             
-            if (role === 'Admin' || role === 'Manager' || role === 'Business' || 
-                role === 'FrontDesk' || role === 'Cashier' || role === 'Accounting' || 
-                role === 'Inventory') {
-              redirectUrl = '/admin/html/index.html';
-            } else {
-              redirectUrl = '/customer/index.html';
+            // Priority 1: Use redirect parameter if provided and user is customer
+            if (redirectParam && (role === 'Customer' || !role)) {
+              try {
+                const decodedUrl = decodeURIComponent(redirectParam);
+                // Validate URL is from same origin for security
+                if (decodedUrl.startsWith(window.location.origin) || decodedUrl.startsWith('/')) {
+                  redirectUrl = decodedUrl;
+                  console.log('🔄 Using redirect parameter:', redirectUrl);
+                }
+              } catch (e) {
+                console.warn('⚠️ Invalid redirect parameter:', e);
+              }
+            }
+            
+            // Priority 2: Determine redirect URL based on role
+            if (!redirectUrl) {
+              if (role === 'Admin' || role === 'Manager' || role === 'Business' || 
+                  role === 'FrontDesk' || role === 'Cashier' || role === 'Accounting' || 
+                  role === 'Inventory') {
+                redirectUrl = '/admin/html/index.html';
+              } else {
+                redirectUrl = '/customer/index.html';
+              }
             }
             
             console.log('🎯 User role:', role);
