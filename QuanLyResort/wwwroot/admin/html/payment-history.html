@@ -560,6 +560,16 @@
     document.addEventListener('DOMContentLoaded', function() {
       loadStatistics();
       loadPayments();
+      
+      // Auto-refresh every 30 seconds
+      setInterval(() => {
+        try {
+          loadStatistics();
+          loadPayments();
+        } catch (error) {
+          console.error('Error auto-refreshing payment history:', error);
+        }
+      }, 30000); // 30 seconds
     });
   </script>
 </body>

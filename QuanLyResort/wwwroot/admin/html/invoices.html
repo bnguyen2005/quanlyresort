@@ -362,6 +362,18 @@
       
       await loadAllData();
       setupEventListeners();
+      
+      // Auto-refresh every 30 seconds
+      setInterval(async () => {
+        try {
+          await Promise.all([
+            loadStatistics(),
+            loadInvoices()
+          ]);
+        } catch (error) {
+          console.error('Error auto-refreshing invoices:', error);
+        }
+      }, 30000); // 30 seconds
     });
 
     // Load all data

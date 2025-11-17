@@ -58,6 +58,34 @@ async function openRestaurantPayment(orderId) {
     // Update modal content
     updateRestaurantPaymentModal(orderId, order.orderNumber || `ORD${orderId}`, amount);
 
+    // Setup payment method change handler
+    const paymentMethodSelect = document.getElementById('rpPaymentMethod');
+    if (paymentMethodSelect) {
+      paymentMethodSelect.addEventListener('change', function() {
+        const method = this.value;
+        const qrSection = document.getElementById('rpQRSection');
+        const cashSection = document.getElementById('rpCashSection');
+        
+        if (method === 'QR') {
+          if (qrSection) qrSection.style.display = 'block';
+          if (cashSection) cashSection.style.display = 'none';
+        } else if (method === 'Cash') {
+          if (qrSection) qrSection.style.display = 'none';
+          if (cashSection) cashSection.style.display = 'block';
+          
+          // Update cash section info
+          const cashOrderNumber = document.getElementById('rpCashOrderNumber');
+          const cashAmount = document.getElementById('rpCashAmount');
+          if (cashOrderNumber) cashOrderNumber.textContent = order.orderNumber || `ORD${orderId}`;
+          if (cashAmount) cashAmount.textContent = formatCurrency(amount);
+        }
+      });
+      
+      // Set default to QR and trigger change to show correct section
+      paymentMethodSelect.value = 'QR';
+      paymentMethodSelect.dispatchEvent(new Event('change'));
+    }
+
     // Show modal
     const modalElement = document.getElementById('restaurantPaymentModal');
     if (!modalElement) {

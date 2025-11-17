@@ -290,6 +290,17 @@
               <option value="RoomCharge">🏨 Charge vào phòng (nếu có booking)</option>
             </select>
           </div>
+
+          <!-- Cash Payment Confirmation Section -->
+          <div id="cashSection" style="display: none; padding: 20px; background: #f8f9fa; border-radius: 12px; text-align: center;">
+            <div style="font-size: 48px; margin-bottom: 16px;">💵</div>
+            <h5 style="color: #1a1a1a; margin-bottom: 12px;">Thanh toán tại nhà hàng</h5>
+            <p style="color: #6b7280; margin-bottom: 20px;">Vui lòng thanh toán trực tiếp tại quầy thanh toán của nhà hàng khi nhận món.</p>
+            <div style="background: white; padding: 16px; border-radius: 8px; border: 2px solid #c8a97e;">
+              <p class="mb-1"><strong>Mã đơn hàng:</strong> <span id="cashOrderNumber">-</span></p>
+              <p class="mb-0"><strong>Số tiền:</strong> <span id="cashTotalAmount" style="color: #c8a97e; font-size: 18px; font-weight: 700;">0 ₫</span></p>
+            </div>
+          </div>
           
           <!-- QR Code Section -->
           <div id="qrSection" class="text-center p-4" style="background: #f8f9fa; border-radius: 8px; display: none;">
@@ -594,7 +605,7 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
       document.getElementById('modalOrderNumber').value = order.orderNumber;
       document.getElementById('modalTotalAmount').value = formatCurrency(order.totalAmount || 0);
 
-      // Show QR if QR payment method is selected
+      // Set payment method and update UI
       const paymentMethodSelect = document.getElementById('paymentMethodSelect');
       paymentMethodSelect.value = order.paymentMethod || 'QR';
       updatePaymentMethod();
@@ -638,12 +649,27 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
     function updatePaymentMethod() {
       const paymentMethod = document.getElementById('paymentMethodSelect').value;
       const qrSection = document.getElementById('qrSection');
+      const cashSection = document.getElementById('cashSection');
       
       if (paymentMethod === 'QR') {
         generateQRCode();
-        qrSection.style.display = 'block';
+        if (qrSection) qrSection.style.display = 'block';
+        if (cashSection) cashSection.style.display = 'none';
+      } else if (paymentMethod === 'Cash') {
+        if (qrSection) qrSection.style.display = 'none';
+        if (cashSection) cashSection.style.display = 'block';
+        
+        // Update cash section info
+        if (window.currentOrder) {
+          const cashOrderNumber = document.getElementById('cashOrderNumber');
+          const cashTotalAmount = document.getElementById('cashTotalAmount');
+          if (cashOrderNumber) cashOrderNumber.textContent = window.currentOrder.orderNumber || '-';
+          if (cashTotalAmount) cashTotalAmount.textContent = formatCurrency(window.currentOrder.totalAmount || 0);
+        }
       } else {
-        qrSection.style.display = 'none';
+        // RoomCharge or other
+        if (qrSection) qrSection.style.display = 'none';
+        if (cashSection) cashSection.style.display = 'none';
       }
     }
 
@@ -652,6 +678,12 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
       const paymentMethodSelect = document.getElementById('paymentMethodSelect');
       if (paymentMethodSelect) {
         paymentMethodSelect.addEventListener('change', updatePaymentMethod);
+        
+        // Ensure QR is hidden on initial load if Cash is selected
+        if (paymentMethodSelect.value !== 'QR') {
+          const qrSection = document.getElementById('qrSection');
+          if (qrSection) qrSection.style.display = 'none';
+        }
       }
     });
 

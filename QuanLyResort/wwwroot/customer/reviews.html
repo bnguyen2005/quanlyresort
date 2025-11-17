@@ -1193,6 +1193,15 @@
         </select>
       </div>
       <div class="filter-group">
+        <label>📋 Loại đánh giá:</label>
+        <select id="filterReviewType">
+          <option value="">Tất cả</option>
+          <option value="room">🏨 Phòng nghỉ</option>
+          <option value="service">🛎️ Dịch vụ</option>
+          <option value="menu">🍽️ Món ăn</option>
+        </select>
+      </div>
+      <div class="filter-group">
         <button id="resetFilters" class="btn-reset-filters">
           <i class="icon-refresh"></i> Reset
         </button>
@@ -1468,6 +1477,7 @@
       try {
         loading.hidden = false;
         
+        const reviewType = document.getElementById('filterReviewType')?.value || '';
         const roomId = document.getElementById('filterRoomId')?.value || '';
         const rating = document.getElementById('filterRating')?.value || '';
         
@@ -1486,8 +1496,25 @@
         const data = await resp.json();
         let allReviews = data.reviews || [];
         
-        // Apply client-side search filter
+        // Apply client-side filters
         const searchTerm = document.getElementById('reviewSearch')?.value.toLowerCase().trim() || '';
+        
+        // Filter by review type
+        if (reviewType) {
+          if (reviewType === 'room') {
+            // Only reviews with RoomId (room reviews)
+            allReviews = allReviews.filter(review => review.roomId != null);
+          } else if (reviewType === 'service') {
+            // Reviews without RoomId (service reviews)
+            allReviews = allReviews.filter(review => review.roomId == null);
+          } else if (reviewType === 'menu') {
+            // Reviews without RoomId (menu/food reviews)
+            // For now, same as service (can be extended later with ServiceId field)
+            allReviews = allReviews.filter(review => review.roomId == null);
+          }
+        }
+        
+        // Apply search filter
         if (searchTerm) {
           allReviews = allReviews.filter(review => {
             const comment = (review.comment || '').toLowerCase();
@@ -1589,11 +1616,13 @@
 
     // Event Listeners
     document.getElementById('reviewForm')?.addEventListener('submit', submitReview);
+    document.getElementById('filterReviewType')?.addEventListener('change', loadReviews);
     document.getElementById('filterRoomId')?.addEventListener('change', loadReviews);
     document.getElementById('filterRating')?.addEventListener('change', loadReviews);
     document.getElementById('reviewSearch')?.addEventListener('input', debounce(loadReviews, 300));
     document.getElementById('resetFilters')?.addEventListener('click', () => {
       document.getElementById('reviewSearch').value = '';
+      document.getElementById('filterReviewType').value = '';
       document.getElementById('filterRoomId').value = '';
       document.getElementById('filterRating').value = '';
       loadReviews();

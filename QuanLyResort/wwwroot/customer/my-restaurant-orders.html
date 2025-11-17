@@ -179,6 +179,25 @@
             <h4 class="text-primary">Số tiền: <span id="rpAmount">0 ₫</span></h4>
           </div>
 
+          <div class="mb-3">
+            <label class="form-label" style="font-weight: 600;">Phương thức thanh toán</label>
+            <select id="rpPaymentMethod" class="form-select" style="font-size: 16px; padding: 0.75rem;">
+              <option value="QR" selected>💳 Chuyển khoản QR (VietQR)</option>
+              <option value="Cash">💵 Thanh toán tại nhà hàng</option>
+            </select>
+          </div>
+
+          <!-- Cash Payment Confirmation Section -->
+          <div id="rpCashSection" style="display: none; padding: 20px; background: #f8f9fa; border-radius: 12px; text-align: center;">
+            <div style="font-size: 48px; margin-bottom: 16px;">💵</div>
+            <h5 style="color: #1a1a1a; margin-bottom: 12px;">Thanh toán tại nhà hàng</h5>
+            <p style="color: #6b7280; margin-bottom: 20px;">Vui lòng thanh toán trực tiếp tại quầy thanh toán của nhà hàng khi nhận món.</p>
+            <div style="background: white; padding: 16px; border-radius: 8px; border: 2px solid #c8a97e;">
+              <p class="mb-1"><strong>Mã đơn hàng:</strong> <span id="rpCashOrderNumber">-</span></p>
+              <p class="mb-0"><strong>Số tiền:</strong> <span id="rpCashAmount" style="color: #c8a97e; font-size: 18px; font-weight: 700;">0 ₫</span></p>
+            </div>
+          </div>
+
           <div id="rpQRSection">
             <p class="text-center mb-3">
               <strong>Nội dung chuyển khoản:</strong><br>
