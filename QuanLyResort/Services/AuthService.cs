@@ -36,12 +36,19 @@ public class AuthService : IAuthService
 
     public async Task<(bool Success, string? Token, User? User)> LoginAsync(string emailOrUsername, string password, string? role = null)
     {
-        // Tìm user theo email HOẶC username
-        var user = await _unitOfWork.Users.FirstOrDefaultAsync(u => u.Email == emailOrUsername || u.Username == emailOrUsername);
+        // Trim và normalize password để tránh whitespace issues
+        var trimmedPassword = password?.Trim() ?? "";
+        var trimmedEmailOrUsername = emailOrUsername?.Trim() ?? "";
         
         _logger.LogInformation("[LoginAsync] ========== LOGIN ATTEMPT ==========");
-        _logger.LogInformation("[LoginAsync] EmailOrUsername: {EmailOrUsername}", emailOrUsername);
+        _logger.LogInformation("[LoginAsync] EmailOrUsername: '{EmailOrUsername}' (length: {Length})", trimmedEmailOrUsername, trimmedEmailOrUsername.Length);
+        _logger.LogInformation("[LoginAsync] Password: '{Password}' (length: {Length}, original length: {OriginalLength})", 
+            trimmedPassword, trimmedPassword.Length, password?.Length ?? 0);
         _logger.LogInformation("[LoginAsync] Requested Role: {Role}", role ?? "(any)");
+        
+        // Tìm user theo email HOẶC username
+        var user = await _unitOfWork.Users.FirstOrDefaultAsync(u => u.Email == trimmedEmailOrUsername || u.Username == trimmedEmailOrUsername);
+        
         _logger.LogInformation("[LoginAsync] User found: {Found}", user != null);
         
         if (user == null)
@@ -59,23 +66,62 @@ public class AuthService : IAuthService
             return (false, null, null);
         }
 
-        _logger.LogInformation("[LoginAsync] Password length: {Length}", password.Length);
         _logger.LogInformation("[LoginAsync] Hash prefix: {Prefix}...", 
             user.PasswordHash?.Substring(0, Math.Min(20, user.PasswordHash?.Length ?? 0)) ?? "NULL");
+        _logger.LogInformation("[LoginAsync] Hash length: {Length}", user.PasswordHash?.Length ?? 0);
 
-        // Verify password first
-        var verifyResult = BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
-        _logger.LogInformation("[LoginAsync] Password verification: {Result}", verifyResult);
+        // Verify password với trimmed password
+        var verifyResult = false;
+        try
+        {
+            verifyResult = BCrypt.Net.BCrypt.Verify(trimmedPassword, user.PasswordHash);
+            _logger.LogInformation("[LoginAsync] Password verification (trimmed): {Result}", verifyResult);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[LoginAsync] ❌ BCrypt.Verify exception: {Message}", ex.Message);
+        }
+        
+        // Nếu verify fail, thử với password gốc (không trim) để debug
+        if (!verifyResult && trimmedPassword != password)
+        {
+            try
+            {
+                var verifyOriginal = BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
+                _logger.LogInformation("[LoginAsync] Password verification (original, not trimmed): {Result}", verifyOriginal);
+                if (verifyOriginal)
+                {
+                    verifyResult = true; // Use original if it works
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "[LoginAsync] ❌ BCrypt.Verify (original) exception: {Message}", ex.Message);
+            }
+        }
         
         if (!verifyResult)
         {
             _logger.LogWarning("[LoginAsync] ❌ Password verification failed");
-            _logger.LogWarning("[LoginAsync] Attempted password: {Password}", password);
+            _logger.LogWarning("[LoginAsync] Attempted password (trimmed): '{Password}' (length: {Length})", trimmedPassword, trimmedPassword.Length);
             _logger.LogWarning("[LoginAsync] Stored hash: {Hash}", user.PasswordHash?.Substring(0, Math.Min(30, user.PasswordHash?.Length ?? 0)) ?? "NULL");
             
             // Test với password mặc định
             var testDefaultPassword = BCrypt.Net.BCrypt.Verify("P@ssw0rd123", user.PasswordHash);
             _logger.LogInformation("[LoginAsync] Test with default password 'P@ssw0rd123': {Result}", testDefaultPassword);
+            
+            // Debug: So sánh từng ký tự
+            if (trimmedPassword.Length == "P@ssw0rd123".Length)
+            {
+                for (int i = 0; i < trimmedPassword.Length; i++)
+                {
+                    if (trimmedPassword[i] != "P@ssw0rd123"[i])
+                    {
+                        _logger.LogWarning("[LoginAsync] Character mismatch at position {Pos}: '{Char1}' (attempted, code: {Code1}) vs '{Char2}' (expected, code: {Code2})", 
+                            i, trimmedPassword[i], (int)trimmedPassword[i], "P@ssw0rd123"[i], (int)"P@ssw0rd123"[i]);
+                    }
+                }
+            }
             
             return (false, null, null);
         }
