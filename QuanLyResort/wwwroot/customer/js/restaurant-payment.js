@@ -55,35 +55,55 @@ async function openRestaurantPayment(orderId) {
       return;
     }
 
-    // Update modal content
-    updateRestaurantPaymentModal(orderId, order.orderNumber || `ORD${orderId}`, amount);
-
-    // Setup payment method change handler
+    // Setup payment method change handler FIRST, before updating modal
     const paymentMethodSelect = document.getElementById('rpPaymentMethod');
+    const qrSection = document.getElementById('rpQRSection');
+    const cashSection = document.getElementById('rpCashSection');
+    
+    // Initialize sections - hide both first
+    if (qrSection) qrSection.style.display = 'none';
+    if (cashSection) cashSection.style.display = 'none';
+    
     if (paymentMethodSelect) {
-      paymentMethodSelect.addEventListener('change', function() {
+      // Remove existing listeners to avoid duplicates
+      const newSelect = paymentMethodSelect.cloneNode(true);
+      paymentMethodSelect.parentNode.replaceChild(newSelect, paymentMethodSelect);
+      
+      // Setup new handler
+      newSelect.addEventListener('change', function() {
         const method = this.value;
-        const qrSection = document.getElementById('rpQRSection');
-        const cashSection = document.getElementById('rpCashSection');
+        const qrSectionEl = document.getElementById('rpQRSection');
+        const cashSectionEl = document.getElementById('rpCashSection');
         
         if (method === 'QR') {
-          if (qrSection) qrSection.style.display = 'block';
-          if (cashSection) cashSection.style.display = 'none';
+          if (qrSectionEl) qrSectionEl.style.display = 'block';
+          if (cashSectionEl) cashSectionEl.style.display = 'none';
+          // Only create QR when QR is selected
+          updateRestaurantPaymentModal(orderId, order.orderNumber || `ORD${orderId}`, amount);
         } else if (method === 'Cash') {
-          if (qrSection) qrSection.style.display = 'none';
-          if (cashSection) cashSection.style.display = 'block';
+          if (qrSectionEl) qrSectionEl.style.display = 'none';
+          if (cashSectionEl) cashSectionEl.style.display = 'block';
           
           // Update cash section info
           const cashOrderNumber = document.getElementById('rpCashOrderNumber');
           const cashAmount = document.getElementById('rpCashAmount');
           if (cashOrderNumber) cashOrderNumber.textContent = order.orderNumber || `ORD${orderId}`;
           if (cashAmount) cashAmount.textContent = formatCurrency(amount);
+          
+          // Hide QR section elements
+          const qrImg = document.getElementById('rpQRImage');
+          const waitingEl = document.getElementById('rpWaiting');
+          if (qrImg) qrImg.style.display = 'none';
+          if (waitingEl) waitingEl.style.display = 'none';
         }
       });
       
       // Set default to QR and trigger change to show correct section
-      paymentMethodSelect.value = 'QR';
-      paymentMethodSelect.dispatchEvent(new Event('change'));
+      newSelect.value = 'QR';
+      newSelect.dispatchEvent(new Event('change'));
+    } else {
+      // If no payment method select, default to QR
+      updateRestaurantPaymentModal(orderId, order.orderNumber || `ORD${orderId}`, amount);
     }
 
     // Show modal
@@ -131,6 +151,13 @@ async function openRestaurantPayment(orderId) {
  * Update modal content - Tạo SePay QR code động
  */
 async function updateRestaurantPaymentModal(orderId, orderNumber, amount) {
+  // Check if QR payment method is selected - only create QR if QR is selected
+  const paymentMethodSelect = document.getElementById('rpPaymentMethod');
+  if (paymentMethodSelect && paymentMethodSelect.value !== 'QR') {
+    console.log("[FRONTEND] ⏭️ [updateRestaurantPaymentModal] Payment method is not QR, skipping QR creation");
+    return;
+  }
+  
   // Order number
   const codeEl = document.getElementById('rpOrderNumber');
   if (codeEl) codeEl.textContent = orderNumber;
@@ -164,7 +191,7 @@ async function updateRestaurantPaymentModal(orderId, orderNumber, amount) {
       successEl.classList.add('d-none');
       successEl.classList.remove('d-block');
     }
-    if (qrSection) qrSection.style.display = 'none';
+    // Don't hide QR section here - let payment method handler control it
     if (qrImg) {
       qrImg.style.display = 'none';
       qrImg.src = '';
