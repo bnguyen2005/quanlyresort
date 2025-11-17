@@ -111,6 +111,22 @@ public class JwtAuthorizationMiddleware
             }
         }
 
+        // Cho phép các admin public endpoints (seed, check-admin, reset-admin-password, force-create-admin, check-users)
+        // Check TRƯỚC khi kiểm tra token - CRITICAL: Must be BEFORE any auth checks
+        if (path.StartsWith("/api/admin/"))
+        {
+            if (path == "/api/admin/seed" && method == "POST" ||
+                path == "/api/admin/check-admin" && method == "GET" ||
+                path == "/api/admin/reset-admin-password" && method == "POST" ||
+                path == "/api/admin/force-create-admin" && method == "POST" ||
+                path == "/api/admin/check-users" && method == "GET")
+            {
+                _logger.LogInformation("[Authorization] ✅ Allowing public admin endpoint: {Path} (Method: {Method})", rawPath, method);
+                await _next(context);
+                return;
+            }
+        }
+
         // Skip middleware cho public endpoints
         if (IsPublicEndpoint(path))
         {
