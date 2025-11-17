@@ -6,6 +6,7 @@
 const API_BASE = API_BASE_URL;
 let dataTable;
 let editingCouponId = null;
+let coupons = []; // Store coupons for delete confirmation
 
 // Check auth on load
 document.addEventListener('DOMContentLoaded', function() {
@@ -125,7 +126,10 @@ async function loadCoupons() {
   }
 }
 
-function renderCouponsTable(coupons) {
+function renderCouponsTable(couponsData) {
+  // Store coupons globally for delete confirmation
+  coupons = couponsData || [];
+  
   const tbody = document.querySelector('#couponsTable tbody');
   const table = document.querySelector('#couponsTable');
   if (!tbody || !table) return;
@@ -155,7 +159,7 @@ function renderCouponsTable(coupons) {
   // Clear tbody
   tbody.innerHTML = '';
 
-  if (!coupons || coupons.length === 0) {
+  if (!couponsData || couponsData.length === 0) {
     // Don't initialize DataTable for empty state - just show message
     const emptyRow = document.createElement('tr');
     emptyRow.innerHTML = '<td colspan="9" class="text-center text-muted py-4"><div style="padding:40px"><i class="bx bx-info-circle" style="font-size:48px;opacity:0.3;display:block;margin-bottom:12px"></i><div style="font-size:16px;font-weight:500;margin-bottom:8px">Chưa có mã giảm giá nào</div><div style="font-size:13px;opacity:0.7">API backend có thể chưa được triển khai. Vui lòng liên hệ quản trị viên.</div></div></td>';
@@ -164,7 +168,7 @@ function renderCouponsTable(coupons) {
     return;
   }
 
-  coupons.forEach(coupon => {
+  couponsData.forEach(coupon => {
     const typeText = coupon.type === 'percent' ? '%' : '₫';
     const valueDisplay = coupon.type === 'percent' 
       ? `${coupon.value}%` 
@@ -318,8 +322,32 @@ function editCoupon(id) {
 async function saveCoupon() {
   const form = document.getElementById('couponForm');
   
-  // Use Validation utility if available
-  if (window.Validation) {
+  // Validate form using AdminValidation
+  if (window.AdminValidation) {
+    const validationRules = {
+      code: { required: true, length: { minLength: 3, maxLength: 50 } },
+      type: { required: true },
+      value: { required: true, number: true, min: 0.01 },
+      startDate: { required: true, date: true },
+      endDate: { required: true, date: true },
+      maxUses: { integer: true, min: 0 }
+    };
+    
+    const result = AdminValidation.validateForm(form, validationRules);
+    if (!result.valid) {
+      if (result.errors.length > 0) {
+        const firstError = result.errors[0];
+        firstError.input.focus();
+        if (window.showToast) {
+          showToast(firstError.message, 'error');
+        } else {
+          alert(firstError.message);
+        }
+      }
+      return;
+    }
+  } else if (window.Validation) {
+    // Use Validation utility if available
     const result = Validation.validateForm(form);
     if (!result.valid) {
       if (result.errors.length > 0) {
@@ -351,18 +379,98 @@ async function saveCoupon() {
     isActive: document.getElementById('isActive').checked
   };
 
-  // Validation
-  if (couponData.type === 'percent' && (couponData.value < 1 || couponData.value > 100)) {
-    showToast('Giảm giá phần trăm phải từ 1% đến 100%', 'warning');
-    return;
-  }
-  if (couponData.type === 'amount' && couponData.value <= 0) {
-    showToast('Số tiền giảm phải lớn hơn 0', 'warning');
-    return;
-  }
-  if (new Date(couponData.endDate) <= new Date(couponData.startDate)) {
-    showToast('Ngày kết thúc phải sau ngày bắt đầu', 'warning');
-    return;
+  // Additional validation using AdminValidation
+  if (window.AdminValidation) {
+    // Validate code format (alphanumeric, no special chars except dash/underscore)
+    const codeRegex = /^[A-Z0-9_-]+$/;
+    if (!codeRegex.test(couponData.code)) {
+      document.getElementById('code').focus();
+      if (window.showToast) {
+        showToast('Mã giảm giá chỉ được chứa chữ cái, số, dấu gạch ngang và gạch dưới', 'error');
+      } else {
+        alert('Mã giảm giá chỉ được chứa chữ cái, số, dấu gạch ngang và gạch dưới');
+      }
+      return;
+    }
+    
+    // Validate value based on type
+    if (couponData.type === 'percent') {
+      const valueResult = AdminValidation.validateNumber(couponData.value, 'Giảm giá phần trăm', 1, 100);
+      if (!valueResult.valid) {
+        document.getElementById('value').focus();
+        if (window.showToast) {
+          showToast(valueResult.message, 'error');
+        } else {
+          alert(valueResult.message);
+        }
+        return;
+      }
+    } else if (couponData.type === 'amount') {
+      const valueResult = AdminValidation.validateNumber(couponData.value, 'Số tiền giảm', 0.01);
+      if (!valueResult.valid) {
+        document.getElementById('value').focus();
+        if (window.showToast) {
+          showToast(valueResult.message, 'error');
+        } else {
+          alert(valueResult.message);
+        }
+        return;
+      }
+    }
+    
+    // Validate date range
+    const dateRangeResult = AdminValidation.validateDateRange(couponData.startDate, couponData.endDate, 'Ngày bắt đầu', 'Ngày kết thúc');
+    if (!dateRangeResult.valid) {
+      document.getElementById('endDate').focus();
+      if (window.showToast) {
+        showToast(dateRangeResult.message, 'error');
+      } else {
+        alert(dateRangeResult.message);
+      }
+      return;
+    }
+    
+    // Validate maxUses if provided
+    if (couponData.maxUses > 0) {
+      const maxUsesResult = AdminValidation.validateInteger(couponData.maxUses, 'Số lần sử dụng tối đa', 1);
+      if (!maxUsesResult.valid) {
+        document.getElementById('maxUses').focus();
+        if (window.showToast) {
+          showToast(maxUsesResult.message, 'error');
+        } else {
+          alert(maxUsesResult.message);
+        }
+        return;
+      }
+    }
+    
+    // Validate maxDiscount if provided (for percent type)
+    if (couponData.type === 'percent' && couponData.maxDiscount !== null && couponData.maxDiscount > 0) {
+      const maxDiscountResult = AdminValidation.validateNumber(couponData.maxDiscount, 'Giảm giá tối đa', 0.01);
+      if (!maxDiscountResult.valid) {
+        document.getElementById('maxDiscount').focus();
+        if (window.showToast) {
+          showToast(maxDiscountResult.message, 'error');
+        } else {
+          alert(maxDiscountResult.message);
+        }
+        return;
+      }
+    }
+  } else {
+    // Fallback validation
+    if (couponData.type === 'percent' && (couponData.value < 1 || couponData.value > 100)) {
+      showToast('Giảm giá phần trăm phải từ 1% đến 100%', 'warning');
+      return;
+    }
+    if (couponData.type === 'amount' && couponData.value <= 0) {
+      showToast('Số tiền giảm phải lớn hơn 0', 'warning');
+      return;
+    }
+    if (new Date(couponData.endDate) <= new Date(couponData.startDate)) {
+      showToast('Ngày kết thúc phải sau ngày bắt đầu', 'warning');
+      return;
+    }
   }
 
   const token = localStorage.getItem('token');
@@ -469,7 +577,24 @@ async function toggleCouponStatus(id, newStatus) {
 }
 
 async function deleteCoupon(id) {
-  if (!confirm('Bạn có chắc chắn muốn xóa mã giảm giá này?')) return;
+  // Find coupon code for confirmation
+  const coupon = coupons.find(c => c.couponId === id);
+  const couponCode = coupon ? coupon.code : `Coupon #${id}`;
+  
+  // Confirm delete using AdminValidation
+  if (window.AdminValidation) {
+    AdminValidation.confirmDelete(couponCode, async () => {
+      await performDeleteCoupon(id);
+    });
+  } else {
+    if (!confirm(`Bạn có chắc chắn muốn xóa mã giảm giá "${couponCode}"? Hành động này không thể hoàn tác!`)) {
+      return;
+    }
+    await performDeleteCoupon(id);
+  }
+}
+
+async function performDeleteCoupon(id) {
 
   const token = localStorage.getItem('token');
   try {
