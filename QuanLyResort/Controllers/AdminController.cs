@@ -112,6 +112,23 @@ public class AdminController : ControllerBase
             return Ok(new { exists = false, message = "Admin user not found" });
         }
         
+        // Test password verification
+        var testPassword = "P@ssw0rd123";
+        var verifyResult = false;
+        var verifyError = "";
+        try
+        {
+            verifyResult = BCrypt.Net.BCrypt.Verify(testPassword, adminUser.PasswordHash);
+        }
+        catch (Exception ex)
+        {
+            verifyError = ex.Message;
+        }
+        
+        // Test với hash mới
+        var newHash = BCrypt.Net.BCrypt.HashPassword(testPassword);
+        var verifyNewHash = BCrypt.Net.BCrypt.Verify(testPassword, newHash);
+        
         return Ok(new
         {
             exists = true,
@@ -121,7 +138,16 @@ public class AdminController : ControllerBase
             role = adminUser.Role,
             isActive = adminUser.IsActive,
             hasPasswordHash = !string.IsNullOrEmpty(adminUser.PasswordHash),
-            passwordHashLength = adminUser.PasswordHash?.Length ?? 0
+            passwordHashLength = adminUser.PasswordHash?.Length ?? 0,
+            passwordHashPrefix = adminUser.PasswordHash?.Substring(0, Math.Min(30, adminUser.PasswordHash?.Length ?? 0)) ?? "NULL",
+            passwordVerification = new
+            {
+                testPassword = testPassword,
+                verifyResult = verifyResult,
+                verifyError = verifyError,
+                newHashPrefix = newHash.Substring(0, Math.Min(30, newHash.Length)),
+                verifyNewHash = verifyNewHash
+            }
         });
     }
 
