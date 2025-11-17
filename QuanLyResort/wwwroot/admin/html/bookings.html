@@ -449,7 +449,7 @@
     // Load customers for dropdown
     async function loadCustomers() {
       try {
-        const response = await adminAPI('/customer-management/customers');
+        const response = await adminAPI('/customer-management');
         customers = response;
         
         const select = document.getElementById('customerId');

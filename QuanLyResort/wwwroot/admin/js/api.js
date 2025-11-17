@@ -56,13 +56,24 @@ const apiCall = async (endpoint, options = {}) => {
     }
 
     // Try to parse JSON, but handle non-JSON responses gracefully
+    // Clone response để có thể đọc nhiều lần nếu cần
     let data = null;
     try {
+      // Clone response để có thể đọc lại nếu cần
+      const clonedResponse = response.clone();
       data = await response.json();
     } catch (parseErr) {
-      const text = await response.text();
-      console.warn('[apiCall] Response not JSON:', text.slice(0, 200));
-      data = { message: text };
+      // Nếu JSON parse fail, thử đọc text từ cloned response
+      try {
+        const clonedResponse = response.clone();
+        const text = await clonedResponse.text();
+        console.warn('[apiCall] Response not JSON:', text.slice(0, 200));
+        data = { message: text };
+      } catch (textErr) {
+        // Nếu không clone được, thử đọc từ response gốc (có thể đã bị consume)
+        console.warn('[apiCall] Could not read response text:', textErr);
+        data = { message: `HTTP ${response.status}: ${response.statusText}` };
+      }
     }
 
     if (!response.ok) {
