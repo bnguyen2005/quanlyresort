@@ -130,13 +130,14 @@ public class CouponsController : ControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> GetActiveCoupons()
     {
+        // Use UTC for comparison - all dates in database should be stored as UTC
         var now = DateTime.UtcNow;
         
         var activeCoupons = await _context.Coupons
             .Where(c => c.IsActive 
                 && c.StartDate <= now 
                 && c.EndDate >= now
-                && (!c.MaxUses.HasValue || c.UsesCount < c.MaxUses.Value))
+                && (!c.MaxUses.HasValue || c.MaxUses.Value == 0 || c.UsesCount < c.MaxUses.Value))
             .OrderByDescending(c => c.CreatedAt)
             .Select(c => new
             {
@@ -247,6 +248,51 @@ public class CouponsController : ControllerBase
             return BadRequest(new { message = "Ngày kết thúc phải sau ngày bắt đầu" });
         }
 
+        // Convert dates to UTC if they are Unspecified or Local
+        // Frontend sends datetime-local (no timezone), assume it's Vietnam local time (UTC+7)
+        var startDate = request.StartDate;
+        var endDate = request.EndDate;
+        
+        if (startDate.Kind == DateTimeKind.Unspecified)
+        {
+            // Assume it's Vietnam local time (UTC+7), convert to UTC
+            // Create a TimeZoneInfo for Vietnam (SE Asia Standard Time = UTC+7)
+            try
+            {
+                var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                startDate = TimeZoneInfo.ConvertTimeToUtc(startDate, vietnamTimeZone);
+            }
+            catch
+            {
+                // Fallback: assume UTC+7 offset
+                startDate = startDate.AddHours(-7);
+                startDate = DateTime.SpecifyKind(startDate, DateTimeKind.Utc);
+            }
+        }
+        else if (startDate.Kind == DateTimeKind.Local)
+        {
+            startDate = startDate.ToUniversalTime();
+        }
+        
+        if (endDate.Kind == DateTimeKind.Unspecified)
+        {
+            try
+            {
+                var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                endDate = TimeZoneInfo.ConvertTimeToUtc(endDate, vietnamTimeZone);
+            }
+            catch
+            {
+                // Fallback: assume UTC+7 offset
+                endDate = endDate.AddHours(-7);
+                endDate = DateTime.SpecifyKind(endDate, DateTimeKind.Utc);
+            }
+        }
+        else if (endDate.Kind == DateTimeKind.Local)
+        {
+            endDate = endDate.ToUniversalTime();
+        }
+
         var coupon = new Coupon
         {
             Code = request.Code.ToUpper().Trim(),
@@ -255,8 +301,8 @@ public class CouponsController : ControllerBase
             Value = request.Value,
             MaxDiscount = request.MaxDiscount,
             MaxUses = request.MaxUses ?? 0, // 0 = unlimited
-            StartDate = request.StartDate,
-            EndDate = request.EndDate,
+            StartDate = startDate,
+            EndDate = endDate,
             IsActive = request.IsActive,
             CreatedAt = DateTime.UtcNow,
             CreatedBy = userEmail
@@ -326,12 +372,50 @@ public class CouponsController : ControllerBase
 
         if (request.StartDate.HasValue)
         {
-            coupon.StartDate = request.StartDate.Value;
+            var startDate = request.StartDate.Value;
+            // Convert to UTC if Unspecified or Local
+            if (startDate.Kind == DateTimeKind.Unspecified)
+            {
+                try
+                {
+                    var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                    startDate = TimeZoneInfo.ConvertTimeToUtc(startDate, vietnamTimeZone);
+                }
+                catch
+                {
+                    startDate = startDate.AddHours(-7);
+                    startDate = DateTime.SpecifyKind(startDate, DateTimeKind.Utc);
+                }
+            }
+            else if (startDate.Kind == DateTimeKind.Local)
+            {
+                startDate = startDate.ToUniversalTime();
+            }
+            coupon.StartDate = startDate;
         }
 
         if (request.EndDate.HasValue)
         {
-            coupon.EndDate = request.EndDate.Value;
+            var endDate = request.EndDate.Value;
+            // Convert to UTC if Unspecified or Local
+            if (endDate.Kind == DateTimeKind.Unspecified)
+            {
+                try
+                {
+                    var vietnamTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+                    endDate = TimeZoneInfo.ConvertTimeToUtc(endDate, vietnamTimeZone);
+                }
+                catch
+                {
+                    endDate = endDate.AddHours(-7);
+                    endDate = DateTime.SpecifyKind(endDate, DateTimeKind.Utc);
+                }
+            }
+            else if (endDate.Kind == DateTimeKind.Local)
+            {
+                endDate = endDate.ToUniversalTime();
+            }
+            coupon.EndDate = endDate;
         }
 
         if (request.IsActive.HasValue)

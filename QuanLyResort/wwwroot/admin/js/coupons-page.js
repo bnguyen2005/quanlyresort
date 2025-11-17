@@ -367,6 +367,23 @@ async function saveCoupon() {
     }
   }
 
+  // Convert datetime-local to UTC ISO string
+  // datetime-local returns "YYYY-MM-DDTHH:mm" (no timezone)
+  // We need to convert it to UTC ISO string for backend
+  const startDateInput = document.getElementById('startDate').value;
+  const endDateInput = document.getElementById('endDate').value;
+  
+  let startDate, endDate;
+  if (startDateInput) {
+    // Parse as local time, then convert to UTC ISO string
+    const localStartDate = new Date(startDateInput);
+    startDate = localStartDate.toISOString();
+  }
+  if (endDateInput) {
+    const localEndDate = new Date(endDateInput);
+    endDate = localEndDate.toISOString();
+  }
+
   const couponData = {
     code: document.getElementById('code').value.trim().toUpperCase(),
     description: document.getElementById('description').value.trim(),
@@ -374,8 +391,8 @@ async function saveCoupon() {
     value: parseFloat(document.getElementById('value').value),
     maxDiscount: document.getElementById('maxDiscount').value ? parseFloat(document.getElementById('maxDiscount').value) : null,
     maxUses: document.getElementById('maxUses').value ? parseInt(document.getElementById('maxUses').value) : 0,
-    startDate: document.getElementById('startDate').value,
-    endDate: document.getElementById('endDate').value,
+    startDate: startDate,
+    endDate: endDate,
     isActive: document.getElementById('isActive').checked
   };
 
