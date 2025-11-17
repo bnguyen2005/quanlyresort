@@ -137,7 +137,7 @@ curl -X POST https://quanlyresort-production.up.railway.app/api/simplepayment/we
 ## 🎯 Bước Tiếp Theo
 
 1. **Kiểm tra SePay Dashboard:**
-   - Webhook có được kích hoạt cho QR code không?
+   - ebhook có được kích hoạWt cho QR code không?
    - Có điều kiện nào filter không?
 
 2. **Kiểm tra Railway Logs:**

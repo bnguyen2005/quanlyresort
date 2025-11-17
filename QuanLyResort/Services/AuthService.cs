@@ -83,7 +83,8 @@ public class AuthService : IAuthService
         _logger.LogInformation("[LoginAsync] ✅ Password verified successfully");
 
         // Check role if specified (case-insensitive comparison)
-        if (!string.IsNullOrEmpty(role))
+        // Allow empty string or null role to bypass role check
+        if (!string.IsNullOrWhiteSpace(role))
         {
             var requestedRole = role.Trim();
             var userRole = user.Role?.Trim() ?? "";
@@ -97,15 +98,24 @@ public class AuthService : IAuthService
             
             _logger.LogInformation("[LoginAsync] Normalized requested role: '{NormalizedRequested}'", normalizedRequested);
             
-            // Check if user role matches requested role (case-insensitive)
-            var roleMatches = userRole.Equals(normalizedRequested, StringComparison.OrdinalIgnoreCase) || 
-                            userRole.Equals(requestedRole, StringComparison.OrdinalIgnoreCase);
-            
-            if (!roleMatches)
+            // Special case: If user is Admin, allow login with any admin-related role request
+            if (userRole == "Admin" && (normalizedRequested.Equals("Admin", StringComparison.OrdinalIgnoreCase) || 
+                                        requestedRole.Equals("Admin", StringComparison.OrdinalIgnoreCase)))
             {
-                _logger.LogWarning("[LoginAsync] ❌ Role mismatch: required='{RequestedRole}' (normalized: '{NormalizedRequested}'), actual='{UserRole}'", 
-                    requestedRole, normalizedRequested, userRole);
-                return (false, null, null);
+                _logger.LogInformation("[LoginAsync] ✅ Admin user login with Admin role - allowed");
+            }
+            else
+            {
+                // Check if user role matches requested role (case-insensitive)
+                var roleMatches = userRole.Equals(normalizedRequested, StringComparison.OrdinalIgnoreCase) || 
+                                userRole.Equals(requestedRole, StringComparison.OrdinalIgnoreCase);
+                
+                if (!roleMatches)
+                {
+                    _logger.LogWarning("[LoginAsync] ❌ Role mismatch: required='{RequestedRole}' (normalized: '{NormalizedRequested}'), actual='{UserRole}'", 
+                        requestedRole, normalizedRequested, userRole);
+                    return (false, null, null);
+                }
             }
             
             // Additional role-based access control for admin
@@ -117,6 +127,10 @@ public class AuthService : IAuthService
             }
             
             _logger.LogInformation("[LoginAsync] ✅ Role check passed");
+        }
+        else
+        {
+            _logger.LogInformation("[LoginAsync] No role specified - allowing login for any role");
         }
 
         user.LastLoginAt = DateTime.UtcNow;

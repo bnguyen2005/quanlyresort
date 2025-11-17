@@ -30,7 +30,7 @@ Deploy backend lên server có **HTTPS thật** để PayOs webhook hoạt độ
    git init
    git add .
    git commit -m "Initial commit"
-   git remote add origin https://github.com/your-username/quanlyresort.git
+   git remote add origin https://github.com/Lamm123435469898/quanlyresort.git
    git push -u origin main
    ```
 

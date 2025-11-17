@@ -98,6 +98,34 @@ public class AdminController : ControllerBase
     }
 
     /// <summary>
+    /// Kiểm tra admin user có tồn tại không
+    /// </summary>
+    [HttpGet("check-admin")]
+    [AllowAnonymous]
+    public async Task<IActionResult> CheckAdmin()
+    {
+        var adminUser = await _context.Users
+            .FirstOrDefaultAsync(u => u.Email == "admin@resort.test" || u.Username == "admin");
+        
+        if (adminUser == null)
+        {
+            return Ok(new { exists = false, message = "Admin user not found" });
+        }
+        
+        return Ok(new
+        {
+            exists = true,
+            userId = adminUser.UserId,
+            username = adminUser.Username,
+            email = adminUser.Email,
+            role = adminUser.Role,
+            isActive = adminUser.IsActive,
+            hasPasswordHash = !string.IsNullOrEmpty(adminUser.PasswordHash),
+            passwordHashLength = adminUser.PasswordHash?.Length ?? 0
+        });
+    }
+
+    /// <summary>
     /// Reset password cho admin user hoặc tạo mới nếu chưa có
     /// </summary>
     [HttpPost("reset-admin-password")]

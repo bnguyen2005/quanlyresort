@@ -10,8 +10,8 @@ cd "$(dirname "$0")/.." || exit 1
 
 # Token mới
 TOKEN="YOUR_GITHUB_PERSONAL_ACCESS_TOKEN_HERE"
-USERNAME="bnguyen2005"
-REPO_URL="https://github.com/bnguyen2005/quanlyresortt.git"
+USERNAME="Lamm123435469898"
+REPO_URL="https://github.com/Lamm123435469898/quanlyresort.git"
 
 echo "📊 Kiểm tra trạng thái..."
 git status --short
