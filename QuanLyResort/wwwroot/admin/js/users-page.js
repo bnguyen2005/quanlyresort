@@ -205,46 +205,94 @@ async function editUser(id) {
 async function saveUser() {
   console.log('🔵 [saveUser] Starting...');
   const form = document.getElementById('userForm');
-  if (!form.checkValidity()) {
-    form.reportValidity();
-    return;
+  
+  // Validate form using AdminValidation
+  if (window.AdminValidation) {
+    const validationRules = {
+      username: { required: true, length: { minLength: 3, maxLength: 50 } },
+      email: { required: true, email: true },
+      fullName: { required: true, length: { minLength: 2, maxLength: 100 } },
+      phoneNumber: { phone: true },
+      role: { required: true }
+    };
+    
+    const result = AdminValidation.validateForm(form, validationRules);
+    if (!result.valid) {
+      if (result.errors.length > 0) {
+        const firstError = result.errors[0];
+        firstError.input.focus();
+        if (window.showToast) {
+          showToast(firstError.message, 'error');
+        } else {
+          alert(firstError.message);
+        }
+      }
+      return;
+    }
+  } else {
+    // Fallback to native validation
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
   }
 
   const userId = document.getElementById('userId').value;
   console.log('🔵 [saveUser] UserId:', userId || 'NEW');
   
   const data = {
-    username: document.getElementById('username').value,
-    email: document.getElementById('email').value,
-    fullName: document.getElementById('fullName').value,
-    phoneNumber: document.getElementById('phoneNumber').value,
+    username: document.getElementById('username').value.trim(),
+    email: document.getElementById('email').value.trim(),
+    fullName: document.getElementById('fullName').value.trim(),
+    phoneNumber: document.getElementById('phoneNumber').value.trim() || null,
     role: document.getElementById('role').value,
     isActive: document.getElementById('isActive').checked
   };
   
   console.log('🔵 [saveUser] Data:', data);
 
-  if (!userId) {
-    // Create new user
-    const password = document.getElementById('password').value;
-    if (!password) {
+  // Validate email
+  if (window.AdminValidation) {
+    const emailResult = AdminValidation.validateEmail(data.email);
+    if (!emailResult.valid) {
+      document.getElementById('email').focus();
       if (window.showToast) {
-        showToast('Vui lòng nhập mật khẩu!', 'warning');
+        showToast(emailResult.message, 'error');
       } else {
-        alert('Vui lòng nhập mật khẩu!');
+        alert(emailResult.message);
       }
-      document.getElementById('password').focus();
       return;
     }
     
-    // Validate password strength
-    if (password.length < 6) {
-      if (window.showToast) {
-        showToast('Mật khẩu phải có ít nhất 6 ký tự!', 'warning');
-      } else {
-        alert('Mật khẩu phải có ít nhất 6 ký tự!');
+    // Validate phone if provided
+    if (data.phoneNumber) {
+      const phoneResult = AdminValidation.validatePhone(data.phoneNumber);
+      if (!phoneResult.valid) {
+        document.getElementById('phoneNumber').focus();
+        if (window.showToast) {
+          showToast(phoneResult.message, 'error');
+        } else {
+          alert(phoneResult.message);
+        }
+        return;
       }
+    }
+  }
+
+  if (!userId) {
+    // Create new user - password is required
+    const password = document.getElementById('password').value;
+    const passwordResult = window.AdminValidation 
+      ? AdminValidation.validatePassword(password, true)
+      : { valid: password && password.length >= 6, message: password ? '' : 'Mật khẩu là bắt buộc' };
+    
+    if (!passwordResult.valid) {
       document.getElementById('password').focus();
+      if (window.showToast) {
+        showToast(passwordResult.message || 'Mật khẩu phải có ít nhất 6 ký tự!', 'error');
+      } else {
+        alert(passwordResult.message || 'Mật khẩu phải có ít nhất 6 ký tự!');
+      }
       return;
     }
     
@@ -328,35 +376,59 @@ async function changePassword() {
   
   console.log('🔵 [changePassword] UserId:', userId);
 
-  if (!newPassword || !confirmPassword) {
-    if (window.showToast) {
-      showToast('Vui lòng nhập đầy đủ thông tin!', 'warning');
-    } else {
-      alert('Vui lòng nhập đầy đủ thông tin!');
+  // Validate using AdminValidation
+  if (window.AdminValidation) {
+    const passwordResult = AdminValidation.validatePassword(newPassword, true);
+    if (!passwordResult.valid) {
+      document.getElementById('newPassword').focus();
+      if (window.showToast) {
+        showToast(passwordResult.message, 'error');
+      } else {
+        alert(passwordResult.message);
+      }
+      return;
     }
-    return;
-  }
-  
-  // Validate password strength
-  if (newPassword.length < 6) {
-    if (window.showToast) {
-      showToast('Mật khẩu phải có ít nhất 6 ký tự!', 'warning');
-    } else {
-      alert('Mật khẩu phải có ít nhất 6 ký tự!');
+    
+    // Validate password match
+    if (newPassword !== confirmPassword) {
+      document.getElementById('confirmPassword').focus();
+      if (window.showToast) {
+        showToast('Mật khẩu xác nhận không khớp!', 'error');
+      } else {
+        alert('Mật khẩu xác nhận không khớp!');
+      }
+      return;
     }
-    document.getElementById('newPassword').focus();
-    return;
-  }
-  
-  // Validate password match
-  if (newPassword !== confirmPassword) {
-    if (window.showToast) {
-      showToast('Mật khẩu xác nhận không khớp!', 'error');
-    } else {
-      alert('Mật khẩu xác nhận không khớp!');
+  } else {
+    // Fallback validation
+    if (!newPassword || !confirmPassword) {
+      if (window.showToast) {
+        showToast('Vui lòng nhập đầy đủ thông tin!', 'warning');
+      } else {
+        alert('Vui lòng nhập đầy đủ thông tin!');
+      }
+      return;
     }
-    document.getElementById('confirmPassword').focus();
-    return;
+    
+    if (newPassword.length < 6) {
+      document.getElementById('newPassword').focus();
+      if (window.showToast) {
+        showToast('Mật khẩu phải có ít nhất 6 ký tự!', 'warning');
+      } else {
+        alert('Mật khẩu phải có ít nhất 6 ký tự!');
+      }
+      return;
+    }
+    
+    if (newPassword !== confirmPassword) {
+      document.getElementById('confirmPassword').focus();
+      if (window.showToast) {
+        showToast('Mật khẩu xác nhận không khớp!', 'error');
+      } else {
+        alert('Mật khẩu xác nhận không khớp!');
+      }
+      return;
+    }
   }
 
   try {
@@ -450,11 +522,23 @@ async function toggleActive(id, currentStatus) {
 }
 
 async function deleteUser(id) {
-  const confirmed = window.showConfirm 
-    ? await showConfirm('Bạn có chắc muốn xóa user này? Thao tác này không thể hoàn tác!', 'Xác nhận xóa')
-    : confirm('Bạn có chắc muốn xóa user này? Thao tác này không thể hoàn tác!');
-  if (!confirmed) return;
+  // Find user name for confirmation
+  const user = users.find(u => u.userId === id);
+  const userName = user ? (user.fullName || user.username || user.email) : `User #${id}`;
+  
+  // Confirm delete
+  if (window.AdminValidation) {
+    AdminValidation.confirmDelete(userName, async () => {
+      await performDeleteUser(id);
+    });
+  } else {
+    if (confirm(`Bạn có chắc chắn muốn xóa "${userName}"? Hành động này không thể hoàn tác!`)) {
+      await performDeleteUser(id);
+    }
+  }
+}
 
+async function performDeleteUser(id) {
   try {
     const response = await fetch(`${API_BASE}/usermanagement/${id}`, {
       method: 'DELETE',
