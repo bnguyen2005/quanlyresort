@@ -1434,30 +1434,8 @@
           }
         });
         
-        // Clear coupon button (add if needed)
-        const clearCouponBtn = document.createElement('button');
-        clearCouponBtn.type = 'button';
-        clearCouponBtn.className = 'btn btn-sm btn-outline-secondary';
-        clearCouponBtn.textContent = 'Xóa mã';
-        clearCouponBtn.style.cssText = 'margin-left:8px;white-space:nowrap';
-        clearCouponBtn.addEventListener('click', () => {
-          window.coupons?.clearAppliedCoupon && window.coupons.clearAppliedCoupon();
-          if (couponInput) couponInput.value = '';
-          if (couponMsg) {
-            couponMsg.textContent = '';
-            couponMsg.style.color = '#6b7280';
-          }
-          const badge = document.getElementById('couponAppliedBadge');
-          if (badge) badge.style.display = 'none';
-          couponInput.classList.remove('is-invalid');
-          updateTotal();
-        });
-        
-        // Insert clear button after apply button
-        const couponContainer = applyCouponBtn.parentElement;
-        if (couponContainer && !couponContainer.querySelector('.btn-outline-secondary')) {
-          couponContainer.appendChild(clearCouponBtn);
-        }
+        // Clear coupon button removed - to save space for coupon input field
+        // Users can clear by entering a new coupon code or clearing the input field directly
       }
 
       // Track booking details to detect changes
