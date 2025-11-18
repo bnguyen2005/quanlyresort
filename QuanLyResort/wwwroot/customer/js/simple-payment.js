@@ -1175,20 +1175,58 @@ async function confirmHotelPayment() {
  */
 function closeHotelPaymentModal() {
   const modal = document.getElementById('hotelPaymentConfirmationModal');
-  if (!modal) return;
+  if (!modal) {
+    console.warn("[FRONTEND] " + '⚠️ [closeHotelPaymentModal] Modal not found');
+    return;
+  }
   
-  // Close modal
+  console.log("[FRONTEND] " + '🔄 [closeHotelPaymentModal] Closing hotel payment modal');
+  
+  // Try multiple methods to close modal
+  let closed = false;
+  
+  // Method 1: Bootstrap 5 - try getInstance first
   if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-    const bsModal = bootstrap.Modal.getInstance(modal);
-    if (bsModal) {
-      bsModal.hide();
-    } else {
-      hideModalDirectly(modal);
+    try {
+      // Check if getInstance exists (Bootstrap 5)
+      if (typeof bootstrap.Modal.getInstance === 'function') {
+        const bsModal = bootstrap.Modal.getInstance(modal);
+        if (bsModal) {
+          bsModal.hide();
+          closed = true;
+          console.log("[FRONTEND] " + '✅ [closeHotelPaymentModal] Closed using Bootstrap 5 Modal.getInstance');
+        } else {
+          // Try creating new instance and hiding
+          const newModal = new bootstrap.Modal(modal);
+          newModal.hide();
+          closed = true;
+          console.log("[FRONTEND] " + '✅ [closeHotelPaymentModal] Closed using Bootstrap 5 new Modal instance');
+        }
+      } else {
+        // Bootstrap 4 or older - use jQuery or direct method
+        console.log("[FRONTEND] " + '⚠️ [closeHotelPaymentModal] Bootstrap.Modal.getInstance not available, trying jQuery');
+      }
+    } catch (e) {
+      console.warn("[FRONTEND] " + '⚠️ [closeHotelPaymentModal] Bootstrap method failed:', e);
     }
-  } else if (typeof $ !== 'undefined' && $.fn.modal) {
-    $(modal).modal('hide');
-  } else {
+  }
+  
+  // Method 2: jQuery (if Bootstrap method didn't work)
+  if (!closed && typeof $ !== 'undefined' && $.fn.modal) {
+    try {
+      $(modal).modal('hide');
+      closed = true;
+      console.log("[FRONTEND] " + '✅ [closeHotelPaymentModal] Closed using jQuery');
+    } catch (e) {
+      console.warn("[FRONTEND] " + '⚠️ [closeHotelPaymentModal] jQuery method failed:', e);
+    }
+  }
+  
+  // Method 3: Direct DOM manipulation (fallback)
+  if (!closed) {
     hideModalDirectly(modal);
+    closed = true;
+    console.log("[FRONTEND] " + '✅ [closeHotelPaymentModal] Closed using direct DOM manipulation');
   }
   
   // Reload bookings list after modal is closed
