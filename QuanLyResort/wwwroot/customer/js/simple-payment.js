@@ -141,8 +141,41 @@ async function openSimplePayment(bookingId) {
     }
 
     // Check payment method - if PayAtHotel or Cash, show hotel payment confirmation instead of QR
-    const paymentMethod = booking.paymentMethod || booking.PaymentMethod || 'BankTransfer';
-    console.log("[FRONTEND] " + '🔍 [openSimplePayment] Payment method:', paymentMethod);
+    // Payment method can be in booking object, invoice, or need to fetch from API
+    let paymentMethod = booking.paymentMethod || booking.PaymentMethod;
+    
+    // If not found in booking, check invoice
+    if (!paymentMethod && booking.invoice) {
+      paymentMethod = booking.invoice.paymentMethod || booking.invoice.PaymentMethod;
+    }
+    
+    // If still not found, try to fetch booking detail from API
+    if (!paymentMethod) {
+      try {
+        const token = localStorage.getItem('token');
+        const detailUrl = `${location.origin}/api/bookings/${bookingId}?_=${Date.now()}`;
+        const detailResp = await fetch(detailUrl, {
+          cache: 'no-store',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (detailResp.ok) {
+          const bookingDetail = await detailResp.json();
+          paymentMethod = bookingDetail.paymentMethod || bookingDetail.PaymentMethod;
+          if (bookingDetail.invoice) {
+            paymentMethod = paymentMethod || bookingDetail.invoice.paymentMethod || bookingDetail.invoice.PaymentMethod;
+          }
+        }
+      } catch (e) {
+        console.error("[FRONTEND] " + '❌ Error fetching booking detail for payment method:', e);
+      }
+    }
+    
+    // Default to BankTransfer if not found
+    paymentMethod = paymentMethod || 'BankTransfer';
+    console.log("[FRONTEND] " + '🔍 [openSimplePayment] Payment method:', paymentMethod, 'from booking:', booking);
     
     if (paymentMethod === 'PayAtHotel' || paymentMethod === 'Cash') {
       // Show hotel payment confirmation modal instead of QR
