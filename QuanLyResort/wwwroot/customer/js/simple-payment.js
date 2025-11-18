@@ -143,23 +143,30 @@ async function openSimplePayment(bookingId) {
     // Check payment method - if PayAtHotel or Cash, show hotel payment confirmation instead of QR
     // Payment method can be in booking object, invoice, SpecialRequests (JSON), or need to fetch from API
     let paymentMethod = booking.paymentMethod || booking.PaymentMethod;
+    console.log("[FRONTEND] " + '🔍 [openSimplePayment] Step 1 - Direct paymentMethod:', paymentMethod);
     
     // If not found, try to parse from SpecialRequests (JSON string)
     if (!paymentMethod && booking.specialRequests) {
+      console.log("[FRONTEND] " + '🔍 [openSimplePayment] Step 2 - Checking SpecialRequests:', booking.specialRequests);
       try {
         const specialRequests = typeof booking.specialRequests === 'string' 
           ? JSON.parse(booking.specialRequests) 
           : booking.specialRequests;
+        console.log("[FRONTEND] " + '🔍 [openSimplePayment] Parsed SpecialRequests:', specialRequests);
         if (specialRequests && typeof specialRequests === 'object') {
           paymentMethod = specialRequests.paymentMethod || specialRequests.PaymentMethod;
+          console.log("[FRONTEND] " + '🔍 [openSimplePayment] Found paymentMethod in SpecialRequests:', paymentMethod);
         }
       } catch (e) {
+        console.warn("[FRONTEND] " + '⚠️ [openSimplePayment] Could not parse SpecialRequests as JSON:', e);
         // If parsing fails, check if it contains payment method as plain text
         const specialRequestsStr = String(booking.specialRequests || '');
         if (specialRequestsStr.includes('PayAtHotel') || specialRequestsStr.includes('"paymentMethod":"PayAtHotel"')) {
           paymentMethod = 'PayAtHotel';
+          console.log("[FRONTEND] " + '🔍 [openSimplePayment] Found PayAtHotel in SpecialRequests string');
         } else if (specialRequestsStr.includes('Cash') || specialRequestsStr.includes('"paymentMethod":"Cash"')) {
           paymentMethod = 'Cash';
+          console.log("[FRONTEND] " + '🔍 [openSimplePayment] Found Cash in SpecialRequests string');
         }
       }
     }
