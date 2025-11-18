@@ -2122,8 +2122,15 @@
           e.preventDefault();
           e.stopPropagation();
           const serviceId = parseInt(qtyBtn.getAttribute('data-service-id') || qtyBtn.closest('.menu-card, .menu-card-new')?.getAttribute('data-service-id'));
-          const delta = parseInt(qtyBtn.getAttribute('data-delta')) || 
-                       (qtyBtn.classList.contains('btn-qty-plus') || qtyBtn.classList.contains('btn-qty-new') && !qtyBtn.classList.contains('btn-qty-minus') ? 1 : -1);
+          let delta = parseInt(qtyBtn.getAttribute('data-delta'));
+          if (isNaN(delta)) {
+            // Determine delta from class names
+            if (qtyBtn.classList.contains('btn-qty-plus') || (qtyBtn.classList.contains('btn-qty-new') && !qtyBtn.classList.contains('btn-qty-minus'))) {
+              delta = 1;
+            } else {
+              delta = -1;
+            }
+          }
           
           if (serviceId && !isNaN(serviceId)) {
             console.log('[renderMenuItems] Quantity button clicked:', { serviceId, delta, target: target.tagName, qtyBtn: qtyBtn.tagName });
