@@ -78,8 +78,16 @@ async function openRestaurantPayment(orderId) {
         if (method === 'QR') {
           if (qrSectionEl) qrSectionEl.style.display = 'block';
           if (cashSectionEl) cashSectionEl.style.display = 'none';
+          
+          // Hide confirm button for QR payment
+          const confirmBtn = document.getElementById('rpConfirmCashBtn');
+          if (confirmBtn) confirmBtn.style.display = 'none';
+          
           // Only create QR when QR is selected
           updateRestaurantPaymentModal(orderId, order.orderNumber || `ORD${orderId}`, amount);
+          
+          // Start polling for QR payment
+          startRestaurantPaymentPolling(orderId);
         } else if (method === 'Cash') {
           if (qrSectionEl) qrSectionEl.style.display = 'none';
           if (cashSectionEl) cashSectionEl.style.display = 'block';
@@ -93,8 +101,20 @@ async function openRestaurantPayment(orderId) {
           // Hide QR section elements
           const qrImg = document.getElementById('rpQRImage');
           const waitingEl = document.getElementById('rpWaiting');
+          const successEl = document.getElementById('rpSuccess');
           if (qrImg) qrImg.style.display = 'none';
           if (waitingEl) waitingEl.style.display = 'none';
+          if (successEl) successEl.style.display = 'none';
+          
+          // Show confirm button for cash payment
+          const confirmBtn = document.getElementById('rpConfirmCashBtn');
+          if (confirmBtn) {
+            confirmBtn.style.display = 'block';
+            confirmBtn.onclick = () => confirmRestaurantCashPayment(orderId);
+          }
+          
+          // Stop polling when cash is selected (no need to poll for cash)
+          stopRestaurantPaymentPolling();
         }
       });
       
@@ -136,8 +156,9 @@ async function openRestaurantPayment(orderId) {
       document.body.classList.add('modal-open');
     }
 
-    // Start polling
-    startRestaurantPaymentPolling(orderId);
+    // Start polling only if QR is selected (will be started in change handler)
+    // Don't start polling here - let the payment method handler decide
+    // startRestaurantPaymentPolling(orderId);
 
     window.currentRestaurantPaymentOrderId = orderId;
 
@@ -756,7 +777,137 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+/**
+ * Confirm restaurant cash payment
+ */
+async function confirmRestaurantCashPayment(orderId) {
+  console.log("[FRONTEND] " + '💵 [confirmRestaurantCashPayment] Confirming cash payment for order:', orderId);
+  
+  const modal = document.getElementById('restaurantPaymentModal');
+  if (!modal) {
+    showSimpleToast('Lỗi: Không tìm thấy modal', 'danger');
+    return;
+  }
+  
+  const confirmBtn = document.getElementById('rpConfirmCashBtn');
+  if (confirmBtn) {
+    confirmBtn.disabled = true;
+    confirmBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Đang xử lý...';
+  }
+  
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('Vui lòng đăng nhập để xác nhận thanh toán');
+    }
+    
+    // Call API to confirm cash payment
+    const response = await fetch(`${location.origin}/api/restaurant-orders/${orderId}/pay`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        paymentMethod: 'Cash'
+      })
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: 'Lỗi không xác định' }));
+      throw new Error(errorData.message || `HTTP ${response.status}`);
+    }
+    
+    const result = await response.json();
+    console.log("[FRONTEND] " + '✅ [confirmRestaurantCashPayment] Payment confirmed:', result);
+    
+    // Show thank you message in modal instead of closing immediately
+    const modalBody = modal.querySelector('.modal-body');
+    const modalFooter = modal.querySelector('.modal-footer');
+    const modalHeader = modal.querySelector('.modal-header');
+    
+    if (modalBody && modalFooter && modalHeader) {
+      // Update header
+      const headerTitle = modalHeader.querySelector('.modal-title');
+      const headerCloseBtn = modalHeader.querySelector('.btn-close');
+      if (headerTitle) {
+        headerTitle.innerHTML = '✅ Cảm ơn bạn đã thanh toán!';
+        headerTitle.style.color = '#059669';
+      }
+      // Ensure close button in header works
+      if (headerCloseBtn) {
+        headerCloseBtn.setAttribute('onclick', 'closeRestaurantPaymentModal()');
+        headerCloseBtn.setAttribute('data-bs-dismiss', 'modal');
+      }
+      
+      // Update body with thank you message
+      const orderNumber = result.order?.orderNumber || `ORD${orderId}`;
+      const amount = result.order?.totalAmount || 0;
+      modalBody.innerHTML = `
+        <div style="text-align: center; padding: 40px 20px;">
+          <div style="font-size: 80px; margin-bottom: 24px;">🎉</div>
+          <h3 style="color: #059669; margin-bottom: 16px; font-weight: 700;">Cảm ơn bạn đã thanh toán!</h3>
+          <p style="color: #6b7280; margin-bottom: 24px; font-size: 16px; line-height: 1.6;">
+            Thanh toán của bạn đã được xác nhận thành công.
+          </p>
+          <div style="background: #f0fdf4; padding: 20px; border-radius: 12px; border: 2px solid #86efac; margin-bottom: 24px;">
+            <div style="margin-bottom: 12px;">
+              <strong style="color: #1a1a1a; font-size: 16px;">Mã đơn hàng:</strong>
+              <span style="color: #059669; font-size: 18px; font-weight: 700; margin-left: 8px;">${orderNumber}</span>
+            </div>
+            <div style="margin-bottom: 12px;">
+              <strong style="color: #1a1a1a; font-size: 16px;">Phương thức thanh toán:</strong>
+              <span style="color: #059669; font-size: 18px; font-weight: 700; margin-left: 8px;">💵 Tiền mặt</span>
+            </div>
+            <div>
+              <strong style="color: #1a1a1a; font-size: 16px;">Trạng thái:</strong>
+              <span style="color: #059669; font-size: 18px; font-weight: 700; margin-left: 8px;">Đã thanh toán</span>
+            </div>
+          </div>
+          <div style="background: #fef3c7; padding: 16px; border-radius: 8px; border: 1px solid #fbbf24;">
+            <p style="margin: 0; color: #92400e; font-size: 14px; line-height: 1.6;">
+              <strong>💡 Lưu ý:</strong> Đơn hàng của bạn sẽ được chuẩn bị và giao đến địa chỉ đã đăng ký.
+            </p>
+          </div>
+        </div>
+      `;
+      
+      // Update footer - only show close button
+      modalFooter.innerHTML = `
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="closeRestaurantPaymentModal()" style="padding: 12px 28px; font-size: 16px; font-weight: 600; border-radius: 10px; background: #c8a97e; border: none; width: 100%;">
+          <i class="icon-check"></i> Đóng
+        </button>
+      `;
+    }
+    
+    // Show toast notification
+    showSimpleToast('Xác nhận thanh toán thành công! Cảm ơn bạn!', 'success');
+    
+    // Reload page or order list after a delay
+    setTimeout(() => {
+      if (window.location.pathname.includes('order-details')) {
+        if (window.loadOrderDetails && window.currentOrder?.orderId) {
+          window.loadOrderDetails(window.currentOrder.orderId);
+        } else {
+          window.location.reload();
+        }
+      } else {
+        window.location.reload();
+      }
+    }, 1000);
+    
+  } catch (error) {
+    console.error("[FRONTEND] " + '❌ [confirmRestaurantCashPayment] Error:', error);
+    showSimpleToast(error.message || 'Lỗi xác nhận thanh toán', 'danger');
+    if (confirmBtn) {
+      confirmBtn.disabled = false;
+      confirmBtn.innerHTML = '<i class="icon-check"></i> Xác nhận đã thanh toán';
+    }
+  }
+}
+
 // Export for global use
 window.openRestaurantPayment = openRestaurantPayment;
 window.closeRestaurantPaymentModal = closeRestaurantPaymentModal;
+window.confirmRestaurantCashPayment = confirmRestaurantCashPayment;
 

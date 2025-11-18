@@ -189,12 +189,29 @@
 
           <!-- Cash Payment Confirmation Section -->
           <div id="rpCashSection" style="display: none; padding: 20px; background: #f8f9fa; border-radius: 12px; text-align: center;">
-            <div style="font-size: 48px; margin-bottom: 16px;">💵</div>
-            <h5 style="color: #1a1a1a; margin-bottom: 12px;">Thanh toán tại nhà hàng</h5>
-            <p style="color: #6b7280; margin-bottom: 20px;">Vui lòng thanh toán trực tiếp tại quầy thanh toán của nhà hàng khi nhận món.</p>
-            <div style="background: white; padding: 16px; border-radius: 8px; border: 2px solid #c8a97e;">
-              <p class="mb-1"><strong>Mã đơn hàng:</strong> <span id="rpCashOrderNumber">-</span></p>
-              <p class="mb-0"><strong>Số tiền:</strong> <span id="rpCashAmount" style="color: #c8a97e; font-size: 18px; font-weight: 700;">0 ₫</span></p>
+            <div style="font-size: 64px; margin-bottom: 20px;">💵</div>
+            <h4 style="color: #1a1a1a; margin-bottom: 16px;">Thanh toán tại nhà hàng</h4>
+            <p style="color: #6b7280; margin-bottom: 30px; font-size: 16px; line-height: 1.6;">
+              Bạn có thể thanh toán bằng tiền mặt hoặc thẻ tại quầy thanh toán của nhà hàng khi nhận món.
+            </p>
+            <div style="background: white; padding: 24px; border-radius: 12px; border: 2px solid #c8a97e; margin-bottom: 24px;">
+              <div style="margin-bottom: 12px;">
+                <strong style="color: #1a1a1a; font-size: 16px;">Mã đơn hàng:</strong>
+                <span id="rpCashOrderNumber" style="color: #059669; font-size: 18px; font-weight: 700; margin-left: 8px;">-</span>
+              </div>
+              <div style="margin-bottom: 12px;">
+                <strong style="color: #1a1a1a; font-size: 16px;">Số tiền cần thanh toán:</strong>
+                <span id="rpCashAmount" style="color: #c8a97e; font-size: 24px; font-weight: 700; margin-left: 8px;">0 ₫</span>
+              </div>
+              <div>
+                <strong style="color: #1a1a1a; font-size: 16px;">Địa chỉ:</strong>
+                <span style="color: #6b7280; font-size: 15px; margin-left: 8px;">123 Đường Biển Xanh, Thành phố Biển, Việt Nam</span>
+              </div>
+            </div>
+            <div style="background: #f0fdf4; padding: 16px; border-radius: 8px; border: 1px solid #86efac;">
+              <p style="margin: 0; color: #059669; font-size: 14px; line-height: 1.6;">
+                <strong>💡 Lưu ý:</strong> Vui lòng thanh toán khi nhận món tại quầy thanh toán của nhà hàng.
+              </p>
             </div>
           </div>
 
@@ -225,8 +242,11 @@
             </div>
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+        <div class="modal-footer" style="border-top: 2px solid #f0f0f0; padding: 20px 30px;">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="padding: 12px 28px; font-size: 16px; font-weight: 600; border-radius: 10px;">Đóng</button>
+          <button type="button" class="btn btn-primary" onclick="confirmRestaurantCashPayment()" id="rpConfirmCashBtn" style="display: none; padding: 12px 28px; font-size: 16px; font-weight: 600; border-radius: 10px; background: #c8a97e; border: none;">
+            <i class="icon-check"></i> Xác nhận đã thanh toán
+          </button>
         </div>
       </div>
     </div>
