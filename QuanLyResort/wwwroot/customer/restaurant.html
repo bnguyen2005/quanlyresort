@@ -2330,7 +2330,7 @@
                         <button type="button" class="btn btn-sm" onclick="adjustQuantity(${item.serviceId}, 1); updateQuickViewQty(${item.serviceId});">+</button>
                       </div>
                     </div>
-                    <button type="button" class="btn btn-primary w-100" onclick="try { if(typeof addToCart === 'function') { addToCart(${item.serviceId}, '${(item.serviceName || item.name || '').replace(/'/g, "\\'")}', ${item.price || 0}); if(typeof updateQuickViewQty === 'function') updateQuickViewQty(${item.serviceId}); } else { console.error('[Restaurant] addToCart not found'); alert('Lỗi: Chức năng chưa sẵn sàng. Vui lòng tải lại trang.'); } } catch(e) { console.error('[Restaurant] Error in addToCart:', e); alert('Lỗi: ' + e.message); }" style="background: #c8a97e; border: none;">
+                    <button type="button" class="btn btn-primary w-100" id="quickViewAddToCartBtn" data-service-id="${item.serviceId}" data-service-name="${(item.serviceName || item.name || '').replace(/"/g, '&quot;')}" data-price="${item.price || 0}" style="background: #c8a97e; border: none;">
                       <i class="icon-shopping-cart"></i> Thêm vào giỏ hàng
                     </button>
                   </div>
