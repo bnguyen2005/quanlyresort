@@ -1094,9 +1094,15 @@ async function confirmHotelPayment() {
     if (modalBody && modalFooter && modalHeader) {
       // Update header
       const headerTitle = modalHeader.querySelector('.modal-title');
+      const headerCloseBtn = modalHeader.querySelector('.btn-close');
       if (headerTitle) {
         headerTitle.innerHTML = '✅ Cảm ơn bạn đã thanh toán!';
         headerTitle.style.color = '#059669';
+      }
+      // Ensure close button in header works
+      if (headerCloseBtn) {
+        headerCloseBtn.setAttribute('onclick', 'closeHotelPaymentModal()');
+        headerCloseBtn.setAttribute('data-bs-dismiss', 'modal');
       }
       
       // Update body with thank you message
