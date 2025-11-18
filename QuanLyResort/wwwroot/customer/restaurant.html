@@ -325,15 +325,34 @@
       box-shadow: 0 8px 30px rgba(0,0,0,0.12) !important;
     }
     
-    /* Enhanced Menu Cards - Modern Design */
-    .menu-card {
+    /* New Modern Menu Cards Design */
+    .menu-card-new {
       transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
       position: relative;
       overflow: hidden;
-      border-radius: 16px !important;
-      background: #fff !important;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.08) !important;
-      border: 1px solid #f0f0f0 !important;
+    }
+    
+    .menu-card-new:hover {
+      transform: translateY(-8px) !important;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.15) !important;
+    }
+    
+    .menu-card-image-new {
+      transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    
+    .menu-card-new:hover .menu-card-image-new {
+      transform: scale(1.1);
+    }
+    
+    .menu-card-new:hover .menu-card-quick-view-new {
+      transform: translate(-50%, -50%) scale(1) !important;
+    }
+    
+    .menu-card-quick-view-new:hover {
+      background: #C8A97E !important;
+      color: #fff !important;
+      transform: translate(-50%, -50%) scale(1.1) !important;
     }
     
     /* Pulse animation for cart badge */
@@ -346,16 +365,39 @@
       }
     }
     
-    /* Button hover effects */
-    .btn-qty:hover,
-    .btn-add-to-cart:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(200,169,126,0.3);
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
     
-    .btn-qty:active,
-    .btn-add-to-cart:active {
-      transform: translateY(0);
+    /* Button hover effects */
+    .btn-qty-new:active,
+    .btn-add-to-cart-new:active {
+      transform: translateY(0) !important;
+    }
+    
+    /* Success notification animation */
+    @keyframes bounceIn {
+      0% {
+        opacity: 0;
+        transform: scale(0.3);
+      }
+      50% {
+        opacity: 1;
+        transform: scale(1.05);
+      }
+      70% {
+        transform: scale(0.9);
+      }
+      100% {
+        transform: scale(1);
+      }
     }
     
     .menu-card::before {
@@ -1168,13 +1210,21 @@
         console.log('[addToCart] ✅ Updated existing item in cart:', shoppingCart[existingIndex]);
         
         // Show success notification
-        const message = `✅ Đã cập nhật ${serviceName} (${quantity} phần) vào giỏ hàng`;
+        const message = `✅ Đã cập nhật "${serviceName}" (${quantity} phần) trong giỏ hàng!`;
         if (typeof showToast === 'function') {
           showToast(message, 'success');
         } else if (window.showToast) {
           window.showToast(message, 'success');
         } else {
-          alert(message);
+          // Fallback: Create custom notification
+          const notification = document.createElement('div');
+          notification.style.cssText = 'position: fixed; top: 20px; right: 20px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 16px 24px; border-radius: 12px; box-shadow: 0 8px 24px rgba(16,185,129,0.4); z-index: 10000; animation: slideInUp 0.4s ease; font-weight: 600; font-size: 14px; max-width: 350px;';
+          notification.textContent = message;
+          document.body.appendChild(notification);
+          setTimeout(() => {
+            notification.style.animation = 'slideInUp 0.4s ease reverse';
+            setTimeout(() => notification.remove(), 400);
+          }, 3000);
         }
       } else {
         // Thêm mới vào cart
@@ -1188,13 +1238,21 @@
         console.log('[addToCart] ✅ Added new item to cart:', newItem);
         
         // Show success notification with animation
-        const message = `✅ Đã thêm ${serviceName} (${quantity} phần) vào giỏ hàng`;
+        const message = `✅ Đã thêm "${serviceName}" (${quantity} phần) vào giỏ hàng thành công!`;
         if (typeof showToast === 'function') {
           showToast(message, 'success');
         } else if (window.showToast) {
           window.showToast(message, 'success');
         } else {
-          alert(message);
+          // Fallback: Create custom notification
+          const notification = document.createElement('div');
+          notification.style.cssText = 'position: fixed; top: 20px; right: 20px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 16px 24px; border-radius: 12px; box-shadow: 0 8px 24px rgba(16,185,129,0.4); z-index: 10000; animation: slideInUp 0.4s ease; font-weight: 600; font-size: 14px; max-width: 350px;';
+          notification.textContent = message;
+          document.body.appendChild(notification);
+          setTimeout(() => {
+            notification.style.animation = 'slideInUp 0.4s ease reverse';
+            setTimeout(() => notification.remove(), 400);
+          }, 3000);
         }
         
         // Add visual feedback - animate cart icon
@@ -1203,6 +1261,18 @@
           cartBadge.style.animation = 'pulse 0.5s ease-in-out';
           setTimeout(() => {
             cartBadge.style.animation = '';
+          }, 500);
+        }
+        
+        // Add visual feedback to the button
+        const addBtn = document.querySelector(`.btn-add-to-cart-new[data-service-id="${serviceId}"]`);
+        if (addBtn) {
+          const originalBg = addBtn.style.background;
+          addBtn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+          addBtn.style.animation = 'bounceIn 0.5s ease';
+          setTimeout(() => {
+            addBtn.style.background = originalBg;
+            addBtn.style.animation = '';
           }, 500);
         }
       }
@@ -1978,34 +2048,46 @@
         }
         
         html += `
-          <div class="col-lg-4 col-md-6 col-sm-6 mb-4" style="display: block !important; visibility: visible !important; opacity: 1 !important; box-sizing: border-box; padding-left: 12px; padding-right: 12px; margin-bottom: 16px; flex: 0 0 auto;">
-            <div class="menu-card ftco-animate" data-service-id="${item.serviceId}" style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: transform 0.3s, box-shadow 0.3s; height: 100%; display: flex !important; flex-direction: column; visibility: visible !important; opacity: 1 !important; position: relative; z-index: 1; cursor: pointer;" title="Click để thêm vào giỏ hàng">
-              <div class="menu-card-image" style="width: 100%; height: 200px; background-image: url(${img}); background-size: cover; background-position: center; position: relative; overflow: hidden;">
-                <button class="menu-card-quick-view" onclick="showQuickView(${item.serviceId}, event)" title="Xem nhanh">
+          <div class="col-lg-4 col-md-6 col-sm-6 mb-4" style="display: block !important; visibility: visible !important; opacity: 1 !important; box-sizing: border-box; padding-left: 12px; padding-right: 12px; margin-bottom: 24px; flex: 0 0 auto;">
+            <div class="menu-card-new ftco-animate" data-service-id="${item.serviceId}" style="background: #ffffff; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); height: 100%; display: flex !important; flex-direction: column; visibility: visible !important; opacity: 1 !important; position: relative; z-index: 1; border: 1px solid #f0f0f0;">
+              <!-- Image Section -->
+              <div class="menu-card-image-new" style="width: 100%; height: 240px; background-image: url(${img}); background-size: cover; background-position: center; position: relative; overflow: hidden;">
+                <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.1) 100%);"></div>
+                <!-- Quick View Button -->
+                <button class="menu-card-quick-view-new" onclick="showQuickView(${item.serviceId}, event)" title="Xem nhanh" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); background: rgba(255,255,255,0.95); color: #C8A97E; border: none; border-radius: 50%; width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; transition: all 0.3s ease; z-index: 10; box-shadow: 0 4px 16px rgba(0,0,0,0.2);">
                   <i class="icon-eye"></i>
                 </button>
-                <div style="position: absolute; top: 12px; right: 12px; background: var(--color-primary-main, #C8A97E); color: white; padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 14px; font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+                <!-- Price Badge -->
+                <div style="position: absolute; top: 16px; right: 16px; background: linear-gradient(135deg, #C8A97E 0%, #B89968 100%); color: white; padding: 8px 16px; border-radius: 25px; font-size: 15px; font-weight: 700; box-shadow: 0 4px 12px rgba(200,169,126,0.4); backdrop-filter: blur(10px);">
                   ${price}${unit}
                 </div>
               </div>
-              <div class="menu-card-content" style="padding: 1.25rem; flex: 1; display: flex; flex-direction: column;">
-                <h3 class="menu-card-title" style="margin: 0 0 0.75rem 0; font-size: 20px; font-weight: 600; color: var(--color-text-primary, #1F2937); line-height: 1.3;">
+              
+              <!-- Content Section -->
+              <div class="menu-card-content-new" style="padding: 20px; flex: 1; display: flex; flex-direction: column; background: #ffffff;">
+                <!-- Title -->
+                <h3 class="menu-card-title-new" style="margin: 0 0 10px 0; font-size: 22px; font-weight: 700; color: #1a1a1a; line-height: 1.3; letter-spacing: -0.3px;">
                   ${name}
                 </h3>
-                <p class="menu-card-desc" style="margin: 0 0 1rem 0; color: var(--color-muted, #6B7280); font-size: 14px; line-height: 1.6; flex: 1;">
+                
+                <!-- Description -->
+                <p class="menu-card-desc-new" style="margin: 0 0 20px 0; color: #6b7280; font-size: 14px; line-height: 1.6; flex: 1; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
                   ${desc}
                 </p>
-                <div class="menu-actions" style="display: flex; gap: 0.5rem; align-items: center; margin-top: auto;">
-                  <div class="quantity-control" style="display: flex; align-items: center; gap: 0.5rem; border: 1px solid var(--color-line, #E5E7EB); border-radius: 6px; padding: 0.25rem 0.5rem; background: #F9FAFB;">
-                    <button type="button" class="btn-qty btn-qty-minus" data-service-id="${item.serviceId}" data-delta="-1" style="background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 8px; font-size: 18px; cursor: pointer; color: var(--color-primary-main, #C8A97E); padding: 6px 14px; line-height: 1; min-width: 40px; transition: all 0.2s; font-weight: 700;" onmouseover="this.style.background='#e9ecef'; this.style.borderColor='#C8A97E'; this.style.transform='scale(1.05)';" onmouseout="this.style.background='#f8f9fa'; this.style.borderColor='#e9ecef'; this.style.transform='scale(1)';">−</button>
-                    <span id="qty-${item.serviceId}" class="quantity-display" style="min-width: 2.5rem; text-align: center; font-weight: 700; color: #1a1a1a; font-size: 16px; padding: 0 8px;">0</span>
-                    <button type="button" class="btn-qty btn-qty-plus" data-service-id="${item.serviceId}" data-delta="1" style="background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 8px; font-size: 18px; cursor: pointer; color: var(--color-primary-main, #C8A97E); padding: 6px 14px; line-height: 1; min-width: 40px; transition: all 0.2s; font-weight: 700;" onmouseover="this.style.background='#e9ecef'; this.style.borderColor='#C8A97E'; this.style.transform='scale(1.05)';" onmouseout="this.style.background='#f8f9fa'; this.style.borderColor='#e9ecef'; this.style.transform='scale(1)';">+</button>
+                
+                <!-- Actions Section -->
+                <div class="menu-actions-new" style="display: flex; gap: 10px; align-items: center; margin-top: auto; padding-top: 16px; border-top: 1px solid #f0f0f0;">
+                  <!-- Quantity Control -->
+                  <div class="quantity-control-new" style="display: flex; align-items: center; gap: 8px; background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 12px; padding: 6px 8px;">
+                    <button type="button" class="btn-qty-new btn-qty-minus" data-service-id="${item.serviceId}" data-delta="-1" style="background: #ffffff; border: none; border-radius: 8px; font-size: 20px; cursor: pointer; color: #C8A97E; padding: 6px 12px; line-height: 1; min-width: 36px; transition: all 0.2s; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05);" onmouseover="this.style.background='#f0f0f0'; this.style.color='#B89968'; this.style.transform='scale(1.1)';" onmouseout="this.style.background='#ffffff'; this.style.color='#C8A97E'; this.style.transform='scale(1)';" onclick="event.stopPropagation();">−</button>
+                    <span id="qty-${item.serviceId}" class="quantity-display-new" style="min-width: 32px; text-align: center; font-weight: 700; color: #1a1a1a; font-size: 16px; padding: 0 8px;">0</span>
+                    <button type="button" class="btn-qty-new btn-qty-plus" data-service-id="${item.serviceId}" data-delta="1" style="background: #ffffff; border: none; border-radius: 8px; font-size: 20px; cursor: pointer; color: #C8A97E; padding: 6px 12px; line-height: 1; min-width: 36px; transition: all 0.2s; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05);" onmouseover="this.style.background='#f0f0f0'; this.style.color='#B89968'; this.style.transform='scale(1.1)';" onmouseout="this.style.background='#ffffff'; this.style.color='#C8A97E'; this.style.transform='scale(1)';" onclick="event.stopPropagation();">+</button>
                   </div>
-                  <button type="button" class="btn-add-to-cart" data-service-id="${item.serviceId}" data-service-name="${name.replace(/"/g, '&quot;')}" data-price="${item.price || 0}" style="flex: 1; background: linear-gradient(135deg, var(--color-primary-main, #C8A97E) 0%, var(--color-primary-dark, #B89968) 100%); color: white; border: none; border-radius: 8px; padding: 0.75rem 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; white-space: nowrap; box-shadow: 0 2px 8px rgba(200,169,126,0.3);" onmouseover="this.style.background='linear-gradient(135deg, var(--color-primary-dark, #B89968) 0%, var(--color-primary-main, #C8A97E) 100%)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(200,169,126,0.4)';" onmouseout="this.style.background='linear-gradient(135deg, var(--color-primary-main, #C8A97E) 0%, var(--color-primary-dark, #B89968) 100%)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(200,169,126,0.3)';">
-                    <span style="font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 6px;">
-                      <span>🛒</span>
-                      <span>Thêm vào giỏ</span>
-                    </span>
+                  
+                  <!-- Add to Cart Button -->
+                  <button type="button" class="btn-add-to-cart-new" data-service-id="${item.serviceId}" data-service-name="${name.replace(/"/g, '&quot;')}" data-price="${item.price || 0}" style="flex: 1; background: linear-gradient(135deg, #C8A97E 0%, #B89968 100%); color: white; border: none; border-radius: 12px; padding: 12px 20px; font-weight: 600; cursor: pointer; transition: all 0.3s; white-space: nowrap; box-shadow: 0 4px 12px rgba(200,169,126,0.3); font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px;" onmouseover="this.style.background='linear-gradient(135deg, #B89968 0%, #C8A97E 100%)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(200,169,126,0.4)';" onmouseout="this.style.background='linear-gradient(135deg, #C8A97E 0%, #B89968 100%)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(200,169,126,0.3)';" onclick="event.stopPropagation();">
+                    <span style="font-size: 18px;">🛒</span>
+                    <span>Thêm vào giỏ</span>
                   </button>
                 </div>
               </div>
@@ -2028,20 +2110,20 @@
       const clickHandler = function(e) {
         const target = e.target;
         
-        // Skip if clicking on quick view button or its icon
-        if (target.closest('.menu-card-quick-view') || target.classList.contains('icon-eye')) {
+        // Skip if clicking on quick view button or its icon (support both old and new classes)
+        if (target.closest('.menu-card-quick-view, .menu-card-quick-view-new') || target.classList.contains('icon-eye')) {
           return; // Let quick view handle its own click
         }
         
-        // Handle quantity buttons - check both class and parent
-        const qtyBtn = target.closest('.btn-qty-plus, .btn-qty-minus') || 
-                      (target.classList.contains('btn-qty-plus') || target.classList.contains('btn-qty-minus') ? target : null);
+        // Handle quantity buttons - check both old and new classes
+        const qtyBtn = target.closest('.btn-qty-plus, .btn-qty-minus, .btn-qty-new') || 
+                      (target.classList.contains('btn-qty-plus') || target.classList.contains('btn-qty-minus') || target.classList.contains('btn-qty-new') ? target : null);
         if (qtyBtn) {
           e.preventDefault();
           e.stopPropagation();
-          const serviceId = parseInt(qtyBtn.getAttribute('data-service-id') || qtyBtn.closest('.menu-card')?.getAttribute('data-service-id'));
+          const serviceId = parseInt(qtyBtn.getAttribute('data-service-id') || qtyBtn.closest('.menu-card, .menu-card-new')?.getAttribute('data-service-id'));
           const delta = parseInt(qtyBtn.getAttribute('data-delta')) || 
-                       (qtyBtn.classList.contains('btn-qty-plus') ? 1 : -1);
+                       (qtyBtn.classList.contains('btn-qty-plus') || qtyBtn.classList.contains('btn-qty-new') && !qtyBtn.classList.contains('btn-qty-minus') ? 1 : -1);
           
           if (serviceId && !isNaN(serviceId)) {
             console.log('[renderMenuItems] Quantity button clicked:', { serviceId, delta, target: target.tagName, qtyBtn: qtyBtn.tagName });
@@ -2065,15 +2147,15 @@
           return;
         }
         
-        // Handle add to cart button (check if clicked on button or its child span)
-        const addToCartBtn = target.closest('.btn-add-to-cart') || 
-                            (target.classList.contains('btn-add-to-cart') ? target : null);
+        // Handle add to cart button (check if clicked on button or its child span) - support both old and new classes
+        const addToCartBtn = target.closest('.btn-add-to-cart, .btn-add-to-cart-new') || 
+                            (target.classList.contains('btn-add-to-cart') || target.classList.contains('btn-add-to-cart-new') ? target : null);
         if (addToCartBtn) {
           e.preventDefault();
           e.stopPropagation();
           
           const serviceId = parseInt(addToCartBtn.getAttribute('data-service-id') || 
-                                     addToCartBtn.closest('.menu-card')?.getAttribute('data-service-id'));
+                                     addToCartBtn.closest('.menu-card, .menu-card-new')?.getAttribute('data-service-id'));
           const serviceName = addToCartBtn.getAttribute('data-service-name') || '';
           const price = parseInt(addToCartBtn.getAttribute('data-price')) || 0;
           
@@ -2110,8 +2192,8 @@
           return;
         }
         
-        // Handle click on menu card (outside buttons) - add to cart with quantity 1
-        const menuCard = target.closest('.menu-card');
+        // Handle click on menu card (outside buttons) - add to cart with quantity 1 - support both old and new classes
+        const menuCard = target.closest('.menu-card, .menu-card-new');
         if (menuCard) {
           e.preventDefault();
           e.stopPropagation();
