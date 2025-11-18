@@ -325,11 +325,37 @@
       box-shadow: 0 8px 30px rgba(0,0,0,0.12) !important;
     }
     
-    /* Enhanced Menu Cards */
+    /* Enhanced Menu Cards - Modern Design */
     .menu-card {
       transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
       position: relative;
       overflow: hidden;
+      border-radius: 16px !important;
+      background: #fff !important;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08) !important;
+      border: 1px solid #f0f0f0 !important;
+    }
+    
+    /* Pulse animation for cart badge */
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.15);
+      }
+    }
+    
+    /* Button hover effects */
+    .btn-qty:hover,
+    .btn-add-to-cart:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(200,169,126,0.3);
+    }
+    
+    .btn-qty:active,
+    .btn-add-to-cart:active {
+      transform: translateY(0);
     }
     
     .menu-card::before {
@@ -1123,16 +1149,16 @@
       
       console.log('[addToCart] Quantity from element:', quantity, 'Element:', qtyEl);
       
-      // Không cho phép thêm vào giỏ nếu số lượng = 0
+      // Nếu số lượng = 0, tự động set thành 1
       if (quantity <= 0) {
-        const message = 'Vui lòng chọn số lượng (bấm nút +) trước khi thêm vào giỏ.';
-        console.warn('[addToCart] ⚠️ Quantity is 0, cannot add to cart');
-        if (window.showToast) {
-          showToast(message, 'warning');
-        } else {
-          alert(message);
+        quantity = 1;
+        if (qtyEl) {
+          qtyEl.textContent = '1';
         }
-        return;
+        if (quickViewQtyEl) {
+          quickViewQtyEl.textContent = '1';
+        }
+        console.log('[addToCart] ⚠️ Quantity was 0, auto-set to 1');
       }
       
       const existingIndex = shoppingCart.findIndex(item => item.serviceId === serviceId);
@@ -1140,10 +1166,15 @@
         // Nếu đã có trong cart, cập nhật số lượng
         shoppingCart[existingIndex].quantity = quantity;
         console.log('[addToCart] ✅ Updated existing item in cart:', shoppingCart[existingIndex]);
-        if (window.showToast) {
-          showToast(`Đã cập nhật số lượng ${serviceName} trong giỏ hàng`, 'success');
+        
+        // Show success notification
+        const message = `✅ Đã cập nhật ${serviceName} (${quantity} phần) vào giỏ hàng`;
+        if (typeof showToast === 'function') {
+          showToast(message, 'success');
+        } else if (window.showToast) {
+          window.showToast(message, 'success');
         } else {
-          alert(`Đã cập nhật số lượng ${serviceName} trong giỏ hàng`);
+          alert(message);
         }
       } else {
         // Thêm mới vào cart
@@ -1155,10 +1186,24 @@
         };
         shoppingCart.push(newItem);
         console.log('[addToCart] ✅ Added new item to cart:', newItem);
-        if (window.showToast) {
-          showToast(`Đã thêm ${serviceName} vào giỏ hàng (${quantity} phần)`, 'success');
+        
+        // Show success notification with animation
+        const message = `✅ Đã thêm ${serviceName} (${quantity} phần) vào giỏ hàng`;
+        if (typeof showToast === 'function') {
+          showToast(message, 'success');
+        } else if (window.showToast) {
+          window.showToast(message, 'success');
         } else {
-          alert(`Đã thêm ${serviceName} vào giỏ hàng (${quantity} phần)`);
+          alert(message);
+        }
+        
+        // Add visual feedback - animate cart icon
+        const cartBadge = document.querySelector('.cart-badge, #cartBadge');
+        if (cartBadge) {
+          cartBadge.style.animation = 'pulse 0.5s ease-in-out';
+          setTimeout(() => {
+            cartBadge.style.animation = '';
+          }, 500);
         }
       }
       
@@ -1747,11 +1792,14 @@
           console.warn('[Order] Error closing modal:', modalError);
         }
         
-        // Show success message
+        // Show success message with animation
+        const successMessage = `🎉 Đặt món thành công! Mã đơn: ${order.orderNumber}`;
         if (typeof showToast === 'function') {
-          showToast(`Đặt món thành công! Mã đơn: ${order.orderNumber}`, 'success');
+          showToast(successMessage, 'success');
+        } else if (window.showToast) {
+          window.showToast(successMessage, 'success');
         } else {
-          alert(`Đặt món thành công! Mã đơn: ${order.orderNumber}`);
+          alert(successMessage);
         }
         
         // Redirect to order details or show order info
@@ -1949,12 +1997,15 @@
                 </p>
                 <div class="menu-actions" style="display: flex; gap: 0.5rem; align-items: center; margin-top: auto;">
                   <div class="quantity-control" style="display: flex; align-items: center; gap: 0.5rem; border: 1px solid var(--color-line, #E5E7EB); border-radius: 6px; padding: 0.25rem 0.5rem; background: #F9FAFB;">
-                    <button type="button" class="btn-qty btn-qty-minus" data-service-id="${item.serviceId}" data-delta="-1" style="background: none; border: none; font-size: 18px; cursor: pointer; color: var(--color-primary-main, #C8A97E); padding: 0 0.5rem; line-height: 1;">−</button>
-                    <span id="qty-${item.serviceId}" class="quantity-display" style="min-width: 30px; text-align: center; font-weight: 600; color: var(--color-text-primary, #1F2937);">0</span>
-                    <button type="button" class="btn-qty btn-qty-plus" data-service-id="${item.serviceId}" data-delta="1" style="background: none; border: none; font-size: 18px; cursor: pointer; color: var(--color-primary-main, #C8A97E); padding: 0 0.5rem; line-height: 1;">+</button>
+                    <button type="button" class="btn-qty btn-qty-minus" data-service-id="${item.serviceId}" data-delta="-1" style="background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 8px; font-size: 18px; cursor: pointer; color: var(--color-primary-main, #C8A97E); padding: 6px 14px; line-height: 1; min-width: 40px; transition: all 0.2s; font-weight: 700;" onmouseover="this.style.background='#e9ecef'; this.style.borderColor='#C8A97E'; this.style.transform='scale(1.05)';" onmouseout="this.style.background='#f8f9fa'; this.style.borderColor='#e9ecef'; this.style.transform='scale(1)';">−</button>
+                    <span id="qty-${item.serviceId}" class="quantity-display" style="min-width: 2.5rem; text-align: center; font-weight: 700; color: #1a1a1a; font-size: 16px; padding: 0 8px;">0</span>
+                    <button type="button" class="btn-qty btn-qty-plus" data-service-id="${item.serviceId}" data-delta="1" style="background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 8px; font-size: 18px; cursor: pointer; color: var(--color-primary-main, #C8A97E); padding: 6px 14px; line-height: 1; min-width: 40px; transition: all 0.2s; font-weight: 700;" onmouseover="this.style.background='#e9ecef'; this.style.borderColor='#C8A97E'; this.style.transform='scale(1.05)';" onmouseout="this.style.background='#f8f9fa'; this.style.borderColor='#e9ecef'; this.style.transform='scale(1)';">+</button>
                   </div>
-                  <button type="button" class="btn-add-to-cart" data-service-id="${item.serviceId}" data-service-name="${name.replace(/"/g, '&quot;')}" data-price="${item.price || 0}" style="flex: 1; background: var(--color-primary-main, #C8A97E); color: white; border: none; border-radius: 6px; padding: 0.625rem 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; white-space: nowrap;" onmouseover="this.style.background='var(--color-primary-dark, #B89968)'; this.style.transform='scale(1.02)'" onmouseout="this.style.background='var(--color-primary-main, #C8A97E)'; this.style.transform='scale(1)'">
-                    <span style="font-size: 14px;">Thêm vào giỏ</span>
+                  <button type="button" class="btn-add-to-cart" data-service-id="${item.serviceId}" data-service-name="${name.replace(/"/g, '&quot;')}" data-price="${item.price || 0}" style="flex: 1; background: linear-gradient(135deg, var(--color-primary-main, #C8A97E) 0%, var(--color-primary-dark, #B89968) 100%); color: white; border: none; border-radius: 8px; padding: 0.75rem 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; white-space: nowrap; box-shadow: 0 2px 8px rgba(200,169,126,0.3);" onmouseover="this.style.background='linear-gradient(135deg, var(--color-primary-dark, #B89968) 0%, var(--color-primary-main, #C8A97E) 100%)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(200,169,126,0.4)';" onmouseout="this.style.background='linear-gradient(135deg, var(--color-primary-main, #C8A97E) 0%, var(--color-primary-dark, #B89968) 100%)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 8px rgba(200,169,126,0.3)';">
+                    <span style="font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                      <span>🛒</span>
+                      <span>Thêm vào giỏ</span>
+                    </span>
                   </button>
                 </div>
               </div>
@@ -1982,47 +2033,79 @@
           return; // Let quick view handle its own click
         }
         
-        // Handle quantity buttons
-        if (target.classList.contains('btn-qty-plus') || target.classList.contains('btn-qty-minus')) {
+        // Handle quantity buttons - check both class and parent
+        const qtyBtn = target.closest('.btn-qty-plus, .btn-qty-minus') || 
+                      (target.classList.contains('btn-qty-plus') || target.classList.contains('btn-qty-minus') ? target : null);
+        if (qtyBtn) {
           e.preventDefault();
           e.stopPropagation();
-          const serviceId = parseInt(target.getAttribute('data-service-id'));
-          const delta = parseInt(target.getAttribute('data-delta')) || (target.classList.contains('btn-qty-plus') ? 1 : -1);
+          const serviceId = parseInt(qtyBtn.getAttribute('data-service-id') || qtyBtn.closest('.menu-card')?.getAttribute('data-service-id'));
+          const delta = parseInt(qtyBtn.getAttribute('data-delta')) || 
+                       (qtyBtn.classList.contains('btn-qty-plus') ? 1 : -1);
           
           if (serviceId && !isNaN(serviceId)) {
-            console.log('[renderMenuItems] Quantity button clicked:', { serviceId, delta });
+            console.log('[renderMenuItems] Quantity button clicked:', { serviceId, delta, target: target.tagName, qtyBtn: qtyBtn.tagName });
             if (typeof window.adjustQuantity === 'function') {
               window.adjustQuantity(serviceId, delta);
+              // Show feedback
+              if (window.showToast) {
+                const qtyEl = document.getElementById(`qty-${serviceId}`);
+                const newQty = parseInt(qtyEl?.textContent || 0);
+                if (newQty > 0) {
+                  showToast(`Số lượng: ${newQty}`, 'info');
+                }
+              }
             } else {
               console.error('[renderMenuItems] adjustQuantity function not found');
+              alert('Lỗi: Chức năng chưa sẵn sàng. Vui lòng tải lại trang.');
             }
+          } else {
+            console.error('[renderMenuItems] Could not find serviceId for quantity button');
           }
           return;
         }
         
         // Handle add to cart button (check if clicked on button or its child span)
-        if (target.classList.contains('btn-add-to-cart') || target.closest('.btn-add-to-cart')) {
+        const addToCartBtn = target.closest('.btn-add-to-cart') || 
+                            (target.classList.contains('btn-add-to-cart') ? target : null);
+        if (addToCartBtn) {
           e.preventDefault();
           e.stopPropagation();
-          const btn = target.classList.contains('btn-add-to-cart') ? target : target.closest('.btn-add-to-cart');
-          if (btn) {
-            const serviceId = parseInt(btn.getAttribute('data-service-id'));
-            const serviceName = btn.getAttribute('data-service-name') || '';
-            const price = parseInt(btn.getAttribute('data-price')) || 0;
+          
+          const serviceId = parseInt(addToCartBtn.getAttribute('data-service-id') || 
+                                     addToCartBtn.closest('.menu-card')?.getAttribute('data-service-id'));
+          const serviceName = addToCartBtn.getAttribute('data-service-name') || '';
+          const price = parseInt(addToCartBtn.getAttribute('data-price')) || 0;
+          
+          if (serviceId && !isNaN(serviceId)) {
+            console.log('[renderMenuItems] Add to cart clicked:', { serviceId, serviceName, price, target: target.tagName });
             
-            if (serviceId && !isNaN(serviceId)) {
-              console.log('[renderMenuItems] Add to cart clicked:', { serviceId, serviceName, price });
-              if (typeof window.addToCart === 'function') {
-                window.addToCart(serviceId, serviceName, price);
-              } else {
-                console.error('[renderMenuItems] addToCart function not found');
-                if (window.showToast) {
-                  showToast('Lỗi: Chức năng chưa sẵn sàng. Vui lòng tải lại trang.', 'error');
-                } else {
-                  alert('Lỗi: Chức năng chưa sẵn sàng. Vui lòng tải lại trang.');
+            // Check quantity first
+            const qtyEl = document.getElementById(`qty-${serviceId}`);
+            const quantity = parseInt(qtyEl?.textContent || 0);
+            
+            if (quantity <= 0) {
+              // Auto set quantity to 1 if 0
+              if (qtyEl) {
+                qtyEl.textContent = '1';
+                if (typeof window.adjustQuantity === 'function') {
+                  window.adjustQuantity(serviceId, 1);
                 }
               }
             }
+            
+            if (typeof window.addToCart === 'function') {
+              window.addToCart(serviceId, serviceName, price);
+            } else {
+              console.error('[renderMenuItems] addToCart function not found');
+              if (window.showToast) {
+                showToast('Lỗi: Chức năng chưa sẵn sàng. Vui lòng tải lại trang.', 'error');
+              } else {
+                alert('Lỗi: Chức năng chưa sẵn sàng. Vui lòng tải lại trang.');
+              }
+            }
+          } else {
+            console.error('[renderMenuItems] Could not find serviceId for add to cart button');
           }
           return;
         }
