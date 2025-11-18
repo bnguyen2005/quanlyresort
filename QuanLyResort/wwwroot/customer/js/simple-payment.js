@@ -140,7 +140,17 @@ async function openSimplePayment(bookingId) {
       return;
     }
 
-    // Update modal content
+    // Check payment method - if PayAtHotel or Cash, show hotel payment confirmation instead of QR
+    const paymentMethod = booking.paymentMethod || booking.PaymentMethod || 'BankTransfer';
+    console.log("[FRONTEND] " + '🔍 [openSimplePayment] Payment method:', paymentMethod);
+    
+    if (paymentMethod === 'PayAtHotel' || paymentMethod === 'Cash' || paymentMethod === 'PayAtHotel') {
+      // Show hotel payment confirmation modal instead of QR
+      showHotelPaymentConfirmation(bookingId, booking.bookingCode || `BKG${bookingId}`, amount);
+      return;
+    }
+
+    // Update modal content for QR payment
     updatePaymentModal(bookingId, booking.bookingCode || `BKG${bookingId}`, amount);
 
     // Show modal
