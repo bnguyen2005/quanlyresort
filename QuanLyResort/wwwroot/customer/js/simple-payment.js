@@ -1014,8 +1014,9 @@ function showHotelPaymentConfirmation(bookingId, bookingCode, amount) {
     amountEl.textContent = formatVND(amount);
   }
   
-  // Store booking ID for confirmation
+  // Store booking ID and code for confirmation
   modal.dataset.bookingId = bookingId;
+  modal.dataset.bookingCode = bookingCode;
   
   // Show modal
   try {
@@ -1085,30 +1086,73 @@ async function confirmHotelPayment() {
     const result = await response.json();
     console.log("[FRONTEND] " + '✅ [confirmHotelPayment] Payment confirmed:', result);
     
-    showSimpleToast('Xác nhận thanh toán thành công!', 'success');
+    // Show thank you message in modal instead of closing immediately
+    const modalBody = modal.querySelector('.modal-body');
+    const modalFooter = modal.querySelector('.modal-footer');
+    const modalHeader = modal.querySelector('.modal-header');
     
-    // Close modal
-    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-      const bsModal = bootstrap.Modal.getInstance(modal);
-      if (bsModal) bsModal.hide();
-    } else if (typeof $ !== 'undefined' && $.fn.modal) {
-      $(modal).modal('hide');
-    } else {
-      modal.classList.remove('show');
-      modal.style.display = 'none';
-      document.body.classList.remove('modal-open');
-      const backdrop = document.querySelector('.modal-backdrop');
-      if (backdrop) backdrop.remove();
+    if (modalBody && modalFooter && modalHeader) {
+      // Update header
+      const headerTitle = modalHeader.querySelector('.modal-title');
+      if (headerTitle) {
+        headerTitle.innerHTML = '✅ Cảm ơn bạn đã thanh toán!';
+        headerTitle.style.color = '#059669';
+      }
+      
+      // Update body with thank you message
+      modalBody.innerHTML = `
+        <div style="text-align: center; padding: 40px 20px;">
+          <div style="font-size: 80px; margin-bottom: 24px;">🎉</div>
+          <h3 style="color: #059669; margin-bottom: 16px; font-weight: 700;">Cảm ơn bạn đã thanh toán!</h3>
+          <p style="color: #6b7280; margin-bottom: 24px; font-size: 16px; line-height: 1.6;">
+            Thanh toán của bạn đã được xác nhận thành công.
+          </p>
+          <div style="background: #f0fdf4; padding: 20px; border-radius: 12px; border: 2px solid #86efac; margin-bottom: 24px;">
+            <div style="margin-bottom: 12px;">
+              <strong style="color: #1a1a1a; font-size: 16px;">Mã đặt phòng:</strong>
+              <span id="hpcThankYouBookingCode" style="color: #059669; font-size: 18px; font-weight: 700; margin-left: 8px;">${modal.dataset.bookingCode || '-'}</span>
+            </div>
+            ${result.invoiceNumber ? `
+            <div style="margin-bottom: 12px;">
+              <strong style="color: #1a1a1a; font-size: 16px;">Số hóa đơn:</strong>
+              <span style="color: #059669; font-size: 18px; font-weight: 700; margin-left: 8px;">${result.invoiceNumber}</span>
+            </div>
+            ` : ''}
+            <div>
+              <strong style="color: #1a1a1a; font-size: 16px;">Trạng thái:</strong>
+              <span style="color: #059669; font-size: 18px; font-weight: 700; margin-left: 8px;">Đã thanh toán</span>
+            </div>
+          </div>
+          <div style="background: #fef3c7; padding: 16px; border-radius: 8px; border: 1px solid #fbbf24;">
+            <p style="margin: 0; color: #92400e; font-size: 14px; line-height: 1.6;">
+              <strong>💡 Lưu ý:</strong> Vui lòng mang theo CMND/CCCD hoặc Hộ chiếu khi đến làm thủ tục check-in.
+            </p>
+          </div>
+        </div>
+      `;
+      
+      // Update footer - only show close button
+      modalFooter.innerHTML = `
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="closeHotelPaymentModal()" style="padding: 12px 28px; font-size: 16px; font-weight: 600; border-radius: 10px; background: #c8a97e; border: none; width: 100%;">
+          <i class="icon-check"></i> Đóng
+        </button>
+      `;
+      
+      // Store booking code for thank you message
+      modal.dataset.bookingCode = modal.dataset.bookingCode || bookingId;
     }
     
-    // Reload bookings list
-    if (window.loadBookings) {
-      window.loadBookings();
-    } else {
-      setTimeout(() => {
-        window.location.reload();
-      }, 1500);
-    }
+    // Show toast notification
+    showSimpleToast('Xác nhận thanh toán thành công! Cảm ơn bạn!', 'success');
+    
+    // Reload bookings list after a delay
+    setTimeout(() => {
+      if (window.loadBookings) {
+        window.loadBookings();
+      } else {
+        // Don't auto-reload, let user close manually
+      }
+    }, 1000);
     
   } catch (error) {
     console.error("[FRONTEND] " + '❌ [confirmHotelPayment] Error:', error);
@@ -1120,9 +1164,41 @@ async function confirmHotelPayment() {
   }
 }
 
+/**
+ * Close hotel payment modal
+ */
+function closeHotelPaymentModal() {
+  const modal = document.getElementById('hotelPaymentConfirmationModal');
+  if (!modal) return;
+  
+  // Close modal
+  if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+    const bsModal = bootstrap.Modal.getInstance(modal);
+    if (bsModal) {
+      bsModal.hide();
+    } else {
+      hideModalDirectly(modal);
+    }
+  } else if (typeof $ !== 'undefined' && $.fn.modal) {
+    $(modal).modal('hide');
+  } else {
+    hideModalDirectly(modal);
+  }
+  
+  // Reload bookings list after modal is closed
+  setTimeout(() => {
+    if (window.loadBookings) {
+      window.loadBookings();
+    } else {
+      window.location.reload();
+    }
+  }, 300);
+}
+
 // Make functions globally available
 window.showHotelPaymentConfirmation = showHotelPaymentConfirmation;
 window.confirmHotelPayment = confirmHotelPayment;
+window.closeHotelPaymentModal = closeHotelPaymentModal;
 window.openSimplePayment = openSimplePayment;
 
 // Stop polling when modal is closed
