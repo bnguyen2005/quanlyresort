@@ -867,7 +867,187 @@ function showSimpleToast(message, type) {
   }
 }
 
-// Export for global use - MUST be after function definition
+/**
+ * Show hotel payment confirmation modal (for PayAtHotel/Cash bookings)
+ */
+function showHotelPaymentConfirmation(bookingId, bookingCode, amount) {
+  console.log("[FRONTEND] " + '🏨 [showHotelPaymentConfirmation] Showing hotel payment confirmation for booking:', bookingId);
+  
+  // Check if modal exists, if not create it
+  let modal = document.getElementById('hotelPaymentConfirmationModal');
+  if (!modal) {
+    const modalHTML = `
+      <div class="modal fade" id="hotelPaymentConfirmationModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+          <div class="modal-content" style="border-radius: 20px;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #c8a97e 0%, #b89968 100%); color: white;">
+              <h5 class="modal-title" style="font-size: 24px; font-weight: 700;">💵 Xác Nhận Thanh Toán Tại Khách Sạn</h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="padding: 30px;">
+              <div style="text-align: center; padding: 20px;">
+                <div style="font-size: 64px; margin-bottom: 20px;">🏨</div>
+                <h4 style="color: #1a1a1a; margin-bottom: 16px;">Thanh toán tại khách sạn</h4>
+                <p style="color: #6b7280; margin-bottom: 30px; font-size: 16px; line-height: 1.6;">
+                  Bạn có thể thanh toán bằng tiền mặt hoặc thẻ tại quầy lễ tân khi làm thủ tục check-in.
+                </p>
+                <div style="background: white; padding: 24px; border-radius: 12px; border: 2px solid #c8a97e; margin-bottom: 24px;">
+                  <div style="margin-bottom: 12px;">
+                    <strong style="color: #1a1a1a; font-size: 16px;">Mã đặt phòng:</strong>
+                    <span id="hpcBookingCode" style="color: #059669; font-size: 18px; font-weight: 700; margin-left: 8px;">-</span>
+                  </div>
+                  <div style="margin-bottom: 12px;">
+                    <strong style="color: #1a1a1a; font-size: 16px;">Số tiền cần thanh toán:</strong>
+                    <span id="hpcAmount" style="color: #c8a97e; font-size: 24px; font-weight: 700; margin-left: 8px;">0 ₫</span>
+                  </div>
+                  <div>
+                    <strong style="color: #1a1a1a; font-size: 16px;">Địa chỉ:</strong>
+                    <span style="color: #6b7280; font-size: 15px; margin-left: 8px;">123 Đường Biển Xanh, Thành phố Biển, Việt Nam</span>
+                  </div>
+                </div>
+                <div style="background: #f0fdf4; padding: 16px; border-radius: 8px; border: 1px solid #86efac;">
+                  <p style="margin: 0; color: #059669; font-size: 14px; line-height: 1.6;">
+                    <strong>💡 Lưu ý:</strong> Vui lòng mang theo CMND/CCCD hoặc Hộ chiếu khi đến làm thủ tục check-in và thanh toán.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer" style="border-top: 2px solid #f0f0f0; padding: 20px 30px;">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="padding: 12px 28px; font-size: 16px; font-weight: 600; border-radius: 10px;">Đóng</button>
+              <button type="button" class="btn btn-primary" onclick="confirmHotelPayment()" id="hpcConfirmBtn" style="padding: 12px 28px; font-size: 16px; font-weight: 600; border-radius: 10px; background: #c8a97e; border: none;">
+                <i class="icon-check"></i> Xác nhận đã thanh toán
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    modal = document.getElementById('hotelPaymentConfirmationModal');
+  }
+  
+  // Update modal content
+  const bookingCodeEl = document.getElementById('hpcBookingCode');
+  const amountEl = document.getElementById('hpcAmount');
+  if (bookingCodeEl) bookingCodeEl.textContent = bookingCode;
+  if (amountEl) {
+    const formatVND = (v) => {
+      const num = Number(v || 0);
+      if (num === 0) return '0 ₫';
+      return new Intl.NumberFormat('vi-VN').format(num) + ' ₫';
+    };
+    amountEl.textContent = formatVND(amount);
+  }
+  
+  // Store booking ID for confirmation
+  modal.dataset.bookingId = bookingId;
+  
+  // Show modal
+  try {
+    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+      const bsModal = new bootstrap.Modal(modal);
+      bsModal.show();
+    } else if (typeof $ !== 'undefined' && $.fn.modal) {
+      $(modal).modal('show');
+    } else {
+      modal.classList.add('show');
+      modal.style.display = 'block';
+      document.body.classList.add('modal-open');
+      const backdrop = document.createElement('div');
+      backdrop.className = 'modal-backdrop fade show';
+      document.body.appendChild(backdrop);
+    }
+  } catch (e) {
+    console.error("[FRONTEND] " + '❌ Error showing hotel payment confirmation modal:', e);
+    modal.classList.add('show');
+    modal.style.display = 'block';
+    document.body.classList.add('modal-open');
+  }
+}
+
+/**
+ * Confirm hotel payment (mark booking as paid)
+ */
+async function confirmHotelPayment() {
+  const modal = document.getElementById('hotelPaymentConfirmationModal');
+  if (!modal) {
+    showSimpleToast('Lỗi: Không tìm thấy modal', 'danger');
+    return;
+  }
+  
+  const bookingId = modal.dataset.bookingId;
+  if (!bookingId) {
+    showSimpleToast('Lỗi: Không tìm thấy mã đặt phòng', 'danger');
+    return;
+  }
+  
+  const confirmBtn = document.getElementById('hpcConfirmBtn');
+  if (confirmBtn) {
+    confirmBtn.disabled = true;
+    confirmBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Đang xử lý...';
+  }
+  
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('Vui lòng đăng nhập để xác nhận thanh toán');
+    }
+    
+    // Use PayOnline endpoint to confirm cash payment
+    const response = await fetch(`${location.origin}/api/bookings/${bookingId}/pay-online`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: 'Lỗi không xác định' }));
+      throw new Error(errorData.message || `HTTP ${response.status}`);
+    }
+    
+    const result = await response.json();
+    console.log("[FRONTEND] " + '✅ [confirmHotelPayment] Payment confirmed:', result);
+    
+    showSimpleToast('Xác nhận thanh toán thành công!', 'success');
+    
+    // Close modal
+    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+      const bsModal = bootstrap.Modal.getInstance(modal);
+      if (bsModal) bsModal.hide();
+    } else if (typeof $ !== 'undefined' && $.fn.modal) {
+      $(modal).modal('hide');
+    } else {
+      modal.classList.remove('show');
+      modal.style.display = 'none';
+      document.body.classList.remove('modal-open');
+      const backdrop = document.querySelector('.modal-backdrop');
+      if (backdrop) backdrop.remove();
+    }
+    
+    // Reload bookings list
+    if (window.loadBookings) {
+      window.loadBookings();
+    } else {
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+    }
+    
+  } catch (error) {
+    console.error("[FRONTEND] " + '❌ [confirmHotelPayment] Error:', error);
+    showSimpleToast(error.message || 'Lỗi xác nhận thanh toán', 'danger');
+    if (confirmBtn) {
+      confirmBtn.disabled = false;
+      confirmBtn.innerHTML = '<i class="icon-check"></i> Xác nhận đã thanh toán';
+    }
+  }
+}
+
+// Make functions globally available
+window.showHotelPaymentConfirmation = showHotelPaymentConfirmation;
+window.confirmHotelPayment = confirmHotelPayment;
 window.openSimplePayment = openSimplePayment;
 
 // Stop polling when modal is closed
