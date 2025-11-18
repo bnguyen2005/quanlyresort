@@ -837,62 +837,81 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
         const result = await response.json();
         console.log('[confirmPayment] ✅ Payment confirmed:', result);
 
-        // Show success message
-        if (typeof showToast === 'function') {
-          showToast('Thanh toán thành công!', 'success');
-        } else {
-          alert('Thanh toán thành công!');
-        }
-
-        // Close modal - use jQuery modal first (more compatible)
+        // Show thank you message in modal instead of closing immediately
         const modalEl = document.getElementById('paymentModal');
         if (modalEl) {
-          try {
-            if (typeof $ !== 'undefined' && $.fn.modal) {
-              $(modalEl).modal('hide');
-            } else if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-              // Try Bootstrap 5
-              try {
-                const modal = bootstrap.Modal.getInstance(modalEl);
-                if (modal) {
-                  modal.hide();
-                } else {
-                  // Create new instance and hide
-                  const newModal = new bootstrap.Modal(modalEl);
-                  newModal.hide();
-                }
-              } catch (e) {
-                console.warn('[confirmPayment] Bootstrap modal error:', e);
-                // Fallback to manual close
-                modalEl.classList.remove('show');
-                modalEl.style.display = 'none';
-                document.body.classList.remove('modal-open');
-                const backdrop = document.querySelector('.modal-backdrop');
-                if (backdrop) backdrop.remove();
-              }
-            } else {
-              // Fallback: manual close
-              modalEl.classList.remove('show');
-              modalEl.style.display = 'none';
-              document.body.classList.remove('modal-open');
-              const backdrop = document.querySelector('.modal-backdrop');
-              if (backdrop) backdrop.remove();
+          const modalBody = modalEl.querySelector('.modal-body');
+          const modalFooter = modalEl.querySelector('.modal-footer');
+          const modalHeader = modalEl.querySelector('.modal-header');
+          
+          if (modalBody && modalFooter && modalHeader) {
+            // Update header
+            const headerTitle = modalHeader.querySelector('.modal-title');
+            const headerCloseBtn = modalHeader.querySelector('.btn-close');
+            if (headerTitle) {
+              headerTitle.innerHTML = '✅ Cảm ơn bạn đã thanh toán!';
+              headerTitle.style.color = '#059669';
             }
-          } catch (e) {
-            console.warn('[confirmPayment] Error closing modal:', e);
-            // Final fallback
-            modalEl.classList.remove('show');
-            modalEl.style.display = 'none';
-            document.body.classList.remove('modal-open');
-            const backdrop = document.querySelector('.modal-backdrop');
-            if (backdrop) backdrop.remove();
+            // Ensure close button in header works
+            if (headerCloseBtn) {
+              headerCloseBtn.setAttribute('onclick', 'closeRestaurantPaymentModal()');
+              headerCloseBtn.setAttribute('data-bs-dismiss', 'modal');
+            }
+            
+            // Update body with thank you message
+            const orderNumber = window.currentOrder?.orderNumber || result.order?.orderNumber || `ORD${orderId}`;
+            modalBody.innerHTML = `
+              <div style="text-align: center; padding: 40px 20px;">
+                <div style="font-size: 80px; margin-bottom: 24px;">🎉</div>
+                <h3 style="color: #059669; margin-bottom: 16px; font-weight: 700;">Cảm ơn bạn đã thanh toán!</h3>
+                <p style="color: #6b7280; margin-bottom: 24px; font-size: 16px; line-height: 1.6;">
+                  Thanh toán của bạn đã được xác nhận thành công.
+                </p>
+                <div style="background: #f0fdf4; padding: 20px; border-radius: 12px; border: 2px solid #86efac; margin-bottom: 24px;">
+                  <div style="margin-bottom: 12px;">
+                    <strong style="color: #1a1a1a; font-size: 16px;">Mã đơn hàng:</strong>
+                    <span style="color: #059669; font-size: 18px; font-weight: 700; margin-left: 8px;">${orderNumber}</span>
+                  </div>
+                  <div style="margin-bottom: 12px;">
+                    <strong style="color: #1a1a1a; font-size: 16px;">Phương thức thanh toán:</strong>
+                    <span style="color: #059669; font-size: 18px; font-weight: 700; margin-left: 8px;">${paymentMethod === 'Cash' ? '💵 Tiền mặt' : paymentMethod === 'QR' ? '💳 QR Code' : paymentMethod}</span>
+                  </div>
+                  <div>
+                    <strong style="color: #1a1a1a; font-size: 16px;">Trạng thái:</strong>
+                    <span style="color: #059669; font-size: 18px; font-weight: 700; margin-left: 8px;">Đã thanh toán</span>
+                  </div>
+                </div>
+                <div style="background: #fef3c7; padding: 16px; border-radius: 8px; border: 1px solid #fbbf24;">
+                  <p style="margin: 0; color: #92400e; font-size: 14px; line-height: 1.6;">
+                    <strong>💡 Lưu ý:</strong> Đơn hàng của bạn sẽ được chuẩn bị và giao đến địa chỉ đã đăng ký.
+                  </p>
+                </div>
+              </div>
+            `;
+            
+            // Update footer - only show close button
+            modalFooter.innerHTML = `
+              <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="closeRestaurantPaymentModal()" style="padding: 12px 28px; font-size: 16px; font-weight: 600; border-radius: 10px; background: #c8a97e; border: none; width: 100%;">
+                <i class="icon-check"></i> Đóng
+              </button>
+            `;
           }
         }
+        
+        // Show toast notification
+        if (typeof showToast === 'function') {
+          showToast('Xác nhận thanh toán thành công! Cảm ơn bạn!', 'success');
+        } else {
+          alert('Xác nhận thanh toán thành công! Cảm ơn bạn!');
+        }
 
-        // Reload order details after a short delay to update UI
+        // Reload order details after a delay
         setTimeout(() => {
-          console.log('[confirmPayment] Reloading order details to update UI...');
-          loadOrderDetails(orderId);
+          if (window.loadOrderDetails) {
+            window.loadOrderDetails(orderId);
+          } else {
+            window.location.reload();
+          }
         }, 1000);
 
       } catch (error) {
