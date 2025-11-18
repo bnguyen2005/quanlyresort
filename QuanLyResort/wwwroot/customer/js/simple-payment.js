@@ -141,8 +141,28 @@ async function openSimplePayment(bookingId) {
     }
 
     // Check payment method - if PayAtHotel or Cash, show hotel payment confirmation instead of QR
-    // Payment method can be in booking object, invoice, or need to fetch from API
+    // Payment method can be in booking object, invoice, SpecialRequests (JSON), or need to fetch from API
     let paymentMethod = booking.paymentMethod || booking.PaymentMethod;
+    
+    // If not found, try to parse from SpecialRequests (JSON string)
+    if (!paymentMethod && booking.specialRequests) {
+      try {
+        const specialRequests = typeof booking.specialRequests === 'string' 
+          ? JSON.parse(booking.specialRequests) 
+          : booking.specialRequests;
+        if (specialRequests && typeof specialRequests === 'object') {
+          paymentMethod = specialRequests.paymentMethod || specialRequests.PaymentMethod;
+        }
+      } catch (e) {
+        // If parsing fails, check if it contains payment method as plain text
+        const specialRequestsStr = String(booking.specialRequests || '');
+        if (specialRequestsStr.includes('PayAtHotel') || specialRequestsStr.includes('"paymentMethod":"PayAtHotel"')) {
+          paymentMethod = 'PayAtHotel';
+        } else if (specialRequestsStr.includes('Cash') || specialRequestsStr.includes('"paymentMethod":"Cash"')) {
+          paymentMethod = 'Cash';
+        }
+      }
+    }
     
     // If not found in booking, check invoice
     if (!paymentMethod && booking.invoice) {
@@ -164,6 +184,21 @@ async function openSimplePayment(bookingId) {
         if (detailResp.ok) {
           const bookingDetail = await detailResp.json();
           paymentMethod = bookingDetail.paymentMethod || bookingDetail.PaymentMethod;
+          
+          // Try to parse from SpecialRequests in detail
+          if (!paymentMethod && bookingDetail.specialRequests) {
+            try {
+              const specialRequests = typeof bookingDetail.specialRequests === 'string' 
+                ? JSON.parse(bookingDetail.specialRequests) 
+                : bookingDetail.specialRequests;
+              if (specialRequests && typeof specialRequests === 'object') {
+                paymentMethod = specialRequests.paymentMethod || specialRequests.PaymentMethod;
+              }
+            } catch (e) {
+              console.warn("[FRONTEND] " + '⚠️ Could not parse SpecialRequests:', e);
+            }
+          }
+          
           if (bookingDetail.invoice) {
             paymentMethod = paymentMethod || bookingDetail.invoice.paymentMethod || bookingDetail.invoice.PaymentMethod;
           }
