@@ -2347,6 +2347,57 @@
       
       document.body.insertAdjacentHTML('beforeend', modalHTML);
       
+      // Attach event listener to add to cart button in modal
+      const addToCartBtn = document.getElementById('quickViewAddToCartBtn');
+      if (addToCartBtn) {
+        addToCartBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          
+          const btnServiceId = parseInt(this.getAttribute('data-service-id'));
+          const btnServiceName = this.getAttribute('data-service-name') || '';
+          const btnPrice = parseInt(this.getAttribute('data-price')) || 0;
+          
+          console.log('[showQuickView] Add to cart clicked in modal:', { btnServiceId, btnServiceName, btnPrice });
+          
+          if (btnServiceId && !isNaN(btnServiceId)) {
+            // Check quantity from quick view modal
+            const quickViewQtyEl = document.getElementById(`quickViewQty-${btnServiceId}`);
+            let quantity = parseInt(quickViewQtyEl?.textContent || 0);
+            
+            // Auto set quantity to 1 if 0
+            if (quantity <= 0) {
+              quantity = 1;
+              if (quickViewQtyEl) {
+                quickViewQtyEl.textContent = '1';
+              }
+              // Also update main display if exists
+              const mainQtyEl = document.getElementById(`qty-${btnServiceId}`);
+              if (mainQtyEl) {
+                mainQtyEl.textContent = '1';
+              }
+            }
+            
+            if (typeof window.addToCart === 'function') {
+              window.addToCart(btnServiceId, btnServiceName, btnPrice);
+              // Update quick view quantity display after adding
+              if (typeof updateQuickViewQty === 'function') {
+                setTimeout(() => updateQuickViewQty(btnServiceId), 100);
+              }
+            } else {
+              console.error('[showQuickView] addToCart function not found');
+              if (window.showToast) {
+                showToast('Lỗi: Chức năng chưa sẵn sàng. Vui lòng tải lại trang.', 'error');
+              } else {
+                alert('Lỗi: Chức năng chưa sẵn sàng. Vui lòng tải lại trang.');
+              }
+            }
+          } else {
+            console.error('[showQuickView] Could not find serviceId for add to cart button');
+          }
+        });
+      }
+      
       // Show modal (Bootstrap 4 compatible)
       const modalEl = document.getElementById('quickViewModal');
       if (typeof jQuery !== 'undefined' && jQuery(modalEl).modal) {
