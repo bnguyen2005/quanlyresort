@@ -83,6 +83,12 @@ async function openRestaurantPayment(orderId) {
           const confirmBtn = document.getElementById('rpConfirmCashBtn');
           if (confirmBtn) confirmBtn.style.display = 'none';
           
+          // Hide waiting and success messages initially
+          const waitingEl = document.getElementById('rpWaiting');
+          const successEl = document.getElementById('rpSuccess');
+          if (waitingEl) waitingEl.style.display = 'block';
+          if (successEl) successEl.style.display = 'none';
+          
           // Only create QR when QR is selected
           updateRestaurantPaymentModal(orderId, order.orderNumber || `ORD${orderId}`, amount);
           
