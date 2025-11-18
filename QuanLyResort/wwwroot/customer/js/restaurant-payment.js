@@ -479,26 +479,11 @@ function startRestaurantPaymentPolling(orderId) {
         // Stop polling
         stopRestaurantPaymentPolling();
         
-        // Show success UI immediately
-        showRestaurantPaymentSuccess();
-        
-        // Force update lại sau 100ms và 300ms
-        setTimeout(() => {
-          showRestaurantPaymentSuccess();
-        }, 100);
-        
-        setTimeout(() => {
-          showRestaurantPaymentSuccess();
-        }, 300);
+        // Show thank you message in modal
+        showRestaurantPaymentThankYou(order);
         
         // Show toast notification
-        showSimpleToast('✅ Thanh toán thành công!', 'success');
-        
-        // Reload order details after 2 seconds
-        setTimeout(() => {
-          console.log('[FRONTEND] 🔄 [RestaurantPaymentPolling] Reloading page to show updated status...');
-          window.location.reload();
-        }, 2000);
+        showSimpleToast('✅ Thanh toán thành công! Cảm ơn bạn!', 'success');
         
         console.log('[FRONTEND] ✅✅✅ [RestaurantPaymentPolling] ========== PAYMENT PROCESSING COMPLETE ==========');
       } else {
@@ -527,7 +512,7 @@ function stopRestaurantPaymentPolling() {
 }
 
 /**
- * Show payment success
+ * Show payment success (legacy - kept for compatibility)
  */
 function showRestaurantPaymentSuccess() {
   console.log("[FRONTEND] 🎉🎉🎉 [showRestaurantPaymentSuccess] ========== STARTING ==========");
@@ -589,6 +574,155 @@ function showRestaurantPaymentSuccess() {
 }
 
 /**
+ * Show thank you message after successful QR payment
+ */
+function showRestaurantPaymentThankYou(order) {
+  console.log("[FRONTEND] 🎉 [showRestaurantPaymentThankYou] Showing thank you message for order:", order);
+  
+  const modal = document.getElementById('restaurantPaymentModal');
+  if (!modal) {
+    console.error("[FRONTEND] ❌ [showRestaurantPaymentThankYou] Modal restaurantPaymentModal not found!");
+    return;
+  }
+  
+  const modalBody = modal.querySelector('.modal-body');
+  const modalFooter = modal.querySelector('.modal-footer');
+  const modalHeader = modal.querySelector('.modal-header');
+  
+  if (modalBody && modalFooter && modalHeader) {
+    // Update header
+    const headerTitle = modalHeader.querySelector('.modal-title');
+    const headerCloseBtn = modalHeader.querySelector('.btn-close');
+    if (headerTitle) {
+      headerTitle.innerHTML = '✅ Cảm ơn bạn đã thanh toán!';
+      headerTitle.style.color = '#059669';
+    }
+    // Ensure close button in header works
+    if (headerCloseBtn) {
+      headerCloseBtn.setAttribute('onclick', 'closeRestaurantPaymentModal()');
+      headerCloseBtn.setAttribute('data-bs-dismiss', 'modal');
+    }
+    
+    // Update body with thank you message
+    const orderNumber = order?.orderNumber || `ORD${order?.orderId || ''}`;
+    const amount = order?.totalAmount || 0;
+    modalBody.innerHTML = `
+      <div style="text-align: center; padding: 40px 20px;">
+        <div style="font-size: 80px; margin-bottom: 24px;">🎉</div>
+        <h3 style="color: #059669; margin-bottom: 16px; font-weight: 700;">Cảm ơn bạn đã thanh toán!</h3>
+        <p style="color: #6b7280; margin-bottom: 24px; font-size: 16px; line-height: 1.6;">
+          Thanh toán của bạn đã được xác nhận thành công.
+        </p>
+        <div style="background: #f0fdf4; padding: 20px; border-radius: 12px; border: 2px solid #86efac; margin-bottom: 24px;">
+          <div style="margin-bottom: 12px;">
+            <strong style="color: #1a1a1a; font-size: 16px;">Mã đơn hàng:</strong>
+            <span style="color: #059669; font-size: 18px; font-weight: 700; margin-left: 8px;">${orderNumber}</span>
+          </div>
+          <div style="margin-bottom: 12px;">
+            <strong style="color: #1a1a1a; font-size: 16px;">Số tiền:</strong>
+            <span style="color: #059669; font-size: 18px; font-weight: 700; margin-left: 8px;">${formatCurrency(amount)}</span>
+          </div>
+          <div style="margin-bottom: 12px;">
+            <strong style="color: #1a1a1a; font-size: 16px;">Phương thức thanh toán:</strong>
+            <span style="color: #059669; font-size: 18px; font-weight: 700; margin-left: 8px;">💳 QR Code</span>
+          </div>
+          <div>
+            <strong style="color: #1a1a1a; font-size: 16px;">Trạng thái:</strong>
+            <span style="color: #059669; font-size: 18px; font-weight: 700; margin-left: 8px;">Đã thanh toán</span>
+          </div>
+        </div>
+        <div style="background: #fef3c7; padding: 16px; border-radius: 8px; border: 1px solid #fbbf24;">
+          <p style="margin: 0; color: #92400e; font-size: 14px; line-height: 1.6;">
+            <strong>💡 Lưu ý:</strong> Đơn hàng của bạn sẽ được chuẩn bị và giao đến địa chỉ đã đăng ký.
+          </p>
+        </div>
+      </div>
+    `;
+    
+    // Update footer - only show close button
+    modalFooter.innerHTML = `
+      <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="closeRestaurantPaymentModal()" style="padding: 12px 28px; font-size: 16px; font-weight: 600; border-radius: 10px; background: #c8a97e; border: none; width: 100%;">
+        <i class="icon-check"></i> Đóng
+      </button>
+    `;
+  }
+}
+
+/**
+ * Close restaurant payment modal
+ */
+function closeRestaurantPaymentModal() {
+  const modal = document.getElementById('restaurantPaymentModal');
+  if (!modal) {
+    console.warn("[FRONTEND] " + '⚠️ [closeRestaurantPaymentModal] Modal not found');
+    return;
+  }
+  
+  console.log("[FRONTEND] " + '🔄 [closeRestaurantPaymentModal] Closing restaurant payment modal');
+  
+  // Try multiple methods to close modal
+  let closed = false;
+  
+  // Method 1: Bootstrap 5 - try getInstance first
+  if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+    try {
+      if (typeof bootstrap.Modal.getInstance === 'function') {
+        const bsModal = bootstrap.Modal.getInstance(modal);
+        if (bsModal) {
+          bsModal.hide();
+          closed = true;
+          console.log("[FRONTEND] " + '✅ [closeRestaurantPaymentModal] Closed using Bootstrap 5 Modal.getInstance');
+        } else {
+          const newModal = new bootstrap.Modal(modal);
+          newModal.hide();
+          closed = true;
+          console.log("[FRONTEND] " + '✅ [closeRestaurantPaymentModal] Closed using Bootstrap 5 new Modal instance');
+        }
+      }
+    } catch (e) {
+      console.warn("[FRONTEND] " + '⚠️ [closeRestaurantPaymentModal] Bootstrap method failed:', e);
+    }
+  }
+  
+  // Method 2: jQuery
+  if (!closed && typeof $ !== 'undefined' && $.fn.modal) {
+    try {
+      $(modal).modal('hide');
+      closed = true;
+      console.log("[FRONTEND] " + '✅ [closeRestaurantPaymentModal] Closed using jQuery');
+    } catch (e) {
+      console.warn("[FRONTEND] " + '⚠️ [closeRestaurantPaymentModal] jQuery method failed:', e);
+    }
+  }
+  
+  // Method 3: Direct DOM manipulation
+  if (!closed) {
+    modal.classList.remove('show');
+    modal.style.display = 'none';
+    document.body.classList.remove('modal-open');
+    const backdrop = document.querySelector('.modal-backdrop');
+    if (backdrop) backdrop.remove();
+    closed = true;
+    console.log("[FRONTEND] " + '✅ [closeRestaurantPaymentModal] Closed using direct DOM manipulation');
+  }
+  
+  // Reload page or order list after modal is closed
+  setTimeout(() => {
+    if (window.location.pathname.includes('order-details')) {
+      // If on order details page, reload order details
+      if (window.loadOrderDetails && window.currentOrder?.orderId) {
+        window.loadOrderDetails(window.currentOrder.orderId);
+      } else {
+        window.location.reload();
+      }
+    } else {
+      // If on orders list page, reload page
+      window.location.reload();
+    }
+  }, 300);
+}
+
+/**
  * Format currency
  */
 function formatCurrency(amount) {
@@ -624,4 +758,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Export for global use
 window.openRestaurantPayment = openRestaurantPayment;
+window.closeRestaurantPaymentModal = closeRestaurantPaymentModal;
 

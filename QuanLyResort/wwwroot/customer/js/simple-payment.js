@@ -662,38 +662,14 @@ function startSimplePolling(bookingId) {
         console.log('[FRONTEND] 🔄 [SimplePolling] Stopping polling...');
         stopSimplePolling();
         
-        // Show success UI immediately (KHÔNG cần delay)
-        console.log('[FRONTEND] 🎉 [SimplePolling] Calling showPaymentSuccess() immediately...');
-        showPaymentSuccess();
-        
-        // Force update lại sau 100ms để đảm bảo
-        setTimeout(() => {
-          console.log('[FRONTEND] 🎉 [SimplePolling] Calling showPaymentSuccess() again (100ms delay)...');
-          showPaymentSuccess();
-        }, 100);
-        
-        // Force update lại sau 300ms để đảm bảo
-        setTimeout(() => {
-          console.log('[FRONTEND] 🎉 [SimplePolling] Calling showPaymentSuccess() again (300ms delay)...');
-          showPaymentSuccess();
-        }, 300);
+        // Show thank you message in modal
+        showBookingPaymentThankYou(booking);
         
         // Show toast notification
         console.log('[FRONTEND] 🎉 [SimplePolling] Showing toast notification...');
-        showSimpleToast('✅ Thanh toán thành công!', 'success');
+        showSimpleToast('✅ Thanh toán thành công! Cảm ơn bạn!', 'success');
         
-        // Reload bookings list to update status ngay lập tức
-        if (window.loadBookings) {
-          console.log('[FRONTEND] 🔄 [SimplePolling] Reloading bookings list...');
-          window.loadBookings();
-        }
-        
-        // Option 1: Reload trang sau 2 giây (ĐƠN GIẢN NHẤT - không cần đóng modal)
-        // Giải pháp này đảm bảo UI được cập nhật hoàn toàn và không có lỗi Bootstrap
-        setTimeout(() => {
-          console.log('[FRONTEND] 🔄 [SimplePolling] Reloading page to show updated status...');
-          window.location.reload();
-        }, 2000);
+        console.log('[FRONTEND] ✅✅✅ [SimplePolling] ========== PAYMENT PROCESSING COMPLETE ==========');
         
         // Option 2: Đóng modal sau 5 giây (nếu không muốn reload trang)
         // Uncomment dòng dưới và comment Option 1 nếu muốn dùng cách này
@@ -746,7 +722,150 @@ function stopSimplePolling() {
 }
 
 /**
- * Show payment success
+ * Show thank you message after successful QR payment for booking
+ */
+function showBookingPaymentThankYou(booking) {
+  console.log("[FRONTEND] 🎉 [showBookingPaymentThankYou] Showing thank you message for booking:", booking);
+  
+  const modal = document.getElementById('simplePaymentModal');
+  if (!modal) {
+    console.error("[FRONTEND] ❌ [showBookingPaymentThankYou] Modal simplePaymentModal not found!");
+    return;
+  }
+  
+  const modalBody = modal.querySelector('.modal-body');
+  const modalFooter = modal.querySelector('.modal-footer');
+  const modalHeader = modal.querySelector('.modal-header');
+  
+  if (modalBody && modalFooter && modalHeader) {
+    // Update header
+    const headerTitle = modalHeader.querySelector('.modal-title');
+    const headerCloseBtn = modalHeader.querySelector('.btn-close');
+    if (headerTitle) {
+      headerTitle.innerHTML = '✅ Cảm ơn bạn đã thanh toán!';
+      headerTitle.style.color = '#059669';
+    }
+    // Ensure close button in header works
+    if (headerCloseBtn) {
+      headerCloseBtn.setAttribute('onclick', 'closeSimplePaymentModal()');
+      headerCloseBtn.setAttribute('data-bs-dismiss', 'modal');
+    }
+    
+    // Update body with thank you message
+    const bookingCode = booking?.bookingCode || `BKG${booking?.bookingId || ''}`;
+    const amount = booking?.estimatedTotalAmount || booking?.totalAmount || 0;
+    modalBody.innerHTML = `
+      <div style="text-align: center; padding: 40px 20px;">
+        <div style="font-size: 80px; margin-bottom: 24px;">🎉</div>
+        <h3 style="color: #059669; margin-bottom: 16px; font-weight: 700;">Cảm ơn bạn đã thanh toán!</h3>
+        <p style="color: #6b7280; margin-bottom: 24px; font-size: 16px; line-height: 1.6;">
+          Thanh toán của bạn đã được xác nhận thành công.
+        </p>
+        <div style="background: #f0fdf4; padding: 20px; border-radius: 12px; border: 2px solid #86efac; margin-bottom: 24px;">
+          <div style="margin-bottom: 12px;">
+            <strong style="color: #1a1a1a; font-size: 16px;">Mã đặt phòng:</strong>
+            <span style="color: #059669; font-size: 18px; font-weight: 700; margin-left: 8px;">${bookingCode}</span>
+          </div>
+          <div style="margin-bottom: 12px;">
+            <strong style="color: #1a1a1a; font-size: 16px;">Số tiền:</strong>
+            <span style="color: #059669; font-size: 18px; font-weight: 700; margin-left: 8px;">${formatCurrency(amount)}</span>
+          </div>
+          <div style="margin-bottom: 12px;">
+            <strong style="color: #1a1a1a; font-size: 16px;">Phương thức thanh toán:</strong>
+            <span style="color: #059669; font-size: 18px; font-weight: 700; margin-left: 8px;">💳 QR Code</span>
+          </div>
+          <div>
+            <strong style="color: #1a1a1a; font-size: 16px;">Trạng thái:</strong>
+            <span style="color: #059669; font-size: 18px; font-weight: 700; margin-left: 8px;">Đã thanh toán</span>
+          </div>
+        </div>
+        <div style="background: #fef3c7; padding: 16px; border-radius: 8px; border: 1px solid #fbbf24;">
+          <p style="margin: 0; color: #92400e; font-size: 14px; line-height: 1.6;">
+            <strong>💡 Lưu ý:</strong> Vui lòng mang theo CMND/CCCD hoặc Hộ chiếu khi đến làm thủ tục check-in.
+          </p>
+        </div>
+      </div>
+    `;
+    
+    // Update footer - only show close button
+    modalFooter.innerHTML = `
+      <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="closeSimplePaymentModal()" style="padding: 12px 28px; font-size: 16px; font-weight: 600; border-radius: 10px; background: #c8a97e; border: none; width: 100%;">
+        <i class="icon-check"></i> Đóng
+      </button>
+    `;
+  }
+}
+
+/**
+ * Close simple payment modal
+ */
+function closeSimplePaymentModal() {
+  const modal = document.getElementById('simplePaymentModal');
+  if (!modal) {
+    console.warn("[FRONTEND] " + '⚠️ [closeSimplePaymentModal] Modal not found');
+    return;
+  }
+  
+  console.log("[FRONTEND] " + '🔄 [closeSimplePaymentModal] Closing simple payment modal');
+  
+  // Try multiple methods to close modal
+  let closed = false;
+  
+  // Method 1: Bootstrap 5 - try getInstance first
+  if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+    try {
+      if (typeof bootstrap.Modal.getInstance === 'function') {
+        const bsModal = bootstrap.Modal.getInstance(modal);
+        if (bsModal) {
+          bsModal.hide();
+          closed = true;
+          console.log("[FRONTEND] " + '✅ [closeSimplePaymentModal] Closed using Bootstrap 5 Modal.getInstance');
+        } else {
+          const newModal = new bootstrap.Modal(modal);
+          newModal.hide();
+          closed = true;
+          console.log("[FRONTEND] " + '✅ [closeSimplePaymentModal] Closed using Bootstrap 5 new Modal instance');
+        }
+      }
+    } catch (e) {
+      console.warn("[FRONTEND] " + '⚠️ [closeSimplePaymentModal] Bootstrap method failed:', e);
+    }
+  }
+  
+  // Method 2: jQuery
+  if (!closed && typeof $ !== 'undefined' && $.fn.modal) {
+    try {
+      $(modal).modal('hide');
+      closed = true;
+      console.log("[FRONTEND] " + '✅ [closeSimplePaymentModal] Closed using jQuery');
+    } catch (e) {
+      console.warn("[FRONTEND] " + '⚠️ [closeSimplePaymentModal] jQuery method failed:', e);
+    }
+  }
+  
+  // Method 3: Direct DOM manipulation
+  if (!closed) {
+    modal.classList.remove('show');
+    modal.style.display = 'none';
+    document.body.classList.remove('modal-open');
+    const backdrop = document.querySelector('.modal-backdrop');
+    if (backdrop) backdrop.remove();
+    closed = true;
+    console.log("[FRONTEND] " + '✅ [closeSimplePaymentModal] Closed using direct DOM manipulation');
+  }
+  
+  // Reload bookings list after modal is closed
+  setTimeout(() => {
+    if (window.loadBookings) {
+      window.loadBookings();
+    } else {
+      window.location.reload();
+    }
+  }, 300);
+}
+
+/**
+ * Show payment success (legacy - kept for compatibility)
  */
 function showPaymentSuccess() {
   console.log("[FRONTEND] 🎉🎉🎉 [showPaymentSuccess] ========== STARTING ==========");
@@ -1243,6 +1362,7 @@ function closeHotelPaymentModal() {
 window.showHotelPaymentConfirmation = showHotelPaymentConfirmation;
 window.confirmHotelPayment = confirmHotelPayment;
 window.closeHotelPaymentModal = closeHotelPaymentModal;
+window.closeSimplePaymentModal = closeSimplePaymentModal;
 window.openSimplePayment = openSimplePayment;
 
 // Stop polling when modal is closed
