@@ -957,7 +957,7 @@ function showHotelPaymentConfirmation(bookingId, bookingCode, amount) {
           <div class="modal-content" style="border-radius: 20px;">
             <div class="modal-header" style="background: linear-gradient(135deg, #c8a97e 0%, #b89968 100%); color: white;">
               <h5 class="modal-title" style="font-size: 24px; font-weight: 700;">💵 Xác Nhận Thanh Toán Tại Khách Sạn</h5>
-              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" onclick="closeHotelPaymentModal()"></button>
             </div>
             <div class="modal-body" style="padding: 30px;">
               <div style="text-align: center; padding: 20px;">
