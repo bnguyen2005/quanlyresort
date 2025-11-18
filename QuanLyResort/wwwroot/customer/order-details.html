@@ -932,8 +932,77 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
       }
     }
     
-    // Make confirmPayment globally accessible
+    /**
+     * Close restaurant payment modal
+     */
+    function closeRestaurantPaymentModal() {
+      const modal = document.getElementById('paymentModal');
+      if (!modal) {
+        console.warn('[closeRestaurantPaymentModal] Modal not found');
+        return;
+      }
+      
+      console.log('[closeRestaurantPaymentModal] Closing restaurant payment modal');
+      
+      // Try multiple methods to close modal
+      let closed = false;
+      
+      // Method 1: Bootstrap 5 - try getInstance first
+      if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        try {
+          if (typeof bootstrap.Modal.getInstance === 'function') {
+            const bsModal = bootstrap.Modal.getInstance(modal);
+            if (bsModal) {
+              bsModal.hide();
+              closed = true;
+              console.log('[closeRestaurantPaymentModal] Closed using Bootstrap 5 Modal.getInstance');
+            } else {
+              const newModal = new bootstrap.Modal(modal);
+              newModal.hide();
+              closed = true;
+              console.log('[closeRestaurantPaymentModal] Closed using Bootstrap 5 new Modal instance');
+            }
+          }
+        } catch (e) {
+          console.warn('[closeRestaurantPaymentModal] Bootstrap method failed:', e);
+        }
+      }
+      
+      // Method 2: jQuery
+      if (!closed && typeof $ !== 'undefined' && $.fn.modal) {
+        try {
+          $(modal).modal('hide');
+          closed = true;
+          console.log('[closeRestaurantPaymentModal] Closed using jQuery');
+        } catch (e) {
+          console.warn('[closeRestaurantPaymentModal] jQuery method failed:', e);
+        }
+      }
+      
+      // Method 3: Direct DOM manipulation
+      if (!closed) {
+        modal.classList.remove('show');
+        modal.style.display = 'none';
+        document.body.classList.remove('modal-open');
+        const backdrop = document.querySelector('.modal-backdrop');
+        if (backdrop) backdrop.remove();
+        closed = true;
+        console.log('[closeRestaurantPaymentModal] Closed using direct DOM manipulation');
+      }
+      
+      // Reload order details after modal is closed
+      setTimeout(() => {
+        if (window.loadOrderDetails && window.currentOrder?.orderId) {
+          window.loadOrderDetails(window.currentOrder.orderId);
+        } else {
+          window.location.reload();
+        }
+      }, 300);
+    }
+
+    // Make functions globally accessible
     window.confirmPayment = confirmPayment;
+    window.closeRestaurantPaymentModal = closeRestaurantPaymentModal;
 
     function showError(message) {
       document.getElementById('loadingState').style.display = 'none';
