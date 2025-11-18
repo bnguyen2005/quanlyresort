@@ -2076,12 +2076,12 @@
                 </p>
                 
                 <!-- Actions Section -->
-                <div class="menu-actions-new" style="display: flex; gap: 10px; align-items: center; margin-top: auto; padding-top: 16px; border-top: 1px solid #f0f0f0;">
+                <div class="menu-actions-new" style="display: flex; gap: 8px; align-items: center; margin-top: auto; padding-top: 16px; border-top: 1px solid #f0f0f0;">
                   <!-- Quantity Control -->
-                  <div class="quantity-control-new" style="display: flex; align-items: center; gap: 8px; background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 12px; padding: 6px 8px;">
-                    <button type="button" class="btn-qty-new btn-qty-minus" data-service-id="${item.serviceId}" data-delta="-1" style="background: #ffffff; border: none; border-radius: 8px; font-size: 20px; cursor: pointer; color: #C8A97E; padding: 6px 12px; line-height: 1; min-width: 36px; transition: all 0.2s; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05);" onmouseover="this.style.background='#f0f0f0'; this.style.color='#B89968'; this.style.transform='scale(1.1)';" onmouseout="this.style.background='#ffffff'; this.style.color='#C8A97E'; this.style.transform='scale(1)';" onclick="event.stopPropagation();">−</button>
-                    <span id="qty-${item.serviceId}" class="quantity-display-new" style="min-width: 32px; text-align: center; font-weight: 700; color: #1a1a1a; font-size: 16px; padding: 0 8px;">0</span>
-                    <button type="button" class="btn-qty-new btn-qty-plus" data-service-id="${item.serviceId}" data-delta="1" style="background: #ffffff; border: none; border-radius: 8px; font-size: 20px; cursor: pointer; color: #C8A97E; padding: 6px 12px; line-height: 1; min-width: 36px; transition: all 0.2s; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05);" onmouseover="this.style.background='#f0f0f0'; this.style.color='#B89968'; this.style.transform='scale(1.1)';" onmouseout="this.style.background='#ffffff'; this.style.color='#C8A97E'; this.style.transform='scale(1)';" onclick="event.stopPropagation();">+</button>
+                  <div class="quantity-control-new" style="display: flex; align-items: center; gap: 4px; background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 4px 6px; flex-shrink: 0;">
+                    <button type="button" class="btn-qty-new btn-qty-minus" data-service-id="${item.serviceId}" data-delta="-1" style="background: #ffffff; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; color: #C8A97E; padding: 4px 8px; line-height: 1; min-width: 28px; width: 28px; height: 28px; transition: all 0.2s; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">−</button>
+                    <span id="qty-${item.serviceId}" class="quantity-display-new" style="min-width: 24px; width: 24px; text-align: center; font-weight: 700; color: #1a1a1a; font-size: 14px; padding: 0 4px;">0</span>
+                    <button type="button" class="btn-qty-new btn-qty-plus" data-service-id="${item.serviceId}" data-delta="1" style="background: #ffffff; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; color: #C8A97E; padding: 4px 8px; line-height: 1; min-width: 28px; width: 28px; height: 28px; transition: all 0.2s; font-weight: 700; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">+</button>
                   </div>
                   
                   <!-- Add to Cart Button -->
@@ -2121,35 +2121,46 @@
         if (qtyBtn) {
           e.preventDefault();
           e.stopPropagation();
-          const serviceId = parseInt(qtyBtn.getAttribute('data-service-id') || qtyBtn.closest('.menu-card, .menu-card-new')?.getAttribute('data-service-id'));
+          
+          // Get serviceId from button attribute or parent card
+          let serviceId = parseInt(qtyBtn.getAttribute('data-service-id'));
+          if (!serviceId || isNaN(serviceId)) {
+            const parentCard = qtyBtn.closest('.menu-card, .menu-card-new');
+            serviceId = parseInt(parentCard?.getAttribute('data-service-id'));
+          }
+          
+          // Get delta from attribute or determine from class names
           let delta = parseInt(qtyBtn.getAttribute('data-delta'));
           if (isNaN(delta)) {
-            // Determine delta from class names
-            if (qtyBtn.classList.contains('btn-qty-plus') || (qtyBtn.classList.contains('btn-qty-new') && !qtyBtn.classList.contains('btn-qty-minus'))) {
+            // Determine delta from class names - check for plus/minus classes first
+            if (qtyBtn.classList.contains('btn-qty-plus')) {
               delta = 1;
-            } else {
+            } else if (qtyBtn.classList.contains('btn-qty-minus')) {
               delta = -1;
+            } else if (qtyBtn.classList.contains('btn-qty-new')) {
+              // For btn-qty-new, check if it has plus or minus class
+              if (qtyBtn.classList.contains('btn-qty-plus')) {
+                delta = 1;
+              } else if (qtyBtn.classList.contains('btn-qty-minus')) {
+                delta = -1;
+              } else {
+                // Fallback: check button text or position
+                const btnText = qtyBtn.textContent?.trim();
+                delta = (btnText === '+' || btnText === '＋') ? 1 : -1;
+              }
             }
           }
           
-          if (serviceId && !isNaN(serviceId)) {
-            console.log('[renderMenuItems] Quantity button clicked:', { serviceId, delta, target: target.tagName, qtyBtn: qtyBtn.tagName });
+          if (serviceId && !isNaN(serviceId) && !isNaN(delta)) {
+            console.log('[renderMenuItems] Quantity button clicked:', { serviceId, delta, target: target.tagName, qtyBtn: qtyBtn.tagName, classes: qtyBtn.className });
             if (typeof window.adjustQuantity === 'function') {
               window.adjustQuantity(serviceId, delta);
-              // Show feedback
-              if (window.showToast) {
-                const qtyEl = document.getElementById(`qty-${serviceId}`);
-                const newQty = parseInt(qtyEl?.textContent || 0);
-                if (newQty > 0) {
-                  showToast(`Số lượng: ${newQty}`, 'info');
-                }
-              }
             } else {
               console.error('[renderMenuItems] adjustQuantity function not found');
               alert('Lỗi: Chức năng chưa sẵn sàng. Vui lòng tải lại trang.');
             }
           } else {
-            console.error('[renderMenuItems] Could not find serviceId for quantity button');
+            console.error('[renderMenuItems] Could not find serviceId or delta for quantity button:', { serviceId, delta, qtyBtn });
           }
           return;
         }
