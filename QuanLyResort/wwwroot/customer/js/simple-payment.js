@@ -144,7 +144,7 @@ async function openSimplePayment(bookingId) {
     const paymentMethod = booking.paymentMethod || booking.PaymentMethod || 'BankTransfer';
     console.log("[FRONTEND] " + '🔍 [openSimplePayment] Payment method:', paymentMethod);
     
-    if (paymentMethod === 'PayAtHotel' || paymentMethod === 'Cash' || paymentMethod === 'PayAtHotel') {
+    if (paymentMethod === 'PayAtHotel' || paymentMethod === 'Cash') {
       // Show hotel payment confirmation modal instead of QR
       showHotelPaymentConfirmation(bookingId, booking.bookingCode || `BKG${bookingId}`, amount);
       return;
