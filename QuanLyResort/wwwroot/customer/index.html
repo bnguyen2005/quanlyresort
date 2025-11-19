@@ -34,6 +34,30 @@
   <link rel="stylesheet" href="/css/grid.css">
   <link rel="stylesheet" href="/css/components/navbar.css">
   <style>
+    /* Unified font styling */
+    body {
+      font-family: 'Poppins', sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      color: #333;
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+    
+    .heading-section h2 {
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+    }
+    
+    p {
+      font-family: 'Poppins', sans-serif;
+      line-height: 1.8;
+    }
+    
     /* Fix booking form input sizes */
     .ftco-booking .booking-form .form-control,
     .ftco-booking .booking-form select.form-control {
@@ -124,7 +148,7 @@
       </div>
     </section>
 
-    <section class="ftco-booking">
+    <section class="ftco-booking" style="margin-top: 60px; padding-top: 40px; padding-bottom: 40px;">
     	<div class="container">
     		<div class="row">
     			<div class="col-lg-12">
@@ -202,10 +226,12 @@
     <section class="ftco-section ftc-no-pb ftc-no-pt">
 			<div class="container">
 				<div class="row">
-					<div class="col-md-5 p-md-5 img img-2 d-flex justify-content-center align-items-center" style="background-image: url(images/bg_2.jpg);">
-						<a href="https://vimeo.com/45830194" class="icon popup-vimeo d-flex justify-content-center align-items-center">
-							<span class="icon-play"></span>
-						</a>
+					<div class="col-md-5 p-md-5 d-flex justify-content-center align-items-center" style="background: #000; border-radius: 12px; overflow: hidden;">
+						<iframe src="https://player.vimeo.com/video/45830194?autoplay=1&loop=1&muted=1&controls=1&playsinline=1" 
+							style="width: 100%; height: 400px; border: none;" 
+							allow="autoplay; fullscreen; picture-in-picture" 
+							allowfullscreen>
+						</iframe>
 					</div>
 					<div class="col-md-7 py-5 wrap-about pb-md-5 ftco-animate">
 	          <div class="heading-section heading-section-wo-line pt-md-5 pl-md-5 mb-5">
@@ -323,42 +349,27 @@
       </div>
     </section>
 
-    <section class="ftco-section ftco-counter img" id="section-counter" style="background-image: url(images/bg_1.jpg);">
+    <section class="ftco-section" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 80px 0;">
     	<div class="container">
     		<div class="row justify-content-center">
     			<div class="col-md-10">
-		    		<div class="row">
-		          <div class="col-md-3 d-flex justify-content-center counter-wrap ftco-animate">
-		            <div class="block-18 text-center">
-		              <div class="text">
-		                <strong class="number" data-number="50000">0</strong>
-                <span>Khách hàng hạnh phúc</span>
-		              </div>
+		    		<div class="row align-items-center">
+		          <div class="col-md-6 mb-4 mb-md-0">
+		            <h2 class="mb-4" style="font-family: 'Playfair Display', serif; font-size: 36px; color: #1a1a1a; font-weight: 700;">Nhà hàng Resort Deluxe</h2>
+		            <p style="font-size: 18px; line-height: 1.8; color: #555; margin-bottom: 20px;">
+		              Tại nhà hàng của chúng tôi, chúng tôi tự hào mang đến những món ăn được chế biến tinh tế từ những nguyên liệu tươi ngon nhất. Đội ngũ đầu bếp giàu kinh nghiệm luôn sáng tạo để mang đến những hương vị độc đáo, kết hợp giữa ẩm thực truyền thống và hiện đại.
+		            </p>
+		            <p style="font-size: 18px; line-height: 1.8; color: #555; margin-bottom: 20px;">
+		              Không gian nhà hàng sang trọng, ấm cúng với view đẹp, phù hợp cho các bữa tiệc gia đình, họp mặt bạn bè hay các sự kiện đặc biệt. Chúng tôi cam kết mang đến trải nghiệm ẩm thực đáng nhớ cho mọi thực khách.
+		            </p>
+		            <div class="mt-4">
+		              <a href="restaurant.html" class="btn btn-primary py-3 px-5" style="background: #c8a97e; border: none; font-size: 16px; font-weight: 600;">
+		                Xem thực đơn <span class="icon-long-arrow-right"></span>
+		              </a>
 		            </div>
 		          </div>
-		          <div class="col-md-3 d-flex justify-content-center counter-wrap ftco-animate">
-		            <div class="block-18 text-center">
-		              <div class="text">
-		                <strong class="number" data-number="3000">0</strong>
-                <span>Phòng nghỉ</span>
-		              </div>
-		            </div>
-		          </div>
-		          <div class="col-md-3 d-flex justify-content-center counter-wrap ftco-animate">
-		            <div class="block-18 text-center">
-		              <div class="text">
-		                <strong class="number" data-number="1000">0</strong>
-                <span>Nhân viên</span>
-		              </div>
-		            </div>
-		          </div>
-		          <div class="col-md-3 d-flex justify-content-center counter-wrap ftco-animate">
-		            <div class="block-18 text-center">
-		              <div class="text">
-		                <strong class="number" data-number="100">0</strong>
-                <span>Điểm đến</span>
-		              </div>
-		            </div>
+		          <div class="col-md-6">
+		            <div style="background: url('images/bg_2.jpg') center/cover; height: 400px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.1);"></div>
 		          </div>
 		        </div>
 	        </div>
@@ -769,6 +780,7 @@
     async function loadHomeReviews() {
       try {
         const url = `${location.origin}/api/reviews?limit=3&_=${Date.now()}`;
+        console.log('[HomeReviews] Fetching:', url);
         const resp = await fetch(url, { cache: 'no-store' });
         
         if (!resp.ok) {
@@ -776,10 +788,26 @@
         }
         
         const data = await resp.json();
-        const reviews = (data.reviews || []).slice(0, 3);
+        console.log('[HomeReviews] Raw response:', data);
+        
+        // Handle different response formats
+        let reviews = [];
+        if (Array.isArray(data)) {
+          reviews = data.slice(0, 3);
+        } else if (data && Array.isArray(data.reviews)) {
+          reviews = data.reviews.slice(0, 3);
+        } else if (data && Array.isArray(data.items)) {
+          reviews = data.items.slice(0, 3);
+        }
+        
+        console.log('[HomeReviews] Processed reviews:', reviews);
+        
         const container = document.getElementById('homeReviews');
         
-        if (!container) return;
+        if (!container) {
+          console.error('[HomeReviews] Container not found');
+          return;
+        }
         
         if (reviews.length === 0) {
           container.innerHTML = '<div class="col-12 text-center text-muted py-4"><p>Chưa có đánh giá nào</p></div>';
