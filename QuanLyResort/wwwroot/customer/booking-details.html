@@ -880,6 +880,16 @@
             // Check status (case-insensitive) - Booking model chỉ có 'status', không có 'paymentStatus'
             const newStatus = (booking.status || booking.Status || '').toString().toLowerCase();
             
+            // Debug: log raw booking object để xem structure
+            if (oldStatus === null || newStatus !== oldStatus) {
+              console.log(`🔍 [BackgroundPolling] Booking ${bookingId} raw data:`, {
+                status: booking.status,
+                Status: booking.Status,
+                bookingCode: booking.bookingCode || booking.BookingCode,
+                normalizedStatus: newStatus
+              });
+            }
+            
             // Lần đầu tiên, lưu old status
             if (oldStatus === null) {
               oldStatus = newStatus;
@@ -891,11 +901,12 @@
             
             // Nếu status thay đổi từ non-paid sang paid, reload booking
             if (newStatus === 'paid' && oldStatus !== 'paid') {
-              console.log('✅ [BackgroundPolling] Payment detected! Status changed from', oldStatus, 'to', newStatus);
+              console.log('✅ [BackgroundPolling] ✅✅✅ PAYMENT DETECTED! Status changed from', oldStatus, 'to', newStatus);
               showToast('✅ Thanh toán thành công! Trạng thái đã được cập nhật.', 'success');
               
               // Reload booking
               setTimeout(() => {
+                console.log('🔄 [BackgroundPolling] Reloading booking...');
                 loadBooking();
               }, 1000);
               
@@ -903,11 +914,17 @@
               if (backgroundPollingInterval) {
                 clearInterval(backgroundPollingInterval);
                 backgroundPollingInterval = null;
+                console.log('🛑 [BackgroundPolling] Stopped polling');
               }
             } else {
               // Update old status để track changes
+              if (oldStatus !== newStatus) {
+                console.log(`🔄 [BackgroundPolling] Status changed from '${oldStatus}' to '${newStatus}' (not paid yet)`);
+              }
               oldStatus = newStatus;
             }
+          } else {
+            console.warn(`⚠️ [BackgroundPolling] Failed to fetch booking ${bookingId}:`, resp.status, resp.statusText);
           }
         } catch (e) {
           console.warn('⚠️ [BackgroundPolling] Error:', e);

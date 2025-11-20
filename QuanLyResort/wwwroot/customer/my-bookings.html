@@ -1904,15 +1904,25 @@
               
               if (resp.ok) {
                 const updatedBooking = await resp.json();
-                // Check status (case-insensitive)
+                // Check status (case-insensitive) - Booking model chỉ có 'status'
                 const newStatus = (updatedBooking.status || updatedBooking.Status || '').toString().toLowerCase();
                 const oldStatus = (booking.status || booking.Status || '').toString().toLowerCase();
+                
+                // Debug: log raw data nếu status thay đổi
+                if (oldStatus !== newStatus) {
+                  console.log(`🔍 [BackgroundPolling] Booking ${bookingId} raw data:`, {
+                    oldStatus: booking.status || booking.Status,
+                    newStatus: updatedBooking.status || updatedBooking.Status,
+                    normalizedOld: oldStatus,
+                    normalizedNew: newStatus
+                  });
+                }
                 
                 console.log(`🔍 [BackgroundPolling] Booking ${bookingId}: oldStatus='${oldStatus}', newStatus='${newStatus}'`);
                 
                 // Nếu status thay đổi thành "paid", reload trang
                 if (newStatus === 'paid' && oldStatus !== 'paid') {
-                  console.log('✅ [BackgroundPolling] Payment detected for booking', bookingId);
+                  console.log('✅ [BackgroundPolling] ✅✅✅ PAYMENT DETECTED! Status changed from', oldStatus, 'to', newStatus);
                   const bookingCode = updatedBooking.bookingCode || updatedBooking.BookingCode || booking.bookingCode || booking.BookingCode || `BKG${bookingId}`;
                   showToast(`✅ Thanh toán thành công cho đặt phòng ${bookingCode}!`, 'success');
                   
@@ -1920,13 +1930,17 @@
                   const index = window._bookings.findIndex(b => (b.bookingId || b.BookingId) === bookingId);
                   if (index >= 0) {
                     window._bookings[index] = updatedBooking;
+                    console.log('✅ [BackgroundPolling] Updated booking in cache');
                   }
                   
                   // Reload bookings list
                   setTimeout(() => {
+                    console.log('🔄 [BackgroundPolling] Reloading bookings list...');
                     loadBookings();
                   }, 1000);
                 }
+              } else {
+                console.warn(`⚠️ [BackgroundPolling] Failed to fetch booking ${bookingId}:`, resp.status, resp.statusText);
               }
             } catch (e) {
               console.warn('⚠️ [BackgroundPolling] Error checking booking', booking.bookingId || booking.BookingId, ':', e);
