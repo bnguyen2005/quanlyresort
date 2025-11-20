@@ -550,13 +550,24 @@
     
     document.getElementById('btnPay')?.addEventListener('click', async () => {
       try {
+        // Wait for simple-payment.js to load if not ready
+        if (typeof openSimplePayment !== 'function') {
+          console.warn('⚠️ [booking-details] openSimplePayment not found, waiting for script...');
+          // Wait up to 2 seconds for script to load
+          let attempts = 0;
+          while (typeof openSimplePayment !== 'function' && attempts < 20) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+            attempts++;
+          }
+        }
+        
         // Use simple-payment.js for consistent payment flow
         if (typeof openSimplePayment === 'function') {
           console.log('✅ [booking-details] Using openSimplePayment from simple-payment.js');
           openSimplePayment(bookingId);
         } else {
           // Fallback to old method if simple-payment.js not loaded
-          console.warn('⚠️ [booking-details] openSimplePayment not found, using fallback');
+          console.error('❌ [booking-details] openSimplePayment not found after waiting, using fallback');
           const token = localStorage.getItem('token');
           const url = `${location.origin}/api/bookings/${bookingId}?_=${Date.now()}`;
           const resp = await fetch(url, {cache:'no-store', headers:{'Authorization':`Bearer ${token}`}});
