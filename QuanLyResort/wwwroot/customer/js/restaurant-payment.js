@@ -825,9 +825,12 @@ async function confirmRestaurantCashPayment(orderId) {
     }
     
     const result = await response.json();
-    console.log("[FRONTEND] " + '✅ [confirmRestaurantCashPayment] Payment confirmed:', result);
+    console.log("[FRONTEND] " + '✅ [confirmRestaurantCashPayment] Cash payment requested:', result);
     
-    // Show thank you message in modal instead of closing immediately
+    // Check if payment was approved immediately (admin) or awaiting confirmation (customer)
+    const isAwaitingConfirmation = result.awaitingConfirmation === true || (result.order?.paymentStatus === "AwaitingConfirmation");
+    
+    // Show appropriate message based on status
     const modalBody = modal.querySelector('.modal-body');
     const modalFooter = modal.querySelector('.modal-footer');
     const modalHeader = modal.querySelector('.modal-header');
@@ -836,47 +839,87 @@ async function confirmRestaurantCashPayment(orderId) {
       // Update header
       const headerTitle = modalHeader.querySelector('.modal-title');
       const headerCloseBtn = modalHeader.querySelector('.btn-close');
-      if (headerTitle) {
-        headerTitle.innerHTML = '✅ Cảm ơn bạn đã thanh toán!';
-        headerTitle.style.color = '#059669';
+      
+      if (isAwaitingConfirmation) {
+        // Customer: Show waiting message
+        if (headerTitle) {
+          headerTitle.innerHTML = '⏳ Yêu cầu đã được gửi';
+          headerTitle.style.color = '#f59e0b';
+        }
+        
+        const orderNumber = result.order?.orderNumber || `ORD${orderId}`;
+        modalBody.innerHTML = `
+          <div style="text-align: center; padding: 40px 20px;">
+            <div style="font-size: 80px; margin-bottom: 24px;">⏳</div>
+            <h3 style="color: #f59e0b; margin-bottom: 16px; font-weight: 700;">Yêu cầu thanh toán đã được gửi</h3>
+            <p style="color: #6b7280; margin-bottom: 24px; font-size: 16px; line-height: 1.6;">
+              Yêu cầu thanh toán tiền mặt của bạn đã được gửi thành công. Vui lòng chờ admin xác nhận.
+            </p>
+            <div style="background: #fef3c7; padding: 20px; border-radius: 12px; border: 2px solid #fbbf24; margin-bottom: 24px;">
+              <div style="margin-bottom: 12px;">
+                <strong style="color: #1a1a1a; font-size: 16px;">Mã đơn hàng:</strong>
+                <span style="color: #f59e0b; font-size: 18px; font-weight: 700; margin-left: 8px;">${orderNumber}</span>
+              </div>
+              <div>
+                <strong style="color: #1a1a1a; font-size: 16px;">Trạng thái:</strong>
+                <span style="color: #f59e0b; font-size: 18px; font-weight: 700; margin-left: 8px;">Chờ xác nhận</span>
+              </div>
+            </div>
+            <div style="background: #eff6ff; padding: 16px; border-radius: 8px; border: 1px solid #93c5fd;">
+              <p style="margin: 0; color: #1e40af; font-size: 14px; line-height: 1.6;">
+                <strong>💡 Lưu ý:</strong> Admin sẽ xác nhận thanh toán của bạn trong thời gian sớm nhất. Bạn sẽ nhận được thông báo khi thanh toán được xác nhận.
+              </p>
+            </div>
+          </div>
+        `;
+        
+        showSimpleToast('Yêu cầu thanh toán tiền mặt đã được gửi. Vui lòng chờ admin xác nhận.', 'info');
+      } else {
+        // Admin: Show success message (payment approved immediately)
+        if (headerTitle) {
+          headerTitle.innerHTML = '✅ Cảm ơn bạn đã thanh toán!';
+          headerTitle.style.color = '#059669';
+        }
+        
+        const orderNumber = result.order?.orderNumber || `ORD${orderId}`;
+        const amount = result.order?.totalAmount || 0;
+        modalBody.innerHTML = `
+          <div style="text-align: center; padding: 40px 20px;">
+            <div style="font-size: 80px; margin-bottom: 24px;">🎉</div>
+            <h3 style="color: #059669; margin-bottom: 16px; font-weight: 700;">Cảm ơn bạn đã thanh toán!</h3>
+            <p style="color: #6b7280; margin-bottom: 24px; font-size: 16px; line-height: 1.6;">
+              Thanh toán của bạn đã được xác nhận thành công.
+            </p>
+            <div style="background: #f0fdf4; padding: 20px; border-radius: 12px; border: 2px solid #86efac; margin-bottom: 24px;">
+              <div style="margin-bottom: 12px;">
+                <strong style="color: #1a1a1a; font-size: 16px;">Mã đơn hàng:</strong>
+                <span style="color: #059669; font-size: 18px; font-weight: 700; margin-left: 8px;">${orderNumber}</span>
+              </div>
+              <div style="margin-bottom: 12px;">
+                <strong style="color: #1a1a1a; font-size: 16px;">Phương thức thanh toán:</strong>
+                <span style="color: #059669; font-size: 18px; font-weight: 700; margin-left: 8px;">💵 Tiền mặt</span>
+              </div>
+              <div>
+                <strong style="color: #1a1a1a; font-size: 16px;">Trạng thái:</strong>
+                <span style="color: #059669; font-size: 18px; font-weight: 700; margin-left: 8px;">Đã thanh toán</span>
+              </div>
+            </div>
+            <div style="background: #fef3c7; padding: 16px; border-radius: 8px; border: 1px solid #fbbf24;">
+              <p style="margin: 0; color: #92400e; font-size: 14px; line-height: 1.6;">
+                <strong>💡 Lưu ý:</strong> Đơn hàng của bạn sẽ được chuẩn bị và giao đến địa chỉ đã đăng ký.
+              </p>
+            </div>
+          </div>
+        `;
+        
+        showSimpleToast('Xác nhận thanh toán thành công! Cảm ơn bạn!', 'success');
       }
+      
       // Ensure close button in header works
       if (headerCloseBtn) {
         headerCloseBtn.setAttribute('onclick', 'closeRestaurantPaymentModal()');
         headerCloseBtn.setAttribute('data-bs-dismiss', 'modal');
       }
-      
-      // Update body with thank you message
-      const orderNumber = result.order?.orderNumber || `ORD${orderId}`;
-      const amount = result.order?.totalAmount || 0;
-      modalBody.innerHTML = `
-        <div style="text-align: center; padding: 40px 20px;">
-          <div style="font-size: 80px; margin-bottom: 24px;">🎉</div>
-          <h3 style="color: #059669; margin-bottom: 16px; font-weight: 700;">Cảm ơn bạn đã thanh toán!</h3>
-          <p style="color: #6b7280; margin-bottom: 24px; font-size: 16px; line-height: 1.6;">
-            Thanh toán của bạn đã được xác nhận thành công.
-          </p>
-          <div style="background: #f0fdf4; padding: 20px; border-radius: 12px; border: 2px solid #86efac; margin-bottom: 24px;">
-            <div style="margin-bottom: 12px;">
-              <strong style="color: #1a1a1a; font-size: 16px;">Mã đơn hàng:</strong>
-              <span style="color: #059669; font-size: 18px; font-weight: 700; margin-left: 8px;">${orderNumber}</span>
-            </div>
-            <div style="margin-bottom: 12px;">
-              <strong style="color: #1a1a1a; font-size: 16px;">Phương thức thanh toán:</strong>
-              <span style="color: #059669; font-size: 18px; font-weight: 700; margin-left: 8px;">💵 Tiền mặt</span>
-            </div>
-            <div>
-              <strong style="color: #1a1a1a; font-size: 16px;">Trạng thái:</strong>
-              <span style="color: #059669; font-size: 18px; font-weight: 700; margin-left: 8px;">Đã thanh toán</span>
-            </div>
-          </div>
-          <div style="background: #fef3c7; padding: 16px; border-radius: 8px; border: 1px solid #fbbf24;">
-            <p style="margin: 0; color: #92400e; font-size: 14px; line-height: 1.6;">
-              <strong>💡 Lưu ý:</strong> Đơn hàng của bạn sẽ được chuẩn bị và giao đến địa chỉ đã đăng ký.
-            </p>
-          </div>
-        </div>
-      `;
       
       // Update footer - only show close button
       modalFooter.innerHTML = `
@@ -885,9 +928,6 @@ async function confirmRestaurantCashPayment(orderId) {
         </button>
       `;
     }
-    
-    // Show toast notification
-    showSimpleToast('Xác nhận thanh toán thành công! Cảm ơn bạn!', 'success');
     
     // Reload page or order list after a delay
     setTimeout(() => {

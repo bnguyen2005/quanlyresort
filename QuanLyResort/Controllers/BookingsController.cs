@@ -222,6 +222,174 @@ public class BookingsController : ControllerBase
     }
 
     /// <summary>
+    /// User yêu cầu thanh toán tiền mặt (chờ admin xác nhận)
+    /// </summary>
+    [HttpPost("{id}/request-cash-payment")]
+    [Authorize(Roles = "Customer")]
+    public async Task<IActionResult> RequestCashPayment(int id)
+    {
+        try
+        {
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value ?? "system";
+            
+            var booking = await _bookingService.GetBookingByIdAsync(id);
+            if (booking == null)
+            {
+                return NotFound(new { message = "Không tìm thấy đặt phòng" });
+            }
+            
+            // Kiểm tra authorization: customer chỉ có thể request cho booking của mình
+            var customerId = User.FindFirst("CustomerId")?.Value;
+            if (string.IsNullOrEmpty(customerId) || !int.TryParse(customerId, out int userCustomerId) || booking.CustomerId != userCustomerId)
+            {
+                return Forbid();
+            }
+            
+            if (booking.Status == "Paid")
+            {
+                return BadRequest(new { message = "Đặt phòng này đã được thanh toán rồi" });
+            }
+            
+            if (booking.Status != "Pending" && booking.Status != "Confirmed")
+            {
+                return BadRequest(new { message = $"Không thể yêu cầu thanh toán khi đặt phòng đang ở trạng thái '{booking.Status}'" });
+            }
+            
+            // Lưu thông tin yêu cầu thanh toán tiền mặt vào SpecialRequests
+            var specialRequests = booking.SpecialRequests;
+            Dictionary<string, object>? requestsDict = null;
+            
+            try
+            {
+                if (!string.IsNullOrEmpty(specialRequests))
+                {
+                    requestsDict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(specialRequests);
+                }
+            }
+            catch { }
+            
+            if (requestsDict == null)
+            {
+                requestsDict = new Dictionary<string, object>();
+            }
+            
+            requestsDict["cashPaymentRequested"] = true;
+            requestsDict["cashPaymentRequestedAt"] = DateTime.UtcNow.ToString("O");
+            requestsDict["cashPaymentRequestedBy"] = userEmail;
+            
+            booking.SpecialRequests = System.Text.Json.JsonSerializer.Serialize(requestsDict);
+            booking.UpdatedAt = DateTime.UtcNow;
+            
+            await _context.SaveChangesAsync();
+            
+            return Ok(new { 
+                message = "Yêu cầu thanh toán tiền mặt đã được gửi. Vui lòng chờ admin xác nhận.", 
+                bookingId = id,
+                status = booking.Status
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Lỗi khi xử lý yêu cầu thanh toán", error = ex.Message });
+        }
+    }
+    
+    /// <summary>
+    /// Admin xác nhận thanh toán tiền mặt
+    /// </summary>
+    [HttpPost("{id}/approve-cash-payment")]
+    [Authorize(Roles = "Admin,FrontDesk,Cashier")]
+    public async Task<IActionResult> ApproveCashPayment(int id)
+    {
+        try
+        {
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value ?? "system";
+            
+            var booking = await _bookingService.GetBookingByIdAsync(id);
+            if (booking == null)
+            {
+                return NotFound(new { message = "Không tìm thấy đặt phòng" });
+            }
+            
+            if (booking.Status == "Paid")
+            {
+                return BadRequest(new { message = "Đặt phòng này đã được thanh toán rồi" });
+            }
+            
+            // Kiểm tra xem có yêu cầu thanh toán tiền mặt không
+            var hasCashPaymentRequest = false;
+            if (!string.IsNullOrEmpty(booking.SpecialRequests))
+            {
+                try
+                {
+                    var requestsDict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(booking.SpecialRequests);
+                    if (requestsDict != null && requestsDict.ContainsKey("cashPaymentRequested"))
+                    {
+                        hasCashPaymentRequest = true;
+                    }
+                }
+                catch { }
+            }
+            
+            if (!hasCashPaymentRequest)
+            {
+                return BadRequest(new { message = "Không có yêu cầu thanh toán tiền mặt cho đặt phòng này" });
+            }
+            
+            // Xử lý thanh toán (giống như ProcessOnlinePaymentAsync)
+            var success = await _bookingService.ProcessOnlinePaymentAsync(id, userEmail);
+            
+            if (!success)
+            {
+                return BadRequest(new { message = "Không thể xử lý thanh toán. Vui lòng thử lại sau hoặc liên hệ hỗ trợ." });
+            }
+            
+            // Xóa thông tin yêu cầu thanh toán tiền mặt khỏi SpecialRequests
+            var specialRequests = booking.SpecialRequests;
+            if (!string.IsNullOrEmpty(specialRequests))
+            {
+                try
+                {
+                    var requestsDict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(specialRequests);
+                    if (requestsDict != null)
+                    {
+                        requestsDict.Remove("cashPaymentRequested");
+                        requestsDict.Remove("cashPaymentRequestedAt");
+                        requestsDict.Remove("cashPaymentRequestedBy");
+                        requestsDict["cashPaymentApproved"] = true;
+                        requestsDict["cashPaymentApprovedAt"] = DateTime.UtcNow.ToString("O");
+                        requestsDict["cashPaymentApprovedBy"] = userEmail;
+                        
+                        var updatedBooking = await _bookingService.GetBookingByIdAsync(id);
+                        if (updatedBooking != null)
+                        {
+                            updatedBooking.SpecialRequests = System.Text.Json.JsonSerializer.Serialize(requestsDict);
+                            updatedBooking.UpdatedAt = DateTime.UtcNow;
+                            await _context.SaveChangesAsync();
+                        }
+                    }
+                }
+                catch { }
+            }
+            
+            var updatedBookingFinal = await _bookingService.GetBookingByIdAsync(id);
+            var invoiceNumber = updatedBookingFinal?.Invoice?.InvoiceNumber;
+            
+            return Ok(new { 
+                message = "Xác nhận thanh toán tiền mặt thành công", 
+                bookingId = id, 
+                paid = true,
+                invoiceNumber = invoiceNumber,
+                status = updatedBookingFinal?.Status
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Lỗi khi xác nhận thanh toán", error = ex.Message });
+        }
+    }
+    
+    /// <summary>
     /// Xử lý thanh toán online cho booking
     /// </summary>
     [HttpPost("{id}/pay-online")]

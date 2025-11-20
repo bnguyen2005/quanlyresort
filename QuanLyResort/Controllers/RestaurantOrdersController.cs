@@ -475,6 +475,48 @@ public class RestaurantOrdersController : ControllerBase
                 return BadRequest(new { message = "Không thể thanh toán đơn hàng đã bị hủy" });
             }
 
+            // Nếu là Customer và PaymentMethod là Cash, chỉ lưu yêu cầu (chờ admin xác nhận)
+            if (userRole == "Customer" && request.PaymentMethod == "Cash")
+            {
+                // Lưu thông tin yêu cầu thanh toán tiền mặt vào SpecialRequests
+                var specialRequests = order.SpecialRequests;
+                Dictionary<string, object>? requestsDict = null;
+                
+                try
+                {
+                    if (!string.IsNullOrEmpty(specialRequests))
+                    {
+                        requestsDict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(specialRequests);
+                    }
+                }
+                catch { }
+                
+                if (requestsDict == null)
+                {
+                    requestsDict = new Dictionary<string, object>();
+                }
+                
+                requestsDict["cashPaymentRequested"] = true;
+                requestsDict["cashPaymentRequestedAt"] = DateTime.UtcNow.ToString("O");
+                requestsDict["cashPaymentRequestedBy"] = userEmail;
+                
+                order.SpecialRequests = System.Text.Json.JsonSerializer.Serialize(requestsDict);
+                order.PaymentMethod = request.PaymentMethod;
+                order.PaymentStatus = "AwaitingConfirmation"; // Chờ admin xác nhận
+                order.UpdatedAt = DateTime.UtcNow;
+                
+                await _context.SaveChangesAsync();
+                
+                _logger.LogInformation($"Order {order.OrderNumber} cash payment requested by customer, awaiting admin confirmation");
+                
+                return Ok(new { 
+                    message = "Yêu cầu thanh toán tiền mặt đã được gửi. Vui lòng chờ admin xác nhận.", 
+                    order,
+                    awaitingConfirmation = true
+                });
+            }
+            
+            // Admin/Manager/FrontDesk hoặc PaymentMethod khác Cash: xử lý thanh toán ngay
             order.PaymentMethod = request.PaymentMethod;
             order.PaymentStatus = "Paid";
             order.UpdatedAt = DateTime.UtcNow;
@@ -495,6 +537,85 @@ public class RestaurantOrdersController : ControllerBase
         {
             _logger.LogError(ex, "Error paying order");
             return StatusCode(500, new { message = "Lỗi khi thanh toán", error = ex.Message });
+        }
+    }
+    
+    /// <summary>
+    /// Admin xác nhận thanh toán tiền mặt cho restaurant order
+    /// POST /api/restaurant-orders/{id}/approve-cash-payment
+    /// </summary>
+    [HttpPost("{id}/approve-cash-payment")]
+    [Authorize(Roles = "Admin,FrontDesk,Cashier")]
+    public async Task<IActionResult> ApproveCashPayment(int id)
+    {
+        try
+        {
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value ?? "system";
+            
+            var order = await _context.RestaurantOrders
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Service)
+                .FirstOrDefaultAsync(o => o.OrderId == id);
+            
+            if (order == null)
+            {
+                return NotFound(new { message = "Không tìm thấy đơn hàng" });
+            }
+            
+            if (order.PaymentStatus == "Paid")
+            {
+                return BadRequest(new { message = "Đơn hàng đã được thanh toán" });
+            }
+            
+            if (order.PaymentStatus != "AwaitingConfirmation")
+            {
+                return BadRequest(new { message = "Đơn hàng này không có yêu cầu thanh toán tiền mặt đang chờ xác nhận" });
+            }
+            
+            // Xác nhận thanh toán
+            order.PaymentStatus = "Paid";
+            order.UpdatedAt = DateTime.UtcNow;
+            
+            // Cập nhật SpecialRequests để ghi nhận admin đã approve
+            var specialRequests = order.SpecialRequests;
+            Dictionary<string, object>? requestsDict = null;
+            
+            try
+            {
+                if (!string.IsNullOrEmpty(specialRequests))
+                {
+                    requestsDict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(specialRequests);
+                }
+            }
+            catch { }
+            
+            if (requestsDict == null)
+            {
+                requestsDict = new Dictionary<string, object>();
+            }
+            
+            requestsDict["cashPaymentApproved"] = true;
+            requestsDict["cashPaymentApprovedAt"] = DateTime.UtcNow.ToString("O");
+            requestsDict["cashPaymentApprovedBy"] = userEmail;
+            
+            order.SpecialRequests = System.Text.Json.JsonSerializer.Serialize(requestsDict);
+            
+            // If status is Pending, update to Confirmed
+            if (order.Status == "Pending")
+            {
+                order.Status = "Confirmed";
+            }
+            
+            await _context.SaveChangesAsync();
+            
+            _logger.LogInformation($"Order {order.OrderNumber} cash payment approved by {userEmail}");
+            
+            return Ok(new { message = "Xác nhận thanh toán tiền mặt thành công", order });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error approving cash payment");
+            return StatusCode(500, new { message = "Lỗi khi xác nhận thanh toán", error = ex.Message });
         }
     }
 }

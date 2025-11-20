@@ -45,8 +45,8 @@ public class RestaurantOrder
 
     [Required]
     [StringLength(30)]
-    [RegularExpression("^(Unpaid|Paid|Refunded)$", ErrorMessage = "PaymentStatus must be one of: Unpaid, Paid, Refunded")]
-    public string PaymentStatus { get; set; } = "Unpaid"; // Unpaid, Paid, Refunded
+    [RegularExpression("^(Unpaid|Paid|Refunded|AwaitingConfirmation)$", ErrorMessage = "PaymentStatus must be one of: Unpaid, Paid, Refunded, AwaitingConfirmation")]
+    public string PaymentStatus { get; set; } = "Unpaid"; // Unpaid, Paid, Refunded, AwaitingConfirmation
 
     [StringLength(100)]
     public string? CreatedBy { get; set; }

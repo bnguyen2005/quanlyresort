@@ -1218,8 +1218,8 @@ async function confirmHotelPayment() {
       throw new Error('Vui lòng đăng nhập để xác nhận thanh toán');
     }
     
-    // Use PayOnline endpoint to confirm cash payment
-    const response = await fetch(`${location.origin}/api/bookings/${bookingId}/pay-online`, {
+    // Use request-cash-payment endpoint để yêu cầu thanh toán tiền mặt (chờ admin xác nhận)
+    const response = await fetch(`${location.origin}/api/bookings/${bookingId}/request-cash-payment`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
