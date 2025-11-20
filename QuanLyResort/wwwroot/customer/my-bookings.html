@@ -489,7 +489,23 @@
       }
     }
     
+    function hasCashPaymentRequest(booking) {
+      if (!booking || !booking.specialRequests) return false;
+      try {
+        const specialRequests = typeof booking.specialRequests === 'string' 
+          ? JSON.parse(booking.specialRequests) 
+          : booking.specialRequests;
+        return specialRequests && typeof specialRequests === 'object' && specialRequests.cashPaymentRequested === true;
+      } catch (e) {
+        return false;
+      }
+    }
+    
     function canPayBooking(booking) {
+      // Nếu đã request cash payment, không cho phép thanh toán nữa (chờ admin approve)
+      if (hasCashPaymentRequest(booking)) {
+        return false;
+      }
       // Chỉ cho phép thanh toán khi booking ở trạng thái Pending hoặc Confirmed và chưa thanh toán
       return (booking.status === 'Pending' || booking.status === 'Confirmed') && booking.status !== 'Paid';
     }
@@ -940,9 +956,13 @@
           }
         }
         
+        const hasCashRequest = hasCashPaymentRequest(booking);
+        const canPay = canPayBooking(booking);
+        const showUnpaidBadge = (booking.status === 'Pending' || booking.status === 'Confirmed') && booking.status !== 'Paid';
+        
         return `
           <div class="booking-card" style="animation-delay:${0.1 * idx}s">
-            ${canPayBooking(booking) ? '<div class="unpaid-badge">Chưa thanh toán</div>' : ''}
+            ${showUnpaidBadge ? '<div class="unpaid-badge">Chưa thanh toán</div>' : ''}
             <div class="booking-header">
               <div>
                 <div class="booking-code">#${booking.bookingCode || booking.bookingId}</div>
@@ -981,7 +1001,20 @@
             ${specialBlock}
             
             <div class="booking-actions">
-              ${canPayBooking(booking) ? `
+              ${hasCashRequest ? `
+                <div class="alert alert-info" style="margin-bottom: 15px; padding: 12px 16px; border-radius: 10px; background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); border: 2px solid #2196f3; color: #1565c0; font-size: 14px;">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="oi oi-clock" style="font-size: 18px;"></span>
+                    <div>
+                      <strong>⏳ Đang chờ admin xác nhận</strong>
+                      <p style="margin: 3px 0 0 0; font-size: 13px; opacity: 0.9;">Yêu cầu thanh toán tiền mặt đã được gửi.</p>
+                    </div>
+                  </div>
+                </div>
+                ${booking.status === 'Pending' || booking.status === 'Confirmed' ? `
+                  <button class=\"btn btn-outline-danger\" onclick=\"cancelBooking(${booking.bookingId})\">Hủy đặt phòng</button>
+                ` : ''}
+              ` : canPay ? `
                 <button class=\"btn btn-outline-danger\" onclick=\"cancelBooking(${booking.bookingId})\">Hủy đặt phòng</button>
                 <button class=\"btn btn-primary\" onclick=\"if(typeof openSimplePayment==='function'){openSimplePayment(${booking.bookingId});}else{console.error('openSimplePayment not loaded');alert('Hệ thống thanh toán đang tải, vui lòng thử lại sau');}\">
                   <span class=\"oi oi-credit-card mr-2\"></span>Thanh toán

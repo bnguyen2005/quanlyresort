@@ -330,6 +330,15 @@
               <span class="oi oi-credit-card"></span>
               Thanh toán
             </button>
+            <div id="awaitingConfirmationMsg" class="alert alert-info" style="display:none; margin-bottom: 15px; padding: 15px 20px; border-radius: 12px; background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); border: 2px solid #2196f3; color: #1565c0;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span class="oi oi-clock" style="font-size: 20px;"></span>
+                <div>
+                  <strong>⏳ Đang chờ admin xác nhận thanh toán</strong>
+                  <p style="margin: 5px 0 0 0; font-size: 14px; opacity: 0.9;">Yêu cầu thanh toán tiền mặt của bạn đã được gửi. Vui lòng chờ admin xác nhận.</p>
+                </div>
+              </div>
+            </div>
             <button class="btn btn-outline-secondary btn-action" onclick="window.location.href='my-bookings.html'">
               <span class="oi oi-arrow-left"></span>
               Quay lại danh sách
@@ -507,7 +516,23 @@
       return texts[status] || status;
     }
     
+    function hasCashPaymentRequest(booking) {
+      if (!booking || !booking.specialRequests) return false;
+      try {
+        const specialRequests = typeof booking.specialRequests === 'string' 
+          ? JSON.parse(booking.specialRequests) 
+          : booking.specialRequests;
+        return specialRequests && typeof specialRequests === 'object' && specialRequests.cashPaymentRequested === true;
+      } catch (e) {
+        return false;
+      }
+    }
+    
     function canPayBooking(booking) {
+      // Nếu đã request cash payment, không cho phép thanh toán nữa (chờ admin approve)
+      if (hasCashPaymentRequest(booking)) {
+        return false;
+      }
       return (booking.status === 'Pending' || booking.status === 'Confirmed') && booking.status !== 'Paid';
     }
     
@@ -616,18 +641,45 @@
         
         // Show/hide pay button and unpaid badge
         const unpaidBadgeContainer = document.getElementById('unpaidBadgeContainer');
+        const awaitingConfirmationMsg = document.getElementById('awaitingConfirmationMsg');
+        
         if (btnPay) {
-          if (canPayBooking(b)) {
+          const hasCashRequest = hasCashPaymentRequest(b);
+          const canPay = canPayBooking(b);
+          
+          if (hasCashRequest) {
+            // Đã request cash payment - ẩn nút thanh toán, hiển thị message chờ admin
+            btnPay.style.display = 'none';
+            btnPay.dataset.ready = 'false';
+            // Show awaiting confirmation message
+            if (awaitingConfirmationMsg) {
+              awaitingConfirmationMsg.style.display = 'block';
+            }
+            // Show unpaid badge
+            if (unpaidBadgeContainer) {
+              unpaidBadgeContainer.innerHTML = '<div class="unpaid-badge">Chưa thanh toán</div>';
+            }
+          } else if (canPay) {
+            // Có thể thanh toán - hiển thị nút thanh toán
             btnPay.style.display = 'inline-flex';
             btnPay.disabled = false;
             btnPay.dataset.ready = 'true';
+            // Hide awaiting confirmation message
+            if (awaitingConfirmationMsg) {
+              awaitingConfirmationMsg.style.display = 'none';
+            }
             // Show unpaid badge
             if (unpaidBadgeContainer) {
               unpaidBadgeContainer.innerHTML = '<div class="unpaid-badge">Chưa thanh toán</div>';
             }
           } else {
+            // Đã thanh toán hoặc không thể thanh toán - ẩn tất cả
             btnPay.style.display = 'none';
             btnPay.dataset.ready = 'false';
+            // Hide awaiting confirmation message
+            if (awaitingConfirmationMsg) {
+              awaitingConfirmationMsg.style.display = 'none';
+            }
             // Hide unpaid badge
             if (unpaidBadgeContainer) {
               unpaidBadgeContainer.innerHTML = '';
