@@ -15,11 +15,13 @@ public class BookingsController : ControllerBase
 {
     private readonly IBookingService _bookingService;
     private readonly ResortDbContext _context;
+    private readonly ILogger<BookingsController> _logger;
 
-    public BookingsController(IBookingService bookingService, ResortDbContext context)
+    public BookingsController(IBookingService bookingService, ResortDbContext context, ILogger<BookingsController> logger)
     {
         _bookingService = bookingService;
         _context = context;
+        _logger = logger;
     }
 
     [HttpPost]
@@ -130,7 +132,7 @@ public class BookingsController : ControllerBase
             return Forbid();
         }
         
-        _logger.LogInformation($"[GetBookingById] ✅ Returning booking {id} - Status: '{booking.Status}', PaymentStatus: '{booking.PaymentStatus}', CustomerId: {booking.CustomerId}, BookingCode: '{booking.BookingCode}'");
+        _logger.LogInformation($"[GetBookingById] ✅ Returning booking {id} - Status: '{booking.Status}', CustomerId: {booking.CustomerId}, BookingCode: '{booking.BookingCode}'");
         return Ok(booking);
     }
 
