@@ -1252,10 +1252,16 @@
       
       const existingIndex = shoppingCart.findIndex(item => item.serviceId === serviceId);
       if (existingIndex >= 0) {
-        // Nếu đã có trong cart, cộng thêm số lượng mới vào số lượng hiện tại
+        // Nếu đã có trong cart, cộng thêm số lượng mới vào số lượng hiện tại (KHÔNG GIỚI HẠN)
         const currentCartQty = shoppingCart[existingIndex].quantity || 0;
-        shoppingCart[existingIndex].quantity = currentCartQty + quantity;
-        console.log('[addToCart] ✅ Updated existing item in cart:', shoppingCart[existingIndex], 'Old qty:', currentCartQty, 'Added:', quantity, 'New qty:', shoppingCart[existingIndex].quantity);
+        const newQty = currentCartQty + quantity;
+        shoppingCart[existingIndex].quantity = newQty;
+        console.log('[addToCart] ✅ Updated existing item in cart:', shoppingCart[existingIndex], 'Old qty:', currentCartQty, 'Added:', quantity, 'New qty:', newQty);
+        
+        // Debug: Kiểm tra xem có giới hạn nào không
+        if (newQty > 2) {
+          console.log('[addToCart] ✅ Quantity > 2, no limit applied. Current qty:', newQty);
+        }
         
         // Show success notification
         const message = `✅ Đã cập nhật "${serviceName}" (${quantity} phần) trong giỏ hàng!`;
@@ -1729,9 +1735,11 @@
         return;
       }
       
+      // KHÔNG GIỚI HẠN SỐ LƯỢNG TỐI ĐA - cho phép đặt bất kỳ số lượng nào
       const item = shoppingCart.find(i => i.serviceId === serviceId);
       if (item) {
         item.quantity = newQuantity;
+        console.log('[updateCartItem] ✅ Updated quantity to:', newQuantity, 'for serviceId:', serviceId, '(no max limit)');
         saveCart();
         updateCartModalContent();
         
