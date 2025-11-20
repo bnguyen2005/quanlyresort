@@ -95,6 +95,7 @@
       grid-template-columns: 1fr 320px;
       gap: 30px;
       margin-top: 60px;
+      padding: 0 20px;
     }
     
     /* Results Header */
@@ -271,6 +272,9 @@
     /* Rooms Content Area */
     .rooms-content-area {
       min-height: 400px;
+      background: transparent;
+      padding: 20px;
+      border-radius: 16px;
     }
     
     /* Modern Room Cards */
@@ -693,7 +697,7 @@
       color: #fff;
     }
     .promotion-card.featured::before {
-      background: #fff;
+      background: rgba(255,255,255,0.2);
     }
     .promotion-card-left {
       flex-shrink: 0;
@@ -811,7 +815,7 @@
     /* FAQ Section */
     .faq-section {
       padding: 60px 0;
-      background: #fff;
+      background: linear-gradient(135deg, #f5ede0 0%, #fff8f0 50%, #ffffff 100%);
     }
     .faq-container {
       max-width: 800px;
@@ -819,8 +823,8 @@
       margin-top: 40px;
     }
     .faq-item {
-      background: #fff;
-      border: 1px solid #e5e7eb;
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+      border: 1px solid rgba(200,169,126,0.2);
       border-radius: 12px;
       margin-bottom: 16px;
       overflow: hidden;
@@ -982,7 +986,7 @@
   </section>
 
   <!-- Main Content -->
-  <main class="container">
+  <main class="container" style="background: transparent; padding: 40px 0;">
     <div class="rooms-main-content">
       <!-- Rooms List - Left Column -->
       <div class="rooms-content-area">
