@@ -1,0 +1,31 @@
+# 🔧 Render Environment Variables - Quick Reference
+# Copy từng dòng và paste vào Render Environment Variables
+
+ASPNETCORE_ENVIRONMENT=Production
+ASPNETCORE_URLS=http://0.0.0.0:$PORT
+PORT=10000
+
+ConnectionStrings__DefaultConnection=Data Source=/data/resort.db
+
+JwtSettings__SecretKey=YourSuperSecretKeyForJWTTokenGeneration2025!@#$
+JwtSettings__Issuer=ResortManagementAPI
+JwtSettings__Audience=ResortManagementClient
+JwtSettings__ExpirationHours=24
+
+BankWebhook__PayOs__ClientId=c704495b-5984-4ad3-aa23-b2794a02aa83
+BankWebhook__PayOs__ApiKey=f6ea421b-a8b7-46b8-92be-209eb1a9b2fb
+BankWebhook__PayOs__ChecksumKey=429890033cc6f1ca9696c91bb4abf499de9ac6132c64e335e46f4c87e6d95313
+BankWebhook__PayOs__SecretKey=429890033cc6f1ca9696c91bb4abf499de9ac6132c64e335e46f4c87e6d95313
+BankWebhook__PayOs__VerifySignature=false
+BankWebhook__PayOs__WebhookUrl=https://your-service-name.onrender.com/api/simplepayment/webhook
+
+AIChat__Provider=groq
+AIChat__ApiKey=gsk_your_new_groq_api_key_here
+AIChat__ApiUrl=https://api.groq.com/openai/v1/chat/completions
+AIChat__Model=llama-3.1-8b-instant
+
+# ⚠️ QUAN TRỌNG:
+# 1. Thay "your-service-name" trong BankWebhook__PayOs__WebhookUrl bằng tên service thực tế
+# 2. Thay "gsk_your_new_groq_api_key_here" bằng API key mới từ Groq console
+# 3. Nếu dùng PostgreSQL, thay ConnectionStrings__DefaultConnection bằng connection string của PostgreSQL
+
