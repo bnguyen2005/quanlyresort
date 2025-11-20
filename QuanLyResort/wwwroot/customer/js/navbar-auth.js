@@ -3,51 +3,56 @@
  * Hiển thị email và dropdown menu sau khi đăng nhập
  */
 
-// Thêm CSS cho badge đỏ trong menu
-const style = document.createElement('style');
-style.textContent = `
-  .unpaid-badge-menu {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 20px;
-    height: 20px;
-    padding: 0 6px;
-    background: #dc3545;
-    color: #fff;
-    border-radius: 10px;
-    font-size: 11px;
-    font-weight: 700;
-    margin-left: 8px;
-    animation: pulse-badge 2s infinite;
-    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.4);
-  }
-  .unpaid-badge-menu::before {
-    content: '';
-    width: 6px;
-    height: 6px;
-    background: #fff;
-    border-radius: 50%;
-    display: inline-block;
-    margin-right: 4px;
-    animation: blink-badge 1.5s infinite;
-  }
-  @keyframes pulse-badge {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-  }
-  @keyframes blink-badge {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-  }
-  .dropdown-item {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-`;
-document.head.appendChild(style);
+// Thêm CSS cho badge đỏ trong menu (chỉ thêm 1 lần)
+if (!document.getElementById('navbar-unpaid-badge-style')) {
+  const style = document.createElement('style');
+  style.id = 'navbar-unpaid-badge-style';
+  style.textContent = `
+    .user-dropdown .dropdown-item {
+      position: relative;
+      padding-right: 60px;
+    }
+    .unpaid-badge-menu {
+      position: absolute;
+      top: 50%;
+      right: 18px;
+      transform: translateY(-50%);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 20px;
+      height: 20px;
+      padding: 0 6px;
+      background: #dc3545;
+      color: #fff;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 700;
+      box-shadow: 0 2px 8px rgba(220, 53, 69, 0.4);
+      animation: pulse-badge 2s infinite;
+      z-index: 10;
+    }
+    .unpaid-badge-menu::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      background: #fff;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 4px;
+      animation: blink-badge 1.5s infinite;
+    }
+    @keyframes pulse-badge {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+    }
+    @keyframes blink-badge {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+  `;
+  document.head.appendChild(style);
+}
 
 // Update navbar ngay khi page load
 document.addEventListener('DOMContentLoaded', () => {
@@ -224,16 +229,24 @@ async function getUnpaidBookingsCount() {
     const token = localStorage.getItem('token');
     if (!token) return 0;
     
-    const response = await fetch('/api/bookings', {
+    const url = `${location.origin}/api/bookings/my?_=${Date.now()}`;
+    const response = await fetch(url, {
+      cache: 'no-store',
       headers: {
         'Authorization': `Bearer ${token}`
       }
     });
     
-    if (!response.ok) return 0;
+    if (!response.ok) {
+      console.warn('[Navbar Auth] Cannot fetch unpaid bookings, status:', response.status);
+      return 0;
+    }
     
     const data = await response.json();
-    const bookings = data.items || data || [];
+    const bookings = Array.isArray(data) ? data : (data.items || []);
+    
+    // Lưu cache toàn cục để dùng lại
+    window._bookings = bookings;
     
     // Đếm số booking chưa thanh toán (sử dụng cùng logic với canPayBooking)
     const unpaidCount = bookings.filter(booking => canPayBooking(booking)).length;
