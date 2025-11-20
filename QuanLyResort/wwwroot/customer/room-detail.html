@@ -1875,18 +1875,16 @@
           }
         }
 
-        const fullName = (document.getElementById('bf_fullName').value||'').trim();
-        const email = (document.getElementById('bf_email').value||'').trim();
-        const phone = (document.getElementById('bf_phone').value||'').trim();
-        const nationality = (document.getElementById('bf_nationality').value||'').trim();
-        const idCard = (document.getElementById('bf_idCard').value||'').trim();
-        const passport = (document.getElementById('bf_passport').value||'').trim();
-        const address = (document.getElementById('bf_address').value||'').trim();
-        const eta = (document.getElementById('bf_eta').value||'').trim();
-        const flight = (document.getElementById('bf_flight').value||'').trim();
-        const payment = (document.getElementById('bf_payment').value||'').trim();
-        const extraNotes = (document.getElementById('bf_notes').value||'').trim();
-        const terms = document.getElementById('bf_terms').checked;
+        const fullName = (document.getElementById('bf_fullName')?.value||'').trim();
+        const email = (document.getElementById('bf_email')?.value||'').trim();
+        const phone = (document.getElementById('bf_phone')?.value||'').trim();
+        const nationality = (document.getElementById('bf_nationality')?.value||'').trim();
+        const idCard = (document.getElementById('bf_idCard')?.value||'').trim();
+        const address = (document.getElementById('bf_address')?.value||'').trim();
+        const eta = (document.getElementById('bf_eta')?.value||'').trim();
+        const payment = (document.getElementById('bf_payment')?.value||'').trim();
+        const extraNotes = (document.getElementById('bf_notes')?.value||'').trim();
+        const terms = document.getElementById('bf_terms')?.checked || false;
 
         // Kiểm tra tối thiểu (backup validation)
         if (!fullName || !email || !phone) {
@@ -1906,10 +1904,8 @@
           guestPhone: phone,
           nationality,
           idCard,
-          passport,
           address,
           arrivalTime: eta,
-          flightNumber: flight,
           paymentMethod: payment,
           note: extraNotes
         };
