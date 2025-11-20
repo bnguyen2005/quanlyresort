@@ -35,6 +35,27 @@
     <link rel="stylesheet" href="css/navbar-auth.css">
     
     <style>
+    /* Body Background - Contact Image */
+    body {
+      background-image: url('images/bg_2.jpg');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      background-repeat: no-repeat;
+      position: relative;
+      min-height: 100vh;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.85);
+      z-index: -1;
+    }
+    
     /* Modern Hero Section - Same as rooms.html */
     .rooms-hero {
       background-image: url('images/bg_1.jpg');
