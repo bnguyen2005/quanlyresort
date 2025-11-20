@@ -1252,10 +1252,12 @@
       
       const existingIndex = shoppingCart.findIndex(item => item.serviceId === serviceId);
       if (existingIndex >= 0) {
-        // Nếu đã có trong cart, THAY THẾ số lượng mới (không cộng thêm) để tránh nhầm lẫn
-        // Người dùng có thể tăng số lượng bằng nút + hoặc trong cart modal
-        shoppingCart[existingIndex].quantity = quantity;
-        console.log('[addToCart] ✅ Replaced quantity in cart:', shoppingCart[existingIndex], 'New qty:', quantity, '(replaced, not added)');
+        // Nếu đã có trong cart, CỘNG THÊM số lượng mới vào số lượng hiện tại (KHÔNG GIỚI HẠN)
+        // Logic: 1+1=2, 2+1=3, 3+1=4, ...
+        const currentCartQty = shoppingCart[existingIndex].quantity || 0;
+        const newQty = currentCartQty + quantity;
+        shoppingCart[existingIndex].quantity = newQty;
+        console.log('[addToCart] ✅ Cộng thêm vào cart:', shoppingCart[existingIndex], 'Old qty:', currentCartQty, 'Added:', quantity, 'New qty:', newQty, '(KHÔNG GIỚI HẠN)');
         
         // Show success notification
         const message = `✅ Đã cập nhật "${serviceName}" (${quantity} phần) trong giỏ hàng!`;
