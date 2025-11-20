@@ -242,12 +242,18 @@ public class BookingsController : ControllerBase
         try
         {
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value ?? "system";
+            var userRole = User.FindFirst(ClaimTypes.Role)?.Value ?? "Unknown";
+            
+            _logger.LogInformation($"[RequestCashPayment] 🔄 Customer {userEmail} (Role: {userRole}) requesting cash payment for booking {id}");
             
             var booking = await _bookingService.GetBookingByIdAsync(id);
             if (booking == null)
             {
+                _logger.LogWarning($"[RequestCashPayment] ❌ Booking {id} not found");
                 return NotFound(new { message = "Không tìm thấy đặt phòng" });
             }
+            
+            _logger.LogInformation($"[RequestCashPayment] 📋 Booking {id} current status: Status='{booking.Status}', BookingCode='{booking.BookingCode}', CustomerId={booking.CustomerId}");
             
             // Kiểm tra authorization: customer chỉ có thể request cho booking của mình
             var customerId = User.FindFirst("CustomerId")?.Value;
