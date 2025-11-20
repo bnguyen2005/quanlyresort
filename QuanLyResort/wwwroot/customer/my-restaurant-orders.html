@@ -518,6 +518,88 @@
     document.addEventListener('DOMContentLoaded', () => {
       loadOrders();
     });
+    
+    // Background polling để check payment status khi admin approve cash payment
+    // Chạy ngay cả khi modal đóng
+    let backgroundPollingInterval = null;
+    
+    function startBackgroundPolling() {
+      // Dừng polling cũ nếu có
+      if (backgroundPollingInterval) {
+        clearInterval(backgroundPollingInterval);
+      }
+      
+      console.log('🔄 [BackgroundPolling] Starting background polling for unpaid orders...');
+      
+      // Poll mỗi 10 giây để check payment status
+      backgroundPollingInterval = setInterval(async () => {
+        try {
+          const token = localStorage.getItem('token');
+          if (!token) {
+            return;
+          }
+          
+          // Lấy danh sách orders hiện tại từ window._orders hoặc DOM
+          const orders = window._orders || [];
+          
+          // Chỉ check các order có thể thanh toán (Pending/Confirmed và Unpaid/AwaitingConfirmation)
+          const unpaidOrders = orders.filter(o => {
+            const status = o.status || '';
+            const paymentStatus = o.paymentStatus || '';
+            return (status === 'Pending' || status === 'Confirmed') && 
+                   (paymentStatus === 'Unpaid' || paymentStatus === 'AwaitingConfirmation');
+          });
+          
+          if (unpaidOrders.length === 0) {
+            return; // Không có order nào cần check
+          }
+          
+          // Check từng order
+          for (const order of unpaidOrders) {
+            try {
+              const url = `${location.origin}/api/restaurant-orders/${order.orderId}?_=${Date.now()}`;
+              const resp = await fetch(url, {
+                headers: { 'Authorization': `Bearer ${token}` },
+                cache: 'no-store'
+              });
+              
+              if (resp.ok) {
+                const updatedOrder = await resp.json();
+                const newPaymentStatus = updatedOrder.paymentStatus || '';
+                const oldPaymentStatus = order.paymentStatus || '';
+                
+                // Nếu payment status thay đổi thành "Paid", reload trang
+                if (newPaymentStatus === 'Paid' && oldPaymentStatus !== 'Paid') {
+                  console.log('✅ [BackgroundPolling] Payment detected for order', order.orderId);
+                  showToast(`✅ Thanh toán thành công cho đơn hàng ${updatedOrder.orderNumber || order.orderNumber}!`, 'success');
+                  
+                  // Reload orders list
+                  setTimeout(() => {
+                    loadOrders();
+                  }, 1000);
+                }
+              }
+            } catch (e) {
+              console.warn('⚠️ [BackgroundPolling] Error checking order', order.orderId, ':', e);
+            }
+          }
+        } catch (e) {
+          console.error('❌ [BackgroundPolling] Error:', e);
+        }
+      }, 10000); // Poll mỗi 10 giây
+    }
+    
+    // Bắt đầu background polling sau khi load orders
+    setTimeout(() => {
+      startBackgroundPolling();
+    }, 2000);
+    
+    // Dừng background polling khi trang đóng
+    window.addEventListener('beforeunload', () => {
+      if (backgroundPollingInterval) {
+        clearInterval(backgroundPollingInterval);
+      }
+    });
   </script>
 </body>
 </html>

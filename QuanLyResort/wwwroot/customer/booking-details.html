@@ -834,6 +834,85 @@
     }
     
     loadBooking();
+    
+    // Background polling để check payment status khi admin approve cash payment
+    // Chạy ngay cả khi modal đóng
+    let backgroundPollingInterval = null;
+    
+    function startBackgroundPolling() {
+      // Dừng polling cũ nếu có
+      if (backgroundPollingInterval) {
+        clearInterval(backgroundPollingInterval);
+      }
+      
+      // Lấy booking ID từ URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const bookingId = urlParams.get('id');
+      
+      if (!bookingId) {
+        return;
+      }
+      
+      console.log('🔄 [BackgroundPolling] Starting background polling for booking:', bookingId);
+      
+      // Poll mỗi 10 giây để check payment status
+      backgroundPollingInterval = setInterval(async () => {
+        try {
+          const token = localStorage.getItem('token');
+          if (!token) {
+            return;
+          }
+          
+          // Check booking status
+          const url = `${location.origin}/api/bookings/${bookingId}?_=${Date.now()}`;
+          const resp = await fetch(url, {
+            headers: { 'Authorization': `Bearer ${token}` },
+            cache: 'no-store'
+          });
+          
+          if (resp.ok) {
+            const booking = await resp.json();
+            const status = booking.status || '';
+            const paymentStatus = booking.paymentStatus || '';
+            
+            // Chỉ check nếu booking chưa thanh toán
+            if (status !== 'Paid' && paymentStatus !== 'Paid') {
+              // Check lại sau
+              return;
+            }
+            
+            // Nếu đã thanh toán, reload booking
+            console.log('✅ [BackgroundPolling] Payment detected for booking', bookingId);
+            showToast('✅ Thanh toán thành công! Trạng thái đã được cập nhật.', 'success');
+            
+            // Reload booking
+            setTimeout(() => {
+              loadBooking();
+            }, 1000);
+            
+            // Dừng polling
+            if (backgroundPollingInterval) {
+              clearInterval(backgroundPollingInterval);
+              backgroundPollingInterval = null;
+            }
+          }
+        } catch (e) {
+          console.warn('⚠️ [BackgroundPolling] Error:', e);
+        }
+      }, 10000); // Poll mỗi 10 giây
+    }
+    
+    // Bắt đầu background polling sau khi load booking
+    setTimeout(() => {
+      startBackgroundPolling();
+    }, 2000);
+    
+    // Dừng background polling khi trang đóng
+    window.addEventListener('beforeunload', () => {
+      if (backgroundPollingInterval) {
+        clearInterval(backgroundPollingInterval);
+      }
+    });
   </script>
 </body>
 </html>

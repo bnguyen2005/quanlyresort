@@ -1070,6 +1070,92 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
         // Loading hidden when order details shown
       }
     }
+    
+    // Background polling để check payment status khi admin approve cash payment
+    // Chạy ngay cả khi modal đóng
+    let backgroundPollingInterval = null;
+    
+    function startBackgroundPolling() {
+      // Dừng polling cũ nếu có
+      if (backgroundPollingInterval) {
+        clearInterval(backgroundPollingInterval);
+      }
+      
+      // Lấy order ID từ URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const orderId = urlParams.get('id');
+      
+      if (!orderId) {
+        return;
+      }
+      
+      console.log('🔄 [BackgroundPolling] Starting background polling for order:', orderId);
+      
+      // Poll mỗi 10 giây để check payment status
+      backgroundPollingInterval = setInterval(async () => {
+        try {
+          const token = localStorage.getItem('token');
+          if (!token) {
+            return;
+          }
+          
+          // Check order status
+          const url = `${location.origin}/api/restaurant-orders/${orderId}?_=${Date.now()}`;
+          const resp = await fetch(url, {
+            headers: { 'Authorization': `Bearer ${token}` },
+            cache: 'no-store'
+          });
+          
+          if (resp.ok) {
+            const order = await resp.json();
+            const paymentStatus = order.paymentStatus || '';
+            
+            // Chỉ check nếu order chưa thanh toán
+            if (paymentStatus !== 'Paid') {
+              // Check lại sau
+              return;
+            }
+            
+            // Nếu đã thanh toán, reload order
+            console.log('✅ [BackgroundPolling] Payment detected for order', orderId);
+            
+            // Show toast nếu có function
+            if (typeof showToast === 'function') {
+              showToast('✅ Thanh toán thành công! Trạng thái đã được cập nhật.', 'success');
+            }
+            
+            // Reload order
+            setTimeout(() => {
+              if (window.loadOrderDetails) {
+                window.loadOrderDetails(orderId);
+              } else {
+                window.location.reload();
+              }
+            }, 1000);
+            
+            // Dừng polling
+            if (backgroundPollingInterval) {
+              clearInterval(backgroundPollingInterval);
+              backgroundPollingInterval = null;
+            }
+          }
+        } catch (e) {
+          console.warn('⚠️ [BackgroundPolling] Error:', e);
+        }
+      }, 10000); // Poll mỗi 10 giây
+    }
+    
+    // Bắt đầu background polling sau khi load order
+    setTimeout(() => {
+      startBackgroundPolling();
+    }, 2000);
+    
+    // Dừng background polling khi trang đóng
+    window.addEventListener('beforeunload', () => {
+      if (backgroundPollingInterval) {
+        clearInterval(backgroundPollingInterval);
+      }
+    });
   </script>
 
 </body>

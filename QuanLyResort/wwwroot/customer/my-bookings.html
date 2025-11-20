@@ -1825,6 +1825,88 @@
     loadBookings();
     // Auto-refresh bằng setInterval đã được loại bỏ.
     // Việc cập nhật trạng thái thanh toán sẽ do polling trong simple-payment.js đảm nhiệm.
+    
+    // Background polling để check payment status khi admin approve cash payment
+    // Chạy ngay cả khi modal đóng
+    let backgroundPollingInterval = null;
+    
+    function startBackgroundPolling() {
+      // Dừng polling cũ nếu có
+      if (backgroundPollingInterval) {
+        clearInterval(backgroundPollingInterval);
+      }
+      
+      console.log('🔄 [BackgroundPolling] Starting background polling for unpaid bookings...');
+      
+      // Poll mỗi 10 giây để check payment status
+      backgroundPollingInterval = setInterval(async () => {
+        try {
+          const token = localStorage.getItem('token');
+          if (!token) {
+            return;
+          }
+          
+          // Lấy danh sách bookings hiện tại từ DOM hoặc window._bookings
+          const bookings = window._bookings || [];
+          
+          // Chỉ check các booking có thể thanh toán (Pending/Confirmed và Unpaid)
+          const unpaidBookings = bookings.filter(b => {
+            const status = b.status || '';
+            const paymentStatus = b.paymentStatus || '';
+            return (status === 'Pending' || status === 'Confirmed') && 
+                   (paymentStatus === 'Unpaid' || paymentStatus === 'AwaitingConfirmation');
+          });
+          
+          if (unpaidBookings.length === 0) {
+            return; // Không có booking nào cần check
+          }
+          
+          // Check từng booking
+          for (const booking of unpaidBookings) {
+            try {
+              const url = `${location.origin}/api/bookings/${booking.bookingId}?_=${Date.now()}`;
+              const resp = await fetch(url, {
+                headers: { 'Authorization': `Bearer ${token}` },
+                cache: 'no-store'
+              });
+              
+              if (resp.ok) {
+                const updatedBooking = await resp.json();
+                const newStatus = updatedBooking.status || '';
+                const oldStatus = booking.status || '';
+                
+                // Nếu status thay đổi thành "Paid", reload trang
+                if (newStatus === 'Paid' && oldStatus !== 'Paid') {
+                  console.log('✅ [BackgroundPolling] Payment detected for booking', booking.bookingId);
+                  showToast(`✅ Thanh toán thành công cho đặt phòng ${updatedBooking.bookingCode || booking.bookingCode}!`, 'success');
+                  
+                  // Reload bookings list
+                  setTimeout(() => {
+                    loadBookings();
+                  }, 1000);
+                }
+              }
+            } catch (e) {
+              console.warn('⚠️ [BackgroundPolling] Error checking booking', booking.bookingId, ':', e);
+            }
+          }
+        } catch (e) {
+          console.error('❌ [BackgroundPolling] Error:', e);
+        }
+      }, 10000); // Poll mỗi 10 giây
+    }
+    
+    // Bắt đầu background polling sau khi load bookings
+    setTimeout(() => {
+      startBackgroundPolling();
+    }, 2000);
+    
+    // Dừng background polling khi trang đóng
+    window.addEventListener('beforeunload', () => {
+      if (backgroundPollingInterval) {
+        clearInterval(backgroundPollingInterval);
+      }
+    });
   </script>
 </body>
 </html>
