@@ -19,7 +19,8 @@
       font-family: 'Poppins', sans-serif;
       padding-top: 0;
       overflow-x: hidden;
-      background: #f8f9fa;
+      background: linear-gradient(135deg, #f5ede0 0%, #fff8f0 50%, #ffffff 100%);
+      min-height: 100vh;
     }
     .ftco-navbar {
       position: sticky !important;
@@ -103,7 +104,7 @@
       align-items: center;
       padding: 20px 0;
       margin-bottom: 20px;
-      border-bottom: 2px solid #f0f0f0;
+      border-bottom: 2px solid rgba(200,169,126,0.2);
     }
     .results-info {
       display: flex;
@@ -161,16 +162,16 @@
     
     /* Modern Filter Section - Vertical Sidebar */
     .filter-section-modern {
-      background: #fff;
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
       padding: 30px;
       border-radius: 20px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      box-shadow: 0 4px 20px rgba(200,169,126,0.15);
       position: sticky;
       top: 100px;
       height: fit-content;
       max-height: calc(100vh - 120px);
       overflow-y: auto;
-      border: 1px solid #e5e7eb;
+      border: 2px solid rgba(200,169,126,0.1);
       animation: slideUp 0.8s ease;
     }
     .filter-header {
@@ -279,16 +280,16 @@
       gap: 24px;
     }
     .room-card-modern {
-      background: #fff;
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
       border-radius: 20px;
       overflow: hidden;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      box-shadow: 0 4px 20px rgba(200,169,126,0.15);
       transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
       cursor: pointer;
       opacity: 0;
       transform: translateY(30px);
       animation: fadeInUp 0.6s ease forwards;
-      border: 1px solid #f0f0f0;
+      border: 2px solid rgba(200,169,126,0.1);
       position: relative;
       height: 100%;
       display: flex;
@@ -302,8 +303,8 @@
     .room-card-modern:nth-child(6) { animation-delay: 0.6s; }
     .room-card-modern:hover {
       transform: translateY(-12px) scale(1.02);
-      box-shadow: 0 20px 50px rgba(0,0,0,0.15);
-      border-color: #c8a97e;
+      box-shadow: 0 20px 50px rgba(200,169,126,0.25);
+      border-color: rgba(200,169,126,0.3);
     }
     .room-image-wrapper {
       position: relative;
@@ -483,9 +484,10 @@
     .empty-state {
       text-align: center;
       padding: 80px 20px;
-      background: #fff;
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
       border-radius: 20px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      box-shadow: 0 4px 20px rgba(200,169,126,0.15);
+      border: 2px solid rgba(200,169,126,0.1);
     }
     .empty-state-icon {
       font-size: 80px;
@@ -613,7 +615,24 @@
     /* Promotions Section */
     .promotions-section {
       padding: 40px 0;
-      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+      background: linear-gradient(135deg, #f5ede0 0%, #fff8f0 50%, #ffffff 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    .promotions-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      opacity: 0.05;
+      background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(200,169,126,0.1) 10px, rgba(200,169,126,0.1) 20px);
+      pointer-events: none;
+    }
+    .promotions-section .container {
+      position: relative;
+      z-index: 1;
     }
     .promotion-cards {
       display: grid;
@@ -625,11 +644,11 @@
       margin-right: auto;
     }
     .promotion-card {
-      background: #fff;
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
       border-radius: 12px;
       padding: 20px;
-      box-shadow: 0 3px 15px rgba(0,0,0,0.08);
-      border: 2px solid transparent;
+      box-shadow: 0 3px 15px rgba(200,169,126,0.15);
+      border: 2px solid rgba(200,169,126,0.1);
       transition: all 0.3s ease;
       position: relative;
       overflow: hidden;
@@ -638,6 +657,11 @@
       align-items: center;
       gap: 16px;
       min-height: 140px;
+    }
+    .promotion-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 25px rgba(200,169,126,0.25);
+      border-color: rgba(200,169,126,0.3);
     }
     .promotion-card::before {
       content: '';
@@ -714,7 +738,7 @@
       color: #fff;
     }
     .promotion-card .code-box {
-      background: #f8f9fa;
+      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
       border: 2px dashed #c8a97e;
       border-radius: 6px;
       padding: 10px;
@@ -893,8 +917,9 @@
     </section>
 
   <!-- Introduction Section -->
-  <section class="ftco-section bg-light" style="padding: 60px 0;">
-    <div class="container">
+  <section class="ftco-section bg-light" style="padding: 60px 0; background: linear-gradient(135deg, #e8dcc6 0%, #f5ede0 50%, #fff8f0 100%); position: relative; overflow: hidden;">
+    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; opacity: 0.05; background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(200,169,126,0.1) 10px, rgba(200,169,126,0.1) 20px);"></div>
+    <div class="container" style="position: relative; z-index: 1;">
       <div class="row align-items-center">
         <div class="col-md-6 mb-4 mb-md-0">
           <div class="heading-section">
@@ -1034,7 +1059,7 @@
           </div>
           <div class="filter-actions">
             <button id="btnSearch" class="btn-filter btn-filter-primary">
-              <i class="icon-search"></i> Tìm phòng
+              <i class="icon-bed"></i> Tìm phòng
             </button>
             <button id="btnReset" class="btn-filter btn-filter-secondary">
               <i class="icon-refresh"></i> Xóa lọc
@@ -1419,7 +1444,97 @@
       }
     }
 
+    // Validation function
+    function validateSearchForm() {
+      const checkin = document.getElementById('checkin')?.value;
+      const checkout = document.getElementById('checkout')?.value;
+      const guestsFilter = document.getElementById('guestsFilter')?.value;
+      
+      // Clear previous errors
+      const errorElements = document.querySelectorAll('.filter-error');
+      errorElements.forEach(el => el.remove());
+      
+      let hasError = false;
+      
+      // Validate checkin date
+      if (checkin) {
+        const checkinDate = new Date(checkin);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        checkinDate.setHours(0, 0, 0, 0);
+        
+        if (checkinDate < today) {
+          showFieldError('checkin', 'Ngày nhận phòng không được trong quá khứ');
+          hasError = true;
+        }
+      }
+      
+      // Validate checkout date
+      if (checkout) {
+        const checkoutDate = new Date(checkout);
+        checkoutDate.setHours(0, 0, 0, 0);
+        
+        if (checkin) {
+          const checkinDate = new Date(checkin);
+          checkinDate.setHours(0, 0, 0, 0);
+          
+          if (checkoutDate <= checkinDate) {
+            showFieldError('checkout', 'Ngày trả phòng phải sau ngày nhận phòng');
+            hasError = true;
+          }
+        } else {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          
+          if (checkoutDate < today) {
+            showFieldError('checkout', 'Ngày trả phòng không được trong quá khứ');
+            hasError = true;
+          }
+        }
+      }
+      
+      // Validate guests
+      if (guestsFilter) {
+        const numGuests = parseInt(guestsFilter);
+        if (isNaN(numGuests) || numGuests < 1 || numGuests > 20) {
+          showFieldError('guestsFilter', 'Số khách phải từ 1 đến 20');
+          hasError = true;
+        }
+      }
+      
+      return !hasError;
+    }
+    
+    function showFieldError(fieldId, message) {
+      const field = document.getElementById(fieldId);
+      if (!field) return;
+      
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'filter-error';
+      errorDiv.style.cssText = 'color: #dc3545; font-size: 12px; margin-top: 4px; padding: 4px 8px; background: #fff5f5; border-radius: 4px;';
+      errorDiv.textContent = message;
+      
+      field.parentElement.appendChild(errorDiv);
+      field.style.borderColor = '#dc3545';
+      
+      // Remove error after 5 seconds
+      setTimeout(() => {
+        errorDiv.remove();
+        field.style.borderColor = '';
+      }, 5000);
+    }
+
     async function loadRooms() {
+      // Validate form before searching
+      if (!validateSearchForm()) {
+        if (typeof showToast === 'function') {
+          showToast('Vui lòng kiểm tra lại thông tin tìm kiếm', 'error');
+        } else {
+          alert('Vui lòng kiểm tra lại thông tin tìm kiếm');
+        }
+        return;
+      }
+      
       const loading = document.getElementById('loading');
       const roomsList = document.getElementById('roomsList');
       
