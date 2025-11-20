@@ -1874,11 +1874,11 @@
           }
           
           // Chỉ check các booking có thể thanh toán (Pending/Confirmed và chưa Paid)
+          // Booking model chỉ có 'status', không có 'paymentStatus'
           const unpaidBookings = bookings.filter(b => {
             // Check status (case-insensitive)
             const status = (b.status || b.Status || '').toString().toLowerCase();
-            const paymentStatus = (b.paymentStatus || b.PaymentStatus || '').toString().toLowerCase();
-            const isUnpaid = status !== 'paid' && paymentStatus !== 'paid';
+            const isUnpaid = status !== 'paid';
             const isPendingOrConfirmed = status === 'pending' || status === 'confirmed';
             
             return isUnpaid && isPendingOrConfirmed;

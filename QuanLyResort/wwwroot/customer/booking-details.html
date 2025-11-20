@@ -877,9 +877,8 @@
           
           if (resp.ok) {
             const booking = await resp.json();
-            // Check status (case-insensitive)
+            // Check status (case-insensitive) - Booking model chỉ có 'status', không có 'paymentStatus'
             const newStatus = (booking.status || booking.Status || '').toString().toLowerCase();
-            const paymentStatus = (booking.paymentStatus || booking.PaymentStatus || '').toString().toLowerCase();
             
             // Lần đầu tiên, lưu old status
             if (oldStatus === null) {
@@ -888,18 +887,11 @@
               return;
             }
             
-            console.log(`🔍 [BackgroundPolling] Booking ${bookingId}: oldStatus='${oldStatus}', newStatus='${newStatus}', paymentStatus='${paymentStatus}'`);
+            console.log(`🔍 [BackgroundPolling] Booking ${bookingId}: oldStatus='${oldStatus}', newStatus='${newStatus}'`);
             
-            // Chỉ check nếu booking chưa thanh toán
-            if (newStatus !== 'paid' && paymentStatus !== 'paid') {
-              // Update old status
-              oldStatus = newStatus;
-              return;
-            }
-            
-            // Nếu đã thanh toán, reload booking
-            if (newStatus === 'paid' || paymentStatus === 'paid') {
-              console.log('✅ [BackgroundPolling] Payment detected for booking', bookingId);
+            // Nếu status thay đổi từ non-paid sang paid, reload booking
+            if (newStatus === 'paid' && oldStatus !== 'paid') {
+              console.log('✅ [BackgroundPolling] Payment detected! Status changed from', oldStatus, 'to', newStatus);
               showToast('✅ Thanh toán thành công! Trạng thái đã được cập nhật.', 'success');
               
               // Reload booking
@@ -913,7 +905,7 @@
                 backgroundPollingInterval = null;
               }
             } else {
-              // Update old status
+              // Update old status để track changes
               oldStatus = newStatus;
             }
           }
