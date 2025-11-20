@@ -400,6 +400,12 @@
   <script>
     const params = new URLSearchParams(window.location.search);
     const bookingId = params.get('id');
+    const btnPay = document.getElementById('btnPay');
+    let currentBooking = null;
+    if (btnPay) {
+      btnPay.disabled = true;
+      btnPay.dataset.ready = 'false';
+    }
     
     // Validate bookingId
     if (!bookingId) {
@@ -486,8 +492,16 @@
         document.getElementById('content').style.display='none';
         const url = `${location.origin}/api/bookings/${bookingId}?_=${Date.now()}`;
         const resp = await fetch(url,{cache:'no-store',headers:{'Authorization':`Bearer ${token}`}});
-        if(!resp.ok) throw new Error('Không thể tải chi tiết');
+        if(!resp.ok) {
+          if (resp.status === 401 || resp.status === 403) {
+            showToast('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.', 'warning');
+            document.getElementById('loading').innerHTML = `<div class="alert alert-info">Vui lòng <a href="login.html">đăng nhập</a> để xem chi tiết đặt phòng.</div>`;
+            return;
+          }
+          throw new Error('Không thể tải chi tiết');
+        }
         const b = await resp.json();
+        currentBooking = b;
         
         // Update header
         document.getElementById('code').textContent = b.bookingCode || `BKG${b.bookingId}`;
@@ -530,11 +544,15 @@
         }
         
         // Show/hide pay button
-        const btnPay = document.getElementById('btnPay');
-        if (canPayBooking(b)) {
-          btnPay.style.display = 'inline-flex';
-        } else {
-          btnPay.style.display = 'none';
+        if (btnPay) {
+          if (canPayBooking(b)) {
+            btnPay.style.display = 'inline-flex';
+            btnPay.disabled = false;
+            btnPay.dataset.ready = 'true';
+          } else {
+            btnPay.style.display = 'none';
+            btnPay.dataset.ready = 'false';
+          }
         }
         
         document.getElementById('loading').style.display='none';
@@ -550,6 +568,16 @@
     
     document.getElementById('btnPay')?.addEventListener('click', async () => {
       try {
+        if (!currentBooking) {
+          showToast('Đang tải chi tiết đặt phòng, vui lòng thử lại.', 'warning');
+          return;
+        }
+        if (!canPayBooking(currentBooking)) {
+          showToast('Đặt phòng này không đủ điều kiện thanh toán.', 'warning');
+          return;
+        }
+        btnPay.disabled = true;
+        btnPay.dataset.ready = 'processing';
         // Wait for simple-payment.js to load if not ready
         if (typeof openSimplePayment !== 'function') {
           console.warn('⚠️ [booking-details] openSimplePayment not found, waiting for script...');
@@ -600,6 +628,11 @@
         }
       } catch(e) {
         showToast('Lỗi: ' + e.message, 'danger');
+      } finally {
+        if (btnPay) {
+          btnPay.disabled = false;
+          btnPay.dataset.ready = 'true';
+        }
       }
     });
 

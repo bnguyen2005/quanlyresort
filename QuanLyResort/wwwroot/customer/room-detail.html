@@ -31,7 +31,14 @@
     .thumb:hover,.thumb.active{opacity:1;border-color:#c8a97e;transform:scale(1.15) translateY(-5px);box-shadow:0 8px 20px rgba(200,169,126,0.4)}
     
     /* Room info với slide animation */
-    .room-info{animation:slideUp 1s ease;padding:50px 0}
+    .room-info{
+      animation:slideUp 1s ease;
+      padding:40px;
+      background:linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,248,240,0.85) 50%, rgba(245,237,224,0.7) 100%);
+      border-radius:24px;
+      box-shadow:0 12px 35px rgba(200,169,126,0.18);
+      border:2px solid rgba(200,169,126,0.12);
+    }
     .room-header{position:relative;margin-bottom:40px}
     .price-badge{background:linear-gradient(135deg,#c8a97e 0%,#b89968 100%);color:#fff;padding:20px 40px;border-radius:20px;display:inline-block;box-shadow:0 8px 30px rgba(200,169,126,0.4);animation:pulse 2s infinite;font-size:28px;font-weight:700}
     .price-badge small{display:block;font-size:14px;opacity:0.9;margin-top:5px}
@@ -101,6 +108,23 @@
     .section-title{position:relative;display:inline-block;padding-bottom:20px;margin-bottom:40px;font-size:42px;font-weight:700;color:#1a1a1a}
     .section-title::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:100px;height:4px;background:linear-gradient(90deg,#c8a97e,#b89968);border-radius:2px;animation:expandWidth 1s ease}
     .section-title::before{content:'';position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);width:60px;height:4px;background:linear-gradient(90deg,#b89968,#c8a97e);border-radius:2px}
+    .room-section{
+      background:linear-gradient(135deg,#f5ede0 0%,#fff8f0 50%,#ffffff 100%);
+      position:relative;
+      overflow:hidden;
+      padding:80px 0;
+    }
+    .room-section::before{
+      content:'';
+      position:absolute;
+      top:0;left:0;right:0;bottom:0;
+      opacity:0.05;
+      background-image:repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(200,169,126,0.1) 10px, rgba(200,169,126,0.1) 20px);
+    }
+    .room-section > .container{
+      position:relative;
+      z-index:1;
+    }
     
     /* Description với typing effect simulation */
     .room-description{font-size:18px;line-height:1.8;color:#555;animation:fadeIn 1.5s ease;background:#fff;padding:30px;border-radius:15px;box-shadow:0 5px 20px rgba(0,0,0,0.08);border-left:5px solid #c8a97e}
