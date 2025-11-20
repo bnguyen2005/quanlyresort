@@ -418,6 +418,7 @@ public class RestaurantOrdersController : ControllerBase
             // Check authorization
             var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
             var customerIdClaim = User.FindFirst("CustomerId")?.Value;
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value ?? "system";
             
             _logger.LogInformation($"[PayOrder] User role: {userRole}, CustomerId claim: {customerIdClaim}, Order CustomerId: {order.CustomerId}");
 
