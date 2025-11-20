@@ -274,7 +274,7 @@
               📱 Chọn phương thức thanh toán
             </label>
             <select id="plPaymentMethod" class="form-select" style="min-height:56px;font-size:16px;padding:16px 45px 16px 18px;border:2px solid #e9ecef;border-radius:12px">
-              <option value="BankTransfer" selected>💳 Chuyển khoản qua QR (VietQR)</option>
+              <option value="QR" selected>💳 Chuyển khoản qua QR (VietQR)</option>
               <option value="Cash">💵 Thanh toán tại khách sạn</option>
             </select>
           </div>
@@ -1328,13 +1328,13 @@
           return;
         }
         
-        // Set default payment method to BankTransfer (QR) and ensure QR section is visible
+        // Set default payment method to QR and ensure QR section is visible
         const paymentMethodSelect = document.getElementById('plPaymentMethod');
         const bankSection = document.getElementById('plBankSection');
         const cashSection = document.getElementById('plCashSection');
         
         if (paymentMethodSelect) {
-          paymentMethodSelect.value = 'BankTransfer';
+          paymentMethodSelect.value = 'QR';
           // Ensure sections are in correct state
           if (bankSection) bankSection.style.display = 'block';
           if (cashSection) cashSection.style.display = 'none';
@@ -1378,7 +1378,7 @@
         
         console.log('🔵 [PaymentMethod] Changed to:', method);
         
-        if (method === 'BankTransfer') {
+        if (method === 'QR') {
           // Show QR section
           if (bankSection) bankSection.style.display = 'block';
           if (cashSection) cashSection.style.display = 'none';

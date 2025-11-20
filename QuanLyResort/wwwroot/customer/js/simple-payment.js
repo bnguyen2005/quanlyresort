@@ -239,11 +239,17 @@ async function openSimplePayment(bookingId) {
       }
     }
     
-    // Default to BankTransfer if not found
-    paymentMethod = paymentMethod || 'BankTransfer';
+    // Default to QR if not found
+    paymentMethod = paymentMethod || 'QR';
     console.log("[FRONTEND] " + '🔍 [openSimplePayment] Payment method:', paymentMethod, 'from booking:', booking);
     
-    if (paymentMethod === 'PayAtHotel' || paymentMethod === 'Cash') {
+    // Normalize payment method: PayAtHotel -> Cash, BankTransfer -> QR
+    if (paymentMethod === 'PayAtHotel' || paymentMethod === 'BankTransfer') {
+      if (paymentMethod === 'PayAtHotel') paymentMethod = 'Cash';
+      if (paymentMethod === 'BankTransfer') paymentMethod = 'QR';
+    }
+    
+    if (paymentMethod === 'Cash') {
       // Show hotel payment confirmation modal instead of QR
       showHotelPaymentConfirmation(bookingId, booking.bookingCode || `BKG${bookingId}`, amount);
       return;
