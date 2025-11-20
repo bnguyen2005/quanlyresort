@@ -116,31 +116,33 @@
     
     .unpaid-badge{
       position:absolute;
-      top:15px;
-      right:15px;
+      top:20px;
+      right:20px;
       background:#dc3545;
       color:#fff;
-      padding:6px 12px;
-      border-radius:20px;
-      font-size:12px;
+      padding:8px 16px;
+      border-radius:25px;
+      font-size:13px;
       font-weight:700;
       text-transform:uppercase;
       letter-spacing:0.5px;
-      box-shadow:0 4px 12px rgba(220,53,69,0.4);
+      box-shadow:0 4px 15px rgba(220,53,69,0.5);
       z-index:10;
       animation:pulse 2s infinite;
       display:flex;
       align-items:center;
-      gap:6px
+      gap:8px;
+      white-space:nowrap
     }
     .unpaid-badge::before{
       content:'';
-      width:8px;
-      height:8px;
+      width:10px;
+      height:10px;
       background:#fff;
       border-radius:50%;
       display:inline-block;
-      animation:blink 1.5s infinite
+      animation:blink 1.5s infinite;
+      flex-shrink:0
     }
     @keyframes pulse{
       0%,100%{transform:scale(1)}
