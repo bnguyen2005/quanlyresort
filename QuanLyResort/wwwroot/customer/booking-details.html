@@ -614,15 +614,24 @@
           document.getElementById('invoiceSection').style.display = 'block';
         }
         
-        // Show/hide pay button
+        // Show/hide pay button and unpaid badge
+        const unpaidBadgeContainer = document.getElementById('unpaidBadgeContainer');
         if (btnPay) {
           if (canPayBooking(b)) {
             btnPay.style.display = 'inline-flex';
             btnPay.disabled = false;
             btnPay.dataset.ready = 'true';
+            // Show unpaid badge
+            if (unpaidBadgeContainer) {
+              unpaidBadgeContainer.innerHTML = '<div class="unpaid-badge">Chưa thanh toán</div>';
+            }
           } else {
             btnPay.style.display = 'none';
             btnPay.dataset.ready = 'false';
+            // Hide unpaid badge
+            if (unpaidBadgeContainer) {
+              unpaidBadgeContainer.innerHTML = '';
+            }
           }
         }
         
