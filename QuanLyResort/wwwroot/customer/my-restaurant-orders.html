@@ -536,28 +536,55 @@
         try {
           const token = localStorage.getItem('token');
           if (!token) {
+            console.warn('⚠️ [BackgroundPolling] No token found');
             return;
           }
           
-          // Lấy danh sách orders hiện tại từ window._orders hoặc DOM
-          const orders = window._orders || [];
+          // Lấy danh sách orders hiện tại từ window._orders hoặc fetch lại
+          let orders = window._orders || [];
           
-          // Chỉ check các order có thể thanh toán (Pending/Confirmed và Unpaid/AwaitingConfirmation)
+          // Nếu không có orders trong cache, fetch lại
+          if (orders.length === 0) {
+            try {
+              const apiUrl = `${location.origin}/api/restaurant-orders/my`;
+              const resp = await fetch(apiUrl, {
+                cache: 'no-store',
+                headers: { 'Authorization': `Bearer ${token}` }
+              });
+              if (resp.ok) {
+                orders = await resp.json();
+                orders = Array.isArray(orders) ? orders : [];
+                window._orders = orders; // Cache lại
+              }
+            } catch (e) {
+              console.warn('⚠️ [BackgroundPolling] Error fetching orders:', e);
+            }
+          }
+          
+          // Chỉ check các order có thể thanh toán (Pending/Confirmed và chưa Paid)
           const unpaidOrders = orders.filter(o => {
-            const status = o.status || '';
-            const paymentStatus = o.paymentStatus || '';
-            return (status === 'Pending' || status === 'Confirmed') && 
-                   (paymentStatus === 'Unpaid' || paymentStatus === 'AwaitingConfirmation');
+            // Check status (case-insensitive)
+            const status = (o.status || o.Status || '').toString().toLowerCase();
+            const paymentStatus = (o.paymentStatus || o.PaymentStatus || '').toString().toLowerCase();
+            const isUnpaid = paymentStatus !== 'paid';
+            const isPendingOrConfirmed = status === 'pending' || status === 'confirmed';
+            
+            return isUnpaid && isPendingOrConfirmed;
           });
           
           if (unpaidOrders.length === 0) {
             return; // Không có order nào cần check
           }
           
+          console.log(`🔍 [BackgroundPolling] Checking ${unpaidOrders.length} unpaid orders...`);
+          
           // Check từng order
           for (const order of unpaidOrders) {
             try {
-              const url = `${location.origin}/api/restaurant-orders/${order.orderId}?_=${Date.now()}`;
+              const orderId = order.orderId || order.OrderId;
+              if (!orderId) continue;
+              
+              const url = `${location.origin}/api/restaurant-orders/${orderId}?_=${Date.now()}`;
               const resp = await fetch(url, {
                 headers: { 'Authorization': `Bearer ${token}` },
                 cache: 'no-store'
@@ -565,13 +592,23 @@
               
               if (resp.ok) {
                 const updatedOrder = await resp.json();
-                const newPaymentStatus = updatedOrder.paymentStatus || '';
-                const oldPaymentStatus = order.paymentStatus || '';
+                // Check payment status (case-insensitive)
+                const newPaymentStatus = (updatedOrder.paymentStatus || updatedOrder.PaymentStatus || '').toString().toLowerCase();
+                const oldPaymentStatus = (order.paymentStatus || order.PaymentStatus || '').toString().toLowerCase();
                 
-                // Nếu payment status thay đổi thành "Paid", reload trang
-                if (newPaymentStatus === 'Paid' && oldPaymentStatus !== 'Paid') {
-                  console.log('✅ [BackgroundPolling] Payment detected for order', order.orderId);
-                  showToast(`✅ Thanh toán thành công cho đơn hàng ${updatedOrder.orderNumber || order.orderNumber}!`, 'success');
+                console.log(`🔍 [BackgroundPolling] Order ${orderId}: oldPaymentStatus='${oldPaymentStatus}', newPaymentStatus='${newPaymentStatus}'`);
+                
+                // Nếu payment status thay đổi thành "paid", reload trang
+                if (newPaymentStatus === 'paid' && oldPaymentStatus !== 'paid') {
+                  console.log('✅ [BackgroundPolling] Payment detected for order', orderId);
+                  const orderNumber = updatedOrder.orderNumber || updatedOrder.OrderNumber || order.orderNumber || order.OrderNumber || `ORD${orderId}`;
+                  showToast(`✅ Thanh toán thành công cho đơn hàng ${orderNumber}!`, 'success');
+                  
+                  // Update cache
+                  const index = window._orders.findIndex(o => (o.orderId || o.OrderId) === orderId);
+                  if (index >= 0) {
+                    window._orders[index] = updatedOrder;
+                  }
                   
                   // Reload orders list
                   setTimeout(() => {
@@ -580,7 +617,7 @@
                 }
               }
             } catch (e) {
-              console.warn('⚠️ [BackgroundPolling] Error checking order', order.orderId, ':', e);
+              console.warn('⚠️ [BackgroundPolling] Error checking order', order.orderId || order.OrderId, ':', e);
             }
           }
         } catch (e) {

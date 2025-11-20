@@ -1843,28 +1843,60 @@
         try {
           const token = localStorage.getItem('token');
           if (!token) {
+            console.warn('⚠️ [BackgroundPolling] No token found');
             return;
           }
           
-          // Lấy danh sách bookings hiện tại từ DOM hoặc window._bookings
-          const bookings = window._bookings || [];
+          // Lấy danh sách bookings hiện tại từ window._bookings hoặc fetch lại
+          let bookings = window._bookings || [];
           
-          // Chỉ check các booking có thể thanh toán (Pending/Confirmed và Unpaid)
+          // Nếu không có bookings trong cache, fetch lại
+          if (bookings.length === 0) {
+            try {
+              const customerId = JSON.parse(localStorage.getItem('user') || '{}').customerId || 
+                                JSON.parse(localStorage.getItem('user') || '{}').userId ||
+                                JSON.parse(localStorage.getItem('user') || '{}').CustomerId;
+              if (customerId) {
+                const apiUrl = `${location.origin}/api/bookings/my?customerId=${customerId}`;
+                const resp = await fetch(apiUrl, {
+                  cache: 'no-store',
+                  headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (resp.ok) {
+                  bookings = await resp.json();
+                  bookings = Array.isArray(bookings) ? bookings : [];
+                  window._bookings = bookings; // Cache lại
+                }
+              }
+            } catch (e) {
+              console.warn('⚠️ [BackgroundPolling] Error fetching bookings:', e);
+            }
+          }
+          
+          // Chỉ check các booking có thể thanh toán (Pending/Confirmed và chưa Paid)
           const unpaidBookings = bookings.filter(b => {
-            const status = b.status || '';
-            const paymentStatus = b.paymentStatus || '';
-            return (status === 'Pending' || status === 'Confirmed') && 
-                   (paymentStatus === 'Unpaid' || paymentStatus === 'AwaitingConfirmation');
+            // Check status (case-insensitive)
+            const status = (b.status || b.Status || '').toString().toLowerCase();
+            const paymentStatus = (b.paymentStatus || b.PaymentStatus || '').toString().toLowerCase();
+            const isUnpaid = status !== 'paid' && paymentStatus !== 'paid';
+            const isPendingOrConfirmed = status === 'pending' || status === 'confirmed';
+            
+            return isUnpaid && isPendingOrConfirmed;
           });
           
           if (unpaidBookings.length === 0) {
             return; // Không có booking nào cần check
           }
           
+          console.log(`🔍 [BackgroundPolling] Checking ${unpaidBookings.length} unpaid bookings...`);
+          
           // Check từng booking
           for (const booking of unpaidBookings) {
             try {
-              const url = `${location.origin}/api/bookings/${booking.bookingId}?_=${Date.now()}`;
+              const bookingId = booking.bookingId || booking.BookingId;
+              if (!bookingId) continue;
+              
+              const url = `${location.origin}/api/bookings/${bookingId}?_=${Date.now()}`;
               const resp = await fetch(url, {
                 headers: { 'Authorization': `Bearer ${token}` },
                 cache: 'no-store'
@@ -1872,13 +1904,23 @@
               
               if (resp.ok) {
                 const updatedBooking = await resp.json();
-                const newStatus = updatedBooking.status || '';
-                const oldStatus = booking.status || '';
+                // Check status (case-insensitive)
+                const newStatus = (updatedBooking.status || updatedBooking.Status || '').toString().toLowerCase();
+                const oldStatus = (booking.status || booking.Status || '').toString().toLowerCase();
                 
-                // Nếu status thay đổi thành "Paid", reload trang
-                if (newStatus === 'Paid' && oldStatus !== 'Paid') {
-                  console.log('✅ [BackgroundPolling] Payment detected for booking', booking.bookingId);
-                  showToast(`✅ Thanh toán thành công cho đặt phòng ${updatedBooking.bookingCode || booking.bookingCode}!`, 'success');
+                console.log(`🔍 [BackgroundPolling] Booking ${bookingId}: oldStatus='${oldStatus}', newStatus='${newStatus}'`);
+                
+                // Nếu status thay đổi thành "paid", reload trang
+                if (newStatus === 'paid' && oldStatus !== 'paid') {
+                  console.log('✅ [BackgroundPolling] Payment detected for booking', bookingId);
+                  const bookingCode = updatedBooking.bookingCode || updatedBooking.BookingCode || booking.bookingCode || booking.BookingCode || `BKG${bookingId}`;
+                  showToast(`✅ Thanh toán thành công cho đặt phòng ${bookingCode}!`, 'success');
+                  
+                  // Update cache
+                  const index = window._bookings.findIndex(b => (b.bookingId || b.BookingId) === bookingId);
+                  if (index >= 0) {
+                    window._bookings[index] = updatedBooking;
+                  }
                   
                   // Reload bookings list
                   setTimeout(() => {
@@ -1887,7 +1929,7 @@
                 }
               }
             } catch (e) {
-              console.warn('⚠️ [BackgroundPolling] Error checking booking', booking.bookingId, ':', e);
+              console.warn('⚠️ [BackgroundPolling] Error checking booking', booking.bookingId || booking.BookingId, ':', e);
             }
           }
         } catch (e) {

@@ -1086,16 +1086,21 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
       const orderId = urlParams.get('id');
       
       if (!orderId) {
+        console.warn('⚠️ [BackgroundPolling] No order ID found in URL');
         return;
       }
       
       console.log('🔄 [BackgroundPolling] Starting background polling for order:', orderId);
+      
+      // Lưu old payment status để so sánh
+      let oldPaymentStatus = null;
       
       // Poll mỗi 10 giây để check payment status
       backgroundPollingInterval = setInterval(async () => {
         try {
           const token = localStorage.getItem('token');
           if (!token) {
+            console.warn('⚠️ [BackgroundPolling] No token found');
             return;
           }
           
@@ -1108,35 +1113,51 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
           
           if (resp.ok) {
             const order = await resp.json();
-            const paymentStatus = order.paymentStatus || '';
+            // Check payment status (case-insensitive)
+            const newPaymentStatus = (order.paymentStatus || order.PaymentStatus || '').toString().toLowerCase();
+            
+            // Lần đầu tiên, lưu old payment status
+            if (oldPaymentStatus === null) {
+              oldPaymentStatus = newPaymentStatus;
+              console.log(`🔍 [BackgroundPolling] Initial paymentStatus for order ${orderId}: '${newPaymentStatus}'`);
+              return;
+            }
+            
+            console.log(`🔍 [BackgroundPolling] Order ${orderId}: oldPaymentStatus='${oldPaymentStatus}', newPaymentStatus='${newPaymentStatus}'`);
             
             // Chỉ check nếu order chưa thanh toán
-            if (paymentStatus !== 'Paid') {
-              // Check lại sau
+            if (newPaymentStatus !== 'paid') {
+              // Update old payment status
+              oldPaymentStatus = newPaymentStatus;
               return;
             }
             
             // Nếu đã thanh toán, reload order
-            console.log('✅ [BackgroundPolling] Payment detected for order', orderId);
-            
-            // Show toast nếu có function
-            if (typeof showToast === 'function') {
-              showToast('✅ Thanh toán thành công! Trạng thái đã được cập nhật.', 'success');
-            }
-            
-            // Reload order
-            setTimeout(() => {
-              if (window.loadOrderDetails) {
-                window.loadOrderDetails(orderId);
-              } else {
-                window.location.reload();
+            if (newPaymentStatus === 'paid' && oldPaymentStatus !== 'paid') {
+              console.log('✅ [BackgroundPolling] Payment detected for order', orderId);
+              
+              // Show toast nếu có function
+              if (typeof showToast === 'function') {
+                showToast('✅ Thanh toán thành công! Trạng thái đã được cập nhật.', 'success');
               }
-            }, 1000);
-            
-            // Dừng polling
-            if (backgroundPollingInterval) {
-              clearInterval(backgroundPollingInterval);
-              backgroundPollingInterval = null;
+              
+              // Reload order
+              setTimeout(() => {
+                if (window.loadOrderDetails) {
+                  window.loadOrderDetails(orderId);
+                } else {
+                  window.location.reload();
+                }
+              }, 1000);
+              
+              // Dừng polling
+              if (backgroundPollingInterval) {
+                clearInterval(backgroundPollingInterval);
+                backgroundPollingInterval = null;
+              }
+            } else {
+              // Update old payment status
+              oldPaymentStatus = newPaymentStatus;
             }
           }
         } catch (e) {

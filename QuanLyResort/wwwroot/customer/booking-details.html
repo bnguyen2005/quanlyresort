@@ -850,16 +850,21 @@
       const bookingId = urlParams.get('id');
       
       if (!bookingId) {
+        console.warn('⚠️ [BackgroundPolling] No booking ID found in URL');
         return;
       }
       
       console.log('🔄 [BackgroundPolling] Starting background polling for booking:', bookingId);
+      
+      // Lưu old status để so sánh
+      let oldStatus = null;
       
       // Poll mỗi 10 giây để check payment status
       backgroundPollingInterval = setInterval(async () => {
         try {
           const token = localStorage.getItem('token');
           if (!token) {
+            console.warn('⚠️ [BackgroundPolling] No token found');
             return;
           }
           
@@ -872,28 +877,44 @@
           
           if (resp.ok) {
             const booking = await resp.json();
-            const status = booking.status || '';
-            const paymentStatus = booking.paymentStatus || '';
+            // Check status (case-insensitive)
+            const newStatus = (booking.status || booking.Status || '').toString().toLowerCase();
+            const paymentStatus = (booking.paymentStatus || booking.PaymentStatus || '').toString().toLowerCase();
+            
+            // Lần đầu tiên, lưu old status
+            if (oldStatus === null) {
+              oldStatus = newStatus;
+              console.log(`🔍 [BackgroundPolling] Initial status for booking ${bookingId}: '${newStatus}'`);
+              return;
+            }
+            
+            console.log(`🔍 [BackgroundPolling] Booking ${bookingId}: oldStatus='${oldStatus}', newStatus='${newStatus}', paymentStatus='${paymentStatus}'`);
             
             // Chỉ check nếu booking chưa thanh toán
-            if (status !== 'Paid' && paymentStatus !== 'Paid') {
-              // Check lại sau
+            if (newStatus !== 'paid' && paymentStatus !== 'paid') {
+              // Update old status
+              oldStatus = newStatus;
               return;
             }
             
             // Nếu đã thanh toán, reload booking
-            console.log('✅ [BackgroundPolling] Payment detected for booking', bookingId);
-            showToast('✅ Thanh toán thành công! Trạng thái đã được cập nhật.', 'success');
-            
-            // Reload booking
-            setTimeout(() => {
-              loadBooking();
-            }, 1000);
-            
-            // Dừng polling
-            if (backgroundPollingInterval) {
-              clearInterval(backgroundPollingInterval);
-              backgroundPollingInterval = null;
+            if (newStatus === 'paid' || paymentStatus === 'paid') {
+              console.log('✅ [BackgroundPolling] Payment detected for booking', bookingId);
+              showToast('✅ Thanh toán thành công! Trạng thái đã được cập nhật.', 'success');
+              
+              // Reload booking
+              setTimeout(() => {
+                loadBooking();
+              }, 1000);
+              
+              // Dừng polling
+              if (backgroundPollingInterval) {
+                clearInterval(backgroundPollingInterval);
+                backgroundPollingInterval = null;
+              }
+            } else {
+              // Update old status
+              oldStatus = newStatus;
             }
           }
         } catch (e) {
