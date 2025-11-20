@@ -1918,10 +1918,16 @@
           });
           
           if (unpaidBookings.length === 0) {
+            // Vẫn log để biết polling đang chạy
+            console.log('🔍 [BackgroundPolling] No unpaid bookings to check');
             return; // Không có booking nào cần check
           }
           
-          console.log(`🔍 [BackgroundPolling] Checking ${unpaidBookings.length} unpaid bookings...`);
+          console.log(`🔍 [BackgroundPolling] Checking ${unpaidBookings.length} unpaid bookings:`, unpaidBookings.map(b => ({
+            id: b.bookingId || b.BookingId,
+            code: b.bookingCode || b.BookingCode,
+            status: b.status || b.Status
+          })));
           
           // Check từng booking
           for (const booking of unpaidBookings) {
@@ -1956,21 +1962,29 @@
                 // Nếu status thay đổi thành "paid", reload trang
                 if (newStatus === 'paid' && oldStatus !== 'paid') {
                   console.log('✅ [BackgroundPolling] ✅✅✅ PAYMENT DETECTED! Status changed from', oldStatus, 'to', newStatus);
+                  console.log('✅ [BackgroundPolling] Full updated booking data:', updatedBooking);
                   const bookingCode = updatedBooking.bookingCode || updatedBooking.BookingCode || booking.bookingCode || booking.BookingCode || `BKG${bookingId}`;
+                  
+                  // Show success toast
                   showToast(`✅ Thanh toán thành công cho đặt phòng ${bookingCode}!`, 'success');
                   
-                  // Update cache
+                  // Update cache immediately
                   const index = window._bookings.findIndex(b => (b.bookingId || b.BookingId) === bookingId);
                   if (index >= 0) {
                     window._bookings[index] = updatedBooking;
                     console.log('✅ [BackgroundPolling] Updated booking in cache');
+                  } else {
+                    // Add to cache if not found
+                    window._bookings.push(updatedBooking);
+                    console.log('✅ [BackgroundPolling] Added booking to cache');
                   }
                   
-                  // Reload bookings list
-                  setTimeout(() => {
-                    console.log('🔄 [BackgroundPolling] Reloading bookings list...');
-                    loadBookings();
-                  }, 1000);
+                  // Reload bookings list immediately
+                  console.log('🔄 [BackgroundPolling] Reloading bookings list immediately...');
+                  loadBookings();
+                } else if (oldStatus !== newStatus) {
+                  // Log any other status changes for debugging
+                  console.log(`🔄 [BackgroundPolling] Booking ${bookingId} status changed from '${oldStatus}' to '${newStatus}' (not paid yet)`);
                 }
               } else {
                 console.warn(`⚠️ [BackgroundPolling] Failed to fetch booking ${bookingId}:`, resp.status, resp.statusText);

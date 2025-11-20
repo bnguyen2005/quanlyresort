@@ -238,7 +238,18 @@ public class InvoicesController : ControllerBase
                 }
             }
 
-            return Ok(new { message = "Payment processed successfully" });
+            // Reload booking one more time to get final status for response
+            var finalBooking = await _bookingService.GetBookingByIdAsync(bookingId.Value);
+            var finalBookingStatus = finalBooking?.Status ?? "Unknown";
+            
+            _logger.LogInformation($"[ProcessPayment] ✅✅✅ FINAL: Invoice {id} paid, Booking {bookingId.Value} final status: '{finalBookingStatus}'");
+            
+            return Ok(new { 
+                message = "Payment processed successfully",
+                invoiceId = id,
+                bookingId = bookingId.Value,
+                bookingStatus = finalBookingStatus
+            });
         }
         catch (Exception ex)
         {
