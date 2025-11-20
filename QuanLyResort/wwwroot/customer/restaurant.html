@@ -1507,11 +1507,12 @@
       currentQty = Math.max(0, newQty);
       qtyEl.textContent = currentQty;
       
-      // Update cart if quantity > 0
+      // Update cart if quantity > 0 (KHÔNG GIỚI HẠN SỐ LƯỢNG TỐI ĐA)
       if (currentQty > 0) {
         const existingIndex = shoppingCart.findIndex(item => item.serviceId === serviceId);
         if (existingIndex >= 0) {
           shoppingCart[existingIndex].quantity = currentQty;
+          console.log('[adjustQuantity] ✅ Updated cart quantity to:', currentQty, 'for serviceId:', serviceId, '(no max limit)');
         }
         // Nếu chưa có trong cart, chỉ cập nhật số lượng hiển thị, chưa thêm vào cart
         // Phải click "Thêm vào giỏ" để thêm vào cart
