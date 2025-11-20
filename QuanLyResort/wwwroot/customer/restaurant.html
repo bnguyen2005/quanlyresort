@@ -1174,23 +1174,26 @@
       
       console.log('[addToCart] Quantity from element:', quantity, 'Element:', qtyEl);
       
-      // Nếu số lượng = 0, tự động set thành 1
+      // Yêu cầu người dùng chọn số lượng trước khi thêm vào giỏ hàng
       if (quantity <= 0) {
-        quantity = 1;
-        if (qtyEl) {
-          qtyEl.textContent = '1';
+        const message = '⚠️ Vui lòng chọn số lượng trước khi thêm vào giỏ hàng!';
+        if (typeof showToast === 'function') {
+          showToast(message, 'warning');
+        } else if (window.showToast) {
+          window.showToast(message, 'warning');
+        } else {
+          alert(message);
         }
-        if (quickViewQtyEl) {
-          quickViewQtyEl.textContent = '1';
-        }
-        console.log('[addToCart] ⚠️ Quantity was 0, auto-set to 1');
+        console.log('[addToCart] ⚠️ Quantity is 0, cannot add to cart');
+        return; // Dừng lại, không thêm vào giỏ hàng
       }
       
       const existingIndex = shoppingCart.findIndex(item => item.serviceId === serviceId);
       if (existingIndex >= 0) {
-        // Nếu đã có trong cart, cập nhật số lượng
-        shoppingCart[existingIndex].quantity = quantity;
-        console.log('[addToCart] ✅ Updated existing item in cart:', shoppingCart[existingIndex]);
+        // Nếu đã có trong cart, cộng thêm số lượng mới vào số lượng hiện tại
+        const currentCartQty = shoppingCart[existingIndex].quantity || 0;
+        shoppingCart[existingIndex].quantity = currentCartQty + quantity;
+        console.log('[addToCart] ✅ Updated existing item in cart:', shoppingCart[existingIndex], 'Old qty:', currentCartQty, 'Added:', quantity, 'New qty:', shoppingCart[existingIndex].quantity);
         
         // Show success notification
         const message = `✅ Đã cập nhật "${serviceName}" (${quantity} phần) trong giỏ hàng!`;
@@ -2167,14 +2170,19 @@
           if (serviceId && !isNaN(serviceId)) {
             console.log('[renderMenuItems] Add to cart clicked:', { serviceId, serviceName, price, target: target.tagName });
             
-            // Check quantity first - chỉ set trong DOM, không gọi adjustQuantity
+            // Check quantity first - yêu cầu người dùng chọn số lượng trước
             const qtyEl = document.getElementById(`qty-${serviceId}`);
             const quantity = parseInt(qtyEl?.textContent || 0);
             
-            // Nếu quantity = 0, chỉ set trong DOM để addToCart xử lý, không gọi adjustQuantity
-            // vì adjustQuantity sẽ cập nhật cart, sau đó addToCart lại thêm vào cart một lần nữa
-            if (quantity <= 0 && qtyEl) {
-              qtyEl.textContent = '1';
+            // Không tự động set quantity = 1, yêu cầu người dùng chọn
+            if (quantity <= 0) {
+              const message = '⚠️ Vui lòng chọn số lượng trước khi thêm vào giỏ hàng!';
+              if (window.showToast) {
+                showToast(message, 'warning');
+              } else {
+                alert(message);
+              }
+              return; // Dừng lại, không thêm vào giỏ hàng
             }
             
             if (typeof window.addToCart === 'function') {
@@ -2207,13 +2215,18 @@
               const serviceName = item.serviceName || item.name || 'Món ăn';
               const price = item.price || 0;
               
-              // Set quantity to 1 if it's 0 - chỉ set trong DOM, không gọi adjustQuantity
+              // Yêu cầu người dùng chọn số lượng trước
               const qtyEl = document.getElementById(`qty-${serviceId}`);
-              if (qtyEl) {
-                const currentQty = parseInt(qtyEl.textContent) || 0;
-                if (currentQty === 0) {
-                  qtyEl.textContent = '1';
+              const currentQty = parseInt(qtyEl?.textContent || 0);
+              
+              if (currentQty <= 0) {
+                const message = '⚠️ Vui lòng chọn số lượng trước khi thêm vào giỏ hàng!';
+                if (window.showToast) {
+                  showToast(message, 'warning');
+                } else {
+                  alert(message);
                 }
+                return; // Dừng lại, không thêm vào giỏ hàng
               }
               
               console.log('[renderMenuItems] Menu card clicked (outside buttons):', { serviceId, serviceName, price });
@@ -2345,17 +2358,15 @@
             const quickViewQtyEl = document.getElementById(`quickViewQty-${btnServiceId}`);
             let quantity = parseInt(quickViewQtyEl?.textContent || 0);
             
-            // Auto set quantity to 1 if 0
+            // Yêu cầu người dùng chọn số lượng trước
             if (quantity <= 0) {
-              quantity = 1;
-              if (quickViewQtyEl) {
-                quickViewQtyEl.textContent = '1';
+              const message = '⚠️ Vui lòng chọn số lượng trước khi thêm vào giỏ hàng!';
+              if (window.showToast) {
+                showToast(message, 'warning');
+              } else {
+                alert(message);
               }
-              // Also update main display if exists
-              const mainQtyEl = document.getElementById(`qty-${btnServiceId}`);
-              if (mainQtyEl) {
-                mainQtyEl.textContent = '1';
-              }
+              return; // Dừng lại, không thêm vào giỏ hàng
             }
             
             if (typeof window.addToCart === 'function') {
