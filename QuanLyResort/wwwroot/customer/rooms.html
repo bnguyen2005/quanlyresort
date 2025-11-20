@@ -52,6 +52,16 @@
       display: flex;
       align-items: center;
     }
+    @media (prefers-reduced-motion: no-preference) {
+      .rooms-hero {
+        background-attachment: fixed;
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .rooms-hero {
+        background-attachment: scroll;
+      }
+    }
     .rooms-hero::before {
       content: '';
       position: absolute;
@@ -174,6 +184,11 @@
       overflow-y: auto;
       border: 2px solid rgba(200,169,126,0.1);
       animation: slideUp 0.8s ease;
+      transition: all 0.3s ease;
+    }
+    .filter-section-modern:hover {
+      box-shadow: 0 8px 30px rgba(200,169,126,0.2);
+      transform: translateY(-2px);
     }
     .filter-header {
       margin-bottom: 24px;
@@ -216,15 +231,23 @@
       border: 2px solid #e5e7eb;
       padding: 12px 16px;
       font-size: 14px;
-      transition: all 0.3s ease;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
       width: 100%;
+      position: relative;
+    }
+    .filter-group .form-control:hover,
+    .filter-group .form-select:hover {
+      border-color: rgba(200,169,126,0.4);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(200,169,126,0.1);
     }
     .filter-group .form-control:focus,
     .filter-group .form-select:focus {
       border-color: #c8a97e;
-      box-shadow: 0 0 0 4px rgba(200,169,126,0.1);
+      box-shadow: 0 0 0 4px rgba(200,169,126,0.15), 0 4px 12px rgba(200,169,126,0.2);
       outline: none;
+      transform: translateY(-2px);
     }
     .filter-actions {
       display: flex;
@@ -257,6 +280,26 @@
     .btn-filter-primary:hover {
       transform: translateY(-2px);
       box-shadow: 0 6px 20px rgba(200,169,126,0.4);
+    }
+    .btn-filter-primary:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 10px rgba(200,169,126,0.3);
+    }
+    .btn-filter-primary::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.6s, height 0.6s;
+    }
+    .btn-filter-primary:hover::before {
+      width: 300px;
+      height: 300px;
     }
     .btn-filter-secondary {
       background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
@@ -310,6 +353,23 @@
       box-shadow: 0 20px 50px rgba(200,169,126,0.25);
       border-color: rgba(200,169,126,0.3);
     }
+    .room-card-modern::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(200,169,126,0.05) 0%, transparent 50%);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      pointer-events: none;
+      z-index: 1;
+      border-radius: 20px;
+    }
+    .room-card-modern:hover::before {
+      opacity: 1;
+    }
     .room-image-wrapper {
       position: relative;
       width: 100%;
@@ -342,9 +402,33 @@
       background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.4) 100%);
       opacity: 0;
       transition: opacity 0.3s ease;
+      z-index: 1;
     }
     .room-card-modern:hover .room-image-overlay {
       opacity: 1;
+    }
+    .room-image-wrapper::after {
+      content: '👁️ Xem ảnh';
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: rgba(200,169,126,0.9);
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 25px;
+      font-size: 13px;
+      font-weight: 600;
+      opacity: 0;
+      transition: all 0.3s ease;
+      z-index: 3;
+      pointer-events: none;
+      white-space: nowrap;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    .room-card-modern:hover .room-image-wrapper::after {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
     }
     .room-badge-top {
       position: absolute;
@@ -392,8 +476,13 @@
       margin-bottom: 12px;
     }
     .room-rating i {
-      color: #f59e0b;
+      color: #c8a97e;
       font-size: 16px;
+      transition: transform 0.2s ease;
+    }
+    .room-card-modern:hover .room-rating i {
+      transform: scale(1.2);
+      color: #b89968;
     }
     .room-title {
       font-size: 22px;
@@ -432,6 +521,15 @@
       gap: 6px;
       font-size: 14px;
       color: #6b7280;
+      transition: all 0.3s ease;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: rgba(200,169,126,0.05);
+    }
+    .room-feature:hover {
+      background: rgba(200,169,126,0.1);
+      transform: translateY(-2px);
+      box-shadow: 0 2px 8px rgba(200,169,126,0.15);
     }
     .room-feature i {
       color: #c8a97e;
@@ -448,7 +546,7 @@
       border-radius: 12px;
       font-weight: 600;
       font-size: 14px;
-      transition: all 0.3s ease;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       border: none;
       cursor: pointer;
       text-decoration: none;
@@ -456,6 +554,27 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-room-action::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.5s, height 0.5s;
+    }
+    .btn-room-action:hover::before {
+      width: 200px;
+      height: 200px;
+    }
+    .btn-room-action:active {
+      transform: scale(0.95);
     }
     .btn-room-primary {
       background: linear-gradient(135deg, #c8a97e 0%, #b89968 100%);
@@ -463,7 +582,7 @@
       box-shadow: 0 4px 12px rgba(200,169,126,0.3);
     }
     .btn-room-primary:hover {
-      transform: translateY(-2px);
+      transform: translateY(-2px) scale(1.02);
       box-shadow: 0 6px 18px rgba(200,169,126,0.4);
       color: #fff;
     }
@@ -528,6 +647,46 @@
       font-size: 16px;
       color: #6b7280;
       font-weight: 500;
+    }
+    
+    /* Loading Skeleton for Room Cards */
+    .room-skeleton {
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(200,169,126,0.15);
+      border: 2px solid rgba(200,169,126,0.1);
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    .skeleton-image {
+      width: 100%;
+      height: 0;
+      padding-top: 70%;
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+    }
+    .skeleton-content {
+      padding: 24px;
+    }
+    .skeleton-line {
+      height: 12px;
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+    .skeleton-line.short { width: 60%; }
+    .skeleton-line.medium { width: 80%; }
+    .skeleton-line.long { width: 100%; }
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
     }
     
     /* Animations */
@@ -1011,10 +1170,14 @@
         <!-- Results Header with Sorting -->
         <div class="results-header">
           <div class="results-info">
+            <span style="font-size: 20px; margin-right: 8px;">📋</span>
             <span id="resultsCount" class="results-count">Đang tải...</span>
           </div>
           <div class="sort-options">
-            <label for="sortBy">Sắp xếp:</label>
+            <label for="sortBy" style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-size: 18px;">🔀</span>
+              <span>Sắp xếp:</span>
+            </label>
             <select id="sortBy" class="sort-select">
               <option value="default">Mặc định</option>
               <option value="price-asc">Giá: Thấp → Cao</option>
@@ -1078,11 +1241,11 @@
             </select>
           </div>
           <div class="filter-actions">
-            <button id="btnSearch" class="btn-filter btn-filter-primary">
-              <i class="icon-bed"></i> Tìm phòng
+            <button id="btnSearch" class="btn-filter btn-filter-primary" title="Tìm kiếm phòng theo tiêu chí">
+              <span style="font-size: 18px; margin-right: 6px;">🔍</span> Tìm phòng
             </button>
-            <button id="btnReset" class="btn-filter btn-filter-secondary">
-              <i class="icon-refresh"></i> Xóa lọc
+            <button id="btnReset" class="btn-filter btn-filter-secondary" title="Xóa tất cả bộ lọc">
+              <span style="font-size: 18px; margin-right: 6px;">🔄</span> Xóa lọc
             </button>
           </div>
         </div>
@@ -1383,7 +1546,7 @@
                  onerror="this.onerror=null; this.src='images/room-${Math.max(1, (r.roomId || 1) % 6)}.jpg'; this.style.display='block';" 
                  onload="this.style.display='block';" />
             <div class="room-image-overlay"></div>
-            <span class="room-badge-top">${roomNumber}</span>
+            <span class="room-badge-top">🏨 ${roomNumber}</span>
             <span class="room-badge-status ${available ? 'room-badge-available' : 'room-badge-unavailable'}">
               ${available ? '✓ Còn phòng' : '✗ Hết phòng'}
             </span>
@@ -1398,25 +1561,26 @@
               <span class="room-price-unit">/ đêm</span>
             </div>
             <div class="room-features">
-              <div class="room-feature">
-                <i class="icon-users"></i>
+              <div class="room-feature" title="Số lượng khách tối đa">
+                <span style="font-size: 18px; margin-right: 6px;">👥</span>
                 <span>${maxOccupancy} khách</span>
               </div>
               ${roomSize !== '-' ? `
-              <div class="room-feature">
-                <i class="icon-expand"></i>
+              <div class="room-feature" title="Diện tích phòng">
+                <span style="font-size: 18px; margin-right: 6px;">📐</span>
                 <span>${roomSize}m²</span>
               </div>
               ` : ''}
             </div>
             <div class="room-actions">
-              <a href="room-detail.html?id=${r.roomId}" class="btn-room-action btn-room-secondary" onclick="event.stopPropagation();">
-                <i class="icon-eye"></i> Chi tiết
+              <a href="room-detail.html?id=${r.roomId}" class="btn-room-action btn-room-secondary" onclick="event.stopPropagation();" title="Xem chi tiết phòng">
+                <span style="font-size: 16px; margin-right: 6px;">👁️</span> Chi tiết
               </a>
               <button class="btn-room-action btn-room-primary" 
                       onclick="event.stopPropagation();bookNow(${r.roomId})" 
-                      ${available ? '' : 'disabled'}>
-                <i class="icon-calendar"></i> Đặt ngay
+                      ${available ? '' : 'disabled'}
+                      title="${available ? 'Đặt phòng ngay' : 'Phòng đã hết'}">
+                <span style="font-size: 16px; margin-right: 6px;">📅</span> Đặt ngay
               </button>
             </div>
           </div>
@@ -1569,6 +1733,26 @@
       try {
         loading.hidden = false;
         loading.textContent = 'Đang tải danh sách phòng...';
+        
+        // Show skeleton loaders
+        const skeletonCount = 6;
+        roomsList.innerHTML = '';
+        roomsList.className = 'rooms-grid';
+        for (let i = 0; i < skeletonCount; i++) {
+          const skeleton = document.createElement('div');
+          skeleton.className = 'room-skeleton';
+          skeleton.innerHTML = `
+            <div class="skeleton-image"></div>
+            <div class="skeleton-content">
+              <div class="skeleton-line short" style="margin-bottom: 16px;"></div>
+              <div class="skeleton-line medium" style="margin-bottom: 12px;"></div>
+              <div class="skeleton-line long" style="margin-bottom: 8px;"></div>
+              <div class="skeleton-line short" style="margin-bottom: 20px;"></div>
+              <div class="skeleton-line long" style="height: 40px; border-radius: 12px;"></div>
+            </div>
+          `;
+          roomsList.appendChild(skeleton);
+        }
         
         const typeId = document.getElementById('typeFilter')?.value || '';
         const qs = new URLSearchParams();
