@@ -15,37 +15,57 @@
   <!-- QRCode.js for generating QR codes from checkoutUrl -->
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <style>
-    body{font-family:'Poppins',sans-serif;padding-top:0;overflow-x:hidden;background:#f8f9fa}
+    body{font-family:'Poppins',sans-serif;padding-top:0;overflow-x:hidden;background:linear-gradient(135deg, #f5ede0 0%, #fff8f0 50%, #ffffff 100%);min-height:100vh}
     .ftco-navbar{position:sticky!important;top:0!important;z-index:1030!important;background-color:#1a1a1a!important;width:100%!important;margin:0!important}
     
     .page-header{
-      background:linear-gradient(135deg,#c8a97e 0%,#b89968 100%);
-      padding:80px 0 120px;
+      background-image: url('images/bg_1.jpg');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      background-repeat: no-repeat;
+      padding:140px 0 100px;
       color:#fff;
       text-align:center;
       position:relative;
-      overflow:hidden
+      overflow:hidden;
+      margin-bottom:60px;
+      min-height:500px;
+      display:flex;
+      align-items:center
     }
     .page-header::before{
       content:'';
       position:absolute;
       top:0;left:0;right:0;bottom:0;
-      background:url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="2" fill="rgba(255,255,255,0.1)"/></svg>');
-      opacity:0.3
+      background:linear-gradient(135deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 100%);
+      z-index:0
     }
-    .page-header h1{position:relative;z-index:1;font-weight:700;text-shadow:0 2px 10px rgba(0,0,0,0.1)}
-    .page-header .subtitle{position:relative;z-index:1;opacity:0.95;font-size:18px}
+    .page-header::after{
+      content:'';
+      position:absolute;
+      top:0;left:0;right:0;bottom:0;
+      background:url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+      opacity:0.3;
+      z-index:1
+    }
+    .page-header .container{position:relative;z-index:2;width:100%}
+    .page-header h1{position:relative;z-index:2;font-weight:700;text-shadow:0 2px 10px rgba(0,0,0,0.3);font-size:48px;animation:fadeInDown 1s ease}
+    .page-header .subtitle{position:relative;z-index:2;opacity:0.95;font-size:20px;text-shadow:0 2px 8px rgba(0,0,0,0.2);animation:fadeInUp 1.2s ease}
+    @keyframes fadeInDown{from{opacity:0;transform:translateY(-30px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeInUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
     
-    .detail-container{margin-top:-60px;position:relative;z-index:10}
+    .detail-container{margin-top:-70px;position:relative;z-index:10}
     
     .booking-card-main{
-      background:#fff;
+      background:linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
       border-radius:24px;
-      box-shadow:0 20px 60px rgba(0,0,0,0.12);
+      box-shadow:0 20px 60px rgba(200,169,126,0.15);
       overflow:hidden;
       margin-bottom:30px;
       animation:slideUp 0.6s ease forwards;
-      opacity:0
+      opacity:0;
+      border:2px solid rgba(200,169,126,0.1)
     }
     @keyframes slideUp{
       from{opacity:0;transform:translateY(30px)}
@@ -76,7 +96,7 @@
       border:2px solid rgba(255,255,255,0.3)
     }
     
-    .booking-body{padding:40px}
+    .booking-body{padding:40px;background:linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,248,240,0.8) 50%, rgba(245,237,224,0.6) 100%)}
     
     .info-section{margin-bottom:35px}
     .info-section-title{
@@ -98,15 +118,18 @@
       gap:20px
     }
     .info-item{
-      background:#f8f9fa;
+      background:linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
       padding:20px;
       border-radius:12px;
       border-left:4px solid #c8a97e;
-      transition:all 0.3s
+      transition:all 0.3s;
+      border:2px solid rgba(200,169,126,0.1);
+      box-shadow:0 4px 15px rgba(200,169,126,0.1)
     }
     .info-item:hover{
       transform:translateY(-2px);
-      box-shadow:0 8px 20px rgba(0,0,0,0.08)
+      box-shadow:0 8px 20px rgba(200,169,126,0.2);
+      border-color:rgba(200,169,126,0.3)
     }
     .info-label{
       font-size:12px;
@@ -124,11 +147,12 @@
     .info-value.text-primary{color:#c8a97e!important;font-size:24px}
     
     .special-requests-box{
-      background:#fff9e6;
-      border:2px solid #ffe69c;
+      background:linear-gradient(135deg, #fff8f0 0%, #f5ede0 100%);
+      border:2px solid rgba(200,169,126,0.2);
       border-radius:12px;
       padding:20px;
-      margin-top:10px
+      margin-top:10px;
+      box-shadow:0 4px 15px rgba(200,169,126,0.1)
     }
     .special-requests-box .label{color:#856404;font-weight:600;margin-bottom:10px}
     
