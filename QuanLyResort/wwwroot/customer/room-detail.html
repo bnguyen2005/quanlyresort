@@ -437,11 +437,15 @@
               <small class="text-muted" style="font-size:12px;margin-top:4px;display:block">Tối đa 500 ký tự</small>
                 </div>
             <div class="col-12">
-              <div class="form-check" style="padding:15px;background:#f8f9fa;border-radius:12px;border:2px solid #e9ecef">
-                <input class="form-check-input" type="checkbox" id="bf_terms" name="terms" required style="width:20px;height:20px;margin-top:3px;margin-right:12px">
-                <label class="form-check-label" for="bf_terms" style="font-size:16px;font-weight:500;line-height:1.6;cursor:pointer;display:block;word-wrap:break-word;white-space:normal">
-                  Tôi đồng ý với điều khoản & chính sách <span style="color:#dc3545">*</span>
-                </label>
+              <div class="form-check" style="padding:20px;background:linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);border-radius:16px;border:2px solid rgba(200,169,126,0.2);box-shadow:0 4px 15px rgba(200,169,126,0.1);transition:all 0.3s ease">
+                <div style="display:flex;align-items:flex-start;gap:12px">
+                  <input class="form-check-input" type="checkbox" id="bf_terms" name="terms" required style="width:22px;height:22px;margin-top:2px;margin-right:0;cursor:pointer;accent-color:#c8a97e;flex-shrink:0">
+                  <label class="form-check-label" for="bf_terms" style="font-size:15px;font-weight:500;line-height:1.7;cursor:pointer;display:block;word-wrap:break-word;white-space:normal;color:#1a1a1a;flex:1">
+                    Tôi đã đọc và đồng ý với 
+                    <a href="#" onclick="event.preventDefault();alert('Điều khoản & Chính sách sẽ được cập nhật sớm');" style="color:#c8a97e;font-weight:600;text-decoration:underline;transition:color 0.3s" onmouseover="this.style.color='#b89968'" onmouseout="this.style.color='#c8a97e'">điều khoản & chính sách</a>
+                    <span style="color:#dc3545;font-weight:700">*</span>
+                  </label>
+                </div>
               </div>
             </div>
           </div>
