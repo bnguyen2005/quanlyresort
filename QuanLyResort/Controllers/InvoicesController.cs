@@ -204,50 +204,53 @@ public class InvoicesController : ControllerBase
             _logger.LogInformation($"[ProcessPayment] ✅ Invoice {id} payment processed. New status: '{invoice?.Status}'");
             
             // Nếu invoice đã được paid và có booking, update booking status
-            if (invoice != null && invoice.Status == "Paid" && bookingId.HasValue)
+            if (invoice != null && invoice.Status == "Paid" && bookingId > 0)
             {
-                _logger.LogInformation($"[ProcessPayment] 💰 Invoice {id} is now Paid. Updating booking {bookingId.Value} status...");
+                _logger.LogInformation($"[ProcessPayment] 💰 Invoice {id} is now Paid. Updating booking {bookingId} status...");
                 
                 // Check booking current status
-                var booking = await _context.Bookings.FindAsync(bookingId.Value);
+                var booking = await _context.Bookings.FindAsync(bookingId);
                 if (booking != null)
                 {
-                    _logger.LogInformation($"[ProcessPayment] 📋 Booking {bookingId.Value} current status: '{booking.Status}'");
+                    _logger.LogInformation($"[ProcessPayment] 📋 Booking {bookingId} current status: '{booking.Status}'");
                     
                     // Chỉ update booking nếu chưa paid
                     if (booking.Status != "Paid")
                     {
-                        var bookingPaymentSuccess = await _bookingService.ProcessOnlinePaymentAsync(bookingId.Value, userEmail);
+                        var bookingPaymentSuccess = await _bookingService.ProcessOnlinePaymentAsync(bookingId, userEmail);
                         if (bookingPaymentSuccess)
                         {
-                            _logger.LogInformation($"[ProcessPayment] ✅✅✅ SUCCESS: Booking {bookingId.Value} status updated to 'Paid'");
+                            _logger.LogInformation($"[ProcessPayment] ✅✅✅ SUCCESS: Booking {bookingId} status updated to 'Paid'");
                         }
                         else
                         {
-                            _logger.LogWarning($"[ProcessPayment] ⚠️ Failed to update booking {bookingId.Value} status");
+                            _logger.LogWarning($"[ProcessPayment] ⚠️ Failed to update booking {bookingId} status");
                         }
                     }
                     else
                     {
-                        _logger.LogInformation($"[ProcessPayment] ℹ️ Booking {bookingId.Value} already paid, skipping update");
+                        _logger.LogInformation($"[ProcessPayment] ℹ️ Booking {bookingId} already paid, skipping update");
                     }
                 }
                 else
                 {
-                    _logger.LogWarning($"[ProcessPayment] ⚠️ Booking {bookingId.Value} not found");
+                    _logger.LogWarning($"[ProcessPayment] ⚠️ Booking {bookingId} not found");
                 }
             }
 
-            // Reload booking one more time to get final status for response
-            var finalBooking = await _bookingService.GetBookingByIdAsync(bookingId.Value);
-            var finalBookingStatus = finalBooking?.Status ?? "Unknown";
-            
-            _logger.LogInformation($"[ProcessPayment] ✅✅✅ FINAL: Invoice {id} paid, Booking {bookingId.Value} final status: '{finalBookingStatus}'");
+            // Reload booking one more time to get final status for response (only if bookingId > 0)
+            string finalBookingStatus = "Unknown";
+            if (bookingId > 0)
+            {
+                var finalBooking = await _bookingService.GetBookingByIdAsync(bookingId);
+                finalBookingStatus = finalBooking?.Status ?? "Unknown";
+                _logger.LogInformation($"[ProcessPayment] ✅✅✅ FINAL: Invoice {id} paid, Booking {bookingId} final status: '{finalBookingStatus}'");
+            }
             
             return Ok(new { 
                 message = "Payment processed successfully",
                 invoiceId = id,
-                bookingId = bookingId.Value,
+                bookingId = bookingId > 0 ? bookingId : (int?)null,
                 bookingStatus = finalBookingStatus
             });
         }
