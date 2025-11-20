@@ -134,6 +134,43 @@
     .payment-status-paid{background:#d4edda;color:#155724;border:2px solid #c3e6cb}
     
     .order-actions{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+    .order-actions .btn{
+      min-width:140px;
+      padding:12px 20px;
+      font-size:14px;
+      font-weight:600;
+      border-radius:10px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      transition:all 0.3s;
+      text-decoration:none;
+      border:2px solid transparent
+    }
+    .order-actions .btn:hover{
+      transform:translateY(-2px);
+      box-shadow:0 4px 12px rgba(0,0,0,0.15)
+    }
+    .order-actions .btn-outline-primary{
+      background:#fff;
+      color:#c8a97e;
+      border-color:#c8a97e
+    }
+    .order-actions .btn-outline-primary:hover{
+      background:#c8a97e;
+      color:#fff;
+      border-color:#c8a97e
+    }
+    .order-actions .btn-primary{
+      background:linear-gradient(135deg,#c8a97e 0%,#b89968 100%);
+      color:#fff;
+      border:none
+    }
+    .order-actions .btn-primary:hover{
+      background:linear-gradient(135deg,#b89968 0%,#c8a97e 100%);
+      color:#fff
+    }
     
     @keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
   </style>

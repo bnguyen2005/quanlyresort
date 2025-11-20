@@ -2034,13 +2034,10 @@
           alert(successMessage);
         }
         
-        // Redirect to order details or show order info
+        // Redirect to order success page (giống như booking-success.html)
         setTimeout(() => {
-          if (confirm(`Đơn hàng ${order.orderNumber} đã được tạo thành công!\n\nBạn có muốn xem chi tiết đơn hàng không?`)) {
-            // Can navigate to order details page if exists
-            window.location.href = `order-details.html?orderId=${order.orderId}`;
-          }
-        }, 500);
+          window.location.href = `order-success.html?orderId=${order.orderId}`;
+        }, 1000);
         
       } catch (error) {
         console.error('[Order] Error:', error);
