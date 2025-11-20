@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using QuanLyResort.Data;
 using QuanLyResort.Models;
 using QuanLyResort.Repositories;
@@ -11,11 +12,13 @@ public class BookingService : IBookingService
     private readonly IAuditService _auditService;
     private readonly INotificationService _notificationService;
     private readonly ResortDbContext _context;
+    private readonly ILogger<BookingService> _logger;
 
     public BookingService(IUnitOfWork unitOfWork, IAuditService auditService, 
-        INotificationService notificationService, ResortDbContext context)
+        INotificationService notificationService, ResortDbContext context, ILogger<BookingService> logger)
     {
         _unitOfWork = unitOfWork;
+        _logger = logger;
         _auditService = auditService;
         _notificationService = notificationService;
         _context = context;
@@ -508,19 +511,34 @@ public class BookingService : IBookingService
 
     public async Task<bool> ProcessOnlinePaymentAsync(int bookingId, string performedBy)
     {
+        _logger.LogInformation($"[ProcessOnlinePaymentAsync] 🔄 Processing payment for booking {bookingId} by {performedBy}");
+        
         var booking = await GetBookingByIdAsync(bookingId);
         if (booking == null)
+        {
+            _logger.LogWarning($"[ProcessOnlinePaymentAsync] ❌ Booking {bookingId} not found");
             return false;
+        }
+
+        _logger.LogInformation($"[ProcessOnlinePaymentAsync] 📋 Booking {bookingId} current status: '{booking.Status}', BookingCode: '{booking.BookingCode}'");
 
         // Không cho phép thanh toán nếu đã thanh toán rồi
         if (booking.Status == "Paid")
+        {
+            _logger.LogWarning($"[ProcessOnlinePaymentAsync] ⚠️ Booking {bookingId} already paid");
             return false;
+        }
 
         // Chỉ cho phép thanh toán nếu booking đang ở trạng thái Pending hoặc Confirmed
         if (booking.Status != "Pending" && booking.Status != "Confirmed")
+        {
+            _logger.LogWarning($"[ProcessOnlinePaymentAsync] ⚠️ Booking {bookingId} status is '{booking.Status}', cannot process payment");
             return false;
+        }
 
         var oldStatus = booking.Status;
+        _logger.LogInformation($"[ProcessOnlinePaymentAsync] 💰 Updating booking {bookingId} status from '{oldStatus}' to 'Paid'");
+        
         booking.Status = "Paid";
         booking.UpdatedAt = DateTime.UtcNow;
 
@@ -575,6 +593,8 @@ public class BookingService : IBookingService
 
         _unitOfWork.Bookings.Update(booking);
         await _unitOfWork.SaveChangesAsync();
+        
+        _logger.LogInformation($"[ProcessOnlinePaymentAsync] ✅✅✅ SUCCESS: Booking {bookingId} status updated to 'Paid'. Invoice: {createdInvoice?.InvoiceNumber ?? "N/A"}");
 
         await _auditService.LogAsync("Booking", bookingId, "PayOnline", performedBy, 
             oldStatus, "Paid", $"Online payment processed successfully. Invoice: {createdInvoice?.InvoiceNumber ?? "N/A"}");
