@@ -665,10 +665,6 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
           if (cashOrderNumber) cashOrderNumber.textContent = window.currentOrder.orderNumber || '-';
           if (cashTotalAmount) cashTotalAmount.textContent = formatCurrency(window.currentOrder.totalAmount || 0);
         }
-      } else {
-        // RoomCharge or other
-        if (qrSection) qrSection.style.display = 'none';
-        if (cashSection) cashSection.style.display = 'none';
       }
     }
 
