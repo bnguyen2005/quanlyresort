@@ -2064,9 +2064,9 @@
                   </div>
                   
                   <!-- Add to Cart Button -->
-                  <button type="button" class="btn-add-to-cart-new" data-service-id="${item.serviceId}" data-service-name="${name.replace(/"/g, '&quot;')}" data-price="${item.price || 0}" style="flex: 1; background: linear-gradient(135deg, #C8A97E 0%, #B89968 100%); color: white; border: none; border-radius: 10px; padding: 10px 16px; font-weight: 600; cursor: pointer; transition: all 0.3s; white-space: nowrap; box-shadow: 0 4px 12px rgba(200,169,126,0.3); font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 6px; min-width: 0;" onmouseover="this.style.background='linear-gradient(135deg, #B89968 0%, #C8A97E 100%)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(200,169,126,0.4)';" onmouseout="this.style.background='linear-gradient(135deg, #C8A97E 0%, #B89968 100%)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(200,169,126,0.3)';">
-                    <span style="font-size: 16px;">🛒</span>
-                    <span>Thêm vào giỏ</span>
+                  <button type="button" class="btn-add-to-cart-new" data-service-id="${item.serviceId}" data-service-name="${name.replace(/"/g, '&quot;')}" data-price="${item.price || 0}" style="flex: 1; background: linear-gradient(135deg, #C8A97E 0%, #B89968 100%); color: white; border: none; border-radius: 10px; padding: 8px 12px; font-weight: 600; cursor: pointer; transition: all 0.3s; white-space: nowrap; box-shadow: 0 4px 12px rgba(200,169,126,0.3); font-size: 12px; display: flex; align-items: center; justify-content: center; gap: 4px; min-width: 0; height: 36px;" onmouseover="this.style.background='linear-gradient(135deg, #B89968 0%, #C8A97E 100%)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(200,169,126,0.4)';" onmouseout="this.style.background='linear-gradient(135deg, #C8A97E 0%, #B89968 100%)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(200,169,126,0.3)';">
+                    <span style="font-size: 14px;">🛒</span>
+                    <span style="font-size: 12px; line-height: 1.2;">Thêm vào giỏ</span>
                   </button>
                 </div>
               </div>
@@ -2167,18 +2167,14 @@
           if (serviceId && !isNaN(serviceId)) {
             console.log('[renderMenuItems] Add to cart clicked:', { serviceId, serviceName, price, target: target.tagName });
             
-            // Check quantity first
+            // Check quantity first - chỉ set trong DOM, không gọi adjustQuantity
             const qtyEl = document.getElementById(`qty-${serviceId}`);
             const quantity = parseInt(qtyEl?.textContent || 0);
             
-            if (quantity <= 0) {
-              // Auto set quantity to 1 if 0
-              if (qtyEl) {
-                qtyEl.textContent = '1';
-                if (typeof window.adjustQuantity === 'function') {
-                  window.adjustQuantity(serviceId, 1);
-                }
-              }
+            // Nếu quantity = 0, chỉ set trong DOM để addToCart xử lý, không gọi adjustQuantity
+            // vì adjustQuantity sẽ cập nhật cart, sau đó addToCart lại thêm vào cart một lần nữa
+            if (quantity <= 0 && qtyEl) {
+              qtyEl.textContent = '1';
             }
             
             if (typeof window.addToCart === 'function') {
@@ -2211,15 +2207,12 @@
               const serviceName = item.serviceName || item.name || 'Món ăn';
               const price = item.price || 0;
               
-              // Set quantity to 1 if it's 0
+              // Set quantity to 1 if it's 0 - chỉ set trong DOM, không gọi adjustQuantity
               const qtyEl = document.getElementById(`qty-${serviceId}`);
               if (qtyEl) {
                 const currentQty = parseInt(qtyEl.textContent) || 0;
                 if (currentQty === 0) {
                   qtyEl.textContent = '1';
-                  if (typeof window.adjustQuantity === 'function') {
-                    window.adjustQuantity(serviceId, 1);
-                  }
                 }
               }
               
@@ -2487,7 +2480,6 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="closeCartModal()">Đóng</button>
           <button type="button" class="btn btn-primary" onclick="submitOrder()" id="submitOrderBtn">
             <i class="icon-check"></i> Đặt món ngay
           </button>
