@@ -1233,9 +1233,9 @@ async function confirmHotelPayment() {
     }
     
     const result = await response.json();
-    console.log("[FRONTEND] " + '✅ [confirmHotelPayment] Payment confirmed:', result);
+    console.log("[FRONTEND] " + '✅ [confirmHotelPayment] Cash payment requested:', result);
     
-    // Show thank you message in modal instead of closing immediately
+    // Show waiting message - yêu cầu đã được gửi, chờ admin xác nhận
     const modalBody = modal.querySelector('.modal-body');
     const modalFooter = modal.querySelector('.modal-footer');
     const modalHeader = modal.querySelector('.modal-header');
@@ -1245,8 +1245,8 @@ async function confirmHotelPayment() {
       const headerTitle = modalHeader.querySelector('.modal-title');
       const headerCloseBtn = modalHeader.querySelector('.btn-close');
       if (headerTitle) {
-        headerTitle.innerHTML = '✅ Cảm ơn bạn đã thanh toán!';
-        headerTitle.style.color = '#059669';
+        headerTitle.innerHTML = '⏳ Yêu cầu đã được gửi';
+        headerTitle.style.color = '#f59e0b';
       }
       // Ensure close button in header works
       if (headerCloseBtn) {
@@ -1254,33 +1254,27 @@ async function confirmHotelPayment() {
         headerCloseBtn.setAttribute('data-bs-dismiss', 'modal');
       }
       
-      // Update body with thank you message
+      // Update body with waiting message
       modalBody.innerHTML = `
         <div style="text-align: center; padding: 40px 20px;">
-          <div style="font-size: 80px; margin-bottom: 24px;">🎉</div>
-          <h3 style="color: #059669; margin-bottom: 16px; font-weight: 700;">Cảm ơn bạn đã thanh toán!</h3>
+          <div style="font-size: 80px; margin-bottom: 24px;">⏳</div>
+          <h3 style="color: #f59e0b; margin-bottom: 16px; font-weight: 700;">Yêu cầu thanh toán đã được gửi</h3>
           <p style="color: #6b7280; margin-bottom: 24px; font-size: 16px; line-height: 1.6;">
-            Thanh toán của bạn đã được xác nhận thành công.
+            Yêu cầu thanh toán tiền mặt của bạn đã được gửi thành công. Vui lòng chờ admin xác nhận.
           </p>
-          <div style="background: #f0fdf4; padding: 20px; border-radius: 12px; border: 2px solid #86efac; margin-bottom: 24px;">
+          <div style="background: #fef3c7; padding: 20px; border-radius: 12px; border: 2px solid #fbbf24; margin-bottom: 24px;">
             <div style="margin-bottom: 12px;">
               <strong style="color: #1a1a1a; font-size: 16px;">Mã đặt phòng:</strong>
-              <span id="hpcThankYouBookingCode" style="color: #059669; font-size: 18px; font-weight: 700; margin-left: 8px;">${modal.dataset.bookingCode || '-'}</span>
+              <span id="hpcThankYouBookingCode" style="color: #f59e0b; font-size: 18px; font-weight: 700; margin-left: 8px;">${modal.dataset.bookingCode || '-'}</span>
             </div>
-            ${result.invoiceNumber ? `
-            <div style="margin-bottom: 12px;">
-              <strong style="color: #1a1a1a; font-size: 16px;">Số hóa đơn:</strong>
-              <span style="color: #059669; font-size: 18px; font-weight: 700; margin-left: 8px;">${result.invoiceNumber}</span>
-            </div>
-            ` : ''}
             <div>
               <strong style="color: #1a1a1a; font-size: 16px;">Trạng thái:</strong>
-              <span style="color: #059669; font-size: 18px; font-weight: 700; margin-left: 8px;">Đã thanh toán</span>
+              <span style="color: #f59e0b; font-size: 18px; font-weight: 700; margin-left: 8px;">Chờ xác nhận</span>
             </div>
           </div>
-          <div style="background: #fef3c7; padding: 16px; border-radius: 8px; border: 1px solid #fbbf24;">
-            <p style="margin: 0; color: #92400e; font-size: 14px; line-height: 1.6;">
-              <strong>💡 Lưu ý:</strong> Vui lòng mang theo CMND/CCCD hoặc Hộ chiếu khi đến làm thủ tục check-in.
+          <div style="background: #eff6ff; padding: 16px; border-radius: 8px; border: 1px solid #93c5fd;">
+            <p style="margin: 0; color: #1e40af; font-size: 14px; line-height: 1.6;">
+              <strong>💡 Lưu ý:</strong> Admin sẽ xác nhận thanh toán của bạn trong thời gian sớm nhất. Bạn sẽ nhận được thông báo khi thanh toán được xác nhận.
             </p>
           </div>
         </div>
@@ -1298,7 +1292,7 @@ async function confirmHotelPayment() {
     }
     
     // Show toast notification
-    showSimpleToast('Xác nhận thanh toán thành công! Cảm ơn bạn!', 'success');
+    showSimpleToast('Yêu cầu thanh toán tiền mặt đã được gửi. Vui lòng chờ admin xác nhận.', 'info');
     
     // Reload bookings list after a delay
     setTimeout(() => {
