@@ -293,6 +293,8 @@ public class BookingsController : ControllerBase
             
             await _context.SaveChangesAsync();
             
+            _logger.LogInformation($"[RequestCashPayment] ✅✅✅ SUCCESS: Cash payment request saved for booking {id}. Status='{booking.Status}', SpecialRequests updated");
+            
             return Ok(new { 
                 message = "Yêu cầu thanh toán tiền mặt đã được gửi. Vui lòng chờ admin xác nhận.", 
                 bookingId = id,
@@ -301,6 +303,7 @@ public class BookingsController : ControllerBase
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, $"[RequestCashPayment] ❌ Exception requesting cash payment for booking {id}");
             return StatusCode(500, new { message = "Lỗi khi xử lý yêu cầu thanh toán", error = ex.Message });
         }
     }
