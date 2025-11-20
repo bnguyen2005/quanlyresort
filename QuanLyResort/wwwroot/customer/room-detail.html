@@ -391,11 +391,13 @@
           <div class="row g-4">
             <div class="col-md-6">
               <label class="form-label" style="font-size:15px;font-weight:600;margin-bottom:10px">Họ và tên <span style="color:#dc3545">*</span></label>
-              <input type="text" class="form-control" id="bf_fullName" name="fullName" placeholder="Nguyễn Văn A" autocomplete="name" required data-label="Họ và tên" minlength="2" style="min-height:50px;font-size:16px;padding:12px 15px">
+              <input type="text" class="form-control" id="bf_fullName" name="fullName" placeholder="Nguyễn Văn A" autocomplete="name" required data-label="Họ và tên" minlength="2" maxlength="100" pattern="[a-zA-ZÀ-ỹ\s]+" style="min-height:50px;font-size:16px;padding:12px 15px">
+              <small class="text-muted" style="font-size:12px;margin-top:4px;display:block">Chỉ nhập chữ cái và khoảng trắng (tối thiểu 2 ký tự)</small>
             </div>
             <div class="col-md-6">
               <label class="form-label" style="font-size:15px;font-weight:600;margin-bottom:10px">Quốc tịch</label>
-              <input type="text" class="form-control" id="bf_nationality" name="nationality" placeholder="Vietnam" autocomplete="country-name" data-label="Quốc tịch" style="min-height:50px;font-size:16px;padding:12px 15px">
+              <input type="text" class="form-control" id="bf_nationality" name="nationality" placeholder="Vietnam" autocomplete="country-name" data-label="Quốc tịch" maxlength="50" pattern="[a-zA-ZÀ-ỹ\s]+" style="min-height:50px;font-size:16px;padding:12px 15px">
+              <small class="text-muted" style="font-size:12px;margin-top:4px;display:block">Chỉ nhập chữ cái và khoảng trắng</small>
             </div>
             <div class="col-md-6">
               <label class="form-label" style="font-size:15px;font-weight:600;margin-bottom:10px">Email <span style="color:#dc3545">*</span></label>
@@ -407,23 +409,16 @@
             </div>
             <div class="col-md-6">
               <label class="form-label" style="font-size:15px;font-weight:600;margin-bottom:10px">CMND/CCCD</label>
-              <input type="text" class="form-control" id="bf_idCard" name="idCard" placeholder="0123456789" autocomplete="off" data-label="CMND/CCCD" style="min-height:50px;font-size:16px;padding:12px 15px">
-            </div>
-            <div class="col-md-6">
-              <label class="form-label" style="font-size:15px;font-weight:600;margin-bottom:10px">Hộ chiếu</label>
-              <input type="text" class="form-control" id="bf_passport" name="passport" placeholder="B1234567" autocomplete="off" data-label="Hộ chiếu" style="min-height:50px;font-size:16px;padding:12px 15px">
+              <input type="text" class="form-control" id="bf_idCard" name="idCard" placeholder="0123456789" autocomplete="off" data-label="CMND/CCCD" pattern="[0-9]{9,12}" maxlength="12" style="min-height:50px;font-size:16px;padding:12px 15px">
+              <small class="text-muted" style="font-size:12px;margin-top:4px;display:block">Chỉ nhập số (9-12 chữ số)</small>
             </div>
             <div class="col-12">
               <label class="form-label" style="font-size:15px;font-weight:600;margin-bottom:10px">Địa chỉ</label>
-              <input type="text" class="form-control" id="bf_address" name="address" placeholder="Số nhà, đường, thành phố" autocomplete="street-address" data-label="Địa chỉ" style="min-height:50px;font-size:16px;padding:12px 15px">
+              <input type="text" class="form-control" id="bf_address" name="address" placeholder="Số nhà, đường, thành phố" autocomplete="street-address" data-label="Địa chỉ" maxlength="200" style="min-height:50px;font-size:16px;padding:12px 15px">
             </div>
             <div class="col-md-6">
               <label class="form-label" style="font-size:15px;font-weight:600;margin-bottom:10px">Giờ đến dự kiến</label>
               <input type="time" class="form-control" id="bf_eta" style="min-height:50px;font-size:16px;padding:12px 15px">
-            </div>
-            <div class="col-md-6">
-              <label class="form-label" style="font-size:15px;font-weight:600;margin-bottom:10px">Số chuyến bay (nếu có)</label>
-              <input type="text" class="form-control" id="bf_flight" placeholder="VN123" style="min-height:50px;font-size:16px;padding:12px 15px">
             </div>
             <div class="col-12">
               <label class="form-label" style="font-size:16px;font-weight:600;margin-bottom:10px">Phương thức thanh toán</label>
@@ -438,7 +433,8 @@
             </div>
             <div class="col-12">
               <label class="form-label" style="font-size:15px;font-weight:600;margin-bottom:10px">Ghi chú/Yêu cầu đặc biệt</label>
-              <textarea class="form-control" id="bf_notes" rows="3" placeholder="Ví dụ: Check-in sớm, tầng cao, view biển..." style="font-size:16px;padding:12px 15px;line-height:1.6"></textarea>
+              <textarea class="form-control" id="bf_notes" name="notes" rows="3" placeholder="Ví dụ: Check-in sớm, tầng cao, view biển..." maxlength="500" style="font-size:16px;padding:12px 15px;line-height:1.6"></textarea>
+              <small class="text-muted" style="font-size:12px;margin-top:4px;display:block">Tối đa 500 ký tự</small>
                 </div>
             <div class="col-12">
               <div class="form-check" style="padding:15px;background:#f8f9fa;border-radius:12px;border:2px solid #e9ecef">
@@ -2164,6 +2160,130 @@
       const navbar = document.querySelector('.ftco-navbar');
       if (window.scrollY > 50) navbar?.classList.add('scrolled');
       else navbar?.classList.remove('scrolled');
+    });
+
+    // Input validation - Chặn ký tự đặc biệt và validate real-time
+    document.addEventListener('DOMContentLoaded', function() {
+      // Họ và tên: chỉ chữ cái, khoảng trắng, dấu tiếng Việt
+      const fullNameInput = document.getElementById('bf_fullName');
+      if (fullNameInput) {
+        fullNameInput.addEventListener('input', function(e) {
+          // Chỉ cho phép chữ cái, khoảng trắng, dấu tiếng Việt
+          let value = e.target.value;
+          value = value.replace(/[^a-zA-ZÀ-ỹ\s]/g, '');
+          if (value !== e.target.value) {
+            e.target.value = value;
+          }
+        });
+        fullNameInput.addEventListener('blur', function(e) {
+          const value = e.target.value.trim();
+          if (value && value.length < 2) {
+            e.target.setCustomValidity('Họ và tên phải có ít nhất 2 ký tự');
+            e.target.classList.add('is-invalid');
+          } else {
+            e.target.setCustomValidity('');
+            e.target.classList.remove('is-invalid');
+          }
+        });
+      }
+
+      // Quốc tịch: chỉ chữ cái và khoảng trắng
+      const nationalityInput = document.getElementById('bf_nationality');
+      if (nationalityInput) {
+        nationalityInput.addEventListener('input', function(e) {
+          let value = e.target.value;
+          value = value.replace(/[^a-zA-ZÀ-ỹ\s]/g, '');
+          if (value !== e.target.value) {
+            e.target.value = value;
+          }
+        });
+      }
+
+      // CMND/CCCD: chỉ số
+      const idCardInput = document.getElementById('bf_idCard');
+      if (idCardInput) {
+        idCardInput.addEventListener('input', function(e) {
+          let value = e.target.value;
+          value = value.replace(/[^0-9]/g, '');
+          if (value !== e.target.value) {
+            e.target.value = value;
+          }
+        });
+        idCardInput.addEventListener('blur', function(e) {
+          const value = e.target.value.trim();
+          if (value && (value.length < 9 || value.length > 12)) {
+            e.target.setCustomValidity('CMND/CCCD phải có 9-12 chữ số');
+            e.target.classList.add('is-invalid');
+          } else {
+            e.target.setCustomValidity('');
+            e.target.classList.remove('is-invalid');
+          }
+        });
+      }
+
+      // Địa chỉ: chữ cái, số, khoảng trắng, dấu câu cơ bản
+      const addressInput = document.getElementById('bf_address');
+      if (addressInput) {
+        addressInput.addEventListener('input', function(e) {
+          // Cho phép chữ cái, số, khoảng trắng, dấu phẩy, dấu chấm, dấu gạch ngang, dấu gạch chéo
+          let value = e.target.value;
+          value = value.replace(/[^a-zA-ZÀ-ỹ0-9\s,.\-\/]/g, '');
+          if (value !== e.target.value) {
+            e.target.value = value;
+          }
+        });
+      }
+
+      // Ghi chú: tương tự địa chỉ
+      const notesInput = document.getElementById('bf_notes');
+      if (notesInput) {
+        notesInput.addEventListener('input', function(e) {
+          // Cho phép chữ cái, số, khoảng trắng, dấu câu cơ bản
+          let value = e.target.value;
+          value = value.replace(/[^a-zA-ZÀ-ỹ0-9\s,.\-!?]/g, '');
+          if (value !== e.target.value) {
+            e.target.value = value;
+          }
+          // Hiển thị số ký tự còn lại
+          const maxLength = 500;
+          const remaining = maxLength - value.length;
+          let counter = e.target.parentElement.querySelector('.char-counter');
+          if (!counter) {
+            counter = document.createElement('small');
+            counter.className = 'char-counter text-muted';
+            counter.style.cssText = 'font-size:12px;margin-top:4px;display:block';
+            e.target.parentElement.appendChild(counter);
+          }
+          counter.textContent = `Còn lại: ${remaining} ký tự`;
+          if (remaining < 50) {
+            counter.style.color = '#dc3545';
+          } else {
+            counter.style.color = '#6b7280';
+          }
+        });
+      }
+
+      // Số điện thoại: đã có pattern, chỉ cần validate thêm
+      const phoneInput = document.getElementById('bf_phone');
+      if (phoneInput) {
+        phoneInput.addEventListener('input', function(e) {
+          let value = e.target.value;
+          value = value.replace(/[^0-9]/g, '');
+          if (value !== e.target.value) {
+            e.target.value = value;
+          }
+        });
+        phoneInput.addEventListener('blur', function(e) {
+          const value = e.target.value.trim();
+          if (value && (value.length < 9 || value.length > 11)) {
+            e.target.setCustomValidity('Số điện thoại phải có 9-11 chữ số');
+            e.target.classList.add('is-invalid');
+          } else {
+            e.target.setCustomValidity('');
+            e.target.classList.remove('is-invalid');
+          }
+        });
+      }
     });
     
     loadRoomDetail();
