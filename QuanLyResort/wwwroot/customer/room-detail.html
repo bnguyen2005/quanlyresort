@@ -96,7 +96,8 @@
     /* Feature sections với fade in */
     .feature-section{padding:80px 0;animation:fadeIn 1.2s ease;position:relative}
     .feature-section::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:url('data:image/svg+xml,<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><g fill="%23f8f9fa" fill-opacity="0.4"><circle cx="30" cy="30" r="2"/></g></svg>');opacity:0.3}
-    .feature-section:nth-child(even){background:linear-gradient(135deg,#f8f9fa 0%,#fff 100%)}
+    .feature-section:nth-child(even){background:linear-gradient(135deg, #f5ede0 0%, #fff8f0 50%, #ffffff 100%);position:relative;overflow:hidden}
+    .feature-section:nth-child(even)::after{content:'';position:absolute;top:0;left:0;right:0;bottom:0;opacity:0.05;background-image:repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(200,169,126,0.1) 10px, rgba(200,169,126,0.1) 20px)}
     .section-title{position:relative;display:inline-block;padding-bottom:20px;margin-bottom:40px;font-size:42px;font-weight:700;color:#1a1a1a}
     .section-title::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:100px;height:4px;background:linear-gradient(90deg,#c8a97e,#b89968);border-radius:2px;animation:expandWidth 1s ease}
     .section-title::before{content:'';position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);width:60px;height:4px;background:linear-gradient(90deg,#b89968,#c8a97e);border-radius:2px}
@@ -295,8 +296,9 @@
     </div>
 
     <!-- Reviews Statistics & Reviews Section -->
-    <div class="room-section">
-      <div class="container">
+    <div class="room-section" style="background:linear-gradient(135deg, #f5ede0 0%, #fff8f0 50%, #ffffff 100%);position:relative;overflow:hidden;padding:80px 0">
+      <div style="position:absolute;top:0;left:0;right:0;bottom:0;opacity:0.05;background-image:repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(200,169,126,0.1) 10px, rgba(200,169,126,0.1) 20px)"></div>
+      <div class="container" style="position:relative;z-index:1">
         <!-- Reviews Statistics -->
         <div class="row mb-4">
           <div class="col-12">
