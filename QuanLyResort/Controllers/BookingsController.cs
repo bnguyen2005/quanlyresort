@@ -111,17 +111,26 @@ public class BookingsController : ControllerBase
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetBookingById(int id)
     {
+        _logger.LogInformation($"[GetBookingById] 📥 Request to get booking {id}");
+        
         var booking = await _bookingService.GetBookingByIdAsync(id);
         if (booking == null)
+        {
+            _logger.LogWarning($"[GetBookingById] ❌ Booking {id} not found");
             return NotFound(new { message = "Booking not found" });
+        }
 
         // Check authorization: customer can only view their own bookings
         var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
         var customerId = User.FindFirst("CustomerId")?.Value;
 
         if (userRole == "Customer" && customerId != booking.CustomerId.ToString())
+        {
+            _logger.LogWarning($"[GetBookingById] 🚫 Forbidden: Customer {customerId} trying to access booking {id} (belongs to {booking.CustomerId})");
             return Forbid();
-
+        }
+        
+        _logger.LogInformation($"[GetBookingById] ✅ Returning booking {id} - Status: '{booking.Status}', PaymentStatus: '{booking.PaymentStatus}', CustomerId: {booking.CustomerId}, BookingCode: '{booking.BookingCode}'");
         return Ok(booking);
     }
 
@@ -304,15 +313,22 @@ public class BookingsController : ControllerBase
         try
         {
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value ?? "system";
+            var userRole = User.FindFirst(ClaimTypes.Role)?.Value ?? "Unknown";
+            
+            _logger.LogInformation($"[ApproveCashPayment] 🔄 Admin {userEmail} (Role: {userRole}) approving cash payment for booking {id}");
             
             var booking = await _bookingService.GetBookingByIdAsync(id);
             if (booking == null)
             {
+                _logger.LogWarning($"[ApproveCashPayment] ❌ Booking {id} not found");
                 return NotFound(new { message = "Không tìm thấy đặt phòng" });
             }
             
+            _logger.LogInformation($"[ApproveCashPayment] 📋 Booking {id} current status: Status='{booking.Status}', BookingCode='{booking.BookingCode}', CustomerId={booking.CustomerId}");
+            
             if (booking.Status == "Paid")
             {
+                _logger.LogWarning($"[ApproveCashPayment] ⚠️ Booking {id} already paid");
                 return BadRequest(new { message = "Đặt phòng này đã được thanh toán rồi" });
             }
             
@@ -326,23 +342,33 @@ public class BookingsController : ControllerBase
                     if (requestsDict != null && requestsDict.ContainsKey("cashPaymentRequested"))
                     {
                         hasCashPaymentRequest = true;
+                        _logger.LogInformation($"[ApproveCashPayment] ✅ Found cash payment request in SpecialRequests");
                     }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning($"[ApproveCashPayment] ⚠️ Error parsing SpecialRequests: {ex.Message}");
+                }
             }
             
             if (!hasCashPaymentRequest)
             {
+                _logger.LogWarning($"[ApproveCashPayment] ❌ No cash payment request found for booking {id}");
                 return BadRequest(new { message = "Không có yêu cầu thanh toán tiền mặt cho đặt phòng này" });
             }
+            
+            _logger.LogInformation($"[ApproveCashPayment] 💰 Processing payment for booking {id}...");
             
             // Xử lý thanh toán (giống như ProcessOnlinePaymentAsync)
             var success = await _bookingService.ProcessOnlinePaymentAsync(id, userEmail);
             
             if (!success)
             {
+                _logger.LogError($"[ApproveCashPayment] ❌ Failed to process payment for booking {id}");
                 return BadRequest(new { message = "Không thể xử lý thanh toán. Vui lòng thử lại sau hoặc liên hệ hỗ trợ." });
             }
+            
+            _logger.LogInformation($"[ApproveCashPayment] ✅ Payment processed successfully for booking {id}");
             
             // Xóa thông tin yêu cầu thanh toán tiền mặt khỏi SpecialRequests
             var specialRequests = booking.SpecialRequests;
@@ -366,14 +392,20 @@ public class BookingsController : ControllerBase
                             updatedBooking.SpecialRequests = System.Text.Json.JsonSerializer.Serialize(requestsDict);
                             updatedBooking.UpdatedAt = DateTime.UtcNow;
                             await _context.SaveChangesAsync();
+                            _logger.LogInformation($"[ApproveCashPayment] ✅ Updated SpecialRequests for booking {id}");
                         }
                     }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning($"[ApproveCashPayment] ⚠️ Error updating SpecialRequests: {ex.Message}");
+                }
             }
             
             var updatedBookingFinal = await _bookingService.GetBookingByIdAsync(id);
             var invoiceNumber = updatedBookingFinal?.Invoice?.InvoiceNumber;
+            
+            _logger.LogInformation($"[ApproveCashPayment] ✅✅✅ SUCCESS: Booking {id} approved! Final Status='{updatedBookingFinal?.Status}', InvoiceNumber='{invoiceNumber}'");
             
             return Ok(new { 
                 message = "Xác nhận thanh toán tiền mặt thành công", 
@@ -385,6 +417,7 @@ public class BookingsController : ControllerBase
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, $"[ApproveCashPayment] ❌ Exception approving cash payment for booking {id}");
             return StatusCode(500, new { message = "Lỗi khi xác nhận thanh toán", error = ex.Message });
         }
     }
@@ -464,4 +497,6 @@ public class CancelBookingRequest
 {
     public string Reason { get; set; } = string.Empty;
 }
+
+
 

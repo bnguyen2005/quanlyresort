@@ -304,7 +304,7 @@ public class RestaurantOrdersController : ControllerBase
     {
         try
         {
-            _logger.LogInformation($"[GetOrderById] Request for OrderId: {id}");
+            _logger.LogInformation($"[GetOrderById] 📥 Request to get order {id}");
             
             var order = await _context.RestaurantOrders
                 .Include(o => o.OrderItems)
@@ -315,7 +315,7 @@ public class RestaurantOrdersController : ControllerBase
 
             if (order == null)
             {
-                _logger.LogWarning($"[GetOrderById] Order {id} not found");
+                _logger.LogWarning($"[GetOrderById] ❌ Order {id} not found");
                 return NotFound(new { message = "Đơn đặt món không tồn tại" });
             }
 
@@ -323,26 +323,26 @@ public class RestaurantOrdersController : ControllerBase
             var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
             var customerIdClaim = User.FindFirst("CustomerId")?.Value;
             
-            _logger.LogInformation($"[GetOrderById] User role: {userRole}, CustomerId claim: {customerIdClaim}, Order CustomerId: {order.CustomerId}");
+            _logger.LogInformation($"[GetOrderById] 👤 User role: {userRole}, CustomerId claim: {customerIdClaim}, Order CustomerId: {order.CustomerId}");
 
             // If authenticated as customer, check if this is their order
             if (userRole == "Customer" && !string.IsNullOrEmpty(customerIdClaim))
             {
                 if (int.TryParse(customerIdClaim, out int customerId) && order.CustomerId != customerId)
                 {
-                    _logger.LogWarning($"[GetOrderById] Customer {customerId} tried to access order {id} belonging to customer {order.CustomerId}");
+                    _logger.LogWarning($"[GetOrderById] 🚫 Forbidden: Customer {customerId} trying to access order {id} (belongs to {order.CustomerId})");
                     return Forbid();
                 }
             }
             // If not authenticated but order has customerId, allow if order was created by walk-in (customerId is null)
             // Or if order has customerId but user is not logged in, still allow (could be shared link)
 
-            _logger.LogInformation($"[GetOrderById] ✅ Order {id} retrieved successfully");
+            _logger.LogInformation($"[GetOrderById] ✅ Returning order {id} - Status: '{order.Status}', PaymentStatus: '{order.PaymentStatus}', OrderNumber: '{order.OrderNumber}', CustomerId: {order.CustomerId}");
             return Ok(order);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting order by id");
+            _logger.LogError(ex, $"[GetOrderById] ❌ Exception getting order {id}");
             return StatusCode(500, new { message = "Lỗi khi tải chi tiết đơn", error = ex.Message });
         }
     }
@@ -552,6 +552,9 @@ public class RestaurantOrdersController : ControllerBase
         try
         {
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value ?? "system";
+            var userRole = User.FindFirst(ClaimTypes.Role)?.Value ?? "Unknown";
+            
+            _logger.LogInformation($"[ApproveCashPayment] 🔄 Admin {userEmail} (Role: {userRole}) approving cash payment for order {id}");
             
             var order = await _context.RestaurantOrders
                 .Include(o => o.OrderItems)
@@ -560,18 +563,25 @@ public class RestaurantOrdersController : ControllerBase
             
             if (order == null)
             {
+                _logger.LogWarning($"[ApproveCashPayment] ❌ Order {id} not found");
                 return NotFound(new { message = "Không tìm thấy đơn hàng" });
             }
             
+            _logger.LogInformation($"[ApproveCashPayment] 📋 Order {id} current status: Status='{order.Status}', PaymentStatus='{order.PaymentStatus}', OrderNumber='{order.OrderNumber}', CustomerId={order.CustomerId}");
+            
             if (order.PaymentStatus == "Paid")
             {
+                _logger.LogWarning($"[ApproveCashPayment] ⚠️ Order {id} already paid");
                 return BadRequest(new { message = "Đơn hàng đã được thanh toán" });
             }
             
             if (order.PaymentStatus != "AwaitingConfirmation")
             {
+                _logger.LogWarning($"[ApproveCashPayment] ⚠️ Order {id} PaymentStatus is '{order.PaymentStatus}', expected 'AwaitingConfirmation'");
                 return BadRequest(new { message = "Đơn hàng này không có yêu cầu thanh toán tiền mặt đang chờ xác nhận" });
             }
+            
+            _logger.LogInformation($"[ApproveCashPayment] 💰 Processing payment for order {id}...");
             
             // Xác nhận thanh toán
             order.PaymentStatus = "Paid";
@@ -588,7 +598,10 @@ public class RestaurantOrdersController : ControllerBase
                     requestsDict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(specialRequests);
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogWarning($"[ApproveCashPayment] ⚠️ Error parsing SpecialRequests: {ex.Message}");
+            }
             
             if (requestsDict == null)
             {
@@ -605,17 +618,18 @@ public class RestaurantOrdersController : ControllerBase
             if (order.Status == "Pending")
             {
                 order.Status = "Confirmed";
+                _logger.LogInformation($"[ApproveCashPayment] ✅ Updated order status from Pending to Confirmed");
             }
             
             await _context.SaveChangesAsync();
             
-            _logger.LogInformation($"Order {order.OrderNumber} cash payment approved by {userEmail}");
+            _logger.LogInformation($"[ApproveCashPayment] ✅✅✅ SUCCESS: Order {id} (OrderNumber: {order.OrderNumber}) approved! Final Status='{order.Status}', PaymentStatus='{order.PaymentStatus}'");
             
             return Ok(new { message = "Xác nhận thanh toán tiền mặt thành công", order });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error approving cash payment");
+            _logger.LogError(ex, $"[ApproveCashPayment] ❌ Exception approving cash payment for order {id}");
             return StatusCode(500, new { message = "Lỗi khi xác nhận thanh toán", error = ex.Message });
         }
     }
