@@ -28,7 +28,31 @@ async function openSimplePayment(bookingId) {
   try {
     // Get booking từ list
     const bookings = window._bookings || [];
-    const booking = bookings.find(b => String(b.bookingId) === String(bookingId));
+    let booking = bookings.find(b => String(b.bookingId) === String(bookingId));
+    
+    // If not found in list, try to fetch from API (for booking-details page)
+    if (!booking) {
+      console.log("[FRONTEND] " + '🔵 [openSimplePayment] Booking not found in _bookings, fetching from API...');
+      try {
+        const token = localStorage.getItem('token');
+        if (token) {
+          const url = `${location.origin}/api/bookings/${bookingId}?_=${Date.now()}`;
+          const resp = await fetch(url, {
+            cache: 'no-store',
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (resp.ok) {
+            booking = await resp.json();
+            // Add to _bookings for future use
+            if (!window._bookings) window._bookings = [];
+            window._bookings.push(booking);
+            console.log("[FRONTEND] " + '✅ [openSimplePayment] Booking fetched from API and added to _bookings');
+          }
+        }
+      } catch (e) {
+        console.error("[FRONTEND] " + '❌ [openSimplePayment] Error fetching booking:', e);
+      }
+    }
     
     if (!booking) {
       showSimpleToast('Không tìm thấy booking', 'danger');

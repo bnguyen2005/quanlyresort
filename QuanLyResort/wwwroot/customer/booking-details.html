@@ -503,6 +503,15 @@
         const b = await resp.json();
         currentBooking = b;
         
+        // Add booking to window._bookings for openSimplePayment to find
+        if (!window._bookings) {
+          window._bookings = [];
+        }
+        // Remove existing booking with same ID if exists
+        window._bookings = window._bookings.filter(book => String(book.bookingId) !== String(bookingId));
+        // Add current booking
+        window._bookings.push(b);
+        
         // Update header
         document.getElementById('code').textContent = b.bookingCode || `BKG${b.bookingId}`;
         const statusBadge = document.getElementById('statusBadge');
@@ -568,22 +577,33 @@
     
     document.getElementById('btnPay')?.addEventListener('click', async () => {
       try {
+        console.log('🔵 [btnPay click] Button clicked, bookingId:', bookingId);
+        console.log('🔵 [btnPay click] currentBooking:', currentBooking);
+        
         if (!currentBooking) {
-          showToast('Đang tải chi tiết đặt phòng, vui lòng thử lại.', 'warning');
-          return;
+          console.warn('⚠️ [btnPay click] No currentBooking, reloading...');
+          await loadBooking();
+          if (!currentBooking) {
+            showToast('Đang tải chi tiết đặt phòng, vui lòng thử lại.', 'warning');
+            return;
+          }
         }
+        
         if (!canPayBooking(currentBooking)) {
+          console.warn('⚠️ [btnPay click] Cannot pay booking:', currentBooking.status);
           showToast('Đặt phòng này không đủ điều kiện thanh toán.', 'warning');
           return;
         }
+        
         btnPay.disabled = true;
         btnPay.dataset.ready = 'processing';
+        
         // Wait for simple-payment.js to load if not ready
         if (typeof openSimplePayment !== 'function') {
           console.warn('⚠️ [booking-details] openSimplePayment not found, waiting for script...');
-          // Wait up to 2 seconds for script to load
+          // Wait up to 3 seconds for script to load
           let attempts = 0;
-          while (typeof openSimplePayment !== 'function' && attempts < 20) {
+          while (typeof openSimplePayment !== 'function' && attempts < 30) {
             await new Promise(resolve => setTimeout(resolve, 100));
             attempts++;
           }
@@ -591,7 +611,8 @@
         
         // Use simple-payment.js for consistent payment flow
         if (typeof openSimplePayment === 'function') {
-          console.log('✅ [booking-details] Using openSimplePayment from simple-payment.js');
+          console.log('✅ [booking-details] Using openSimplePayment from simple-payment.js, bookingId:', bookingId);
+          console.log('✅ [booking-details] window._bookings:', window._bookings);
           openSimplePayment(bookingId);
         } else {
           // Fallback to old method if simple-payment.js not loaded
