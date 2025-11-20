@@ -1,0 +1,43 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.dll
+*.pdb
+*.exe
+
+# Environment variables và secrets
+appsettings.Production.json
+appsettings.Development.json
+appsettings.Local.json
+*.secrets.json
+.env
+.env.local
+
+# API Keys và sensitive data
+**/appsettings.*.json
+!appsettings.json
+!appsettings.Example.json
+
+# Logs
+logs/
+*.log
+
+# IDE
+.vs/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build outputs
+publish/
+dist/
+build/
+
