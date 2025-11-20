@@ -3,6 +3,52 @@
  * Hiển thị email và dropdown menu sau khi đăng nhập
  */
 
+// Thêm CSS cho badge đỏ trong menu
+const style = document.createElement('style');
+style.textContent = `
+  .unpaid-badge-menu {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    background: #dc3545;
+    color: #fff;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-left: 8px;
+    animation: pulse-badge 2s infinite;
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.4);
+  }
+  .unpaid-badge-menu::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: #fff;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 4px;
+    animation: blink-badge 1.5s infinite;
+  }
+  @keyframes pulse-badge {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+  }
+  @keyframes blink-badge {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+  .dropdown-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+`;
+document.head.appendChild(style);
+
 // Update navbar ngay khi page load
 document.addEventListener('DOMContentLoaded', () => {
   console.log('[Navbar Auth] DOMContentLoaded triggered');
@@ -163,6 +209,65 @@ function showGuestNav(navbarMenu) {
 }
 
 /**
+ * Kiểm tra booking có thể thanh toán (chưa thanh toán)
+ * Logic giống với canPayBooking trong my-bookings.html
+ */
+function canPayBooking(booking) {
+  return (booking.status === 'Pending' || booking.status === 'Confirmed') && booking.status !== 'Paid';
+}
+
+/**
+ * Đếm số booking chưa thanh toán
+ */
+async function getUnpaidBookingsCount() {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) return 0;
+    
+    const response = await fetch('/api/bookings', {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    
+    if (!response.ok) return 0;
+    
+    const data = await response.json();
+    const bookings = data.items || data || [];
+    
+    // Đếm số booking chưa thanh toán (sử dụng cùng logic với canPayBooking)
+    const unpaidCount = bookings.filter(booking => canPayBooking(booking)).length;
+    
+    return unpaidCount;
+  } catch (error) {
+    console.error('[Navbar Auth] Error fetching unpaid bookings count:', error);
+    return 0;
+  }
+}
+
+/**
+ * Cập nhật badge đỏ trong menu
+ */
+async function updateUnpaidBadge() {
+  const unpaidCount = await getUnpaidBookingsCount();
+  const bookingMenuItem = document.querySelector('.user-dropdown .dropdown-item[href="my-bookings.html"]');
+  
+  if (bookingMenuItem) {
+    // Xóa badge cũ nếu có
+    const oldBadge = bookingMenuItem.querySelector('.unpaid-badge-menu');
+    if (oldBadge) oldBadge.remove();
+    
+    // Thêm badge mới nếu có booking chưa thanh toán
+    if (unpaidCount > 0) {
+      const badge = document.createElement('span');
+      badge.className = 'unpaid-badge-menu';
+      badge.textContent = unpaidCount > 99 ? '99+' : unpaidCount;
+      bookingMenuItem.appendChild(badge);
+    }
+  }
+}
+
+/**
  * Tạo user dropdown menu
  */
 function createUserDropdown(user) {
@@ -208,6 +313,11 @@ function createUserDropdown(user) {
   `;
   
   console.log('[Navbar Auth] User dropdown created with email:', email);
+  
+  // Cập nhật badge sau khi dropdown được tạo
+  setTimeout(() => {
+    updateUnpaidBadge();
+  }, 500);
   
   return li;
 }
@@ -274,4 +384,13 @@ function handleLogout(event) {
 // Export functions để có thể gọi từ nơi khác
 window.updateNavbarAuth = updateNavbarAuth;
 window.handleLogout = handleLogout;
+window.updateUnpaidBadge = updateUnpaidBadge;
+
+// Cập nhật badge định kỳ mỗi 30 giây
+setInterval(() => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    updateUnpaidBadge();
+  }
+}, 30000);
 
