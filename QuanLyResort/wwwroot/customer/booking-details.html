@@ -65,7 +65,44 @@
       margin-bottom:30px;
       animation:slideUp 0.6s ease forwards;
       opacity:0;
-      border:2px solid rgba(200,169,126,0.1)
+      border:2px solid rgba(200,169,126,0.1);
+      position:relative
+    }
+    .unpaid-badge{
+      position:absolute;
+      top:20px;
+      right:20px;
+      background:#dc3545;
+      color:#fff;
+      padding:8px 16px;
+      border-radius:25px;
+      font-size:13px;
+      font-weight:700;
+      text-transform:uppercase;
+      letter-spacing:0.5px;
+      box-shadow:0 4px 15px rgba(220,53,69,0.4);
+      z-index:20;
+      animation:pulse 2s infinite;
+      display:flex;
+      align-items:center;
+      gap:8px
+    }
+    .unpaid-badge::before{
+      content:'';
+      width:10px;
+      height:10px;
+      background:#fff;
+      border-radius:50%;
+      display:inline-block;
+      animation:blink 1.5s infinite
+    }
+    @keyframes pulse{
+      0%,100%{transform:scale(1)}
+      50%{transform:scale(1.05)}
+    }
+    @keyframes blink{
+      0%,100%{opacity:1}
+      50%{opacity:0.3}
     }
     @keyframes slideUp{
       from{opacity:0;transform:translateY(30px)}
@@ -209,6 +246,7 @@
       <div id="content" style="display:none">
         <!-- Header Section -->
         <div class="booking-header-section">
+          <div id="unpaidBadgeContainer"></div>
           <div>
             <div class="booking-code" id="code">-</div>
             <small style="opacity:0.9;font-size:14px">Đặt ngày: <span id="bookingDate">-</span></small>
