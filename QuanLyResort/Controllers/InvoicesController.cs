@@ -16,12 +16,16 @@ public class InvoicesController : ControllerBase
     private readonly IInvoiceService _invoiceService;
     private readonly ResortDbContext _context;
     private readonly IAuditService _auditService;
+    private readonly IBookingService _bookingService;
+    private readonly ILogger<InvoicesController> _logger;
 
-    public InvoicesController(IInvoiceService invoiceService, ResortDbContext context, IAuditService auditService)
+    public InvoicesController(IInvoiceService invoiceService, ResortDbContext context, IAuditService auditService, IBookingService bookingService, ILogger<InvoicesController> logger)
     {
         _invoiceService = invoiceService;
         _context = context;
         _auditService = auditService;
+        _bookingService = bookingService;
+        _logger = logger;
     }
 
     [HttpGet]
@@ -166,14 +170,80 @@ public class InvoicesController : ControllerBase
     [Authorize(Roles = "Admin,Cashier,Accounting")]
     public async Task<IActionResult> ProcessPayment(int id, [FromBody] PaymentRequest request)
     {
-        var userEmail = User.FindFirst(ClaimTypes.Email)?.Value ?? "System";
-        var success = await _invoiceService.ProcessPaymentAsync(id, request.Amount, 
-            request.PaymentMethod, request.PaymentReference, userEmail);
+        try
+        {
+            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value ?? "System";
+            var userRole = User.FindFirst(ClaimTypes.Role)?.Value ?? "Unknown";
+            
+            _logger.LogInformation($"[ProcessPayment] 🔄 Admin {userEmail} (Role: {userRole}) processing payment for invoice {id}");
+            
+            // Get invoice to check booking
+            var invoice = await _invoiceService.GetInvoiceByIdAsync(id);
+            if (invoice == null)
+            {
+                _logger.LogWarning($"[ProcessPayment] ❌ Invoice {id} not found");
+                return NotFound(new { message = "Invoice not found" });
+            }
+            
+            var bookingId = invoice.BookingId;
+            _logger.LogInformation($"[ProcessPayment] 📋 Invoice {id} linked to booking {bookingId}, current invoice status: '{invoice.Status}'");
+            
+            // Process invoice payment
+            var success = await _invoiceService.ProcessPaymentAsync(id, request.Amount, 
+                request.PaymentMethod, request.PaymentReference, userEmail);
 
-        if (!success)
-            return NotFound(new { message = "Invoice not found" });
+            if (!success)
+            {
+                _logger.LogWarning($"[ProcessPayment] ❌ Failed to process payment for invoice {id}");
+                return NotFound(new { message = "Invoice not found" });
+            }
+            
+            // Reload invoice to get updated status
+            invoice = await _invoiceService.GetInvoiceByIdAsync(id);
+            _logger.LogInformation($"[ProcessPayment] ✅ Invoice {id} payment processed. New status: '{invoice?.Status}'");
+            
+            // Nếu invoice đã được paid và có booking, update booking status
+            if (invoice != null && invoice.Status == "Paid" && bookingId.HasValue)
+            {
+                _logger.LogInformation($"[ProcessPayment] 💰 Invoice {id} is now Paid. Updating booking {bookingId.Value} status...");
+                
+                // Check booking current status
+                var booking = await _context.Bookings.FindAsync(bookingId.Value);
+                if (booking != null)
+                {
+                    _logger.LogInformation($"[ProcessPayment] 📋 Booking {bookingId.Value} current status: '{booking.Status}'");
+                    
+                    // Chỉ update booking nếu chưa paid
+                    if (booking.Status != "Paid")
+                    {
+                        var bookingPaymentSuccess = await _bookingService.ProcessOnlinePaymentAsync(bookingId.Value, userEmail);
+                        if (bookingPaymentSuccess)
+                        {
+                            _logger.LogInformation($"[ProcessPayment] ✅✅✅ SUCCESS: Booking {bookingId.Value} status updated to 'Paid'");
+                        }
+                        else
+                        {
+                            _logger.LogWarning($"[ProcessPayment] ⚠️ Failed to update booking {bookingId.Value} status");
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogInformation($"[ProcessPayment] ℹ️ Booking {bookingId.Value} already paid, skipping update");
+                    }
+                }
+                else
+                {
+                    _logger.LogWarning($"[ProcessPayment] ⚠️ Booking {bookingId.Value} not found");
+                }
+            }
 
-        return Ok(new { message = "Payment processed successfully" });
+            return Ok(new { message = "Payment processed successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"[ProcessPayment] ❌ Exception processing payment for invoice {id}");
+            return StatusCode(500, new { message = "Lỗi khi xử lý thanh toán", error = ex.Message });
+        }
     }
 
     [HttpDelete("{id}")]
