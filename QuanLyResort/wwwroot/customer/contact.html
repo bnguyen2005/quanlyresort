@@ -322,8 +322,43 @@
   <script src="js/bootstrap-datepicker.js"></script>
   <script src="js/jquery.timepicker.min.js"></script>
   <script src="js/scrollax.min.js"></script>
+  <!-- Load google-map.js first -->
   <script src="js/google-map.js"></script>
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBVWaKrjvy3MaE7SQ74_uJiULgl1JY0H2s&callback=initMap&libraries=places" async defer></script>
+  <!-- Load Google Maps API with proper async loading -->
+  <script>
+    (function() {
+      // Wait for DOM to be ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadGoogleMaps);
+      } else {
+        loadGoogleMaps();
+      }
+      
+      function loadGoogleMaps() {
+        // Check if already loaded
+        if (window.google && window.google.maps) {
+          if (typeof initMap === 'function') {
+            initMap();
+          }
+          return;
+        }
+        
+        var script = document.createElement('script');
+        script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyBVWaKrjvy3MaE7SQ74_uJiULgl1JY0H2s&callback=initMap&loading=async';
+        script.async = true;
+        script.defer = true;
+        script.onerror = function() {
+          console.error('Failed to load Google Maps API');
+          // Hiển thị thông báo lỗi nếu không load được
+          var mapElement = document.getElementById('map');
+          if (mapElement) {
+            mapElement.innerHTML = '<div style="padding: 40px; text-align: center; color: #666; background: #f8f9fa; border-radius: 8px;"><p style="font-size: 16px; margin-bottom: 10px;">⚠️ Không thể tải bản đồ</p><p style="font-size: 14px; color: #555;">Địa chỉ: 123 Đường Biển Xanh, Thành phố Biển, Việt Nam</p><p style="font-size: 14px; color: #555; margin-top: 5px;">📞 +84 901 329 227</p></div>';
+          }
+        };
+        document.head.appendChild(script);
+      }
+    })();
+  </script>
   <script src="js/main.js"></script>
   <script src="js/form-validation.js"></script>
   
