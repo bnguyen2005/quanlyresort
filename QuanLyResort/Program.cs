@@ -83,6 +83,7 @@ builder.Services.AddScoped<SePayService>();
 builder.Services.AddScoped<VietQRService>();
 builder.Services.AddHttpClient<AIChatService>();
 builder.Services.AddScoped<AIChatService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 // Add SignalR
 builder.Services.AddSignalR();

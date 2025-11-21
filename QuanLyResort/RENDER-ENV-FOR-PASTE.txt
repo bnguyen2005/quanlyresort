@@ -25,4 +25,12 @@ AIChat__Provider=groq
 AIChat__ApiKey=YOUR_GROQ_API_KEY_HERE
 AIChat__ApiUrl=https://api.groq.com/openai/v1/chat/completions
 AIChat__Model=llama-3.1-8b-instant
+EmailSettings__SmtpHost=smtp.gmail.com
+EmailSettings__SmtpPort=587
+EmailSettings__SmtpUsername=YOUR_EMAIL@gmail.com
+EmailSettings__SmtpPassword=YOUR_APP_PASSWORD
+EmailSettings__FromEmail=YOUR_EMAIL@gmail.com
+EmailSettings__FromName=Resort Deluxe
+EmailSettings__EnableSsl=true
+EmailSettings__ContactRecipient=phamthahlam@gmail.com
 
