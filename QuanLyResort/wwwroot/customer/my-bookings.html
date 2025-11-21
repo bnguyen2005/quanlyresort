@@ -506,6 +506,10 @@
       if (hasCashPaymentRequest(booking)) {
         return false;
       }
+      // Nếu phương thức thanh toán là Cash, không hiển thị nút thanh toán
+      if (booking.paymentMethod === 'Cash' || booking.paymentMethod === 'PayAtHotel') {
+        return false;
+      }
       // Chỉ cho phép thanh toán khi booking ở trạng thái Pending hoặc Confirmed và chưa thanh toán
       return (booking.status === 'Pending' || booking.status === 'Confirmed') && booking.status !== 'Paid';
     }
@@ -957,6 +961,7 @@
         }
         
         const hasCashRequest = hasCashPaymentRequest(booking);
+        const isCashPayment = booking.paymentMethod === 'Cash' || booking.paymentMethod === 'PayAtHotel';
         const canPay = canPayBooking(booking);
         const showUnpaidBadge = (booking.status === 'Pending' || booking.status === 'Confirmed') && booking.status !== 'Paid';
         
@@ -1008,6 +1013,19 @@
                     <div>
                       <strong>⏳ Đang chờ admin xác nhận</strong>
                       <p style="margin: 3px 0 0 0; font-size: 13px; opacity: 0.9;">Yêu cầu thanh toán tiền mặt đã được gửi.</p>
+                    </div>
+                  </div>
+                </div>
+                ${booking.status === 'Pending' || booking.status === 'Confirmed' ? `
+                  <button class=\"btn btn-outline-danger\" onclick=\"cancelBooking(${booking.bookingId})\">Hủy đặt phòng</button>
+                ` : ''}
+              ` : isCashPayment && (booking.status === 'Pending' || booking.status === 'Confirmed') && booking.status !== 'Paid' ? `
+                <div class="alert alert-warning" style="margin-bottom: 15px; padding: 12px 16px; border-radius: 10px; background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%); border: 2px solid #ffc107; color: #856404; font-size: 14px;">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="oi oi-dollar" style="font-size: 18px;"></span>
+                    <div>
+                      <strong>💵 Thanh toán tại khách sạn</strong>
+                      <p style="margin: 3px 0 0 0; font-size: 13px; opacity: 0.9;">Vui lòng thanh toán khi đến nhận phòng.</p>
                     </div>
                   </div>
                 </div>

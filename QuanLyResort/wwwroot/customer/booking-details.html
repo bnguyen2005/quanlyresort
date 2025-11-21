@@ -533,6 +533,10 @@
       if (hasCashPaymentRequest(booking)) {
         return false;
       }
+      // Nếu phương thức thanh toán là Cash, không hiển thị nút thanh toán
+      if (booking.paymentMethod === 'Cash' || booking.paymentMethod === 'PayAtHotel') {
+        return false;
+      }
       return (booking.status === 'Pending' || booking.status === 'Confirmed') && booking.status !== 'Paid';
     }
     
@@ -645,6 +649,7 @@
         
         if (btnPay) {
           const hasCashRequest = hasCashPaymentRequest(b);
+          const isCashPayment = b.paymentMethod === 'Cash' || b.paymentMethod === 'PayAtHotel';
           const canPay = canPayBooking(b);
           
           if (hasCashRequest) {
@@ -654,6 +659,31 @@
             // Show awaiting confirmation message
             if (awaitingConfirmationMsg) {
               awaitingConfirmationMsg.style.display = 'block';
+            }
+            // Show unpaid badge
+            if (unpaidBadgeContainer) {
+              unpaidBadgeContainer.innerHTML = '<div class="unpaid-badge">Chưa thanh toán</div>';
+            }
+          } else if (isCashPayment && (b.status === 'Pending' || b.status === 'Confirmed') && b.status !== 'Paid') {
+            // Phương thức thanh toán là Cash - ẩn nút thanh toán, hiển thị message thanh toán tại khách sạn
+            btnPay.style.display = 'none';
+            btnPay.dataset.ready = 'false';
+            // Show message for cash payment
+            if (awaitingConfirmationMsg) {
+              awaitingConfirmationMsg.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <span class="oi oi-dollar" style="font-size: 20px;"></span>
+                  <div>
+                    <strong>💵 Thanh toán tại khách sạn</strong>
+                    <p style="margin: 5px 0 0 0; font-size: 14px; opacity: 0.9;">Vui lòng thanh toán khi đến nhận phòng.</p>
+                  </div>
+                </div>
+              `;
+              awaitingConfirmationMsg.style.display = 'block';
+              awaitingConfirmationMsg.className = 'alert alert-warning';
+              awaitingConfirmationMsg.style.background = 'linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%)';
+              awaitingConfirmationMsg.style.border = '2px solid #ffc107';
+              awaitingConfirmationMsg.style.color = '#856404';
             }
             // Show unpaid badge
             if (unpaidBadgeContainer) {
