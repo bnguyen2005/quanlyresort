@@ -1,7 +1,18 @@
-
-var google;
-
 function initMap() {
+    // Kiểm tra xem Google Maps API đã load chưa
+    if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
+        console.error('Google Maps API chưa được load');
+        setTimeout(initMap, 100); // Retry sau 100ms
+        return;
+    }
+    
+    // Kiểm tra xem jQuery đã load chưa
+    if (typeof jQuery === 'undefined' || typeof $ === 'undefined') {
+        console.error('jQuery chưa được load');
+        setTimeout(initMap, 100); // Retry sau 100ms
+        return;
+    }
+    
     // Địa chỉ Resort Deluxe: 123 Đường Biển Xanh, Thành phố Biển, Việt Nam
     // Tọa độ mặc định (có thể thay đổi sau khi geocode)
     // Đây là tọa độ gần biển ở Việt Nam (ví dụ: Nha Trang)
@@ -25,7 +36,10 @@ function initMap() {
 
     // Get the HTML DOM element that will contain your map 
     var mapElement = document.getElementById('map') || document.querySelector('.map');
-    if (!mapElement) return; // không có vùng map trên trang hiện tại
+    if (!mapElement) {
+        console.warn('Không tìm thấy element #map');
+        return; // không có vùng map trên trang hiện tại
+    }
 
     // Create the Google Map using our element and options defined above
     var map = new google.maps.Map(mapElement, mapOptions);
@@ -41,6 +55,7 @@ function initMap() {
             
             // Center map to the location
             map.setCenter(latlng);
+            map.setZoom(16);
             
             // Add marker
             var marker = new google.maps.Marker({
@@ -67,6 +82,7 @@ function initMap() {
             // Open info window by default
             infoWindow.open(map, marker);
         } else {
+            console.warn('Geocoding failed, using default coordinates');
             // Fallback: Use default coordinates if geocoding fails
             var marker = new google.maps.Marker({
                 position: myLatlng,
@@ -84,14 +100,25 @@ function initMap() {
             });
             infoWindow.open(map, marker);
         }
-    }).fail(function() {
+    }).fail(function(jqXHR, textStatus, errorThrown) {
+        console.error('Geocoding request failed:', textStatus, errorThrown);
         // Fallback if geocoding request fails
         var marker = new google.maps.Marker({
             position: myLatlng,
             map: map,
             title: 'Resort Deluxe'
         });
+        
+        var infoWindow = new google.maps.InfoWindow({
+            content: '<div style="padding: 10px;"><h4 style="margin: 0 0 8px 0; color: #c8a97e;">🏨 Resort Deluxe</h4><p style="margin: 0;">' + address + '</p></div>'
+        });
+        
+        marker.addListener('click', function() {
+            infoWindow.open(map, marker);
+        });
+        infoWindow.open(map, marker);
     });
 }
 
+// Expose initMap to global scope for Google Maps API callback
 window.initMap = initMap;
