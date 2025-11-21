@@ -1,16 +1,25 @@
 function initMap() {
-    // Kiểm tra xem Google Maps API đã load chưa
-    if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
-        console.error('Google Maps API chưa được load');
-        setTimeout(initMap, 100); // Retry sau 100ms
+    try {
+        // Kiểm tra xem Google Maps API đã load chưa
+        if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
+            console.error('Google Maps API chưa được load');
+            setTimeout(initMap, 100); // Retry sau 100ms
+            return;
+        }
+        
+        // Get the HTML DOM element that will contain your map 
+        var mapElement = document.getElementById('map') || document.querySelector('.map');
+        if (!mapElement) {
+            console.warn('Không tìm thấy element #map');
+            return; // không có vùng map trên trang hiện tại
+        }
+    } catch (error) {
+        console.error('Error initializing map:', error);
+        var mapElement = document.getElementById('map');
+        if (mapElement) {
+            mapElement.innerHTML = '<div style="padding: 40px; text-align: center; color: #666; background: #f8f9fa; border-radius: 8px;"><p style="font-size: 16px; margin-bottom: 10px; color: #dc3545;">⚠️ Lỗi khởi tạo bản đồ</p><p style="font-size: 14px; color: #555;">Địa chỉ HUFLIT: 806 Lê Quang Đạo, Trung Mỹ Tây, Quận 12, TP.HCM</p></div>';
+        }
         return;
-    }
-    
-    // Get the HTML DOM element that will contain your map 
-    var mapElement = document.getElementById('map') || document.querySelector('.map');
-    if (!mapElement) {
-        console.warn('Không tìm thấy element #map');
-        return; // không có vùng map trên trang hiện tại
     }
 
     // Địa chỉ HUFLIT - Cơ sở Hóc Môn
@@ -35,7 +44,14 @@ function initMap() {
     };
 
     // Create the Google Map using our element and options defined above
-    var map = new google.maps.Map(mapElement, mapOptions);
+    var map;
+    try {
+        map = new google.maps.Map(mapElement, mapOptions);
+    } catch (error) {
+        console.error('Error creating map:', error);
+        mapElement.innerHTML = '<div style="padding: 40px; text-align: center; color: #666; background: #f8f9fa; border-radius: 8px;"><p style="font-size: 16px; margin-bottom: 10px; color: #dc3545;">⚠️ Lỗi API Key</p><p style="font-size: 14px; color: #555;">Google Maps API key không hợp lệ. Vui lòng liên hệ admin.</p><p style="font-size: 14px; color: #555; margin-top: 10px;">Địa chỉ HUFLIT: 806 Lê Quang Đạo, Trung Mỹ Tây, Quận 12, TP.HCM</p></div>';
+        return;
+    }
     
     // Địa chỉ Resort Deluxe
     var resortAddress = '123 Đường Biển Xanh, Thành phố Biển, Việt Nam';
@@ -61,7 +77,7 @@ function initMap() {
         title: 'HUFLIT - Cơ sở Hóc Môn',
         animation: google.maps.Animation.DROP,
         icon: {
-            url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png'
+            url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png'
         }
     });
     
@@ -139,7 +155,7 @@ function initMap() {
                         title: 'Vị trí của bạn',
                         animation: google.maps.Animation.DROP,
                         icon: {
-                            url: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png'
+                            url: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png'
                         }
                     });
                     

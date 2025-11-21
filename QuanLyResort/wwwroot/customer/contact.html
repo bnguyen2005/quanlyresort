@@ -320,7 +320,7 @@
   <script src="js/aos.js"></script>
   <script src="js/jquery.animateNumber.min.js"></script>
   <script src="js/bootstrap-datepicker.js"></script>
-  <script src="js/jquery.timepicker.min.js"></script>
+  <!-- <script src="js/jquery.timepicker.min.js"></script> --> <!-- File not found, commented out -->
   <script src="js/scrollax.min.js"></script>
   <!-- Load google-map.js first -->
   <script src="js/google-map.js"></script>
@@ -344,7 +344,7 @@
         }
         
         var script = document.createElement('script');
-        script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyBVWaKrjvy3MaE7SQ74_uJiULgl1JY0H2s&callback=initMap&loading=async&libraries=directions';
+        script.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyBVWaKrjvy3MaE7SQ74_uJiULgl1JY0H2s&callback=initMap&loading=async';
         script.async = true;
         script.defer = true;
         script.onerror = function() {
@@ -352,7 +352,16 @@
           // Hiển thị thông báo lỗi nếu không load được
           var mapElement = document.getElementById('map');
           if (mapElement) {
-            mapElement.innerHTML = '<div style="padding: 40px; text-align: center; color: #666; background: #f8f9fa; border-radius: 8px;"><p style="font-size: 16px; margin-bottom: 10px;">⚠️ Không thể tải bản đồ</p><p style="font-size: 14px; color: #555;">Địa chỉ: 123 Đường Biển Xanh, Thành phố Biển, Việt Nam</p><p style="font-size: 14px; color: #555; margin-top: 5px;">📞 +84 901 329 227</p></div>';
+            mapElement.innerHTML = '<div style="padding: 40px; text-align: center; color: #666; background: #f8f9fa; border-radius: 8px;"><p style="font-size: 16px; margin-bottom: 10px;">⚠️ Không thể tải bản đồ</p><p style="font-size: 14px; color: #555;">Địa chỉ HUFLIT: 806 Lê Quang Đạo, Trung Mỹ Tây, Quận 12, TP.HCM</p><p style="font-size: 14px; color: #555; margin-top: 5px;">📞 +84 901 329 227</p></div>';
+          }
+        };
+        
+        // Handle API key errors
+        window.gm_authFailure = function() {
+          console.error('Google Maps API key error');
+          var mapElement = document.getElementById('map');
+          if (mapElement) {
+            mapElement.innerHTML = '<div style="padding: 40px; text-align: center; color: #666; background: #f8f9fa; border-radius: 8px;"><p style="font-size: 16px; margin-bottom: 10px; color: #dc3545;">⚠️ Lỗi API Key</p><p style="font-size: 14px; color: #555;">Google Maps API key không hợp lệ hoặc đã hết hạn.</p><p style="font-size: 14px; color: #555; margin-top: 10px;">Địa chỉ HUFLIT: 806 Lê Quang Đạo, Trung Mỹ Tây, Quận 12, TP.HCM</p></div>';
           }
         };
         document.head.appendChild(script);
