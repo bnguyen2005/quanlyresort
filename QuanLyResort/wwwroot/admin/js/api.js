@@ -648,3 +648,39 @@ const checkAuth = () => {
   return true;
 };
 
+// ==================== API HELPER FUNCTIONS ====================
+
+/**
+ * GET request helper
+ */
+const apiGet = async (endpoint) => {
+  return await apiCall(endpoint, { method: 'GET' });
+};
+
+/**
+ * POST request helper
+ */
+const apiPost = async (endpoint, data) => {
+  return await apiCall(endpoint, {
+    method: 'POST',
+    body: JSON.stringify(data)
+  });
+};
+
+/**
+ * PUT request helper
+ */
+const apiPut = async (endpoint, data) => {
+  return await apiCall(endpoint, {
+    method: 'PUT',
+    body: JSON.stringify(data)
+  });
+};
+
+/**
+ * DELETE request helper
+ */
+const apiDelete = async (endpoint) => {
+  return await apiCall(endpoint, { method: 'DELETE' });
+};
+
