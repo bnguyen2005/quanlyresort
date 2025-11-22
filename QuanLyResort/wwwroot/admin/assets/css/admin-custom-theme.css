@@ -236,6 +236,8 @@
 
 .card-body {
   background: #ffffff;
+  overflow: visible !important;
+  position: relative;
 }
 
 /* Stats Cards với màu sắc */
@@ -280,7 +282,13 @@
    ============================================ */
 .table {
   border-radius: 8px;
+  overflow: visible !important;
+}
+
+/* Chỉ áp dụng overflow: hidden cho thead để giữ border-radius */
+.table thead {
   overflow: hidden;
+  border-radius: 8px 8px 0 0;
 }
 
 .table thead {
@@ -501,19 +509,129 @@
 }
 
 /* Fix for table cells with dropdown */
-#usersTable td:last-child {
+#usersTable td:last-child,
+table td:last-child {
   position: relative;
-  overflow: visible;
+  overflow: visible !important;
 }
 
-#usersTable .dropdown {
+#usersTable .dropdown,
+table .dropdown {
   position: static;
 }
 
-#usersTable .dropdown-menu {
-  position: absolute;
-  right: 0;
-  left: auto;
+#usersTable .dropdown-menu,
+table .dropdown-menu {
+  position: absolute !important;
+  right: 0 !important;
+  left: auto !important;
+  z-index: 1050 !important;
+}
+
+/* Fix dropdown trong DataTables */
+.dataTables_wrapper .table-responsive {
+  overflow: visible !important;
+}
+
+.dataTables_wrapper table {
+  overflow: visible !important;
+}
+
+.dataTables_wrapper .dropdown-menu {
+  z-index: 1051 !important;
+  position: fixed !important;
+}
+
+/* Fix cho tất cả tables trong admin */
+.card .table-responsive,
+.table-responsive {
+  overflow: visible !important;
+  position: relative;
+}
+
+.card .table,
+.table {
+  overflow: visible !important;
+}
+
+.card .table td,
+.table td {
+  overflow: visible !important;
+  position: relative;
+}
+
+.card .table .dropdown,
+.table .dropdown {
+  position: static;
+}
+
+.card .table .dropdown-menu,
+.table .dropdown-menu {
+  position: absolute !important;
+  z-index: 9999 !important;
+  right: 0 !important;
+  left: auto !important;
+  margin-top: 0.25rem !important;
+  display: none;
+}
+
+.card .table .dropdown-menu.show,
+.table .dropdown-menu.show {
+  display: block !important;
+}
+
+/* Fix cho DataTables - dropdown phải render bên ngoài table */
+.dataTables_wrapper {
+  position: relative;
+  overflow: visible !important;
+}
+
+.dataTables_wrapper .dataTables_scrollBody {
+  overflow: visible !important;
+}
+
+.dataTables_wrapper .dataTables_scroll {
+  overflow: visible !important;
+}
+
+/* Đảm bảo dropdown trong DataTables có z-index cao nhất */
+.dataTables_wrapper .dropdown-menu {
+  z-index: 10000 !important;
+}
+
+/* Khi dropdown mở, tính toán vị trí từ button */
+.dataTables_wrapper .dropdown.show .dropdown-menu,
+.dataTables_wrapper .dropdown-menu.show {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  z-index: 10000 !important;
+}
+
+/* Fix cho DataTables scroll body */
+.dataTables_scrollBody {
+  overflow: visible !important;
+}
+
+.dataTables_scrollHeadInner {
+  overflow: visible !important;
+}
+
+/* Đảm bảo table wrapper không cắt dropdown */
+.dataTables_wrapper {
+  overflow: visible !important;
+}
+
+.dataTables_wrapper .dataTables_scroll {
+  overflow: visible !important;
+}
+
+.dataTables_wrapper .dataTables_scrollHead {
+  overflow: visible !important;
+}
+
+.dataTables_wrapper .dataTables_scrollBody {
+  overflow: visible !important;
 }
 
 /* ============================================

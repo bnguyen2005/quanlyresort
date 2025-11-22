@@ -579,6 +579,14 @@
             if (hasValidRows) {
               // Re-initialize DataTable only if we have valid rows
               initDataTable();
+              
+              // Fix dropdown positioning after DataTable initialization
+              setTimeout(() => {
+                fixDropdownPositioning();
+                // Re-initialize Bootstrap dropdowns
+                initializeBootstrapDropdowns();
+              }, 100);
+              
               console.log('[loadOrders] ✅ DataTable re-initialized after data load');
             } else {
               console.warn('[loadOrders] ⚠️ No valid rows found, skipping DataTable initialization');
@@ -739,9 +747,77 @@
       const badges = {
         'Unpaid': '<span class="badge bg-danger">Chưa thanh toán</span>',
         'Paid': '<span class="badge bg-success">Đã thanh toán</span>',
-        'Refunded': '<span class="badge bg-warning">Đã hoàn tiền</span>'
+        'Refunded': '<span class="badge bg-warning">Đã hoàn tiền</span>',
+        'AwaitingConfirmation': '<span class="badge bg-warning">Chờ xác nhận</span>'
       };
       return badges[paymentStatus] || `<span class="badge bg-secondary">${paymentStatus}</span>`;
+    }
+    
+    // Fix dropdown positioning for DataTables
+    function fixDropdownPositioning() {
+      const dropdowns = document.querySelectorAll('#ordersTable .dropdown');
+      dropdowns.forEach(dropdown => {
+        const button = dropdown.querySelector('.dropdown-toggle');
+        const menu = dropdown.querySelector('.dropdown-menu');
+        
+        if (button && menu) {
+          // Ensure dropdown has proper positioning
+          dropdown.style.position = 'static';
+          menu.style.position = 'absolute';
+          menu.style.zIndex = '9999';
+          menu.style.right = '0';
+          menu.style.left = 'auto';
+          
+          // Fix positioning when dropdown opens
+          button.addEventListener('show.bs.dropdown', function() {
+            const rect = button.getBoundingClientRect();
+            menu.style.position = 'fixed';
+            menu.style.top = (rect.bottom + 5) + 'px';
+            menu.style.right = (window.innerWidth - rect.right) + 'px';
+            menu.style.left = 'auto';
+            menu.style.zIndex = '10000';
+          });
+          
+          // Reset when dropdown closes
+          button.addEventListener('hidden.bs.dropdown', function() {
+            menu.style.position = 'absolute';
+            menu.style.top = 'auto';
+            menu.style.right = '0';
+            menu.style.left = 'auto';
+          });
+        }
+      });
+    }
+    
+    // Initialize Bootstrap dropdowns
+    function initializeBootstrapDropdowns() {
+      if (typeof bootstrap !== 'undefined' && bootstrap.Dropdown) {
+        const dropdownToggles = document.querySelectorAll('#ordersTable .dropdown-toggle');
+        dropdownToggles.forEach(toggle => {
+          try {
+            // Destroy existing instance if any
+            const existing = bootstrap.Dropdown.getInstance(toggle);
+            if (existing) {
+              existing.dispose();
+            }
+            new bootstrap.Dropdown(toggle, {
+              boundary: 'viewport',
+              popperConfig: {
+                modifiers: [
+                  {
+                    name: 'preventOverflow',
+                    options: {
+                      boundary: document.body
+                    }
+                  }
+                ]
+              }
+            });
+          } catch (e) {
+            console.warn('Error initializing dropdown:', e);
+          }
+        });
+      }
     }
   </script>
 
