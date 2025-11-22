@@ -420,30 +420,100 @@
 /* ============================================
    DROPDOWNS - Menu thả xuống
    ============================================ */
+.dropdown {
+  position: relative !important;
+}
+
 .dropdown-menu {
   border: 1px solid var(--resort-accent);
   border-radius: 8px;
   box-shadow: 0 8px 24px rgba(200, 169, 126, 0.2);
   padding: 0.5rem;
+  position: absolute !important;
+  top: 100% !important;
+  right: 0 !important;
+  left: auto !important;
+  z-index: 1000 !important;
+  margin-top: 0.25rem !important;
+  min-width: 180px;
+  display: none;
+}
+
+.dropdown-menu.show {
+  display: block !important;
+}
+
+/* Fix dropdown trong table */
+.table-responsive,
+.table {
+  overflow: visible !important;
+}
+
+.table td {
+  overflow: visible !important;
+  position: relative;
+}
+
+/* Fix dropdown button */
+.dropdown-toggle {
+  position: relative;
+  z-index: 1;
+}
+
+.dropdown-toggle::after {
+  margin-left: 0.5em;
 }
 
 .dropdown-item {
   border-radius: 6px;
   margin: 2px 0;
   padding: 0.5rem 1rem;
-  transition: all 0.2s ease;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  cursor: pointer;
+  display: block;
+  width: 100%;
+  clear: both;
+  font-weight: 400;
+  color: #212529;
+  text-align: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+  background-color: transparent;
+  border: 0;
 }
 
-.dropdown-item:hover {
+.dropdown-item:hover,
+.dropdown-item:focus {
   background: linear-gradient(90deg, var(--resort-accent) 0%, var(--resort-secondary) 100%);
   color: var(--resort-primary-dark);
-  transform: translateX(5px);
+  transform: none;
 }
 
 .dropdown-item.active,
 .dropdown-item:active {
   background: linear-gradient(90deg, var(--resort-primary) 0%, var(--resort-primary-light) 100%);
   color: #ffffff;
+}
+
+/* Prevent re-render loop */
+.dropdown-menu:hover {
+  display: block !important;
+}
+
+/* Fix for table cells with dropdown */
+#usersTable td:last-child {
+  position: relative;
+  overflow: visible;
+}
+
+#usersTable .dropdown {
+  position: static;
+}
+
+#usersTable .dropdown-menu {
+  position: absolute;
+  right: 0;
+  left: auto;
 }
 
 /* ============================================

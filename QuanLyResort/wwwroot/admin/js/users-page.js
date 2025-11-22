@@ -109,25 +109,30 @@ async function loadUsers() {
         <td>${user.isActive ? '<span class="badge bg-success">Hoạt động</span>' : '<span class="badge bg-danger">Đã khóa</span>'}</td>
         <td>${new Date(user.createdAt).toLocaleDateString('vi-VN')}</td>
         <td>
-          <div class="dropdown">
-            <button type="button" class="btn btn-sm btn-icon dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+          <div class="dropdown" style="position: relative;">
+            <button type="button" class="btn btn-sm btn-icon dropdown-toggle hide-arrow" 
+                    data-bs-toggle="dropdown" 
+                    aria-expanded="false"
+                    id="dropdownBtn-${user.userId}">
               <i class="bx bx-dots-vertical-rounded"></i>
             </button>
-            <div class="dropdown-menu">
-              <a class="dropdown-item" href="javascript:void(0);" onclick="editUser(${user.userId})">
+            <ul class="dropdown-menu dropdown-menu-end" 
+                aria-labelledby="dropdownBtn-${user.userId}"
+                style="position: absolute; top: 100%; right: 0; z-index: 1000; min-width: 180px;">
+              <li><a class="dropdown-item" href="javascript:void(0);" onclick="editUser(${user.userId})">
                 <i class="bx bx-edit-alt me-1"></i> Sửa
-              </a>
-              <a class="dropdown-item" href="javascript:void(0);" onclick="openChangePasswordModal(${user.userId})">
+              </a></li>
+              <li><a class="dropdown-item" href="javascript:void(0);" onclick="openChangePasswordModal(${user.userId})">
                 <i class="bx bx-key me-1"></i> Đổi mật khẩu
-              </a>
-              <a class="dropdown-item" href="javascript:void(0);" onclick="toggleActive(${user.userId}, ${user.isActive})">
+              </a></li>
+              <li><a class="dropdown-item" href="javascript:void(0);" onclick="toggleActive(${user.userId}, ${user.isActive})">
                 <i class="bx bx-${user.isActive ? 'lock' : 'lock-open'} me-1"></i> ${user.isActive ? 'Khóa' : 'Mở khóa'}
-              </a>
-              <div class="dropdown-divider"></div>
-              <a class="dropdown-item text-danger" href="javascript:void(0);" onclick="deleteUser(${user.userId})">
+              </a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item text-danger" href="javascript:void(0);" onclick="deleteUser(${user.userId})">
                 <i class="bx bx-trash me-1"></i> Xóa
-              </a>
-            </div>
+              </a></li>
+            </ul>
           </div>
         </td>
       </tr>
@@ -135,11 +140,38 @@ async function loadUsers() {
 
     dataTable = $('#usersTable').DataTable({
       language: {
-  url: '/admin/local-plugins/datatables/i18n/vi.json'
+        url: '/admin/local-plugins/datatables/i18n/vi.json'
       },
       pageLength: 25,
-      order: [[0, 'desc']]
+      order: [[0, 'desc']],
+      drawCallback: function() {
+        // Re-initialize Bootstrap dropdowns after table redraw
+        const dropdowns = document.querySelectorAll('.dropdown-toggle');
+        dropdowns.forEach(toggle => {
+          if (window.bootstrap && bootstrap.Dropdown) {
+            try {
+              new bootstrap.Dropdown(toggle);
+            } catch (e) {
+              // Dropdown already initialized
+            }
+          }
+        });
+      }
     });
+    
+    // Initialize Bootstrap dropdowns after table is ready
+    setTimeout(() => {
+      const dropdowns = document.querySelectorAll('.dropdown-toggle');
+      dropdowns.forEach(toggle => {
+        if (window.bootstrap && bootstrap.Dropdown) {
+          try {
+            new bootstrap.Dropdown(toggle);
+          } catch (e) {
+            console.warn('Dropdown init warning:', e);
+          }
+        }
+      });
+    }, 100);
 
   } catch (error) {
     console.error('Error loading users:', error);

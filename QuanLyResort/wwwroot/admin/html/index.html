@@ -320,56 +320,64 @@
             <!-- Stats Cards Row -->
             <div class="row mb-4">
               <div class="col-lg-3 col-md-6 col-12 mb-4">
-                <div class="stats-card">
-                  <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                      <h3 class="card-title mb-2" id="todayBookings">12</h3>
-                      <small class="text-white">Đặt phòng hôm nay</small>
-                    </div>
-                    <div class="avatar flex-shrink-0">
-                      <i class="bx bx-calendar text-white" style="font-size: 2rem;"></i>
+                <a href="bookings.html" style="text-decoration: none; color: inherit;">
+                  <div class="stats-card" style="cursor: pointer;">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                        <h3 class="card-title mb-2" id="todayBookings">0</h3>
+                        <small class="text-white">Đặt phòng hôm nay</small>
+                      </div>
+                      <div class="avatar flex-shrink-0">
+                        <i class="bx bx-calendar text-white" style="font-size: 2rem;"></i>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </a>
               </div>
               <div class="col-lg-3 col-md-6 col-12 mb-4">
-                <div class="stats-card success">
-                  <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                      <h3 class="card-title mb-2" id="todayRevenue">8.500.000₫</h3>
-                      <small class="text-white">Doanh thu hôm nay</small>
-                    </div>
-                    <div class="avatar flex-shrink-0">
-                      <i class="bx bx-dollar text-white" style="font-size: 2rem;"></i>
+                <a href="reports.html" style="text-decoration: none; color: inherit;">
+                  <div class="stats-card success" style="cursor: pointer;">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                        <h3 class="card-title mb-2" id="todayRevenue">0₫</h3>
+                        <small class="text-white">Doanh thu hôm nay</small>
+                      </div>
+                      <div class="avatar flex-shrink-0">
+                        <i class="bx bx-dollar text-white" style="font-size: 2rem;"></i>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </a>
               </div>
               <div class="col-lg-3 col-md-6 col-12 mb-4">
-                <div class="stats-card warning">
-                  <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                      <h3 class="card-title mb-2" id="occupancyRate">75.5%</h3>
-                      <small class="text-white">Tỷ lệ lấp đầy</small>
-                    </div>
-                    <div class="avatar flex-shrink-0">
-                      <i class="bx bx-home text-white" style="font-size: 2rem;"></i>
+                <a href="rooms.html" style="text-decoration: none; color: inherit;">
+                  <div class="stats-card warning" style="cursor: pointer;">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                        <h3 class="card-title mb-2" id="occupancyRate">0%</h3>
+                        <small class="text-white">Tỷ lệ lấp đầy</small>
+                      </div>
+                      <div class="avatar flex-shrink-0">
+                        <i class="bx bx-home text-white" style="font-size: 2rem;"></i>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </a>
               </div>
               <div class="col-lg-3 col-md-6 col-12 mb-4">
-                <div class="stats-card info">
-                  <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                      <h3 class="card-title mb-2" id="todayCheckIns">8</h3>
-                      <small class="text-white">Check-in hôm nay</small>
-                    </div>
-                    <div class="avatar flex-shrink-0">
-                      <i class="bx bx-log-in text-white" style="font-size: 2rem;"></i>
+                <a href="bookings.html?filter=checkin" style="text-decoration: none; color: inherit;">
+                  <div class="stats-card info" style="cursor: pointer;">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                        <h3 class="card-title mb-2" id="todayCheckIns">0</h3>
+                        <small class="text-white">Check-in hôm nay</small>
+                      </div>
+                      <div class="avatar flex-shrink-0">
+                        <i class="bx bx-log-in text-white" style="font-size: 2rem;"></i>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </a>
               </div>
             </div>
 
@@ -529,6 +537,17 @@
   </script>
   <script>
     const API_BASE = `${window.location.origin}/api/dashboard`;
+    
+    // Ensure stats cards are clickable
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add click handlers to stats cards if not already wrapped in <a>
+      const statsCards = document.querySelectorAll('.stats-card');
+      statsCards.forEach(card => {
+        if (!card.closest('a')) {
+          card.style.cursor = 'pointer';
+        }
+      });
+    });
     let revenueChart, occupancyChart, serviceChart;
     let refreshInterval;
 
