@@ -202,10 +202,10 @@ const displayRooms = (rooms) => {
     // If not authenticated, disable action links to prevent API calls from unauthed users
   const disabledAttr = __isAuthenticated ? '' : ' aria-disabled="true" onclick="alert(\'Yêu cầu đăng nhập/ quyền Admin\')"';
 
-  // Build action links according to permissions
-  const viewLink = `<a class="dropdown-item" href="javascript:void(0);" ${disabledAttr} onclick="handleViewRoom(${room.roomId})"><i class="bx bx-show me-1"></i> Xem Chi Tiết</a>`;
-  const editLink = canEdit() ? `<a class="dropdown-item" href="javascript:void(0);" ${disabledAttr} onclick="handleEditRoom(${room.roomId})"><i class="bx bx-edit-alt me-1"></i> Chỉnh Sửa</a>` : '';
-  const deleteLink = canDelete() ? `<a class="dropdown-item text-danger" href="javascript:void(0);" ${disabledAttr} onclick="handleDeleteRoom(${room.roomId})"><i class="bx bx-trash me-1"></i> Xóa</a>` : '';
+  // Build action buttons according to permissions
+  const viewBtn = `<button class="action-btn action-btn-view" ${disabledAttr} onclick="handleViewRoom(${room.roomId})" title="Xem Chi Tiết"><i class="bx bx-show"></i></button>`;
+  const editBtn = canEdit() ? `<button class="action-btn action-btn-edit" ${disabledAttr} onclick="handleEditRoom(${room.roomId})" title="Chỉnh Sửa"><i class="bx bx-edit-alt"></i></button>` : '';
+  const deleteBtn = canDelete() ? `<button class="action-btn action-btn-delete" ${disabledAttr} onclick="handleDeleteRoom(${room.roomId})" title="Xóa"><i class="bx bx-trash"></i></button>` : '';
 
     return `
       <tr>
@@ -215,15 +215,10 @@ const displayRooms = (rooms) => {
         <td><span class="badge bg-label-info">${room.maxOccupancy} người</span></td>
         <td><span class="badge ${statusClass}">${statusText}</span></td>
         <td>
-          <div class="dropdown">
-            <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-              <i class="bx bx-dots-vertical-rounded"></i>
-            </button>
-            <div class="dropdown-menu">
-              ${viewLink}
-              ${editLink}
-              ${deleteLink}
-            </div>
+          <div class="action-buttons">
+            ${viewBtn}
+            ${editBtn}
+            ${deleteBtn}
           </div>
         </td>
       </tr>

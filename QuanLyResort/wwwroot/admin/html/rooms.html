@@ -740,21 +740,16 @@
               <td>${statusBadge}</td>
               <td>${housekeepingBadge}</td>
               <td>
-                <div class="dropdown">
-                  <button class="btn btn-sm btn-secondary dropdown-toggle" data-bs-toggle="dropdown">
-                    <i class="bx bx-dots-vertical-rounded"></i>
+                <div class="action-buttons">
+                  <button class="action-btn action-btn-edit" onclick="handleEditRoom(${room.roomId})" title="Sửa">
+                    <i class="bx bx-edit"></i>
                   </button>
-                  <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="javascript:void(0);" onclick="handleEditRoom(${room.roomId})">
-                      <i class="bx bx-edit me-1"></i> Sửa
-                    </a></li>
-                    <li><a class="dropdown-item" href="javascript:void(0);" onclick="handleStatusModal(${room.roomId})">
-                      <i class="bx bx-refresh me-1"></i> Cập nhật trạng thái
-                    </a></li>
-                    <li><a class="dropdown-item text-danger" href="javascript:void(0);" onclick="handleDeleteRoom(${room.roomId})">
-                      <i class="bx bx-trash me-1"></i> Xóa
-                    </a></li>
-                  </ul>
+                  <button class="action-btn action-btn-change" onclick="handleStatusModal(${room.roomId})" title="Cập nhật trạng thái">
+                    <i class="bx bx-refresh"></i>
+                  </button>
+                  <button class="action-btn action-btn-delete" onclick="handleDeleteRoom(${room.roomId})" title="Xóa">
+                    <i class="bx bx-trash"></i>
+                  </button>
                 </div>
               </td>
             </tr>

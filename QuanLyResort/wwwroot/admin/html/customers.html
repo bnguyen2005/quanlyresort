@@ -596,28 +596,19 @@
           </td>
           <td>${formatDate(customer.createdAt)}</td>
           <td>
-            <div class="dropdown">
-              <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                Thao tác
+            <div class="action-buttons">
+              <button class="action-btn action-btn-view" onclick="viewCustomerDetails(${customer.customerId})" title="Xem chi tiết">
+                <i class="bx bx-show"></i>
               </button>
-              <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="#" onclick="openEditModal(${customer.customerId})">
-                  <i class="bx bx-edit me-2"></i>Chỉnh sửa
-                </a></li>
-                <li><a class="dropdown-item" href="#" onclick="viewCustomerDetails(${customer.customerId})">
-                  <i class="bx bx-show me-2"></i>Xem chi tiết
-                </a></li>
-                <li><a class="dropdown-item" href="#" onclick="openChangeTypeModal(${customer.customerId})">
-                  <i class="bx bx-transfer-alt me-2"></i>Đổi loại khách
-                </a></li>
-                <li><a class="dropdown-item" href="#" onclick="openAddPointsModal(${customer.customerId})">
-                  <i class="bx bx-plus-circle me-2"></i>Cộng điểm
-                </a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item text-danger" href="#" onclick="deleteCustomer(${customer.customerId})">
-                  <i class="bx bx-trash me-2"></i>Xóa
-                </a></li>
-              </ul>
+              <button class="action-btn action-btn-edit" onclick="openEditModal(${customer.customerId})" title="Chỉnh sửa">
+                <i class="bx bx-edit"></i>
+              </button>
+              <button class="action-btn action-btn-change" onclick="openChangeTypeModal(${customer.customerId})" title="Đổi loại khách">
+                <i class="bx bx-transfer-alt"></i>
+              </button>
+              <button class="action-btn action-btn-delete" onclick="deleteCustomer(${customer.customerId})" title="Xóa">
+                <i class="bx bx-trash"></i>
+              </button>
             </div>
           </td>
         `;

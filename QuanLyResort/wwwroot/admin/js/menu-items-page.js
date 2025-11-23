@@ -118,22 +118,16 @@ async function loadMenuItems() {
               <td>${escapeHtml(service.unit || 'Unit')}</td>
               <td>${statusBadge}</td>
               <td>
-                <div class="dropdown">
-                  <button class="btn btn-sm btn-secondary dropdown-toggle" data-bs-toggle="dropdown">
-                    <i class="bx bx-dots-vertical-rounded"></i>
+                <div class="action-buttons">
+                  <button class="action-btn action-btn-edit" onclick="editMenuItem(${service.serviceId})" title="Sửa">
+                    <i class="bx bx-edit"></i>
                   </button>
-                  <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="javascript:void(0);" onclick="editMenuItem(${service.serviceId})">
-                      <i class="bx bx-edit me-1"></i> Sửa
-                    </a></li>
-                    <li><a class="dropdown-item" href="javascript:void(0);" onclick="toggleMenuItemStatus(${service.serviceId}, ${!service.isActive})">
-                      <i class="bx bx-${service.isActive ? 'hide' : 'show'} me-1"></i> ${service.isActive ? 'Ẩn khỏi menu' : 'Hiển thị trên menu'}
-                    </a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item text-danger" href="javascript:void(0);" onclick="deleteMenuItem(${service.serviceId})">
-                      <i class="bx bx-trash me-1"></i> Xóa
-                    </a></li>
-                  </ul>
+                  <button class="action-btn action-btn-toggle" onclick="toggleMenuItemStatus(${service.serviceId}, ${!service.isActive})" title="${service.isActive ? 'Ẩn khỏi menu' : 'Hiển thị trên menu'}">
+                    <i class="bx bx-${service.isActive ? 'hide' : 'show'}"></i>
+                  </button>
+                  <button class="action-btn action-btn-delete" onclick="deleteMenuItem(${service.serviceId})" title="Xóa">
+                    <i class="bx bx-trash"></i>
+                  </button>
                 </div>
               </td>
             </tr>

@@ -202,22 +202,16 @@ function renderCouponsTable(couponsData) {
       <td>${usesText}</td>
       <td>${statusBadge}</td>
       <td>
-        <div class="dropdown">
-          <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-            <i class="bx bx-dots-vertical-rounded"></i>
+        <div class="action-buttons">
+          <button class="action-btn action-btn-edit" onclick="editCoupon('${couponId}')" title="Sửa">
+            <i class="bx bx-edit-alt"></i>
           </button>
-          <div class="dropdown-menu">
-            <a class="dropdown-item" href="javascript:void(0);" onclick="editCoupon('${couponId}')">
-              <i class="bx bx-edit-alt me-1"></i> Sửa
-            </a>
-            <a class="dropdown-item" href="javascript:void(0);" onclick="toggleCouponStatus('${couponId}', ${!isActive})">
-              <i class="bx bx-${isActive ? 'x' : 'check'}-circle me-1"></i> ${isActive ? 'Tắt' : 'Bật'}
-            </a>
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item text-danger" href="javascript:void(0);" onclick="deleteCoupon('${couponId}')">
-              <i class="bx bx-trash me-1"></i> Xóa
-            </a>
-          </div>
+          <button class="action-btn action-btn-toggle" onclick="toggleCouponStatus('${couponId}', ${!isActive})" title="${isActive ? 'Tắt' : 'Bật'}">
+            <i class="bx bx-${isActive ? 'x' : 'check'}-circle"></i>
+          </button>
+          <button class="action-btn action-btn-delete" onclick="deleteCoupon('${couponId}')" title="Xóa">
+            <i class="bx bx-trash"></i>
+          </button>
         </div>
       </td>
     `;

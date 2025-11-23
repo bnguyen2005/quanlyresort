@@ -491,28 +491,22 @@
             <td>${emp.position}</td>
             <td>${emp.isActive ? '<span class="badge bg-success">Đang làm</span>' : '<span class="badge bg-danger">Đã nghỉ</span>'}</td>
             <td>
-              <div class="dropdown">
-                <button type="button" class="btn btn-sm btn-icon dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                  <i class="bx bx-dots-vertical-rounded"></i>
+              <div class="action-buttons">
+                <button class="action-btn action-btn-edit" onclick="editEmployee(${emp.employeeId})" title="Sửa">
+                  <i class="bx bx-edit-alt"></i>
                 </button>
-                <div class="dropdown-menu">
-                  <a class="dropdown-item" href="javascript:void(0);" onclick="editEmployee(${emp.employeeId})">
-                    <i class="bx bx-edit-alt me-1"></i> Sửa
-                  </a>
-                  ${emp.isActive ? `
-                    <a class="dropdown-item" href="javascript:void(0);" onclick="terminateEmployee(${emp.employeeId})">
-                      <i class="bx bx-lock me-1"></i> Chấm dứt HĐ
-                    </a>
-                  ` : `
-                    <a class="dropdown-item" href="javascript:void(0);" onclick="reactivateEmployee(${emp.employeeId})">
-                      <i class="bx bx-lock-open me-1"></i> Kích hoạt lại
-                    </a>
-                  `}
-                  <div class="dropdown-divider"></div>
-                  <a class="dropdown-item text-danger" href="javascript:void(0);" onclick="deleteEmployee(${emp.employeeId})">
-                    <i class="bx bx-trash me-1"></i> Xóa
-                  </a>
-                </div>
+                ${emp.isActive ? `
+                  <button class="action-btn action-btn-toggle" onclick="terminateEmployee(${emp.employeeId})" title="Chấm dứt HĐ">
+                    <i class="bx bx-lock"></i>
+                  </button>
+                ` : `
+                  <button class="action-btn action-btn-change" onclick="reactivateEmployee(${emp.employeeId})" title="Kích hoạt lại">
+                    <i class="bx bx-lock-open"></i>
+                  </button>
+                `}
+                <button class="action-btn action-btn-delete" onclick="deleteEmployee(${emp.employeeId})" title="Xóa">
+                  <i class="bx bx-trash"></i>
+                </button>
               </div>
             </td>
           </tr>

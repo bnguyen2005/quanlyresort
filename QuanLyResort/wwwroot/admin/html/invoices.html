@@ -445,25 +445,20 @@
                 <td><strong>${formatCurrency(invoice.balanceDue)}</strong></td>
                 <td>${statusBadge}</td>
                 <td>
-                  <div class="dropdown">
-                    <button class="btn btn-sm btn-secondary dropdown-toggle" data-bs-toggle="dropdown">
-                      <i class="bx bx-dots-vertical-rounded"></i>
+                  <div class="action-buttons">
+                    <button class="action-btn action-btn-view" onclick="handleViewInvoice(${invoice.invoiceId})" title="Xem chi tiết">
+                      <i class="bx bx-show"></i>
                     </button>
-                    <ul class="dropdown-menu">
-                      <li><a class="dropdown-item" href="javascript:void(0);" onclick="handleViewInvoice(${invoice.invoiceId})">
-                        <i class="bx bx-show me-1"></i> Xem chi tiết
-                      </a></li>
-                      ${invoice.balanceDue > 0 ? `
-                      <li><a class="dropdown-item" href="javascript:void(0);" onclick="handleOpenPaymentModal(${invoice.invoiceId})">
-                        <i class="bx bx-credit-card me-1"></i> Thanh toán
-                      </a></li>
-                      ` : ''}
-                      ${invoice.status !== 'Paid' && invoice.status !== 'Cancelled' ? `
-                      <li><a class="dropdown-item text-danger" href="javascript:void(0);" onclick="handleCancelInvoice(${invoice.invoiceId})">
-                        <i class="bx bx-x me-1"></i> Hủy hóa đơn đặt phòng
-                      </a></li>
-                      ` : ''}
-                    </ul>
+                    ${invoice.balanceDue > 0 ? `
+                    <button class="action-btn action-btn-add" onclick="handleOpenPaymentModal(${invoice.invoiceId})" title="Thanh toán">
+                      <i class="bx bx-credit-card"></i>
+                    </button>
+                    ` : ''}
+                    ${invoice.status !== 'Paid' && invoice.status !== 'Cancelled' ? `
+                    <button class="action-btn action-btn-delete" onclick="handleCancelInvoice(${invoice.invoiceId})" title="Hủy hóa đơn">
+                      <i class="bx bx-x"></i>
+                    </button>
+                    ` : ''}
                   </div>
                 </td>
               </tr>
