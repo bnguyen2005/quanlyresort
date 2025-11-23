@@ -844,12 +844,34 @@
         </div>
         
         <!-- Shopping Cart Floating Button -->
-        <div id="cartFloatingBtn" style="position: fixed; bottom: 30px; right: 30px; z-index: 1000; display: none;">
+        <div id="cartFloatingBtn" style="position: fixed; bottom: 30px; left: 30px; z-index: 999; display: none;">
           <button type="button" class="btn btn-primary btn-lg rounded-circle shadow-lg" style="width: 60px; height: 60px; position: relative;" onclick="showCartModal()">
             <i class="icon-shopping-cart" style="font-size: 24px;"></i>
             <span id="cartBadge" class="badge bg-danger position-absolute top-0 start-100 translate-middle" style="display: none;">0</span>
           </button>
         </div>
+        <style>
+          /* Responsive cho giỏ hàng - tránh xung đột với Chat AI */
+          @media (max-width: 768px) {
+            #cartFloatingBtn {
+              bottom: 20px !important;
+              left: 20px !important;
+            }
+          }
+          @media (max-width: 480px) {
+            #cartFloatingBtn {
+              bottom: 15px !important;
+              left: 15px !important;
+            }
+            #cartFloatingBtn button {
+              width: 56px !important;
+              height: 56px !important;
+            }
+            #cartFloatingBtn i {
+              font-size: 20px !important;
+            }
+          }
+        </style>
 			</div>
 		</section>
 
