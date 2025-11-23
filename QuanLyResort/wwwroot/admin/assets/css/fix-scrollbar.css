@@ -3,11 +3,12 @@
  * Áp dụng cho tất cả trang admin
  */
 
-/* Fix scrollbar cho menu sidebar */
+/* Fix scrollbar cho menu sidebar - Kéo dài ra thay vì cuộn */
 #layout-menu {
-  overflow-y: auto !important;
+  overflow-y: visible !important;
   overflow-x: hidden !important;
-  height: calc(100vh - 4rem) !important;
+  height: auto !important;
+  min-height: 100vh !important;
 }
 
 /* Fix scrollbar cho content */
@@ -43,10 +44,12 @@ body.modal-open {
   overflow-y: auto !important;
 }
 
-/* Fix cho menu-inner */
+/* Fix cho menu-inner - Kéo dài ra thay vì cuộn */
 .menu-inner {
-  overflow-y: auto !important;
-  max-height: calc(100vh - 15rem) !important;
+  overflow-y: visible !important;
+  overflow-x: hidden !important;
+  max-height: none !important;
+  height: auto !important;
 }
 
 /* Fix z-index cho logout dropdown */

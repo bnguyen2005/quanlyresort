@@ -85,6 +85,10 @@
 .layout-menu {
   background: linear-gradient(180deg, #ffffff 0%, var(--resort-secondary) 100%) !important;
   border-right: 2px solid var(--resort-accent) !important;
+  overflow-y: visible !important;
+  overflow-x: hidden !important;
+  height: auto !important;
+  min-height: 100vh !important;
 }
 
 .menu-inner .menu-item .menu-link {
@@ -127,6 +131,39 @@
   font-size: 11px;
   margin-top: 20px;
   margin-bottom: 10px;
+}
+
+/* Menu kéo dài ra thay vì cuộn */
+.menu-inner {
+  overflow-y: visible !important;
+  overflow-x: hidden !important;
+  max-height: none !important;
+  height: auto !important;
+}
+
+/* Tắt PerfectScrollbar cho menu */
+#layout-menu .ps,
+#layout-menu .ps__rail-y,
+#layout-menu .ps__thumb-y {
+  display: none !important;
+}
+
+/* Đảm bảo menu container không bị giới hạn chiều cao */
+.layout-menu-fixed .layout-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: auto !important;
+  min-height: 100vh !important;
+  overflow-y: visible !important;
+  overflow-x: hidden !important;
+}
+
+/* Tắt scrollbar cho menu wrapper */
+.layout-menu .menu-inner-wrapper {
+  overflow: visible !important;
+  height: auto !important;
+  max-height: none !important;
 }
 
 /* App brand logo */
