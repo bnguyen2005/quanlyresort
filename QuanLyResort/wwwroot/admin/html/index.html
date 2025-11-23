@@ -590,8 +590,12 @@
       console.log('📊 Loading dashboard stats with token:', !!token);
 
       if (!token) {
-        console.warn('⚠️ No token found, loading sample data');
-        loadSampleStats();
+        console.warn('⚠️ No token found, showing zero values');
+        updateStatsCards({
+          today: { bookings: 0, revenue: 0, checkIns: 0, checkOuts: 0 },
+          occupancy: { rate: 0, occupied: 0, total: 0, available: 0 },
+          growth: { revenue: 0, bookings: 0 }
+        });
         return;
       }
 
@@ -612,37 +616,21 @@
         } else {
           const errorText = await response.text();
           console.error('❌ Dashboard API error:', response.status, errorText);
-          console.log('📊 Falling back to sample dashboard stats...');
-          loadSampleStats();
+          console.log('📊 Showing zero values instead of sample data');
+          updateStatsCards({
+            today: { bookings: 0, revenue: 0, checkIns: 0, checkOuts: 0 },
+            occupancy: { rate: 0, occupied: 0, total: 0, available: 0 },
+            growth: { revenue: 0, bookings: 0 }
+          });
         }
       } catch (error) {
         console.error('❌ Error loading dashboard stats:', error);
-        loadSampleStats();
+        updateStatsCards({
+          today: { bookings: 0, revenue: 0, checkIns: 0, checkOuts: 0 },
+          occupancy: { rate: 0, occupied: 0, total: 0, available: 0 },
+          growth: { revenue: 0, bookings: 0 }
+        });
       }
-    }
-
-    function loadSampleStats() {
-      // Sample data for demo
-      const sampleData = {
-        today: {
-          bookings: 12,
-          revenue: 8500000,
-          checkIns: 8,
-          checkOuts: 5
-        },
-        occupancy: {
-          rate: 75.5,
-          occupied: 45,
-          total: 60,
-          available: 15
-        },
-        growth: {
-          revenue: 15.2,
-          bookings: 8.7
-        }
-      };
-      
-      updateStatsCards(sampleData);
     }
 
     function updateStatsCards(data) {
@@ -667,8 +655,8 @@
       try {
         const token = localStorage.getItem('token') || localStorage.getItem('adminToken');
         if (!token) {
-          console.warn('⚠️ No token for revenue trends, using sample data');
-          createSampleRevenueChart();
+          console.warn('⚠️ No token for revenue trends, showing empty chart');
+          createRevenueChart([]);
           return;
         }
         
@@ -684,16 +672,16 @@
         if (response.ok) {
           const data = await response.json();
           console.log('✅ Revenue trends data loaded:', data);
-          createRevenueChart(data);
+          createRevenueChart(data || []);
         } else {
           const errorText = await response.text();
           console.error('❌ Revenue trends API error:', response.status, errorText);
-          console.log('📊 Falling back to sample revenue chart...');
-          createSampleRevenueChart();
+          console.log('📊 Showing empty chart instead of sample data');
+          createRevenueChart([]);
         }
       } catch (error) {
         console.error('❌ Error loading revenue trends:', error);
-        createSampleRevenueChart();
+        createRevenueChart([]);
       }
     }
 
@@ -763,25 +751,14 @@
       console.log('✅ Revenue chart created successfully');
     }
 
-    function createSampleRevenueChart() {
-      const sampleData = [];
-      for (let i = 29; i >= 0; i--) {
-        const date = new Date();
-        date.setDate(date.getDate() - i);
-        sampleData.push({
-          date: date.toISOString().split('T')[0],
-          revenue: Math.floor(Math.random() * 5000000) + 2000000
-        });
-      }
-      createRevenueChart(sampleData);
-    }
+    // Removed createSampleRevenueChart - using empty chart instead
 
     async function loadOccupancyTrends() {
       try {
         const token = localStorage.getItem('token') || localStorage.getItem('adminToken');
         if (!token) {
-          console.warn('⚠️ No token for occupancy trends, using sample data');
-          createSampleOccupancyChart();
+          console.warn('⚠️ No token for occupancy trends, showing empty chart');
+          createOccupancyChart([]);
           return;
         }
         
@@ -794,13 +771,14 @@
 
         if (response.ok) {
           const data = await response.json();
-          createOccupancyChart(data);
+          createOccupancyChart(data || []);
         } else {
-          createSampleOccupancyChart();
+          console.warn('⚠️ Cannot load occupancy trends, showing empty chart');
+          createOccupancyChart([]);
         }
       } catch (error) {
         console.error('Error loading occupancy trends:', error);
-        createSampleOccupancyChart();
+        createOccupancyChart([]);
       }
     }
 
@@ -850,16 +828,14 @@
       console.log('✅ Occupancy chart created successfully');
     }
 
-    function createSampleOccupancyChart() {
-      createOccupancyChart([{ occupancyRate: 75.5 }]);
-    }
+    // Removed createSampleOccupancyChart - using empty chart instead
 
     async function loadServiceRevenue() {
       try {
         const token = localStorage.getItem('token') || localStorage.getItem('adminToken');
         if (!token) {
-          console.warn('⚠️ No token for service revenue, using sample data');
-          createSampleServiceChart();
+          console.warn('⚠️ No token for service revenue, showing empty chart');
+          createServiceChart([]);
           return;
         }
         
@@ -872,13 +848,14 @@
 
         if (response.ok) {
           const data = await response.json();
-          createServiceChart(data);
+          createServiceChart(data || []);
         } else {
-          createSampleServiceChart();
+          console.warn('⚠️ Cannot load service revenue, showing empty chart');
+          createServiceChart([]);
         }
       } catch (error) {
         console.error('Error loading service revenue:', error);
-        createSampleServiceChart();
+        createServiceChart([]);
       }
     }
 
@@ -947,23 +924,14 @@
       console.log('✅ Service chart created successfully');
     }
 
-    function createSampleServiceChart() {
-      const sampleData = [
-        { serviceName: 'Spa & Massage', totalRevenue: 8500000 },
-        { serviceName: 'Restaurant', totalRevenue: 6200000 },
-        { serviceName: 'Laundry', totalRevenue: 2800000 },
-        { serviceName: 'Transport', totalRevenue: 1500000 },
-        { serviceName: 'Tour Guide', totalRevenue: 3200000 }
-      ];
-      createServiceChart(sampleData);
-    }
+    // Removed createSampleServiceChart - using empty chart instead
 
     async function loadTopCustomers() {
       try {
         const token = localStorage.getItem('token') || localStorage.getItem('adminToken');
         if (!token) {
-          console.warn('⚠️ No token for top customers, using sample data');
-          loadSampleTopCustomers();
+          console.warn('⚠️ No token for top customers, showing empty list');
+          updateTopCustomers([]);
           return;
         }
         
@@ -976,25 +944,15 @@
 
         if (response.ok) {
           const data = await response.json();
-          updateTopCustomers(data);
+          updateTopCustomers(data || []);
         } else {
-          loadSampleTopCustomers();
+          console.warn('⚠️ Cannot load top customers, showing empty list');
+          updateTopCustomers([]);
         }
       } catch (error) {
         console.error('Error loading top customers:', error);
-        loadSampleTopCustomers();
+        updateTopCustomers([]);
       }
-    }
-
-    function loadSampleTopCustomers() {
-      const sampleData = [
-        { customerName: 'Nguyễn Văn A', totalSpent: 15000000, bookingCount: 8 },
-        { customerName: 'Trần Thị B', totalSpent: 12500000, bookingCount: 6 },
-        { customerName: 'Lê Văn C', totalSpent: 9800000, bookingCount: 5 },
-        { customerName: 'Phạm Thị D', totalSpent: 8200000, bookingCount: 4 },
-        { customerName: 'Hoàng Văn E', totalSpent: 7500000, bookingCount: 3 }
-      ];
-      updateTopCustomers(sampleData);
     }
 
     function updateTopCustomers(customers) {
@@ -1030,8 +988,8 @@
       try {
         const token = localStorage.getItem('token') || localStorage.getItem('adminToken');
         if (!token) {
-          console.warn('⚠️ No token for recent activities, using sample data');
-          loadSampleActivities();
+          console.warn('⚠️ No token for recent activities, showing empty list');
+          updateRecentActivities([]);
           return;
         }
         
@@ -1044,25 +1002,15 @@
 
         if (response.ok) {
           const data = await response.json();
-          updateRecentActivities(data);
+          updateRecentActivities(data || []);
         } else {
-          loadSampleActivities();
+          console.warn('⚠️ Cannot load recent activities, showing empty list');
+          updateRecentActivities([]);
         }
       } catch (error) {
         console.error('Error loading recent activities:', error);
-        loadSampleActivities();
+        updateRecentActivities([]);
       }
-    }
-
-    function loadSampleActivities() {
-      const sampleData = [
-        { description: 'Tạo đặt phòng mới #1234', performedBy: 'admin', timestamp: new Date().toISOString() },
-        { description: 'Cập nhật thông tin khách hàng #567', performedBy: 'manager', timestamp: new Date(Date.now() - 300000).toISOString() },
-        { description: 'Thêm phòng mới #890', performedBy: 'admin', timestamp: new Date(Date.now() - 600000).toISOString() },
-        { description: 'Tạo hóa đơn #456', performedBy: 'staff', timestamp: new Date(Date.now() - 900000).toISOString() },
-        { description: 'Cập nhật đặt phòng #789', performedBy: 'manager', timestamp: new Date(Date.now() - 1200000).toISOString() }
-      ];
-      updateRecentActivities(sampleData);
     }
 
     function updateRecentActivities(activities) {

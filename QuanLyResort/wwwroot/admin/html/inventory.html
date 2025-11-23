@@ -626,11 +626,11 @@
           document.getElementById('totalValue').textContent = formatCurrency(data.totalValue || 0);
           document.getElementById('totalSuppliers').textContent = data.totalSuppliers || 0;
         } else {
-          console.log('📊 Loading sample dashboard stats...');
-          document.getElementById('totalItems').textContent = '156';
-          document.getElementById('lowStockItems').textContent = '8';
-          document.getElementById('totalValue').textContent = formatCurrency(45000000);
-          document.getElementById('totalSuppliers').textContent = '12';
+          console.warn('⚠️ Cannot load dashboard stats, showing zero values');
+          document.getElementById('totalItems').textContent = '0';
+          document.getElementById('lowStockItems').textContent = '0';
+          document.getElementById('totalValue').textContent = formatCurrency(0);
+          document.getElementById('totalSuppliers').textContent = '0';
         }
       } catch (error) {
         console.error('❌ Error loading dashboard stats:', error);
@@ -649,13 +649,8 @@
           categories = await response.json();
           updateCategorySelects();
         } else {
-          // Sample categories
-          categories = [
-            { categoryId: 1, categoryName: 'Đồ uống' },
-            { categoryId: 2, categoryName: 'Thực phẩm' },
-            { categoryId: 3, categoryName: 'Vệ sinh' },
-            { categoryId: 4, categoryName: 'Thiết bị' }
-          ];
+          console.warn('⚠️ Cannot load categories, showing empty list');
+          categories = [];
           updateCategorySelects();
         }
       } catch (error) {
@@ -675,12 +670,8 @@
           suppliers = await response.json();
           updateSupplierSelects();
         } else {
-          // Sample suppliers
-          suppliers = [
-            { supplierId: 1, supplierName: 'Công ty TNHH ABC' },
-            { supplierId: 2, supplierName: 'Nhà cung cấp XYZ' },
-            { supplierId: 3, supplierName: 'Siêu thị Metro' }
-          ];
+          console.warn('⚠️ Cannot load suppliers, showing empty list');
+          suppliers = [];
           updateSupplierSelects();
         }
       } catch (error) {
@@ -757,36 +748,10 @@
             console.log('⏭️ Stale response ignored (version mismatch)');
             return;
           }
-          updateInventoryTable(data.items);
+          updateInventoryTable(data.items || []);
         } else {
-          console.log('📦 Loading sample inventory data...');
-          const sampleItems = [
-            {
-              itemId: 1,
-              itemCode: 'DU001',
-              itemName: 'Nước suối Aquafina 500ml',
-              category: { categoryName: 'Đồ uống' },
-              currentStock: 150,
-              minimumStock: 50,
-              unit: 'chai',
-              unitPrice: 8000,
-              stockStatus: 'Normal',
-              stockValue: 1200000
-            },
-            {
-              itemId: 2,
-              itemCode: 'TP001',
-              itemName: 'Bánh mì sandwich',
-              category: { categoryName: 'Thực phẩm' },
-              currentStock: 5,
-              minimumStock: 20,
-              unit: 'cái',
-              unitPrice: 25000,
-              stockStatus: 'Low Stock',
-              stockValue: 125000
-            }
-          ];
-          updateInventoryTable(sampleItems);
+          console.warn('⚠️ Cannot load inventory data, showing empty table');
+          updateInventoryTable([]);
         }
       } catch (error) {
         console.error('❌ Error loading inventory items:', error);
