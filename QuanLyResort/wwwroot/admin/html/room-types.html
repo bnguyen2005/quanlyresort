@@ -449,23 +449,16 @@
                 : '<span class="badge bg-danger">Ngừng</span>'}
             </td>
             <td>
-              <div class="dropdown">
-                <button type="button" class="btn btn-sm btn-icon dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
-                  <i class="bx bx-dots-vertical-rounded"></i>
+              <div class="action-buttons">
+                <button class="action-btn action-btn-edit" onclick="editRoomType(${rt.roomTypeId})" title="Sửa">
+                  <i class="bx bx-edit-alt"></i>
                 </button>
-                <div class="dropdown-menu">
-                  <a class="dropdown-item" href="javascript:void(0);" onclick="editRoomType(${rt.roomTypeId})">
-                    <i class="bx bx-edit-alt me-1"></i> Sửa
-                  </a>
-                  <a class="dropdown-item" href="javascript:void(0);" onclick="toggleRoomTypeStatus(${rt.roomTypeId}, ${rt.isActive})">
-                    <i class="bx ${rt.isActive ? 'bx-lock' : 'bx-lock-open'} me-1"></i> 
-                    ${rt.isActive ? 'Ngừng bán' : 'Mở bán'}
-                  </a>
-                  <div class="dropdown-divider"></div>
-                  <a class="dropdown-item text-danger" href="javascript:void(0);" onclick="deleteRoomType(${rt.roomTypeId})">
-                    <i class="bx bx-trash me-1"></i> Xóa
-                  </a>
-                </div>
+                <button class="action-btn action-btn-toggle" onclick="toggleRoomTypeStatus(${rt.roomTypeId}, ${rt.isActive})" title="${rt.isActive ? 'Ngừng bán' : 'Mở bán'}">
+                  <i class="bx ${rt.isActive ? 'bx-lock' : 'bx-lock-open'}"></i>
+                </button>
+                <button class="action-btn action-btn-delete" onclick="deleteRoomType(${rt.roomTypeId})" title="Xóa">
+                  <i class="bx bx-trash"></i>
+                </button>
               </div>
             </td>
           </tr>
