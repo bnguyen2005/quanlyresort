@@ -1019,18 +1019,19 @@ table .dropdown-menu {
    ============================================ */
 body {
   /* Background image resort với overlay gradient - Chủ đề resort/tropical */
-  background-image: 
-    linear-gradient(135deg, rgba(200, 169, 126, 0.75) 0%, rgba(184, 153, 104, 0.65) 50%, rgba(245, 241, 232, 0.70) 100%),
+  background: 
+    linear-gradient(135deg, rgba(200, 169, 126, 0.4) 0%, rgba(184, 153, 104, 0.3) 50%, rgba(245, 241, 232, 0.35) 100%),
     url('https://images.unsplash.com/photo-1559827260-dc66d52bef19?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80') !important;
   background-size: cover !important;
   background-position: center center !important;
   background-attachment: fixed !important;
   background-repeat: no-repeat !important;
+  background-color: #F5F1E8 !important; /* Fallback color nếu image không load */
   position: relative;
   min-height: 100vh;
 }
 
-/* Fallback background nếu image không load được */
+/* Fallback background nếu image không load được - chỉ một ::before */
 body::before {
   content: '';
   position: fixed;
@@ -1048,29 +1049,22 @@ body::before {
       rgba(200, 169, 126, 0.03) 20px
     );
   pointer-events: none;
-  z-index: -1;
+  z-index: -2;
+  display: none; /* Ẩn fallback khi có background image */
 }
 
-body::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: 
-    radial-gradient(circle at 20% 50%, rgba(200, 169, 126, 0.05) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(184, 153, 104, 0.05) 0%, transparent 50%),
-    linear-gradient(135deg, rgba(245, 241, 232, 0.3) 0%, rgba(232, 213, 183, 0.2) 100%);
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* Đảm bảo layout-wrapper có background trong suốt */
+/* Đảm bảo layout-wrapper có background trong suốt để hiển thị background image */
 .layout-wrapper {
   position: relative;
   z-index: 1;
   background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* Đảm bảo layout-container không che background */
+.layout-container {
+  background: transparent !important;
+  background-color: transparent !important;
 }
 
 /* Content wrapper có background trắng mờ để nội dung dễ đọc */
@@ -1198,5 +1192,30 @@ body::before {
 
 .shadow-resort {
   box-shadow: 0 4px 12px rgba(200, 169, 126, 0.2) !important;
+}
+
+/* ============================================
+   FORCE BACKGROUND IMAGE - Đảm bảo background hiển thị
+   ============================================ */
+/* Override tất cả background khác để hiển thị background image */
+html {
+  background: transparent !important;
+}
+
+html body {
+  background: 
+    linear-gradient(135deg, rgba(200, 169, 126, 0.4) 0%, rgba(184, 153, 104, 0.3) 50%, rgba(245, 241, 232, 0.35) 100%),
+    url('https://images.unsplash.com/photo-1559827260-dc66d52bef19?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80') !important;
+  background-size: cover !important;
+  background-position: center center !important;
+  background-attachment: fixed !important;
+  background-repeat: no-repeat !important;
+  background-color: #F5F1E8 !important;
+}
+
+/* Đảm bảo layout-page không che background */
+.layout-page {
+  background: transparent !important;
+  background-color: transparent !important;
 }
 
