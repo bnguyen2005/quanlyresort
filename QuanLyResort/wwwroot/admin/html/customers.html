@@ -625,47 +625,45 @@
       });
 
       // Initialize DataTable if not already done
+      const dataTableConfig = {
+        language: {
+          url: '../local-plugins/datatables/i18n/vi.json'
+        },
+        pageLength: 10,
+        order: [[0, 'desc']],
+        columnDefs: [
+          { targets: [0], visible: true }, // ID column
+          { targets: [1], visible: true }, // Name column
+          { targets: [2], visible: true }, // Email column
+          { targets: [3], visible: true }, // Phone column
+          { targets: [4], visible: true }, // Type column
+          { targets: [5], visible: true }, // Nationality column
+          { targets: [6], visible: true }, // Points column
+          { targets: [7], visible: true }, // Created date column
+          { targets: [8], visible: true, orderable: false } // Actions column
+        ],
+        drawCallback: function() {
+          // Khởi tạo lại dropdown sau khi DataTable render
+          if (window.initializeDropdowns) {
+            window.initializeDropdowns();
+          }
+        }
+      };
+
       if (!customersTable) {
-        customersTable = $('#customersTable').DataTable({
-          language: {
-            url: '../local-plugins/datatables/i18n/vi.json'
-          },
-          pageLength: 10,
-          order: [[0, 'desc']],
-          columnDefs: [
-            { targets: [0], visible: true }, // ID column
-            { targets: [1], visible: true }, // Name column
-            { targets: [2], visible: true }, // Email column
-            { targets: [3], visible: true }, // Phone column
-            { targets: [4], visible: true }, // Type column
-            { targets: [5], visible: true }, // Nationality column
-            { targets: [6], visible: true }, // Points column
-            { targets: [7], visible: true }, // Created date column
-            { targets: [8], visible: true, orderable: false } // Actions column
-          ]
-        });
+        customersTable = $('#customersTable').DataTable(dataTableConfig);
       } else {
         // Destroy and recreate DataTable to avoid column mismatch
         customersTable.destroy();
-        customersTable = $('#customersTable').DataTable({
-          language: {
-            url: '../local-plugins/datatables/i18n/vi.json'
-          },
-          pageLength: 10,
-          order: [[0, 'desc']],
-          columnDefs: [
-            { targets: [0], visible: true }, // ID column
-            { targets: [1], visible: true }, // Name column
-            { targets: [2], visible: true }, // Email column
-            { targets: [3], visible: true }, // Phone column
-            { targets: [4], visible: true }, // Type column
-            { targets: [5], visible: true }, // Nationality column
-            { targets: [6], visible: true }, // Points column
-            { targets: [7], visible: true }, // Created date column
-            { targets: [8], visible: true, orderable: false } // Actions column
-          ]
-        });
+        customersTable = $('#customersTable').DataTable(dataTableConfig);
       }
+      
+      // Khởi tạo dropdown sau khi DataTable đã render
+      setTimeout(() => {
+        if (window.initializeDropdowns) {
+          window.initializeDropdowns();
+        }
+      }, 200);
     }
 
     // Open create modal - Global function
@@ -779,7 +777,27 @@
         const response = await apiGet(`/customermanagement/${customerId}`);
         if (response.ok) {
           const customer = await response.json();
-          alert(`Chi tiết khách hàng:\n\nID: ${customer.customerId}\nHọ tên: ${customer.fullName}\nEmail: ${customer.email}\nSĐT: ${customer.phoneNumber || 'N/A'}\nLoại: ${getCustomerTypeText(customer.customerType)}\nQuốc tịch: ${customer.nationality || 'N/A'}\nĐiểm tích lũy: ${customer.loyaltyPoints || 0}\nNgày tạo: ${formatDate(customer.createdAt)}`);
+          
+          let details = `
+Thông tin khách hàng
+
+Họ tên: ${customer.fullName}
+Email: ${customer.email}
+SĐT: ${customer.phoneNumber || '-'}
+Ngày sinh: ${customer.dateOfBirth ? formatDate(customer.dateOfBirth) : '-'}
+Giới tính: ${customer.gender || '-'}
+Quốc tịch: ${customer.nationality || '-'}
+Loại: ${getCustomerTypeText(customer.customerType)}
+Địa chỉ: ${customer.address || '-'}
+CMND/CCCD: ${customer.idCardNumber || '-'}
+Passport: ${customer.passportNumber || '-'}
+Điểm tích lũy: ${customer.loyaltyPoints || 0}
+Cấp VIP: ${customer.vipLevel || 'Bronze'}
+Ghi chú: ${customer.notes || '-'}
+Ngày tạo: ${formatDate(customer.createdAt)}
+          `;
+          
+          alert(details);
         } else {
           alert('Không thể tải thông tin khách hàng');
         }
@@ -810,37 +828,6 @@
       }
     }
 
-    // View customer details
-    async function viewCustomerDetails(customerId) {
-      try {
-        const response = await apiGet(`/customermanagement/${customerId}`);
-        if (response.ok) {
-          const customer = await response.json();
-          
-          let details = `
-            <h5>Thông tin khách hàng</h5>
-            <p><strong>Họ tên:</strong> ${customer.fullName}</p>
-            <p><strong>Email:</strong> ${customer.email}</p>
-            <p><strong>SĐT:</strong> ${customer.phoneNumber || '-'}</p>
-            <p><strong>Ngày sinh:</strong> ${customer.dateOfBirth ? formatDate(customer.dateOfBirth) : '-'}</p>
-            <p><strong>Giới tính:</strong> ${customer.gender || '-'}</p>
-            <p><strong>Quốc tịch:</strong> ${customer.nationality || '-'}</p>
-            <p><strong>Loại:</strong> ${getCustomerTypeText(customer.customerType)}</p>
-            <p><strong>Địa chỉ:</strong> ${customer.address || '-'}</p>
-            <p><strong>CMND/CCCD:</strong> ${customer.idCardNumber || '-'}</p>
-            <p><strong>Passport:</strong> ${customer.passportNumber || '-'}</p>
-            <p><strong>Điểm tích lũy:</strong> ${customer.loyaltyPoints || 0}</p>
-            <p><strong>Cấp VIP:</strong> ${customer.vipLevel || 'Bronze'}</p>
-            <p><strong>Ghi chú:</strong> ${customer.notes || '-'}</p>
-          `;
-          
-          alert(details);
-        }
-      } catch (error) {
-        console.error('❌ Error loading customer details:', error);
-        alert('Không thể tải thông tin khách hàng');
-      }
-    }
 
     // Helper functions
     function getCustomerTypeColor(type) {

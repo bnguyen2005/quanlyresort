@@ -146,31 +146,17 @@ async function loadUsers() {
       order: [[0, 'desc']],
       drawCallback: function() {
         // Re-initialize Bootstrap dropdowns after table redraw
-        const dropdowns = document.querySelectorAll('.dropdown-toggle');
-        dropdowns.forEach(toggle => {
-          if (window.bootstrap && bootstrap.Dropdown) {
-            try {
-              new bootstrap.Dropdown(toggle);
-            } catch (e) {
-              // Dropdown already initialized
-            }
-          }
-        });
+        if (window.initializeDropdowns) {
+          window.initializeDropdowns();
+        }
       }
     });
     
     // Initialize Bootstrap dropdowns after table is ready
     setTimeout(() => {
-      const dropdowns = document.querySelectorAll('.dropdown-toggle');
-      dropdowns.forEach(toggle => {
-        if (window.bootstrap && bootstrap.Dropdown) {
-          try {
-            new bootstrap.Dropdown(toggle);
-          } catch (e) {
-            console.warn('Dropdown init warning:', e);
-          }
-        }
-      });
+      if (window.initializeDropdowns) {
+        window.initializeDropdowns();
+      }
     }, 100);
 
   } catch (error) {

@@ -117,6 +117,127 @@ let menu, animate;
     return new bootstrap.Tooltip(tooltipTriggerEl);
   });
 
+  // Init BS Dropdown - Khởi tạo tất cả dropdown menu
+  function initializeDropdowns() {
+    if (typeof bootstrap !== 'undefined' && bootstrap.Dropdown) {
+      const dropdownToggles = document.querySelectorAll('.dropdown-toggle[data-bs-toggle="dropdown"]');
+      dropdownToggles.forEach(toggle => {
+        try {
+          // Kiểm tra xem dropdown đã được khởi tạo chưa
+          const existing = bootstrap.Dropdown.getInstance(toggle);
+          if (!existing) {
+            new bootstrap.Dropdown(toggle, {
+              boundary: document.body,
+              popperConfig: {
+                strategy: 'fixed',
+                placement: 'bottom-end',
+                modifiers: [
+                  {
+                    name: 'preventOverflow',
+                    options: {
+                      boundary: document.body,
+                      padding: 8
+                    }
+                  },
+                  {
+                    name: 'flip',
+                    options: {
+                      boundary: document.body,
+                      padding: 8
+                    }
+                  },
+                  {
+                    name: 'offset',
+                    options: {
+                      offset: [0, 5]
+                    }
+                  }
+                ]
+              }
+            });
+          }
+        } catch (e) {
+          console.warn('Error initializing dropdown:', e);
+        }
+      });
+    }
+  }
+
+  // Khởi tạo dropdown khi DOM ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeDropdowns);
+  } else {
+    initializeDropdowns();
+  }
+
+  // Khởi tạo lại dropdown sau khi có thay đổi trong DOM (cho DataTables và dynamic content)
+  // Chỉ quan sát các phần quan trọng để tối ưu performance
+  let reinitTimeout;
+  const observer = new MutationObserver(function(mutations) {
+    let shouldReinit = false;
+    mutations.forEach(function(mutation) {
+      if (mutation.addedNodes.length > 0) {
+        mutation.addedNodes.forEach(function(node) {
+          if (node.nodeType === 1) {
+            // Kiểm tra nếu node là dropdown-toggle hoặc chứa dropdown-toggle
+            if (node.classList?.contains('dropdown-toggle') || 
+                node.querySelector?.('.dropdown-toggle') ||
+                node.matches?.('tbody') || 
+                node.matches?.('tr') ||
+                (node.querySelector && (node.querySelector('tbody') || node.querySelector('tr')))) {
+              shouldReinit = true;
+            }
+          }
+        });
+      }
+    });
+    if (shouldReinit) {
+      // Debounce để tránh gọi quá nhiều lần
+      clearTimeout(reinitTimeout);
+      reinitTimeout = setTimeout(initializeDropdowns, 150);
+    }
+  });
+
+  // Quan sát thay đổi trong các table và card (nơi thường có dropdown)
+  const tables = document.querySelectorAll('table, .table, .card, .dataTables_wrapper');
+  tables.forEach(table => {
+    observer.observe(table, {
+      childList: true,
+      subtree: true
+    });
+  });
+
+  // Cũng quan sát body nhưng chỉ khi có thay đổi lớn
+  observer.observe(document.body, {
+    childList: true,
+    subtree: false // Chỉ quan sát direct children của body
+  });
+
+  // Export function để các trang khác có thể gọi
+  window.initializeDropdowns = initializeDropdowns;
+
+  // Tự động khởi tạo dropdown khi DataTables vẽ lại
+  // Listen cho sự kiện draw của tất cả DataTables
+  if (typeof $ !== 'undefined') {
+    $(document).on('draw.dt', 'table', function() {
+      // Khởi tạo dropdown sau khi DataTable vẽ lại
+      if (window.initializeDropdowns) {
+        setTimeout(() => {
+          window.initializeDropdowns();
+        }, 100);
+      }
+    });
+    
+    // Cũng khởi tạo khi DataTable được khởi tạo lần đầu
+    $(document).on('init.dt', 'table', function() {
+      if (window.initializeDropdowns) {
+        setTimeout(() => {
+          window.initializeDropdowns();
+        }, 200);
+      }
+    });
+  }
+
   // Accordion active class
   const accordionActiveFunction = function (e) {
     if (e.type == 'show.bs.collapse' || e.type == 'show.bs.collapse') {

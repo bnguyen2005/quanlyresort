@@ -192,9 +192,22 @@ async function loadMenuItems() {
             autoWidth: false,
             language: {
               url: '../local-plugins/datatables/i18n/vi.json'
+            },
+            drawCallback: function() {
+              // Khởi tạo lại dropdown sau khi DataTable render
+              if (window.initializeDropdowns) {
+                window.initializeDropdowns();
+              }
             }
           });
           console.log('[loadMenuItems] ✅ DataTable initialized');
+          
+          // Khởi tạo dropdown sau khi DataTable đã render
+          setTimeout(() => {
+            if (window.initializeDropdowns) {
+              window.initializeDropdowns();
+            }
+          }, 200);
         }
       } catch (e) {
         console.error('[loadMenuItems] ❌ Error initializing DataTable:', e);
