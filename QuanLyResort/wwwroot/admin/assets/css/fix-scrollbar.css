@@ -64,6 +64,19 @@ body.modal-open {
   display: none !important;
 }
 
+/* Tránh duplicate scrollbar trong table-responsive */
+.table-responsive {
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+  /* Chỉ scroll ngang, không scroll dọc để tránh duplicate */
+}
+
+/* Đảm bảo chỉ có một scrollbar cho content */
+.content-wrapper .table-responsive {
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+}
+
 /* Fix cho menu-inner - Kéo dài ra thay vì cuộn */
 .menu-inner {
   overflow-y: visible !important;

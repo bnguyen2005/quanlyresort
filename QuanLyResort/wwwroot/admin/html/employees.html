@@ -9,8 +9,8 @@
   <link rel="stylesheet" href="../assets/vendor/css/core.css" class="template-customizer-core-css" />
   <link rel="stylesheet" href="../assets/vendor/css/theme-default.css" class="template-customizer-theme-css" />
   <link rel="stylesheet" href="../assets/css/demo.css" />
-  <link rel="stylesheet" href="../assets/css/fix-scrollbar.css" />
-  <link rel="stylesheet" href="../assets/css/admin-custom-theme.css" />
+  <link rel="stylesheet" href="../assets/css/fix-scrollbar.css?v=20250127" />
+  <link rel="stylesheet" href="../assets/css/admin-custom-theme.css?v=20250127" />
   <link rel="stylesheet" href="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" />
   <script src="../assets/vendor/js/helpers.js"></script>
@@ -515,7 +515,11 @@
         dataTable = $('#employeesTable').DataTable({
           language: { url: '/admin/local-plugins/datatables/i18n/vi.json' },
           pageLength: 25,
-          order: [[0, 'desc']]
+          order: [[0, 'desc']],
+          drawCallback: function() {
+            // Đảm bảo icon buttons được render đúng sau khi DataTable redraw
+            // Không cần khởi tạo dropdown vì đã dùng icon buttons
+          }
         });
 
       } catch (error) {

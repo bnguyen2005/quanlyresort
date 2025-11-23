@@ -75,6 +75,21 @@
     .growth-negative {
       color: #dc3545;
     }
+    /* Tránh duplicate scrollbar trong trang reports */
+    .content-wrapper {
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+    }
+    .table-responsive {
+      overflow-x: auto !important;
+      overflow-y: visible !important;
+    }
+    /* Tắt PerfectScrollbar nếu có */
+    .ps,
+    .ps__rail-y,
+    .ps__thumb-y {
+      display: none !important;
+    }
   </style>
 </head>
 <body>
