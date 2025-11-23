@@ -11,7 +11,7 @@
   min-height: 100vh !important;
 }
 
-/* Fix scrollbar cho content */
+/* Fix scrollbar cho content - Tránh duplicate scrollbar */
 .layout-container {
   height: 100vh !important;
   overflow: hidden !important;
@@ -19,8 +19,18 @@
 
 .content-wrapper {
   overflow-y: auto !important;
+  overflow-x: hidden !important;
   height: calc(100vh - 4rem) !important;
   max-height: calc(100vh - 4rem) !important;
+  /* Tắt PerfectScrollbar cho content-wrapper để tránh duplicate */
+  position: relative;
+}
+
+/* Tắt PerfectScrollbar cho content-wrapper */
+.content-wrapper .ps,
+.content-wrapper .ps__rail-y,
+.content-wrapper .ps__thumb-y {
+  display: none !important;
 }
 
 /* Fix pointer-events cho logout button */
@@ -39,9 +49,19 @@ body.modal-open {
   overflow: hidden !important;
 }
 
-/* Đảm bảo scrollbar hiển thị */
+/* Đảm bảo scrollbar hiển thị - Chỉ một scrollbar */
 .layout-page {
   overflow-y: auto !important;
+  overflow-x: hidden !important;
+  /* Tắt PerfectScrollbar cho layout-page để tránh duplicate */
+  position: relative;
+}
+
+/* Tắt PerfectScrollbar cho layout-page */
+.layout-page .ps,
+.layout-page .ps__rail-y,
+.layout-page .ps__thumb-y {
+  display: none !important;
 }
 
 /* Fix cho menu-inner - Kéo dài ra thay vì cuộn */
