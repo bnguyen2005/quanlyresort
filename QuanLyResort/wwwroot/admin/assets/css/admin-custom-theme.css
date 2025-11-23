@@ -214,12 +214,13 @@
   border-radius: 12px !important;
   box-shadow: 0 2px 8px rgba(200, 169, 126, 0.1) !important;
   transition: all 0.3s ease;
-  overflow: hidden;
+  overflow: visible !important; /* CRITICAL: Allow dropdown to escape */
 }
 
 .card:hover {
   box-shadow: 0 8px 24px rgba(200, 169, 126, 0.2) !important;
-  transform: translateY(-4px);
+  /* REMOVED transform: translateY(-4px) - creates stacking context */
+  /* Use margin-top instead if needed for visual effect */
 }
 
 .card-header {
@@ -312,7 +313,7 @@
 
 .table tbody tr:hover {
   background: var(--resort-secondary) !important;
-  transform: scale(1.01);
+  /* REMOVED transform: scale(1.01) - creates stacking context */
   box-shadow: 0 2px 8px rgba(200, 169, 126, 0.1);
 }
 
@@ -517,7 +518,7 @@ table td:last-child {
 
 #usersTable .dropdown,
 table .dropdown {
-  position: static;
+  position: static; /* Keep static for layout, but menu will use fixed positioning */
 }
 
 #usersTable .dropdown-menu,
@@ -537,9 +538,21 @@ table .dropdown-menu {
   overflow: visible !important;
 }
 
+/* CRITICAL: Dropdown menu must escape stacking context */
 .dataTables_wrapper .dropdown-menu {
-  z-index: 1051 !important;
+  z-index: 99999 !important; /* Very high z-index */
+  position: fixed !important; /* Fixed to escape all stacking contexts */
+  isolation: isolate !important; /* Create new stacking context */
+}
+
+/* Ensure dropdown menu is always on top */
+.dataTables_wrapper .dropdown.show .dropdown-menu,
+.dataTables_wrapper .dropdown-menu.show {
+  z-index: 99999 !important;
   position: fixed !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 /* Fix cho tất cả tables trong admin */
@@ -567,17 +580,49 @@ table .dropdown-menu {
 
 .card .table .dropdown-menu,
 .table .dropdown-menu {
-  position: absolute !important;
-  z-index: 9999 !important;
-  right: 0 !important;
-  left: auto !important;
+  /* Use fixed positioning to escape stacking contexts */
+  position: fixed !important;
+  z-index: 99999 !important; /* Very high z-index */
+  right: auto !important; /* Will be calculated by JS */
+  left: auto !important; /* Will be calculated by JS */
+  top: auto !important; /* Will be calculated by JS */
   margin-top: 0.25rem !important;
   display: none;
+  isolation: isolate !important; /* Create new stacking context */
+  will-change: transform, top, right; /* Optimize for position changes */
 }
 
 .card .table .dropdown-menu.show,
 .table .dropdown-menu.show {
   display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* CRITICAL: Prevent parent elements from creating stacking context when dropdown is open */
+.card:has(.dropdown-menu.show),
+.table:has(.dropdown-menu.show),
+.table-responsive:has(.dropdown-menu.show),
+.dataTables_wrapper:has(.dropdown-menu.show) {
+  overflow: visible !important;
+  transform: none !important;
+  filter: none !important;
+  opacity: 1 !important;
+  perspective: none !important;
+  isolation: auto !important;
+}
+
+/* Alternative selector for browsers that don't support :has() */
+.card .dropdown.show,
+.table .dropdown.show,
+.table-responsive .dropdown.show {
+  position: static !important;
+  transform: none !important;
+  filter: none !important;
+  opacity: 1 !important;
+  perspective: none !important;
+  isolation: auto !important;
 }
 
 /* Fix cho DataTables - dropdown phải render bên ngoài table */
@@ -611,27 +656,42 @@ table .dropdown-menu {
 /* Fix cho DataTables scroll body */
 .dataTables_scrollBody {
   overflow: visible !important;
+  transform: none !important; /* Prevent stacking context */
 }
 
 .dataTables_scrollHeadInner {
   overflow: visible !important;
+  transform: none !important; /* Prevent stacking context */
 }
 
 /* Đảm bảo table wrapper không cắt dropdown */
 .dataTables_wrapper {
   overflow: visible !important;
+  transform: none !important; /* Prevent stacking context */
+  isolation: auto !important; /* Don't create stacking context */
 }
 
 .dataTables_wrapper .dataTables_scroll {
   overflow: visible !important;
+  transform: none !important;
 }
 
 .dataTables_wrapper .dataTables_scrollHead {
   overflow: visible !important;
+  transform: none !important;
 }
 
 .dataTables_wrapper .dataTables_scrollBody {
   overflow: visible !important;
+  transform: none !important;
+}
+
+/* Ensure DataTables table itself doesn't create stacking context */
+.dataTables_wrapper table {
+  transform: none !important;
+  filter: none !important;
+  opacity: 1 !important;
+  perspective: none !important;
 }
 
 /* ============================================

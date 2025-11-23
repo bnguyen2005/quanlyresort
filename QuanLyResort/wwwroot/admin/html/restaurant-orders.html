@@ -753,7 +753,7 @@
       return badges[paymentStatus] || `<span class="badge bg-secondary">${paymentStatus}</span>`;
     }
     
-    // Fix dropdown positioning for DataTables
+    // Fix dropdown positioning for DataTables - CRITICAL FIX
     function fixDropdownPositioning() {
       const dropdowns = document.querySelectorAll('#ordersTable .dropdown');
       dropdowns.forEach(dropdown => {
@@ -761,35 +761,84 @@
         const menu = dropdown.querySelector('.dropdown-menu');
         
         if (button && menu) {
-          // Ensure dropdown has proper positioning
-          dropdown.style.position = 'static';
-          menu.style.position = 'absolute';
-          menu.style.zIndex = '9999';
-          menu.style.right = '0';
-          menu.style.left = 'auto';
+          // Remove any transform from parent elements that create stacking context
+          let parent = dropdown.parentElement;
+          while (parent && parent !== document.body) {
+            const style = window.getComputedStyle(parent);
+            if (style.transform && style.transform !== 'none') {
+              console.warn('Found transform on parent:', parent);
+            }
+            parent = parent.parentElement;
+          }
           
-          // Fix positioning when dropdown opens
-          button.addEventListener('show.bs.dropdown', function() {
+          // Ensure dropdown container doesn't create stacking context
+          dropdown.style.position = 'static';
+          dropdown.style.transform = 'none';
+          dropdown.style.filter = 'none';
+          dropdown.style.opacity = '1';
+          dropdown.style.perspective = 'none';
+          
+          // Calculate position when dropdown opens
+          const calculatePosition = () => {
             const rect = button.getBoundingClientRect();
+            const scrollX = window.pageXOffset || document.documentElement.scrollLeft;
+            const scrollY = window.pageYOffset || document.documentElement.scrollTop;
+            
+            // Use fixed positioning to escape all stacking contexts
             menu.style.position = 'fixed';
-            menu.style.top = (rect.bottom + 5) + 'px';
+            menu.style.top = (rect.bottom + scrollY + 5) + 'px';
             menu.style.right = (window.innerWidth - rect.right) + 'px';
             menu.style.left = 'auto';
-            menu.style.zIndex = '10000';
+            menu.style.zIndex = '99999';
+            menu.style.isolation = 'isolate';
+            
+            // Ensure menu is visible
+            menu.style.visibility = 'visible';
+            menu.style.opacity = '1';
+            menu.style.display = 'block';
+          };
+          
+          // Fix positioning when dropdown opens
+          button.addEventListener('show.bs.dropdown', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            calculatePosition();
+          });
+          
+          // Also handle click event
+          button.addEventListener('click', function(e) {
+            // Small delay to ensure Bootstrap has processed the click
+            setTimeout(() => {
+              if (menu.classList.contains('show')) {
+                calculatePosition();
+              }
+            }, 10);
           });
           
           // Reset when dropdown closes
           button.addEventListener('hidden.bs.dropdown', function() {
-            menu.style.position = 'absolute';
-            menu.style.top = 'auto';
-            menu.style.right = '0';
-            menu.style.left = 'auto';
+            menu.style.position = 'fixed'; // Keep fixed even when closed
+            menu.style.visibility = 'hidden';
           });
+          
+          // Handle window resize/scroll
+          let resizeTimer;
+          const handleResize = () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+              if (menu.classList.contains('show')) {
+                calculatePosition();
+              }
+            }, 100);
+          };
+          
+          window.addEventListener('resize', handleResize);
+          window.addEventListener('scroll', handleResize, true);
         }
       });
     }
     
-    // Initialize Bootstrap dropdowns
+    // Initialize Bootstrap dropdowns with proper configuration
     function initializeBootstrapDropdowns() {
       if (typeof bootstrap !== 'undefined' && bootstrap.Dropdown) {
         const dropdownToggles = document.querySelectorAll('#ordersTable .dropdown-toggle');
@@ -800,14 +849,32 @@
             if (existing) {
               existing.dispose();
             }
+            
+            // Initialize with custom popper config to escape stacking contexts
             new bootstrap.Dropdown(toggle, {
-              boundary: 'viewport',
+              boundary: document.body, // Use body as boundary
               popperConfig: {
+                strategy: 'fixed', // Use fixed positioning
+                placement: 'bottom-end',
                 modifiers: [
                   {
                     name: 'preventOverflow',
                     options: {
-                      boundary: document.body
+                      boundary: document.body,
+                      padding: 8
+                    }
+                  },
+                  {
+                    name: 'flip',
+                    options: {
+                      boundary: document.body,
+                      padding: 8
+                    }
+                  },
+                  {
+                    name: 'offset',
+                    options: {
+                      offset: [0, 5]
                     }
                   }
                 ]
