@@ -22,10 +22,10 @@
 .content-wrapper {
   overflow-y: auto !important;
   overflow-x: hidden !important;
-  height: calc(100vh - 4rem) !important;
-  max-height: calc(100vh - 4rem) !important;
-  /* Tắt PerfectScrollbar cho content-wrapper để tránh duplicate */
+  min-height: calc(100vh - 4rem) !important;
+  /* Cho phép content mở rộng nếu cần */
   position: relative;
+  padding-bottom: 2rem !important; /* Thêm padding để không bị cắt bởi footer */
 }
 
 /* Tắt PerfectScrollbar cho content-wrapper */
