@@ -309,8 +309,25 @@
 
     // Initialize page
     document.addEventListener('DOMContentLoaded', () => {
+      // Tắt warning của DataTables ngay từ đầu (trước khi jQuery load xong)
+      if (typeof jQuery !== 'undefined' && jQuery.fn.dataTable) {
+        jQuery.fn.dataTable.ext.errMode = 'none';
+      }
+      // Hoặc đợi jQuery load xong
+      if (typeof $ !== 'undefined') {
+        $(document).ready(function() {
+          if ($.fn.dataTable) {
+            $.fn.dataTable.ext.errMode = 'none';
+          }
+        });
+      }
+      
       // Đợi một chút để đảm bảo DOM đã sẵn sàng
       setTimeout(() => {
+        // Đảm bảo tắt warning trước khi load
+        if (typeof $ !== 'undefined' && $.fn.dataTable) {
+          $.fn.dataTable.ext.errMode = 'none';
+        }
         loadTickets();
         // Không khởi tạo DataTable ở đây vì sẽ được khởi tạo trong renderTickets()
       }, 100);
