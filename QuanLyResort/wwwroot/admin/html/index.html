@@ -1150,9 +1150,25 @@
     function refreshAllData() {
       console.log('🔄 Refreshing all dashboard data...');
       loadDashboardStats();
-      loadRevenueTrends();
-      loadOccupancyTrends();
-      loadServiceRevenue();
+      
+      // Đảm bảo Chart.js đã load trước khi tạo charts
+      if (typeof Chart !== 'undefined') {
+        loadRevenueTrends();
+        loadOccupancyTrends();
+        loadServiceRevenue();
+      } else {
+        console.warn('⚠️ Chart.js not loaded yet, waiting...');
+        setTimeout(() => {
+          if (typeof Chart !== 'undefined') {
+            loadRevenueTrends();
+            loadOccupancyTrends();
+            loadServiceRevenue();
+          } else {
+            console.error('❌ Chart.js still not loaded after timeout');
+          }
+        }, 500);
+      }
+      
       loadTopCustomers();
       loadRecentActivities();
     }
