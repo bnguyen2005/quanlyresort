@@ -189,7 +189,7 @@ public class ReportsController : ControllerBase
         var start = startDate ?? DateTime.Today.AddDays(-30);
         var end = endDate ?? DateTime.Today.AddDays(1);
 
-        // Total revenue from charges and invoices
+        // Total revenue from charges, invoices, and restaurant orders
         // SQLite không hỗ trợ SumAsync trên decimal trực tiếp -> chuyển sang client-side aggregation
         var chargesList = await _context.Charges
             .Where(c => c.ChargeDate >= start && c.ChargeDate < end)
@@ -212,26 +212,47 @@ public class ReportsController : ControllerBase
             .ToList();
         var totalInvoices = invoicesInRange.Sum(i => (decimal?)i) ?? 0;
         
-        // Tổng doanh thu = charges + invoices
-        var totalRevenue = totalCharges + totalInvoices;
+        // Restaurant Orders đã thanh toán trong khoảng thời gian
+        var restaurantOrdersList = await _context.RestaurantOrders
+            .Where(o => o.PaymentStatus == "Paid" && 
+                      ((o.UpdatedAt.HasValue && o.UpdatedAt.Value >= start && o.UpdatedAt.Value < end) ||
+                       (!o.UpdatedAt.HasValue && o.CreatedAt >= start && o.CreatedAt < end)))
+            .Select(o => o.TotalAmount)
+            .ToListAsync();
+        var totalRestaurantOrders = restaurantOrdersList.Sum(o => (decimal?)o) ?? 0;
+        
+        // Tổng doanh thu = charges + invoices + restaurant orders
+        var totalRevenue = totalCharges + totalInvoices + totalRestaurantOrders;
 
         // Revenue by type - client-side aggregation
+        // Include Charges, Invoices (Bookings), and Restaurant Orders
         var chargesByTypeList = await _context.Charges
             .Where(c => c.ChargeDate >= start && c.ChargeDate < end)
-            .Select(c => new { c.ChargeType, c.TotalAmount })
+            .Select(c => new { Type = c.ChargeType ?? "Dịch vụ", c.TotalAmount })
             .ToListAsync();
         
+        // Add Invoices as "Đặt phòng"
+        var invoicesByType = invoicesInRange.Select(i => new { Type = "Đặt phòng", Amount = i }).ToList();
+        
+        // Add Restaurant Orders as "Nhà hàng"
+        var restaurantByType = restaurantOrdersList.Select(r => new { Type = "Nhà hàng", Amount = r }).ToList();
+        
+        // Combine all revenue types
         var revenueByType = chargesByTypeList
-            .GroupBy(c => c.ChargeType)
+            .Select(c => new { Type = c.Type, Amount = c.TotalAmount })
+            .Concat(invoicesByType)
+            .Concat(restaurantByType)
+            .GroupBy(r => r.Type)
             .Select(g => new
             {
                 type = g.Key,
-                amount = g.Sum(c => (decimal?)c.TotalAmount) ?? 0,
+                amount = g.Sum(r => (decimal?)r.Amount) ?? 0,
                 count = g.Count()
             })
+            .OrderByDescending(r => r.amount)
             .ToList();
 
-        // Daily revenue trend - client-side aggregation (charges + invoices)
+        // Daily revenue trend - client-side aggregation (charges + invoices + restaurant orders)
         var dailyChargesList = await _context.Charges
             .Where(c => c.ChargeDate >= start && c.ChargeDate < end)
             .Select(c => new { c.ChargeDate, c.TotalAmount })
@@ -247,10 +268,22 @@ public class ReportsController : ControllerBase
             .Where(i => i.PaidDate >= start && i.PaidDate < end)
             .ToList();
         
-        // Combine charges and invoices by date
+        // Restaurant Orders by date
+        var dailyRestaurantOrdersList = await _context.RestaurantOrders
+            .Where(o => o.PaymentStatus == "Paid" &&
+                      ((o.UpdatedAt.HasValue && o.UpdatedAt.Value >= start && o.UpdatedAt.Value < end) ||
+                       (!o.UpdatedAt.HasValue && o.CreatedAt >= start && o.CreatedAt < end)))
+            .Select(o => new { 
+                Date = o.UpdatedAt.HasValue ? o.UpdatedAt.Value.Date : o.CreatedAt.Date, 
+                Amount = o.TotalAmount 
+            })
+            .ToListAsync();
+        
+        // Combine charges, invoices, and restaurant orders by date
         var dailyData = dailyChargesList
             .Select(c => new { Date = c.ChargeDate.Date, Amount = c.TotalAmount })
             .Concat(dailyInvoicesList.Select(i => new { Date = i.PaidDate.Date, Amount = i.PaidAmount }))
+            .Concat(dailyRestaurantOrdersList.Select(r => new { Date = r.Date, Amount = r.Amount }))
             .GroupBy(d => d.Date)
             .Select(g => new
             {
@@ -276,6 +309,7 @@ public class ReportsController : ControllerBase
             endDate = end.AddDays(-1),
             totalCharges,
             totalInvoices,
+            totalRestaurantOrders,
             totalRevenue,
             totalPayments,
             revenueByType,
