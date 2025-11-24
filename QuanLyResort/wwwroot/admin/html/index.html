@@ -333,6 +333,132 @@
       border-bottom: 3px solid #667eea;
       display: inline-block;
     }
+    
+    /* Order Statistics - Nalika Style */
+    .stat-box {
+      padding: 1.5rem;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(250, 248, 245, 0.95) 100%);
+      border-radius: 15px;
+      text-align: center;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(200, 169, 126, 0.15);
+    }
+    
+    .stat-box:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+    
+    .stat-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    
+    .stat-icon i {
+      font-size: 1.8rem;
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+      color: #6b7280;
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .stat-percentage {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      background: rgba(16, 185, 129, 0.1);
+      color: #10b981;
+    }
+    
+    .progress-container {
+      padding: 1rem;
+      background: rgba(243, 244, 246, 0.5);
+      border-radius: 12px;
+    }
+    
+    .progress-item {
+      margin-bottom: 0.5rem;
+    }
+    
+    .progress {
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    
+    .progress-bar {
+      transition: width 1s ease;
+    }
+    
+    /* Growth Items */
+    .growth-item {
+      padding: 1rem;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(250, 248, 245, 0.95) 100%);
+      border-radius: 12px;
+      border-left: 4px solid #667eea;
+      transition: all 0.3s ease;
+    }
+    
+    .growth-item:hover {
+      transform: translateX(5px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    
+    .growth-label {
+      font-weight: 600;
+      color: #374151;
+    }
+    
+    .growth-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+    
+    /* Quick Stats */
+    .quick-stat {
+      padding: 1rem;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(250, 248, 245, 0.95) 100%);
+      border-radius: 10px;
+      border-left: 3px solid #667eea;
+      transition: all 0.3s ease;
+    }
+    
+    .quick-stat:hover {
+      transform: translateX(5px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    
+    .quick-stat i {
+      font-size: 1.2rem;
+    }
+    
+    /* Activities Count */
+    #activitiesCount {
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+    
+    /* Chart Controls */
+    .chart-controls {
+      display: flex;
+      gap: 0.5rem;
+    }
   </style>
   
   <!-- Helpers -->
@@ -585,23 +711,119 @@
               </div>
             </div>
 
-            <!-- Growth Indicators -->
+            <!-- Order Statistics - Nalika Style -->
             <div class="row mb-4">
-              <div class="col-md-6">
+              <div class="col-lg-8 mb-4">
                 <div class="card">
-                  <div class="card-body text-center">
-                    <h5 class="card-title">Tăng trưởng doanh thu</h5>
-                    <h2 id="revenueGrowth" class="growth-positive">+0%</h2>
-                    <small class="text-muted">So với tháng trước</small>
+                  <div class="card-header">
+                    <h5 class="mb-0">📊 Thống kê đặt phòng</h5>
+                  </div>
+                  <div class="card-body">
+                    <div class="row text-center">
+                      <div class="col-md-3 mb-3">
+                        <div class="stat-box">
+                          <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <i class="bx bx-calendar-check text-white"></i>
+                          </div>
+                          <h3 class="stat-value" id="totalBookings">0</h3>
+                          <p class="stat-label">Tổng đặt phòng</p>
+                          <span class="stat-percentage" id="totalBookingsPct">+0%</span>
+                        </div>
+                      </div>
+                      <div class="col-md-3 mb-3">
+                        <div class="stat-box">
+                          <div class="stat-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                            <i class="bx bx-check-circle text-white"></i>
+                          </div>
+                          <h3 class="stat-value" id="confirmedBookings">0</h3>
+                          <p class="stat-label">Đã xác nhận</p>
+                          <span class="stat-percentage text-success" id="confirmedPct">0%</span>
+                        </div>
+                      </div>
+                      <div class="col-md-3 mb-3">
+                        <div class="stat-box">
+                          <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                            <i class="bx bx-time text-white"></i>
+                          </div>
+                          <h3 class="stat-value" id="pendingBookings">0</h3>
+                          <p class="stat-label">Đang chờ</p>
+                          <span class="stat-percentage text-warning" id="pendingPct">0%</span>
+                        </div>
+                      </div>
+                      <div class="col-md-3 mb-3">
+                        <div class="stat-box">
+                          <div class="stat-icon" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                            <i class="bx bx-x-circle text-white"></i>
+                          </div>
+                          <h3 class="stat-value" id="cancelledBookings">0</h3>
+                          <p class="stat-label">Đã hủy</p>
+                          <span class="stat-percentage text-danger" id="cancelledPct">0%</span>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- Percentage Distribution -->
+                    <div class="mt-4">
+                      <h6 class="mb-3">Phân bổ tỷ lệ</h6>
+                      <div class="progress-container">
+                        <div class="progress-item">
+                          <div class="d-flex justify-content-between mb-1">
+                            <span>Đã xác nhận</span>
+                            <span id="confirmedPercent">0%</span>
+                          </div>
+                          <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-success" id="confirmedProgress" style="width: 0%"></div>
+                          </div>
+                        </div>
+                        <div class="progress-item mt-3">
+                          <div class="d-flex justify-content-between mb-1">
+                            <span>Đang chờ</span>
+                            <span id="pendingPercent">0%</span>
+                          </div>
+                          <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-warning" id="pendingProgress" style="width: 0%"></div>
+                          </div>
+                        </div>
+                        <div class="progress-item mt-3">
+                          <div class="d-flex justify-content-between mb-1">
+                            <span>Đã hủy</span>
+                            <span id="cancelledPercent">0%</span>
+                          </div>
+                          <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-danger" id="cancelledProgress" style="width: 0%"></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-              <div class="col-md-6">
-                <div class="card">
-                  <div class="card-body text-center">
-                    <h5 class="card-title">Tăng trưởng đặt phòng</h5>
-                    <h2 id="bookingGrowth" class="growth-positive">+0%</h2>
-                    <small class="text-muted">So với tháng trước</small>
+              <div class="col-lg-4 mb-4">
+                <div class="card h-100">
+                  <div class="card-header">
+                    <h5 class="mb-0">📈 Tăng trưởng</h5>
+                  </div>
+                  <div class="card-body">
+                    <div class="growth-item mb-4">
+                      <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="growth-label">Doanh thu</span>
+                        <span id="revenueGrowth" class="growth-value growth-positive">+0%</span>
+                      </div>
+                      <small class="text-muted">So với tháng trước</small>
+                    </div>
+                    <div class="growth-item mb-4">
+                      <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="growth-label">Đặt phòng</span>
+                        <span id="bookingGrowth" class="growth-value growth-positive">+0%</span>
+                      </div>
+                      <small class="text-muted">So với tháng trước</small>
+                    </div>
+                    <div class="growth-item">
+                      <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="growth-label">Khách hàng</span>
+                        <span id="customerGrowth" class="growth-value growth-positive">+0%</span>
+                      </div>
+                      <small class="text-muted">So với tháng trước</small>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -648,12 +870,15 @@
               </div>
             </div>
 
-            <!-- Activities Feed -->
+            <!-- Activities Feed - Nalika Style -->
             <div class="row">
-              <div class="col-12">
+              <div class="col-lg-8 mb-4">
                 <div class="card">
-                  <div class="card-header d-flex justify-content-between">
-                    <h5 class="mb-0">🔔 Hoạt động gần đây</h5>
+                  <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                      <h5 class="mb-0">🔔 Hoạt động gần đây</h5>
+                      <small class="text-muted" id="activitiesCount">Bạn có 0 hoạt động mới</small>
+                    </div>
                     <button class="btn btn-sm btn-outline-primary" onclick="loadRecentActivities()">
                       <i class="bx bx-refresh"></i>
                     </button>
@@ -661,6 +886,51 @@
                   <div class="card-body" style="max-height: 500px; overflow-y: auto; min-height: 200px;">
                     <div id="activitiesContainer">
                       <!-- Recent activities will be loaded here -->
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-4 mb-4">
+                <div class="card h-100">
+                  <div class="card-header">
+                    <h5 class="mb-0">📊 Tổng quan nhanh</h5>
+                  </div>
+                  <div class="card-body">
+                    <div class="quick-stat mb-3">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                          <i class="bx bx-user text-primary me-2"></i>
+                          <span>Tổng khách hàng</span>
+                        </div>
+                        <strong id="totalCustomers">0</strong>
+                      </div>
+                    </div>
+                    <div class="quick-stat mb-3">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                          <i class="bx bx-home text-success me-2"></i>
+                          <span>Phòng sẵn sàng</span>
+                        </div>
+                        <strong id="availableRooms">0</strong>
+                      </div>
+                    </div>
+                    <div class="quick-stat mb-3">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                          <i class="bx bx-food-menu text-warning me-2"></i>
+                          <span>Dịch vụ đang dùng</span>
+                        </div>
+                        <strong id="activeServices">0</strong>
+                      </div>
+                    </div>
+                    <div class="quick-stat">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                          <i class="bx bx-receipt text-info me-2"></i>
+                          <span>Hóa đơn tháng này</span>
+                        </div>
+                        <strong id="monthlyInvoices">0</strong>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1351,11 +1621,20 @@
 
     function updateRecentActivities(activities) {
       const container = document.getElementById('activitiesContainer');
+      const activitiesCountEl = document.getElementById('activitiesCount');
       container.innerHTML = '';
 
       if (!activities || activities.length === 0) {
         container.innerHTML = '<div class="text-center text-muted py-4"><i class="bx bx-info-circle"></i> Chưa có hoạt động nào gần đây</div>';
+        if (activitiesCountEl) {
+          activitiesCountEl.textContent = 'Bạn có 0 hoạt động mới';
+        }
         return;
+      }
+
+      // Update activities count
+      if (activitiesCountEl) {
+        activitiesCountEl.textContent = `Bạn có ${activities.length} hoạt động mới`;
       }
 
       activities.forEach(activity => {
