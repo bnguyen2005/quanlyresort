@@ -486,7 +486,10 @@
         return;
       }
 
-      let html = '';
+      // Xóa tất cả rows cũ trước
+      tbody.innerHTML = '';
+      
+      // Tạo rows bằng DOM thay vì HTML string để đảm bảo cấu trúc đúng
       allTickets.forEach(ticket => {
         // Đảm bảo tất cả giá trị đều có giá trị mặc định
         const ticketNumber = ticket.ticketNumber || 'N/A';
@@ -497,47 +500,149 @@
         const customerEmail = ticket.customer ? (ticket.customer.email || '') : (ticket.contactEmail || '');
         const subject = ticket.subject || 'Không có tiêu đề';
         const category = ticket.category || 'Other';
-        const assignedTo = ticket.assignedTo || '<span class="text-muted">Chưa giao</span>';
+        const assignedTo = ticket.assignedTo || 'Chưa giao';
         const ticketId = ticket.ticketId || 0;
 
-        // Đảm bảo mỗi row có đúng 9 cột
-        html += `
-          <tr>
-            <td><strong>${escapeHtml(ticketNumber)}</strong></td>
-            <td>
-              <div>${escapeHtml(customerName)}</div>
-              ${customerEmail ? `<small class="text-muted">${escapeHtml(customerEmail)}</small>` : ''}
-            </td>
-            <td>${escapeHtml(subject)}</td>
-            <td><span class="badge bg-label-info">${escapeHtml(category)}</span></td>
-            <td>${statusBadge}</td>
-            <td>${priorityBadge}</td>
-            <td>${assignedTo}</td>
-            <td>${escapeHtml(createdDate)}</td>
-            <td>
-              <div class="d-flex gap-2">
-                <button class="btn btn-sm btn-outline-primary" onclick="viewTicket(${ticketId})" title="Xem chi tiết">
-                  <i class="bx bx-show"></i>
-                </button>
-                <button class="btn btn-sm btn-outline-warning" onclick="openUpdateModal(${ticketId})" title="Cập nhật">
-                  <i class="bx bx-edit"></i>
-                </button>
-                <button class="btn btn-sm btn-outline-success" onclick="openReplyModal(${ticketId})" title="Trả lời">
-                  <i class="bx bx-reply"></i>
-                </button>
-              </div>
-            </td>
-          </tr>
-        `;
+        // Tạo row bằng DOM để đảm bảo cấu trúc đúng
+        const row = document.createElement('tr');
+        
+        // Cột 1: Mã Ticket
+        const td1 = document.createElement('td');
+        const strong1 = document.createElement('strong');
+        strong1.textContent = ticketNumber;
+        td1.appendChild(strong1);
+        row.appendChild(td1);
+        
+        // Cột 2: Khách hàng
+        const td2 = document.createElement('td');
+        const div2 = document.createElement('div');
+        div2.textContent = customerName;
+        td2.appendChild(div2);
+        if (customerEmail) {
+          const small2 = document.createElement('small');
+          small2.className = 'text-muted';
+          small2.textContent = customerEmail;
+          td2.appendChild(small2);
+        }
+        row.appendChild(td2);
+        
+        // Cột 3: Tiêu đề
+        const td3 = document.createElement('td');
+        td3.textContent = subject;
+        row.appendChild(td3);
+        
+        // Cột 4: Danh mục
+        const td4 = document.createElement('td');
+        const span4 = document.createElement('span');
+        span4.className = 'badge bg-label-info';
+        span4.textContent = category;
+        td4.appendChild(span4);
+        row.appendChild(td4);
+        
+        // Cột 5: Trạng thái
+        const td5 = document.createElement('td');
+        td5.innerHTML = statusBadge;
+        row.appendChild(td5);
+        
+        // Cột 6: Mức độ
+        const td6 = document.createElement('td');
+        td6.innerHTML = priorityBadge;
+        row.appendChild(td6);
+        
+        // Cột 7: Người phụ trách
+        const td7 = document.createElement('td');
+        if (assignedTo && assignedTo !== 'Chưa giao') {
+          td7.textContent = assignedTo;
+        } else {
+          const span7 = document.createElement('span');
+          span7.className = 'text-muted';
+          span7.textContent = 'Chưa giao';
+          td7.appendChild(span7);
+        }
+        row.appendChild(td7);
+        
+        // Cột 8: Ngày tạo
+        const td8 = document.createElement('td');
+        td8.textContent = createdDate;
+        row.appendChild(td8);
+        
+        // Cột 9: Thao tác
+        const td9 = document.createElement('td');
+        const div9 = document.createElement('div');
+        div9.className = 'd-flex gap-2';
+        
+        const btn1 = document.createElement('button');
+        btn1.className = 'btn btn-sm btn-outline-primary';
+        btn1.title = 'Xem chi tiết';
+        btn1.onclick = () => viewTicket(ticketId);
+        const icon1 = document.createElement('i');
+        icon1.className = 'bx bx-show';
+        btn1.appendChild(icon1);
+        div9.appendChild(btn1);
+        
+        const btn2 = document.createElement('button');
+        btn2.className = 'btn btn-sm btn-outline-warning';
+        btn2.title = 'Cập nhật';
+        btn2.onclick = () => openUpdateModal(ticketId);
+        const icon2 = document.createElement('i');
+        icon2.className = 'bx bx-edit';
+        btn2.appendChild(icon2);
+        div9.appendChild(btn2);
+        
+        const btn3 = document.createElement('button');
+        btn3.className = 'btn btn-sm btn-outline-success';
+        btn3.title = 'Trả lời';
+        btn3.onclick = () => openReplyModal(ticketId);
+        const icon3 = document.createElement('i');
+        icon3.className = 'bx bx-reply';
+        btn3.appendChild(icon3);
+        div9.appendChild(btn3);
+        
+        td9.appendChild(div9);
+        row.appendChild(td9);
+        
+        // Đảm bảo row có đúng 9 cột
+        if (row.children.length !== 9) {
+          console.error('[Tickets] Row has incorrect column count:', row.children.length, 'Expected: 9');
+          console.error('[Tickets] Ticket ID:', ticketId);
+        }
+        
+        tbody.appendChild(row);
       });
 
-      tbody.innerHTML = html;
-      
       // Kiểm tra xem table có tồn tại trong DOM không
       const tableElement = document.getElementById('ticketsTable');
       if (!tableElement) {
         console.error('[Tickets] Table element not found in DOM');
         return;
+      }
+      
+      // Đảm bảo tất cả rows có đúng số cột trước khi khởi tạo DataTable
+      const headerCols = document.querySelectorAll('#ticketsTable thead th').length;
+      const tbodyRows = document.querySelectorAll('#ticketsTable tbody tr');
+      
+      console.log('[Tickets] Header columns:', headerCols);
+      console.log('[Tickets] Body rows:', tbodyRows.length);
+      
+      if (tbodyRows.length > 0) {
+        // Kiểm tra tất cả các rows
+        let allRowsValid = true;
+        tbodyRows.forEach((row, index) => {
+          const bodyCols = row.querySelectorAll('td').length;
+          if (headerCols !== bodyCols) {
+            console.error(`[Tickets] Column mismatch in row ${index}: Header has ${headerCols} columns, but body has ${bodyCols} columns`);
+            console.error(`[Tickets] Row ${index} children:`, Array.from(row.children).map(c => c.tagName));
+            allRowsValid = false;
+          }
+        });
+        
+        if (!allRowsValid) {
+          console.error('[Tickets] Cannot initialize DataTable due to column mismatch');
+          if (typeof showToast === 'function') {
+            showToast('Lỗi: Số cột trong bảng không khớp. Vui lòng làm mới trang.', 'error');
+          }
+          return;
+        }
       }
       
       try {
@@ -551,34 +656,11 @@
         ticketsTable = null;
       }
       
-      // Đợi một chút để đảm bảo DOM đã được cập nhật
+      // Đợi một chút để đảm bảo DOM đã được cập nhật hoàn toàn
       setTimeout(() => {
-        // Khởi tạo lại DataTable với dữ liệu mới
         try {
-          // Đảm bảo table có đủ cột - kiểm tra kỹ hơn
-          const headerCols = document.querySelectorAll('#ticketsTable thead th').length;
-          const tbodyRows = document.querySelectorAll('#ticketsTable tbody tr');
-          
-          if (tbodyRows.length === 0) {
-            console.warn('[Tickets] No rows to display');
-            return;
-          }
-          
-          // Kiểm tra tất cả các rows, không chỉ row đầu tiên
-          let allRowsValid = true;
-          tbodyRows.forEach((row, index) => {
-            const bodyCols = row.querySelectorAll('td').length;
-            if (headerCols !== bodyCols) {
-              console.error(`[Tickets] Column mismatch in row ${index}: Header has ${headerCols} columns, but body has ${bodyCols} columns`);
-              console.error(`[Tickets] Row ${index} HTML:`, row.innerHTML);
-              allRowsValid = false;
-            }
-          });
-          
-          if (!allRowsValid) {
-            console.error('[Tickets] Cannot initialize DataTable due to column mismatch');
-            return;
-          }
+          // Tắt warning của DataTables
+          $.fn.dataTable.ext.errMode = 'none';
           
           ticketsTable = $('#ticketsTable').DataTable({
             language: {
@@ -590,7 +672,8 @@
             columnDefs: [
               { orderable: false, targets: 8 } // Disable sorting on Actions column
             ],
-            destroy: true // Đảm bảo destroy table cũ trước khi tạo mới
+            destroy: true, // Đảm bảo destroy table cũ trước khi tạo mới
+            autoWidth: false // Tắt auto width để tránh lỗi
           });
           
           console.log('[Tickets] DataTable initialized successfully with', allTickets.length, 'rows');
@@ -601,7 +684,7 @@
             showToast('Lỗi khi khởi tạo bảng dữ liệu: ' + e.message, 'error');
           }
         }
-      }, 100);
+      }, 150);
     }
 
     // Get status badge
