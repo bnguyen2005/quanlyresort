@@ -504,12 +504,22 @@
       console.log('🚀 Customers page loaded');
       loadStatistics();
       loadCustomers();
+      
       // Debounce search input
       const searchEl = document.getElementById('searchInput');
       let debounceTimer;
       searchEl.addEventListener('input', function() {
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => loadCustomers(), 300);
+      });
+      
+      // Event listeners cho bộ lọc
+      document.getElementById('filterCustomerType').addEventListener('change', function() {
+        loadCustomers();
+      });
+      
+      document.getElementById('filterNationality').addEventListener('change', function() {
+        loadCustomers();
       });
     });
 
@@ -763,39 +773,9 @@
     }
 
     // View customer details - Global function
-    window.viewCustomerDetails = async function(customerId) {
-      try {
-        const response = await apiGet(`/customermanagement/${customerId}`);
-        if (response.ok) {
-          const customer = await response.json();
-          
-          let details = `
-Thông tin khách hàng
-
-Họ tên: ${customer.fullName}
-Email: ${customer.email}
-SĐT: ${customer.phoneNumber || '-'}
-Ngày sinh: ${customer.dateOfBirth ? formatDate(customer.dateOfBirth) : '-'}
-Giới tính: ${customer.gender || '-'}
-Quốc tịch: ${customer.nationality || '-'}
-Loại: ${getCustomerTypeText(customer.customerType)}
-Địa chỉ: ${customer.address || '-'}
-CMND/CCCD: ${customer.idCardNumber || '-'}
-Passport: ${customer.passportNumber || '-'}
-Điểm tích lũy: ${customer.loyaltyPoints || 0}
-Cấp VIP: ${customer.vipLevel || 'Bronze'}
-Ghi chú: ${customer.notes || '-'}
-Ngày tạo: ${formatDate(customer.createdAt)}
-          `;
-          
-          alert(details);
-        } else {
-          alert('Không thể tải thông tin khách hàng');
-        }
-      } catch (error) {
-        console.error('❌ Error loading customer details:', error);
-        alert('Có lỗi xảy ra khi tải thông tin khách hàng');
-      }
+    window.viewCustomerDetails = function(customerId) {
+      // Chuyển sang trang chi tiết thay vì popup
+      window.location.href = `customer-details.html?id=${customerId}`;
     };
 
     // Delete customer - Global function

@@ -766,12 +766,27 @@
           order: [[0, 'asc']]
         });
         
-        // Add filter functionality
+        // Add filter functionality - sử dụng cả jQuery và native JS
         $('#roomTypeFilter, #floorFilter, #statusFilter').on('change', function() {
           roomsDataTable.draw();
         });
         
+        // Thêm event listeners native JS để đảm bảo hoạt động
+        document.getElementById('roomTypeFilter').addEventListener('change', function() {
+          if (roomsDataTable) roomsDataTable.draw();
+        });
+        document.getElementById('floorFilter').addEventListener('change', function() {
+          if (roomsDataTable) roomsDataTable.draw();
+        });
+        document.getElementById('statusFilter').addEventListener('change', function() {
+          if (roomsDataTable) roomsDataTable.draw();
+        });
+        
+        // Custom search function
         $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+          // Chỉ áp dụng cho bảng rooms
+          if (settings.nTable.id !== 'roomsTable') return true;
+          
           const roomTypeFilter = $('#roomTypeFilter').val();
           const floorFilter = $('#floorFilter').val();
           const statusFilter = $('#statusFilter').val();

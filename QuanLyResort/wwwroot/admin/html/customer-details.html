@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="vi" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default" data-assets-path="../assets/" data-template="vertical-menu-template-free">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+  <title>Chi tiết Khách hàng - Resort Management</title>
+  
+  <!-- NO CACHE -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  
+  <link rel="icon" type="image/x-icon" href="../assets/img/favicon/favicon.ico" />
+  <link rel="stylesheet" href="../assets/vendor/fonts/boxicons.css" />
+  <link rel="stylesheet" href="../assets/vendor/css/core.css" class="template-customizer-core-css" />
+  <link rel="stylesheet" href="../assets/vendor/css/theme-default.css" class="template-customizer-theme-css" />
+  <link rel="stylesheet" href="../assets/css/demo.css" />
+  <link rel="stylesheet" href="../assets/css/fix-scrollbar.css" />
+  <link rel="stylesheet" href="../assets/css/admin-custom-theme.css" />
+  <link rel="stylesheet" href="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+  <script src="../assets/vendor/js/helpers.js"></script>
+</head>
+
+<body>
+  <div class="layout-wrapper layout-content-navbar">
+    <div class="layout-container">
+      
+      <!-- Menu - Load from common component -->
+      <div id="common-menu"></div>
+      <script>
+        (function() {
+          const menuVersion = Date.now();
+          fetch('layout-menu.html?v=' + menuVersion)
+            .then(response => {
+              if (!response.ok) throw new Error('Failed to load menu: ' + response.status);
+              return response.text();
+            })
+            .then(html => {
+              const menuContainer = document.getElementById('common-menu');
+              if (menuContainer) {
+                menuContainer.innerHTML = html;
+                console.log('✅ Menu loaded successfully');
+              }
+            })
+            .catch(error => console.error('❌ Error loading menu:', error));
+        })();
+      </script>
+
+      <!-- Layout container -->
+      <div class="layout-page">
+        
+        <!-- Navbar -->
+        <nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme" id="layout-navbar">
+          <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
+            <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
+              <i class="bx bx-menu bx-sm"></i>
+            </a>
+          </div>
+
+          <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+            <div class="navbar-nav align-items-center">
+              <div class="nav-item d-flex align-items-center">
+                <h4 class="mb-0">👤 Chi tiết Khách hàng</h4>
+              </div>
+            </div>
+
+            <ul class="navbar-nav flex-row align-items-center ms-auto">
+              <li class="nav-item navbar-dropdown dropdown-user dropdown">
+                <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
+                  <div class="avatar avatar-online">
+                    <img src="../assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                  </div>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li>
+                    <a class="dropdown-item" href="#">
+                      <div class="d-flex">
+                        <div class="flex-shrink-0 me-3">
+                          <div class="avatar avatar-online">
+                            <img src="../assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                          </div>
+                        </div>
+                        <div class="flex-grow-1">
+                          <span class="fw-semibold d-block" id="userFullName">Admin</span>
+                          <small class="text-muted" id="userRole">Admin</small>
+                        </div>
+                      </div>
+                    </a>
+                  </li>
+                  <li><div class="dropdown-divider"></div></li>
+                  <li><a class="dropdown-item" href="#" onclick="commonLogout()"><i class="bx bx-power-off me-2"></i><span class="align-middle">Đăng xuất</span></a></li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </nav>
+
+        <!-- Content wrapper -->
+        <div class="content-wrapper">
+          <div class="container-xxl flex-grow-1 container-p-y">
+            
+            <!-- Back button -->
+            <div class="mb-4">
+              <a href="customers.html" class="btn btn-outline-secondary">
+                <i class="bx bx-arrow-back me-1"></i> Quay lại danh sách
+              </a>
+            </div>
+
+            <!-- Customer Details Card -->
+            <div class="card" id="customerDetailsCard">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Thông tin Khách hàng</h5>
+                <div>
+                  <button class="btn btn-primary btn-sm" onclick="editCustomer()">
+                    <i class="bx bx-edit me-1"></i> Chỉnh sửa
+                  </button>
+                </div>
+              </div>
+              <div class="card-body">
+                <div id="customerDetailsContent">
+                  <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                      <span class="visually-hidden">Đang tải...</span>
+                    </div>
+                    <p class="mt-3 text-muted">Đang tải thông tin khách hàng...</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Core JS -->
+  <script src="../assets/vendor/libs/jquery/jquery.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+  <script src="../assets/vendor/js/menu.js"></script>
+  <script src="../assets/js/main.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/common-navbar.js"></script>
+
+  <script>
+    // Lấy customerId từ URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const customerId = urlParams.get('id');
+
+    if (!customerId) {
+      document.getElementById('customerDetailsContent').innerHTML = `
+        <div class="alert alert-danger">
+          <i class="bx bx-error-circle me-2"></i> Không tìm thấy ID khách hàng. Vui lòng quay lại danh sách.
+        </div>
+      `;
+    } else {
+      loadCustomerDetails(customerId);
+    }
+
+    async function loadCustomerDetails(id) {
+      try {
+        const response = await apiGet(`/customermanagement/${id}`);
+        if (response.ok) {
+          const customer = await response.json();
+          displayCustomerDetails(customer);
+        } else {
+          document.getElementById('customerDetailsContent').innerHTML = `
+            <div class="alert alert-danger">
+              <i class="bx bx-error-circle me-2"></i> Không thể tải thông tin khách hàng. Vui lòng thử lại.
+            </div>
+          `;
+        }
+      } catch (error) {
+        console.error('❌ Error loading customer details:', error);
+        document.getElementById('customerDetailsContent').innerHTML = `
+          <div class="alert alert-danger">
+            <i class="bx bx-error-circle me-2"></i> Có lỗi xảy ra khi tải thông tin khách hàng.
+          </div>
+        `;
+      }
+    }
+
+    function displayCustomerDetails(customer) {
+      const formatDate = (dateString) => {
+        if (!dateString) return '-';
+        return new Date(dateString).toLocaleDateString('vi-VN');
+      };
+
+      const getCustomerTypeText = (type) => {
+        switch (type) {
+          case 'Individual': return 'Cá nhân';
+          case 'Corporate': return 'Doanh nghiệp';
+          case 'Group': return 'Nhóm';
+          default: return type;
+        }
+      };
+
+      const getVipLevelBadge = (level) => {
+        const colors = {
+          'Bronze': 'warning',
+          'Silver': 'secondary',
+          'Gold': 'warning',
+          'Platinum': 'info'
+        };
+        const color = colors[level] || 'secondary';
+        return `<span class="badge bg-${color}">${level}</span>`;
+      };
+
+      const html = `
+        <div class="row">
+          <div class="col-md-6 mb-4">
+            <div class="card border">
+              <div class="card-header bg-light">
+                <h6 class="mb-0"><i class="bx bx-user me-2"></i> Thông tin cơ bản</h6>
+              </div>
+              <div class="card-body">
+                <table class="table table-borderless">
+                  <tr>
+                    <td width="40%"><strong>Họ tên:</strong></td>
+                    <td>${customer.fullName || '-'}</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Email:</strong></td>
+                    <td>${customer.email || '-'}</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Số điện thoại:</strong></td>
+                    <td>${customer.phoneNumber || '-'}</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Ngày sinh:</strong></td>
+                    <td>${formatDate(customer.dateOfBirth)}</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Giới tính:</strong></td>
+                    <td>${customer.gender || '-'}</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Quốc tịch:</strong></td>
+                    <td>${customer.nationality || '-'}</td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-md-6 mb-4">
+            <div class="card border">
+              <div class="card-header bg-light">
+                <h6 class="mb-0"><i class="bx bx-info-circle me-2"></i> Thông tin bổ sung</h6>
+              </div>
+              <div class="card-body">
+                <table class="table table-borderless">
+                  <tr>
+                    <td width="40%"><strong>Loại khách hàng:</strong></td>
+                    <td><span class="badge bg-primary">${getCustomerTypeText(customer.customerType)}</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Địa chỉ:</strong></td>
+                    <td>${customer.address || '-'}</td>
+                  </tr>
+                  <tr>
+                    <td><strong>CMND/CCCD:</strong></td>
+                    <td>${customer.idCardNumber || '-'}</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Passport:</strong></td>
+                    <td>${customer.passportNumber || '-'}</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Điểm tích lũy:</strong></td>
+                    <td><span class="badge bg-success">${customer.loyaltyPoints || 0} điểm</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Cấp VIP:</strong></td>
+                    <td>${getVipLevelBadge(customer.vipLevel || 'Bronze')}</td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        ${customer.notes ? `
+        <div class="row">
+          <div class="col-12">
+            <div class="card border">
+              <div class="card-header bg-light">
+                <h6 class="mb-0"><i class="bx bx-note me-2"></i> Ghi chú</h6>
+              </div>
+              <div class="card-body">
+                <p class="mb-0">${customer.notes}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        ` : ''}
+        
+        <div class="row mt-3">
+          <div class="col-12">
+            <div class="card border">
+              <div class="card-header bg-light">
+                <h6 class="mb-0"><i class="bx bx-time me-2"></i> Thông tin hệ thống</h6>
+              </div>
+              <div class="card-body">
+                <table class="table table-borderless">
+                  <tr>
+                    <td width="40%"><strong>Ngày tạo:</strong></td>
+                    <td>${formatDate(customer.createdAt)}</td>
+                  </tr>
+                  ${customer.updatedAt ? `
+                  <tr>
+                    <td><strong>Ngày cập nhật:</strong></td>
+                    <td>${formatDate(customer.updatedAt)}</td>
+                  </tr>
+                  ` : ''}
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('customerDetailsContent').innerHTML = html;
+    }
+
+    function editCustomer() {
+      if (customerId) {
+        window.location.href = `customers.html?edit=${customerId}`;
+      }
+    }
+  </script>
+</body>
+</html>
+
