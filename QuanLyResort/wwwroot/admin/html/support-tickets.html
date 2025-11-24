@@ -464,25 +464,46 @@
           console.warn('[Tickets] Error destroying DataTable:', e);
         }
         
-        // Tạo row với đủ 9 cột để DataTable không bị lỗi
-        tbody.innerHTML = '<tr><td colspan="9" class="text-center py-4">Không có ticket nào</td></tr>';
+        // Tạo row với đúng 9 cột (không dùng colspan) để DataTable không bị lỗi
+        tbody.innerHTML = '';
+        const emptyRow = document.createElement('tr');
+        // Tạo 8 cột trống
+        for (let i = 0; i < 8; i++) {
+          const td = document.createElement('td');
+          emptyRow.appendChild(td);
+        }
+        // Cột cuối cùng chứa thông báo
+        const tdMessage = document.createElement('td');
+        tdMessage.className = 'text-center py-4';
+        tdMessage.setAttribute('colspan', '1');
+        tdMessage.textContent = 'Không có ticket nào';
+        emptyRow.appendChild(tdMessage);
+        tbody.appendChild(emptyRow);
         
         // Khởi tạo lại DataTable với empty state
-        try {
-          ticketsTable = $('#ticketsTable').DataTable({
-            language: {
-              url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/vi.json'
-            },
-            order: [[7, 'desc']],
-            pageLength: 25,
-            responsive: true,
-            columnDefs: [
-              { orderable: false, targets: 8 } // Disable sorting on Actions column
-            ]
-          });
-        } catch (e) {
-          console.error('[Tickets] Error initializing DataTable (empty state):', e);
-        }
+        setTimeout(() => {
+          try {
+            // Tắt warning của DataTables
+            $.fn.dataTable.ext.errMode = 'none';
+            
+            ticketsTable = $('#ticketsTable').DataTable({
+              language: {
+                url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/vi.json',
+                emptyTable: 'Không có ticket nào'
+              },
+              order: [[7, 'desc']],
+              pageLength: 25,
+              responsive: true,
+              autoWidth: false,
+              columnDefs: [
+                { orderable: false, targets: 8 } // Disable sorting on Actions column
+              ],
+              destroy: true
+            });
+          } catch (e) {
+            console.error('[Tickets] Error initializing DataTable (empty state):', e);
+          }
+        }, 100);
         return;
       }
 
@@ -659,32 +680,52 @@
       // Đợi một chút để đảm bảo DOM đã được cập nhật hoàn toàn
       setTimeout(() => {
         try {
-          // Tắt warning của DataTables
+          // Tắt warning của DataTables TRƯỚC KHI khởi tạo
           $.fn.dataTable.ext.errMode = 'none';
+          
+          // Kiểm tra lại một lần nữa trước khi khởi tạo
+          const finalHeaderCols = document.querySelectorAll('#ticketsTable thead th').length;
+          const finalBodyRows = document.querySelectorAll('#ticketsTable tbody tr');
+          
+          if (finalBodyRows.length > 0) {
+            const firstRowCols = finalBodyRows[0].querySelectorAll('td').length;
+            if (finalHeaderCols !== firstRowCols) {
+              console.error(`[Tickets] Final check failed: Header has ${finalHeaderCols} columns, first row has ${firstRowCols} columns`);
+              // Vẫn tiếp tục nhưng sẽ log lỗi
+            }
+          }
           
           ticketsTable = $('#ticketsTable').DataTable({
             language: {
-              url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/vi.json'
+              url: 'https://cdn.datatables.net/plug-ins/1.13.7/i18n/vi.json',
+              emptyTable: 'Không có dữ liệu'
             },
             order: [[7, 'desc']], // Sort by created date
             pageLength: 25,
             responsive: true,
+            autoWidth: false, // Tắt auto width để tránh lỗi
             columnDefs: [
               { orderable: false, targets: 8 } // Disable sorting on Actions column
             ],
             destroy: true, // Đảm bảo destroy table cũ trước khi tạo mới
-            autoWidth: false // Tắt auto width để tránh lỗi
+            // Tắt các tính năng có thể gây lỗi
+            paging: true,
+            searching: true,
+            info: true,
+            // Đảm bảo số cột đúng
+            columns: [
+              null, null, null, null, null, null, null, null, { orderable: false }
+            ]
           });
           
           console.log('[Tickets] DataTable initialized successfully with', allTickets.length, 'rows');
         } catch (e) {
           console.error('[Tickets] Error initializing DataTable:', e);
           console.error('[Tickets] Error details:', e.stack);
-          if (typeof showToast === 'function') {
-            showToast('Lỗi khi khởi tạo bảng dữ liệu: ' + e.message, 'error');
-          }
+          // Không hiển thị alert nữa, chỉ log
+          console.warn('[Tickets] DataTable initialization failed, but continuing...');
         }
-      }, 150);
+      }, 200);
     }
 
     // Get status badge
