@@ -488,34 +488,41 @@
 
       let html = '';
       allTickets.forEach(ticket => {
-        const statusBadge = getStatusBadge(ticket.status);
-        const priorityBadge = getPriorityBadge(ticket.priority);
-        const createdDate = new Date(ticket.createdAt).toLocaleDateString('vi-VN');
-        const customerName = ticket.customer ? ticket.customer.fullName : (ticket.contactName || 'Khách vãng lai');
-        const customerEmail = ticket.customer ? ticket.customer.email : ticket.contactEmail;
+        // Đảm bảo tất cả giá trị đều có giá trị mặc định
+        const ticketNumber = ticket.ticketNumber || 'N/A';
+        const statusBadge = getStatusBadge(ticket.status || 'Open');
+        const priorityBadge = getPriorityBadge(ticket.priority || 'Normal');
+        const createdDate = ticket.createdAt ? new Date(ticket.createdAt).toLocaleDateString('vi-VN') : 'N/A';
+        const customerName = ticket.customer ? (ticket.customer.fullName || 'N/A') : (ticket.contactName || 'Khách vãng lai');
+        const customerEmail = ticket.customer ? (ticket.customer.email || '') : (ticket.contactEmail || '');
+        const subject = ticket.subject || 'Không có tiêu đề';
+        const category = ticket.category || 'Other';
+        const assignedTo = ticket.assignedTo || '<span class="text-muted">Chưa giao</span>';
+        const ticketId = ticket.ticketId || 0;
 
+        // Đảm bảo mỗi row có đúng 9 cột
         html += `
           <tr>
-            <td><strong>${ticket.ticketNumber}</strong></td>
+            <td><strong>${escapeHtml(ticketNumber)}</strong></td>
             <td>
-              <div>${customerName}</div>
-              <small class="text-muted">${customerEmail || ''}</small>
+              <div>${escapeHtml(customerName)}</div>
+              ${customerEmail ? `<small class="text-muted">${escapeHtml(customerEmail)}</small>` : ''}
             </td>
-            <td>${ticket.subject}</td>
-            <td><span class="badge bg-label-info">${ticket.category}</span></td>
+            <td>${escapeHtml(subject)}</td>
+            <td><span class="badge bg-label-info">${escapeHtml(category)}</span></td>
             <td>${statusBadge}</td>
             <td>${priorityBadge}</td>
-            <td>${ticket.assignedTo || '<span class="text-muted">Chưa giao</span>'}</td>
-            <td>${createdDate}</td>
+            <td>${assignedTo}</td>
+            <td>${escapeHtml(createdDate)}</td>
             <td>
               <div class="d-flex gap-2">
-                <button class="btn btn-sm btn-outline-primary" onclick="viewTicket(${ticket.ticketId})" title="Xem chi tiết">
+                <button class="btn btn-sm btn-outline-primary" onclick="viewTicket(${ticketId})" title="Xem chi tiết">
                   <i class="bx bx-show"></i>
                 </button>
-                <button class="btn btn-sm btn-outline-warning" onclick="openUpdateModal(${ticket.ticketId})" title="Cập nhật">
+                <button class="btn btn-sm btn-outline-warning" onclick="openUpdateModal(${ticketId})" title="Cập nhật">
                   <i class="bx bx-edit"></i>
                 </button>
-                <button class="btn btn-sm btn-outline-success" onclick="openReplyModal(${ticket.ticketId})" title="Trả lời">
+                <button class="btn btn-sm btn-outline-success" onclick="openReplyModal(${ticketId})" title="Trả lời">
                   <i class="bx bx-reply"></i>
                 </button>
               </div>
@@ -548,15 +555,29 @@
       setTimeout(() => {
         // Khởi tạo lại DataTable với dữ liệu mới
         try {
-          // Đảm bảo table có đủ cột
+          // Đảm bảo table có đủ cột - kiểm tra kỹ hơn
           const headerCols = document.querySelectorAll('#ticketsTable thead th').length;
-          const firstRow = document.querySelector('#ticketsTable tbody tr');
-          if (firstRow) {
-            const bodyCols = firstRow.querySelectorAll('td').length;
+          const tbodyRows = document.querySelectorAll('#ticketsTable tbody tr');
+          
+          if (tbodyRows.length === 0) {
+            console.warn('[Tickets] No rows to display');
+            return;
+          }
+          
+          // Kiểm tra tất cả các rows, không chỉ row đầu tiên
+          let allRowsValid = true;
+          tbodyRows.forEach((row, index) => {
+            const bodyCols = row.querySelectorAll('td').length;
             if (headerCols !== bodyCols) {
-              console.error(`[Tickets] Column mismatch: Header has ${headerCols} columns, but body has ${bodyCols} columns`);
-              return;
+              console.error(`[Tickets] Column mismatch in row ${index}: Header has ${headerCols} columns, but body has ${bodyCols} columns`);
+              console.error(`[Tickets] Row ${index} HTML:`, row.innerHTML);
+              allRowsValid = false;
             }
+          });
+          
+          if (!allRowsValid) {
+            console.error('[Tickets] Cannot initialize DataTable due to column mismatch');
+            return;
           }
           
           ticketsTable = $('#ticketsTable').DataTable({
@@ -568,13 +589,16 @@
             responsive: true,
             columnDefs: [
               { orderable: false, targets: 8 } // Disable sorting on Actions column
-            ]
+            ],
+            destroy: true // Đảm bảo destroy table cũ trước khi tạo mới
           });
+          
+          console.log('[Tickets] DataTable initialized successfully with', allTickets.length, 'rows');
         } catch (e) {
           console.error('[Tickets] Error initializing DataTable:', e);
           console.error('[Tickets] Error details:', e.stack);
           if (typeof showToast === 'function') {
-            showToast('Lỗi khi khởi tạo bảng dữ liệu', 'error');
+            showToast('Lỗi khi khởi tạo bảng dữ liệu: ' + e.message, 'error');
           }
         }
       }, 100);
@@ -601,7 +625,20 @@
         'High': '<span class="badge bg-label-warning">Cao</span>',
         'Urgent': '<span class="badge bg-label-danger">Khẩn cấp</span>'
       };
-      return badges[priority] || `<span class="badge">${priority}</span>`;
+      return badges[priority] || `<span class="badge">${priority || 'Normal'}</span>`;
+    }
+
+    // Helper function to escape HTML
+    function escapeHtml(text) {
+      if (text == null) return '';
+      const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+      };
+      return String(text).replace(/[&<>"']/g, m => map[m]);
     }
 
     // View ticket details
