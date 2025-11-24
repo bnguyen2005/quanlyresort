@@ -387,6 +387,7 @@
     let roomsDataTable;
     let currentEditingRoomId = null;
     let allRoomTypes = [];
+    let roomsFilterRegistered = false;
 
     // Khởi tạo khi DOM ready
     document.addEventListener('DOMContentLoaded', async function() {
@@ -670,22 +671,31 @@
         
         // Populate dropdowns
         const roomTypeSelect = document.getElementById('roomTypeId');
-        roomTypeSelect.innerHTML = '<option value="">Chọn loại phòng</option>';
-        allRoomTypes.forEach(type => {
-          const option = document.createElement('option');
-          option.value = type.roomTypeId;
-          option.textContent = type.typeName;
-          roomTypeSelect.appendChild(option);
-        });
+        if (roomTypeSelect) {
+          roomTypeSelect.innerHTML = '<option value="">Chọn loại phòng</option>';
+          allRoomTypes.forEach(type => {
+            const option = document.createElement('option');
+            option.value = type.roomTypeId;
+            option.textContent = type.typeName;
+            roomTypeSelect.appendChild(option);
+          });
+        }
         
         // Populate filter
         const filterSelect = document.getElementById('roomTypeFilter');
-        allRoomTypes.forEach(type => {
-          const option = document.createElement('option');
-          option.value = type.typeName;
-          option.textContent = type.typeName;
-          filterSelect.appendChild(option);
-        });
+        if (filterSelect) {
+          const currentValue = filterSelect.value;
+          filterSelect.innerHTML = '<option value="">Tất cả loại phòng</option>';
+          allRoomTypes.forEach(type => {
+            const option = document.createElement('option');
+            option.value = type.typeName;
+            option.textContent = type.typeName;
+            filterSelect.appendChild(option);
+          });
+          if (currentValue) {
+            filterSelect.value = currentValue;
+          }
+        }
       } catch (error) {
         console.error('❌ Error loading room types:', error);
         throw error;
@@ -734,7 +744,7 @@
             <tr>
               <td><strong>${room.roomNumber}</strong></td>
               <td>${room.roomType || room.roomTypeName || '—'}</td>
-              <td>${room.floor || '—'}</td>
+              <td>${room.floor != null ? room.floor : ''}</td>
               <td>${formatCurrency(room.pricePerNight)}</td>
               <td>${room.maxOccupancy} người</td>
               <td>${statusBadge}</td>
@@ -757,6 +767,9 @@
           tbody.innerHTML += row;
         });
         
+        // Cập nhật danh sách tầng cho bộ lọc
+        updateFloorFilterOptions(rooms);
+        
         // Initialize DataTable
         roomsDataTable = $('#roomsTable').DataTable({
           language: {
@@ -766,41 +779,51 @@
           order: [[0, 'asc']]
         });
         
-        // Add filter functionality - sử dụng cả jQuery và native JS
-        $('#roomTypeFilter, #floorFilter, #statusFilter').on('change', function() {
-          roomsDataTable.draw();
-        });
+        // Add filter functionality
+        $('#roomTypeFilter, #floorFilter, #statusFilter')
+          .off('change')
+          .on('change', function() {
+            if (roomsDataTable) {
+              roomsDataTable.draw();
+            }
+          });
         
-        // Thêm event listeners native JS để đảm bảo hoạt động
-        document.getElementById('roomTypeFilter').addEventListener('change', function() {
-          if (roomsDataTable) roomsDataTable.draw();
-        });
-        document.getElementById('floorFilter').addEventListener('change', function() {
-          if (roomsDataTable) roomsDataTable.draw();
-        });
-        document.getElementById('statusFilter').addEventListener('change', function() {
-          if (roomsDataTable) roomsDataTable.draw();
-        });
+        if (!roomsFilterRegistered) {
+          $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+            // Chỉ áp dụng cho bảng rooms
+            if (settings.nTable.id !== 'roomsTable') return true;
+            
+            const roomTypeFilter = document.getElementById('roomTypeFilter')?.value || '';
+            const floorFilter = document.getElementById('floorFilter')?.value || '';
+            const statusFilter = document.getElementById('statusFilter')?.value || '';
+            
+            const rowNode = settings.aoData[dataIndex]?.nTr;
+            const cells = rowNode ? rowNode.getElementsByTagName('td') : null;
+            const getCellText = (index, fallback = '') => {
+              if (cells && cells[index]) {
+                return cells[index].textContent.trim();
+              }
+              return fallback.replace(/<[^>]*>/g, '').trim();
+            };
+            
+            const rowRoomType = getCellText(1, data[1]);
+            const rowFloor = getCellText(2, data[2]);
+            const rowStatus = getCellText(5, data[5]);
+            
+            if (roomTypeFilter && rowRoomType !== roomTypeFilter) return false;
+            if (floorFilter && rowFloor !== floorFilter) return false;
+            if (statusFilter) {
+              const statusText = statusFilter === 'true' ? 'Sẵn sàng' : 'Đang dùng';
+              if (!rowStatus.includes(statusText)) return false;
+            }
+            
+            return true;
+          });
+          
+          roomsFilterRegistered = true;
+        }
         
-        // Custom search function
-        $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
-          // Chỉ áp dụng cho bảng rooms
-          if (settings.nTable.id !== 'roomsTable') return true;
-          
-          const roomTypeFilter = $('#roomTypeFilter').val();
-          const floorFilter = $('#floorFilter').val();
-          const statusFilter = $('#statusFilter').val();
-          
-          if (roomTypeFilter && data[1] !== roomTypeFilter) return false;
-          if (floorFilter && data[2] !== floorFilter) return false;
-          if (statusFilter) {
-            const isAvailable = statusFilter === 'true';
-            const statusText = isAvailable ? 'Sẵn sàng' : 'Đang dùng';
-            if (!data[5].includes(statusText)) return false;
-          }
-          
-          return true;
-        });
+        roomsDataTable.draw();
         
       } catch (error) {
         console.error('❌ Error loading rooms:', error);
@@ -818,6 +841,31 @@
         'Maintenance': '<span class="badge bg-dark">Bảo trì</span>'
       };
       return badges[status] || '<span class="badge bg-secondary">—</span>';
+    }
+
+    function updateFloorFilterOptions(rooms) {
+      const floorFilter = document.getElementById('floorFilter');
+      if (!floorFilter) return;
+
+      const currentValue = floorFilter.value;
+      const floors = Array.from(new Set(
+        (rooms || [])
+          .map(room => room.floor)
+          .filter(floor => floor !== null && floor !== undefined && floor !== '')
+          .map(floor => floor.toString())
+      )).sort((a, b) => Number(a) - Number(b));
+
+      floorFilter.innerHTML = '<option value="">Tất cả tầng</option>';
+      floors.forEach(floor => {
+        const option = document.createElement('option');
+        option.value = floor;
+        option.textContent = floor;
+        floorFilter.appendChild(option);
+      });
+
+      if (currentValue && floors.includes(currentValue)) {
+        floorFilter.value = currentValue;
+      }
     }
 
     // Setup event listeners

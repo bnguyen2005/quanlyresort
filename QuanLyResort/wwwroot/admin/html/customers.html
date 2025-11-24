@@ -554,22 +554,28 @@
     // Load customers list
     async function loadCustomers() {
       try {
-        const customerType = document.getElementById('filterCustomerType').value;
-        const nationality = document.getElementById('filterNationality').value;
-        const search = document.getElementById('searchInput').value;
+        const rawSearch = (document.getElementById('searchInput').value || '').trim();
+        const filters = {
+          customerType: document.getElementById('filterCustomerType').value || '',
+          nationality: document.getElementById('filterNationality').value || '',
+          search: rawSearch.toLowerCase()
+        };
 
-        let url = '/customermanagement?';
         const params = new URLSearchParams();
-        
-        if (customerType) params.append('customerType', customerType);
-        if (nationality) params.append('nationality', nationality);
-        if (search) params.append('search', search);
-        
-        url += params.toString();
+        if (filters.customerType) params.append('customerType', filters.customerType);
+        if (filters.nationality) params.append('nationality', filters.nationality);
+        if (rawSearch) params.append('search', rawSearch);
+
+        let url = '/customermanagement';
+        const queryString = params.toString();
+        if (queryString) {
+          url += `?${queryString}`;
+        }
 
         const response = await apiGet(url);
         if (response.ok) {
-          const customers = await response.json();
+          let customers = await response.json();
+          customers = applyCustomerFilters(customers, filters);
           updateCustomersTable(customers);
         } else {
           console.error('❌ Error loading customers:', response.status);
@@ -579,6 +585,42 @@
         console.error('❌ Error loading customers:', error);
         showToast('Lỗi tải danh sách khách hàng', 'danger');
       }
+    }
+
+    function applyCustomerFilters(customers, filters) {
+      if (!Array.isArray(customers)) return [];
+
+      return customers.filter(customer => {
+        if (filters.customerType && customer.customerType !== filters.customerType) {
+          return false;
+        }
+
+        if (filters.nationality) {
+          const nationality = (customer.nationality || '').toLowerCase();
+          if (nationality !== filters.nationality.toLowerCase()) {
+            return false;
+          }
+        }
+
+        if (filters.search) {
+          const haystack = [
+            customer.fullName,
+            customer.email,
+            customer.phoneNumber,
+            customer.idCardNumber,
+            customer.passportNumber
+          ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+
+          if (!haystack.includes(filters.search)) {
+            return false;
+          }
+        }
+
+        return true;
+      });
     }
 
     // Update customers table
