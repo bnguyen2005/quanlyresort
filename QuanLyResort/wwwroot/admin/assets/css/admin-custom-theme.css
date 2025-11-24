@@ -94,10 +94,13 @@
 
 .menu-inner .menu-item .menu-link {
   color: #374151 !important;
-  border-radius: 8px;
-  margin: 2px 8px;
-  transition: all 0.3s ease;
+  border-radius: 12px;
+  margin: 4px 12px;
+  padding: 0.75rem 1rem !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   font-weight: 500;
+  position: relative;
+  overflow: hidden;
 }
 
 .menu-inner .menu-item .menu-link:hover {
