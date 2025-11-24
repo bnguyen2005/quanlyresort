@@ -319,9 +319,11 @@
   <!-- Removed perfect-scrollbar.js to prevent duplicate scrollbar -->
   <script src="../assets/vendor/js/menu.js"></script>
   <script src="../assets/js/main.js?v=20251027"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/common-navbar.js"></script>
 
-  <!-- Charts -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Charts - Load before page script -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
   <!-- DataTables -->
   <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
@@ -349,12 +351,45 @@
     document.addEventListener('DOMContentLoaded', function() {
       console.log('🔵 Reports page loaded');
       console.log('🔍 Chart.js available:', typeof Chart !== 'undefined');
+      console.log('🔍 jQuery available:', typeof $ !== 'undefined');
       
-      initializeDateFilters();
-      loadDashboardStats();
-      loadAllReports();
-      setupEventListeners();
+      // Đợi Chart.js load xong nếu chưa có
+      if (typeof Chart === 'undefined') {
+        console.warn('⚠️ Chart.js not loaded yet, waiting...');
+        let retryCount = 0;
+        const maxRetries = 10;
+        const checkChart = setInterval(() => {
+          retryCount++;
+          if (typeof Chart !== 'undefined') {
+            console.log('✅ Chart.js loaded, initializing reports...');
+            clearInterval(checkChart);
+            initializeReports();
+          } else if (retryCount >= maxRetries) {
+            console.error('❌ Chart.js failed to load after', maxRetries, 'retries');
+            clearInterval(checkChart);
+            // Vẫn khởi tạo các phần không cần Chart.js
+            initializeReports();
+          }
+        }, 200);
+      } else {
+        initializeReports();
+      }
     });
+
+    function initializeReports() {
+      try {
+        initializeDateFilters();
+        setupEventListeners();
+        
+        // Load data với delay nhỏ để đảm bảo DOM sẵn sàng
+        setTimeout(() => {
+          loadDashboardStats();
+          loadAllReports();
+        }, 100);
+      } catch (error) {
+        console.error('❌ Error initializing reports:', error);
+      }
+    }
 
     function initializeDateFilters() {
       const today = new Date();
@@ -655,6 +690,12 @@
     function createRevenueChart(dailyRevenue) {
       console.log('📊 Creating revenue chart with data:', dailyRevenue);
       
+      // Kiểm tra Chart.js
+      if (typeof Chart === 'undefined') {
+        console.error('❌ Chart.js not available!');
+        return;
+      }
+      
       const canvas = document.getElementById('revenueChart');
       console.log('🎯 Revenue canvas element:', canvas);
       
@@ -668,24 +709,32 @@
       
       if (revenueChart) {
         console.log('🗑️ Destroying existing revenue chart');
-        revenueChart.destroy();
+        try {
+          revenueChart.destroy();
+        } catch (e) {
+          console.warn('⚠️ Error destroying chart:', e);
+        }
       }
 
       if (!dailyRevenue || dailyRevenue.length === 0) {
         console.warn('⚠️ No daily revenue data to display');
-        canvas.parentElement.innerHTML = `
-          <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666;">
-            <div style="text-align: center;">
-              <i class="bx bx-info-circle" style="font-size: 3rem; margin-bottom: 1rem; color: #999;"></i>
-              <p style="font-size: 1.1rem; margin: 0;">Không có dữ liệu doanh thu trong khoảng thời gian đã chọn</p>
+        const container = canvas.parentElement;
+        if (container) {
+          container.innerHTML = `
+            <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666;">
+              <div style="text-align: center;">
+                <i class="bx bx-info-circle" style="font-size: 3rem; margin-bottom: 1rem; color: #999;"></i>
+                <p style="font-size: 1.1rem; margin: 0;">Không có dữ liệu doanh thu trong khoảng thời gian đã chọn</p>
+              </div>
             </div>
-          </div>
-        `;
+          `;
+        }
         return;
       }
 
       console.log('🏗️ Building revenue chart...');
-      revenueChart = new Chart(ctx, {
+      try {
+        revenueChart = new Chart(ctx, {
         type: 'line',
         data: {
           labels: dailyRevenue.map(d => new Date(d.date).toLocaleDateString('vi-VN')),
@@ -724,12 +773,43 @@
       });
       
       console.log('✅ Revenue chart created successfully');
+      } catch (error) {
+        console.error('❌ Error creating revenue chart:', error);
+        const container = canvas.parentElement;
+        if (container) {
+          container.innerHTML = `
+            <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #dc3545;">
+              <div style="text-align: center;">
+                <i class="bx bx-error-circle" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                <p style="font-size: 1.1rem; margin: 0;">Lỗi khi tạo biểu đồ: ${error.message}</p>
+              </div>
+            </div>
+          `;
+        }
+      }
     }
 
     function createRevenueTypeChart(revenueByType) {
-      const ctx = document.getElementById('revenueTypeChart').getContext('2d');
+      if (typeof Chart === 'undefined') {
+        console.error('❌ Chart.js not available!');
+        return;
+      }
       
-      if (revenueTypeChart) revenueTypeChart.destroy();
+      const canvas = document.getElementById('revenueTypeChart');
+      if (!canvas) {
+        console.error('❌ Revenue type chart canvas not found!');
+        return;
+      }
+      
+      const ctx = canvas.getContext('2d');
+      
+      if (revenueTypeChart) {
+        try {
+          revenueTypeChart.destroy();
+        } catch (e) {
+          console.warn('⚠️ Error destroying chart:', e);
+        }
+      }
       
       if (!revenueByType || revenueByType.length === 0) {
         console.warn('⚠️ No revenue by type data to display');
@@ -771,9 +851,26 @@
     }
 
     function createOccupancyChart(dailyOccupancy) {
-      const ctx = document.getElementById('occupancyChart').getContext('2d');
+      if (typeof Chart === 'undefined') {
+        console.error('❌ Chart.js not available!');
+        return;
+      }
       
-      if (occupancyChart) occupancyChart.destroy();
+      const canvas = document.getElementById('occupancyChart');
+      if (!canvas) {
+        console.error('❌ Occupancy chart canvas not found!');
+        return;
+      }
+      
+      const ctx = canvas.getContext('2d');
+      
+      if (occupancyChart) {
+        try {
+          occupancyChart.destroy();
+        } catch (e) {
+          console.warn('⚠️ Error destroying chart:', e);
+        }
+      }
       
       if (!dailyOccupancy || dailyOccupancy.length === 0) {
         console.warn('⚠️ No occupancy data to display');
@@ -867,9 +964,26 @@
     }
 
     function createServiceChart(services) {
-      const ctx = document.getElementById('serviceChart').getContext('2d');
+      if (typeof Chart === 'undefined') {
+        console.error('❌ Chart.js not available!');
+        return;
+      }
       
-      if (serviceChart) serviceChart.destroy();
+      const canvas = document.getElementById('serviceChart');
+      if (!canvas) {
+        console.error('❌ Service chart canvas not found!');
+        return;
+      }
+      
+      const ctx = canvas.getContext('2d');
+      
+      if (serviceChart) {
+        try {
+          serviceChart.destroy();
+        } catch (e) {
+          console.warn('⚠️ Error destroying chart:', e);
+        }
+      }
       
       if (!services || services.length === 0) {
         console.warn('⚠️ No service usage data to display');
