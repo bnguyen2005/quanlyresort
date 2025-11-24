@@ -405,13 +405,21 @@ public class RestaurantOrdersController : ControllerBase
     /// </summary>
     [HttpPost("{id}/pay")]
     [Authorize]
-    public async Task<IActionResult> PayOrder(int id, [FromBody] PayOrderRequest request)
+    public async Task<IActionResult> PayOrder(int id, [FromBody] PayOrderRequest? request)
     {
         try
         {
+            // Handle null request
+            if (request == null)
+            {
+                _logger.LogWarning($"[PayOrder] Request body is null for order {id}");
+                request = new PayOrderRequest { PaymentMethod = "Cash" }; // Default to Cash
+            }
+            
             var order = await _context.RestaurantOrders.FindAsync(id);
             if (order == null)
             {
+                _logger.LogWarning($"[PayOrder] Order {id} not found");
                 return NotFound(new { message = "Đơn đặt món không tồn tại" });
             }
 
@@ -420,7 +428,7 @@ public class RestaurantOrdersController : ControllerBase
             var customerIdClaim = User.FindFirst("CustomerId")?.Value;
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value ?? "system";
             
-            _logger.LogInformation($"[PayOrder] User role: {userRole}, CustomerId claim: {customerIdClaim}, Order CustomerId: {order.CustomerId}");
+            _logger.LogInformation($"[PayOrder] Order {id}, User role: {userRole}, CustomerId claim: {customerIdClaim}, Order CustomerId: {order.CustomerId}, PaymentMethod: {request.PaymentMethod}");
 
             // Authorization check:
             // - Customer chỉ có thể thanh toán đơn hàng của chính họ (CustomerId khớp)
