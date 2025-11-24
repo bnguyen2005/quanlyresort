@@ -1017,18 +1017,23 @@
       const container = document.getElementById('activitiesContainer');
       container.innerHTML = '';
 
+      if (!activities || activities.length === 0) {
+        container.innerHTML = '<div class="text-center text-muted py-4"><i class="bx bx-info-circle"></i> Chưa có hoạt động nào gần đây</div>';
+        return;
+      }
+
       activities.forEach(activity => {
         const activityDiv = document.createElement('div');
         activityDiv.className = 'activity-item';
         activityDiv.innerHTML = `
           <div class="d-flex justify-content-between align-items-center">
             <div>
-              <strong>${activity.description}</strong>
+              <strong>${activity.description || 'Hoạt động không có mô tả'}</strong>
               <br>
-              <small class="text-muted">Bởi: ${activity.performedBy}</small>
+              <small class="text-muted">Bởi: ${activity.performedBy || 'Hệ thống'}</small>
             </div>
             <div>
-              <small class="text-muted">${formatDateTime(activity.timestamp)}</small>
+              <small class="text-muted">${formatDateTime(activity.timestamp || new Date())}</small>
             </div>
           </div>
         `;

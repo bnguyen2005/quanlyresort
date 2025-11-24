@@ -873,12 +873,18 @@ table .dropdown-menu {
 .page-link {
   color: var(--resort-primary-dark);
   border-color: var(--resort-accent);
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  z-index: 1 !important;
+  position: relative !important;
 }
 
 .page-link:hover {
   background: var(--resort-accent);
   border-color: var(--resort-primary);
   color: var(--resort-primary-dark);
+  pointer-events: auto !important;
+  cursor: pointer !important;
 }
 
 .page-item.active .page-link {
@@ -886,6 +892,28 @@ table .dropdown-menu {
   border-color: var(--resort-primary-dark);
   color: #ffffff;
   box-shadow: 0 2px 8px rgba(200, 169, 126, 0.3);
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+
+.page-item.disabled .page-link {
+  pointer-events: none !important;
+  cursor: not-allowed !important;
+  opacity: 0.6;
+}
+
+/* Fix cho DataTables pagination */
+.dataTables_wrapper .dataTables_paginate .pagination .page-link {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  z-index: 10 !important;
+  position: relative !important;
+}
+
+.dataTables_wrapper .dataTables_paginate {
+  pointer-events: auto !important;
+  z-index: 10 !important;
+  position: relative !important;
 }
 
 /* ============================================
