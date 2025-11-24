@@ -562,21 +562,35 @@
         // Try to load real data first
         refreshAllData();
         
-        // Create charts with delay
+        // Create charts with delay - đảm bảo Chart.js đã load
         setTimeout(() => {
           console.log('📊 Creating charts...');
           console.log('🔍 Chart.js available:', typeof Chart !== 'undefined');
           
           if (typeof Chart === 'undefined') {
             console.error('❌ Chart.js not loaded yet, retrying...');
-            setTimeout(() => {
-              // Try to load real data again after Chart.js loads
-              loadRevenueTrends();
-              loadOccupancyTrends();
-              loadServiceRevenue();
-            }, 1000);
+            let retryCount = 0;
+            const maxRetries = 10;
+            const checkChart = setInterval(() => {
+              retryCount++;
+              if (typeof Chart !== 'undefined') {
+                console.log('✅ Chart.js loaded, creating charts...');
+                clearInterval(checkChart);
+                loadRevenueTrends();
+                loadOccupancyTrends();
+                loadServiceRevenue();
+              } else if (retryCount >= maxRetries) {
+                console.error('❌ Chart.js failed to load after', maxRetries, 'retries');
+                clearInterval(checkChart);
+              }
+            }, 200);
+          } else {
+            // Chart.js đã sẵn sàng, load data ngay
+            loadRevenueTrends();
+            loadOccupancyTrends();
+            loadServiceRevenue();
           }
-        }, 100);
+        }, 300);
         
         // Start auto refresh
         startAutoRefresh();
@@ -702,8 +716,59 @@
         revenueChart.destroy();
       }
 
+      // Hiển thị chart ngay cả khi không có dữ liệu
       if (!data || data.length === 0) {
-        console.warn('⚠️ No revenue data to display');
+        console.warn('⚠️ No revenue data to display, showing empty chart');
+        // Tạo chart với dữ liệu mặc định (30 ngày với giá trị 0)
+        const defaultLabels = [];
+        const defaultData = [];
+        const today = new Date();
+        for (let i = 29; i >= 0; i--) {
+          const date = new Date(today);
+          date.setDate(date.getDate() - i);
+          defaultLabels.push(date.toLocaleDateString('vi-VN'));
+          defaultData.push(0);
+        }
+        
+        revenueChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: defaultLabels,
+            datasets: [{
+              label: 'Doanh thu (₫)',
+              data: defaultData,
+              borderColor: '#667eea',
+              backgroundColor: 'rgba(102, 126, 234, 0.1)',
+              tension: 0.4,
+              fill: true
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    const fmt = window.formatCurrency || formatCurrency;
+                    return 'Doanh thu: ' + fmt(context.parsed.y);
+                  }
+                }
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  callback: function(value) {
+                    const fmt = window.formatCurrency || formatCurrency;
+                    return fmt(value);
+                  }
+                }
+              }
+            }
+          }
+        });
         return;
       }
 
@@ -799,13 +864,17 @@
         occupancyChart.destroy();
       }
 
+      // Lấy occupancy rate từ dữ liệu hoặc mặc định là 0
+      const occupancyRate = (data && data.length > 0 && data[data.length - 1]?.occupancyRate) ? data[data.length - 1].occupancyRate : 0;
+      const availableRate = 100 - occupancyRate;
+
       console.log('🏗️ Building occupancy chart...');
       occupancyChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
           labels: ['Đã đặt', 'Còn trống'],
           datasets: [{
-            data: [data[data.length - 1]?.occupancyRate || 75, 100 - (data[data.length - 1]?.occupancyRate || 75)],
+            data: [occupancyRate, availableRate],
             backgroundColor: ['#4ecdc4', '#f8f9fa'],
             borderWidth: 0
           }]
@@ -876,8 +945,45 @@
         serviceChart.destroy();
       }
 
+      // Hiển thị chart ngay cả khi không có dữ liệu
       if (!data || data.length === 0) {
-        console.warn('⚠️ No service data to display');
+        console.warn('⚠️ No service data to display, showing empty chart');
+        serviceChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: ['Chưa có dữ liệu'],
+            datasets: [{
+              label: 'Doanh thu (₫)',
+              data: [0],
+              backgroundColor: ['#e0e0e0']
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    const fmt = window.formatCurrency || formatCurrency;
+                    return 'Doanh thu: ' + fmt(context.parsed.y);
+                  }
+                }
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  callback: function(value) {
+                    const fmt = window.formatCurrency || formatCurrency;
+                    return fmt(value);
+                  }
+                }
+              }
+            }
+          }
+        });
         return;
       }
 
