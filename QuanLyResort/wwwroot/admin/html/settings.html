@@ -32,72 +32,183 @@
   <script src="../assets/js/config.js"></script>
   
   <style>
+    /* Nalika Style - Settings Page */
     .settings-card {
       border-radius: 20px;
-      border: 1px solid rgba(200, 169, 126, 0.15);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-      transition: all 0.3s ease;
-      margin-bottom: 1.5rem;
+      border: none;
+      box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      margin-bottom: 2rem;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.98);
     }
     
     .settings-card:hover {
-      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
-      transform: translateY(-2px);
+      box-shadow: 0 8px 35px rgba(0,0,0,0.12);
+      transform: translateY(-4px);
+    }
+    
+    .settings-card .card-header {
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+      border-bottom: 2px solid rgba(102, 126, 234, 0.2);
+      padding: 1.5rem;
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: #374151;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .settings-card .card-header::before {
+      content: '';
+      width: 4px;
+      height: 24px;
+      background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+      border-radius: 2px;
     }
     
     .setting-item {
-      padding: 1.25rem;
-      border-bottom: 1px solid rgba(200, 169, 126, 0.1);
+      padding: 1.5rem;
+      border-bottom: 1px solid #f3f4f6;
       display: flex;
       justify-content: space-between;
       align-items: center;
       transition: all 0.3s ease;
+      position: relative;
     }
     
     .setting-item:last-child {
       border-bottom: none;
     }
     
+    .setting-item::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+      transform: scaleY(0);
+      transition: transform 0.3s ease;
+    }
+    
     .setting-item:hover {
-      background: rgba(200, 169, 126, 0.05);
+      background: linear-gradient(90deg, rgba(102, 126, 234, 0.05) 0%, rgba(255, 255, 255, 1) 100%);
+      padding-left: 2rem;
+    }
+    
+    .setting-item:hover::before {
+      transform: scaleY(1);
     }
     
     .setting-info {
       flex: 1;
+      padding-right: 1.5rem;
     }
     
     .setting-label {
       font-weight: 600;
-      color: #374151;
-      margin-bottom: 0.25rem;
+      color: #1f2937;
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .setting-label i {
+      color: #667eea;
+      font-size: 1.2rem;
     }
     
     .setting-description {
       font-size: 0.875rem;
       color: #6b7280;
+      line-height: 1.5;
+    }
+    
+    .form-switch {
+      position: relative;
     }
     
     .form-switch .form-check-input {
-      width: 3rem;
-      height: 1.5rem;
+      width: 3.5rem;
+      height: 1.75rem;
       cursor: pointer;
+      border-radius: 1rem;
+      border: 2px solid #e5e7eb;
+      transition: all 0.3s ease;
+      background-color: #e5e7eb;
     }
     
     .form-switch .form-check-input:checked {
-      background-color: var(--resort-primary);
-      border-color: var(--resort-primary);
+      background-color: #667eea;
+      border-color: #667eea;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+    }
+    
+    .form-switch .form-check-input:focus {
+      box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+    }
+    
+    .form-select {
+      border-radius: 12px;
+      border: 2px solid #e5e7eb;
+      padding: 0.625rem 1rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      min-width: 180px;
+    }
+    
+    .form-select:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.15);
     }
     
     .save-btn {
-      border-radius: 12px;
-      padding: 0.75rem 2rem;
+      border-radius: 16px;
+      padding: 1rem 3rem;
       font-weight: 600;
-      transition: all 0.3s ease;
+      font-size: 1.1rem;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      color: white;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
     }
     
     .save-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+    
+    .save-btn:active {
+      transform: translateY(-1px) scale(0.98);
+    }
+    
+    .settings-section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 3px solid #667eea;
+      display: inline-block;
+    }
+    
+    .setting-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+      color: #667eea;
+      font-size: 1.25rem;
+      margin-right: 1rem;
     }
   </style>
 </head>
@@ -186,16 +297,20 @@
               <span class="text-muted fw-light">Resort /</span> Cài đặt
             </h4>
 
-            <!-- Notification Settings -->
+            <!-- Notification Settings - Nalika Style -->
             <div class="card settings-card">
               <div class="card-header">
-                <h5 class="mb-0">🔔 Thông báo</h5>
+                <i class="bx bx-bell"></i>
+                <h5 class="mb-0">Thông báo</h5>
               </div>
-              <div class="card-body">
+              <div class="card-body p-0">
                 <div class="setting-item">
                   <div class="setting-info">
-                    <div class="setting-label">Hiển thị thông báo</div>
-                    <div class="setting-description">Nhận thông báo về các hoạt động quan trọng</div>
+                    <div class="setting-label">
+                      <i class="bx bx-bell"></i>
+                      Hiển thị thông báo
+                    </div>
+                    <div class="setting-description">Nhận thông báo về các hoạt động quan trọng trong hệ thống</div>
                   </div>
                   <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" id="notificationsEnabled" checked>
@@ -203,8 +318,11 @@
                 </div>
                 <div class="setting-item">
                   <div class="setting-info">
-                    <div class="setting-label">Thông báo email</div>
-                    <div class="setting-description">Gửi thông báo qua email</div>
+                    <div class="setting-label">
+                      <i class="bx bx-envelope"></i>
+                      Thông báo email
+                    </div>
+                    <div class="setting-description">Gửi thông báo qua email khi có sự kiện quan trọng</div>
                   </div>
                   <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" id="emailNotifications" checked>
@@ -212,8 +330,11 @@
                 </div>
                 <div class="setting-item">
                   <div class="setting-info">
-                    <div class="setting-label">Thông báo đặt phòng mới</div>
-                    <div class="setting-description">Nhận thông báo khi có đặt phòng mới</div>
+                    <div class="setting-label">
+                      <i class="bx bx-calendar-check"></i>
+                      Thông báo đặt phòng mới
+                    </div>
+                    <div class="setting-description">Nhận thông báo ngay khi có đặt phòng mới</div>
                   </div>
                   <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" id="bookingNotifications" checked>
@@ -221,8 +342,11 @@
                 </div>
                 <div class="setting-item">
                   <div class="setting-info">
-                    <div class="setting-label">Thông báo thanh toán</div>
-                    <div class="setting-description">Nhận thông báo về các giao dịch thanh toán</div>
+                    <div class="setting-label">
+                      <i class="bx bx-credit-card"></i>
+                      Thông báo thanh toán
+                    </div>
+                    <div class="setting-description">Nhận thông báo về các giao dịch thanh toán thành công</div>
                   </div>
                   <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" id="paymentNotifications" checked>
@@ -231,16 +355,20 @@
               </div>
             </div>
 
-            <!-- Privacy Settings -->
+            <!-- Privacy Settings - Nalika Style -->
             <div class="card settings-card">
               <div class="card-header">
-                <h5 class="mb-0">🔒 Bảo mật & Quyền riêng tư</h5>
+                <i class="bx bx-shield"></i>
+                <h5 class="mb-0">Bảo mật & Quyền riêng tư</h5>
               </div>
-              <div class="card-body">
+              <div class="card-body p-0">
                 <div class="setting-item">
                   <div class="setting-info">
-                    <div class="setting-label">Xác thực 2 lớp</div>
-                    <div class="setting-description">Bảo vệ tài khoản bằng xác thực 2 lớp</div>
+                    <div class="setting-label">
+                      <i class="bx bx-shield-quarter"></i>
+                      Xác thực 2 lớp
+                    </div>
+                    <div class="setting-description">Bảo vệ tài khoản bằng xác thực 2 lớp (2FA) để tăng cường bảo mật</div>
                   </div>
                   <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" id="twoFactorAuth">
@@ -248,8 +376,11 @@
                 </div>
                 <div class="setting-item">
                   <div class="setting-info">
-                    <div class="setting-label">Đăng nhập tự động</div>
-                    <div class="setting-description">Giữ đăng nhập khi đóng trình duyệt</div>
+                    <div class="setting-label">
+                      <i class="bx bx-lock-open"></i>
+                      Đăng nhập tự động
+                    </div>
+                    <div class="setting-description">Giữ đăng nhập khi đóng trình duyệt để tiện sử dụng</div>
                   </div>
                   <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" id="autoLogin" checked>
@@ -257,8 +388,11 @@
                 </div>
                 <div class="setting-item">
                   <div class="setting-info">
-                    <div class="setting-label">Hiển thị hoạt động</div>
-                    <div class="setting-description">Cho phép người khác xem hoạt động của bạn</div>
+                    <div class="setting-label">
+                      <i class="bx bx-show"></i>
+                      Hiển thị hoạt động
+                    </div>
+                    <div class="setting-description">Cho phép người khác xem hoạt động của bạn trong hệ thống</div>
                   </div>
                   <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" id="showActivity" checked>
@@ -267,16 +401,20 @@
               </div>
             </div>
 
-            <!-- Display Settings -->
+            <!-- Display Settings - Nalika Style -->
             <div class="card settings-card">
               <div class="card-header">
-                <h5 class="mb-0">🎨 Hiển thị</h5>
+                <i class="bx bx-palette"></i>
+                <h5 class="mb-0">Hiển thị</h5>
               </div>
-              <div class="card-body">
+              <div class="card-body p-0">
                 <div class="setting-item">
                   <div class="setting-info">
-                    <div class="setting-label">Chế độ tối</div>
-                    <div class="setting-description">Chuyển sang giao diện tối</div>
+                    <div class="setting-label">
+                      <i class="bx bx-moon"></i>
+                      Chế độ tối
+                    </div>
+                    <div class="setting-description">Chuyển sang giao diện tối để bảo vệ mắt và tiết kiệm pin</div>
                   </div>
                   <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" id="darkMode">
@@ -284,11 +422,14 @@
                 </div>
                 <div class="setting-item">
                   <div class="setting-info">
-                    <div class="setting-label">Ngôn ngữ</div>
-                    <div class="setting-description">Chọn ngôn ngữ hiển thị</div>
+                    <div class="setting-label">
+                      <i class="bx bx-world"></i>
+                      Ngôn ngữ
+                    </div>
+                    <div class="setting-description">Chọn ngôn ngữ hiển thị cho giao diện</div>
                   </div>
                   <div>
-                    <select class="form-select" id="languageSelect" style="width: auto; min-width: 150px;">
+                    <select class="form-select" id="languageSelect">
                       <option value="vi" selected>Tiếng Việt</option>
                       <option value="en">English</option>
                     </select>
@@ -296,11 +437,14 @@
                 </div>
                 <div class="setting-item">
                   <div class="setting-info">
-                    <div class="setting-label">Mật độ hiển thị</div>
-                    <div class="setting-description">Điều chỉnh khoảng cách giữa các phần tử</div>
+                    <div class="setting-label">
+                      <i class="bx bx-grid-alt"></i>
+                      Mật độ hiển thị
+                    </div>
+                    <div class="setting-description">Điều chỉnh khoảng cách giữa các phần tử trên màn hình</div>
                   </div>
                   <div>
-                    <select class="form-select" id="densitySelect" style="width: auto; min-width: 150px;">
+                    <select class="form-select" id="densitySelect">
                       <option value="comfortable" selected>Thoải mái</option>
                       <option value="compact">Gọn gàng</option>
                       <option value="spacious">Rộng rãi</option>
@@ -310,16 +454,20 @@
               </div>
             </div>
 
-            <!-- System Settings -->
+            <!-- System Settings - Nalika Style -->
             <div class="card settings-card">
               <div class="card-header">
-                <h5 class="mb-0">⚙️ Hệ thống</h5>
+                <i class="bx bx-cog"></i>
+                <h5 class="mb-0">Hệ thống</h5>
               </div>
-              <div class="card-body">
+              <div class="card-body p-0">
                 <div class="setting-item">
                   <div class="setting-info">
-                    <div class="setting-label">Tự động làm mới dữ liệu</div>
-                    <div class="setting-description">Tự động tải lại dữ liệu mới mỗi 5 phút</div>
+                    <div class="setting-label">
+                      <i class="bx bx-refresh"></i>
+                      Tự động làm mới dữ liệu
+                    </div>
+                    <div class="setting-description">Tự động tải lại dữ liệu mới mỗi 5 phút để luôn cập nhật</div>
                   </div>
                   <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" id="autoRefresh" checked>
@@ -327,8 +475,11 @@
                 </div>
                 <div class="setting-item">
                   <div class="setting-info">
-                    <div class="setting-label">Hiển thị biểu đồ</div>
-                    <div class="setting-description">Hiển thị các biểu đồ thống kê trên dashboard</div>
+                    <div class="setting-label">
+                      <i class="bx bx-bar-chart-alt-2"></i>
+                      Hiển thị biểu đồ
+                    </div>
+                    <div class="setting-description">Hiển thị các biểu đồ thống kê trên trang dashboard</div>
                   </div>
                   <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" id="showCharts" checked>
@@ -336,8 +487,11 @@
                 </div>
                 <div class="setting-item">
                   <div class="setting-info">
-                    <div class="setting-label">Lưu lịch sử tìm kiếm</div>
-                    <div class="setting-description">Lưu lại các tìm kiếm gần đây</div>
+                    <div class="setting-label">
+                      <i class="bx bx-history"></i>
+                      Lưu lịch sử tìm kiếm
+                    </div>
+                    <div class="setting-description">Lưu lại các tìm kiếm gần đây để truy cập nhanh</div>
                   </div>
                   <div class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" id="saveSearchHistory" checked>
@@ -346,12 +500,17 @@
               </div>
             </div>
 
-            <!-- Save Button -->
-            <div class="row">
-              <div class="col-12 text-end">
-                <button class="btn btn-primary save-btn" onclick="saveSettings()">
-                  <i class="bx bx-save me-2"></i> Lưu cài đặt
-                </button>
+            <!-- Save Button - Nalika Style -->
+            <div class="row mt-4">
+              <div class="col-12">
+                <div class="card settings-card border-0" style="background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);">
+                  <div class="card-body text-center py-4">
+                    <button class="btn btn-primary save-btn" onclick="saveSettings()">
+                      <i class="bx bx-save me-2"></i> Lưu tất cả cài đặt
+                    </button>
+                    <p class="text-muted mt-3 mb-0 small">Các thay đổi sẽ được áp dụng ngay lập tức</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

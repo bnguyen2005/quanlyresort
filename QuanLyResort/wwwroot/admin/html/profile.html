@@ -32,70 +32,187 @@
   <script src="../assets/js/config.js"></script>
   
   <style>
+    /* Nalika Style - Profile Page */
     .profile-header {
-      background: linear-gradient(135deg, var(--resort-primary) 0%, var(--resort-primary-dark) 100%);
-      border-radius: 20px;
-      padding: 2rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 24px;
+      padding: 3rem 2.5rem;
       color: white;
-      margin-bottom: 2rem;
-      box-shadow: 0 8px 25px rgba(200, 169, 126, 0.3);
+      margin-bottom: 2.5rem;
+      box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .profile-header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      animation: rotate 20s linear infinite;
+    }
+    
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
     }
     
     .profile-avatar {
-      width: 120px;
-      height: 120px;
+      width: 140px;
+      height: 140px;
       border-radius: 50%;
-      border: 5px solid rgba(255, 255, 255, 0.3);
+      border: 6px solid rgba(255, 255, 255, 0.4);
       object-fit: cover;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+      position: relative;
+      z-index: 1;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    .profile-avatar:hover {
+      transform: scale(1.05);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+    }
+    
+    .profile-header h3 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      position: relative;
+      z-index: 1;
+    }
+    
+    .profile-header p {
+      font-size: 1.1rem;
+      opacity: 0.95;
+      position: relative;
+      z-index: 1;
     }
     
     .profile-card {
       border-radius: 20px;
-      border: 1px solid rgba(200, 169, 126, 0.15);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-      transition: all 0.3s ease;
+      border: none;
+      box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.98);
     }
     
     .profile-card:hover {
-      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
-      transform: translateY(-2px);
+      box-shadow: 0 8px 35px rgba(0,0,0,0.12);
+      transform: translateY(-4px);
+    }
+    
+    .profile-card .card-header {
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+      border-bottom: 2px solid rgba(102, 126, 234, 0.2);
+      padding: 1.5rem;
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: #374151;
     }
     
     .info-item {
-      padding: 1rem;
-      border-bottom: 1px solid rgba(200, 169, 126, 0.1);
+      padding: 1.5rem;
+      border-bottom: 1px solid #f3f4f6;
       transition: all 0.3s ease;
+      position: relative;
     }
     
     .info-item:last-child {
       border-bottom: none;
     }
     
+    .info-item::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+      transform: scaleY(0);
+      transition: transform 0.3s ease;
+    }
+    
     .info-item:hover {
-      background: rgba(200, 169, 126, 0.05);
+      background: linear-gradient(90deg, rgba(102, 126, 234, 0.05) 0%, rgba(255, 255, 255, 1) 100%);
+      padding-left: 2rem;
+    }
+    
+    .info-item:hover::before {
+      transform: scaleY(1);
     }
     
     .info-label {
       font-weight: 600;
-      color: #374151;
-      margin-bottom: 0.5rem;
+      color: #1f2937;
+      margin-bottom: 0.75rem;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .info-label::before {
+      content: '•';
+      color: #667eea;
+      font-size: 1.2rem;
     }
     
     .info-value {
       color: #6b7280;
+      font-size: 1rem;
+      font-weight: 500;
     }
     
     .edit-btn {
-      border-radius: 12px;
-      padding: 0.75rem 2rem;
+      border-radius: 16px;
+      padding: 0.875rem 2.5rem;
       font-weight: 600;
-      transition: all 0.3s ease;
+      font-size: 1rem;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      background: rgba(255, 255, 255, 0.95);
+      color: #667eea;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      position: relative;
+      z-index: 1;
     }
     
     .edit-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+      background: white;
+    }
+    
+    .stat-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+      border-radius: 12px;
+      font-weight: 600;
+      color: #667eea;
+      font-size: 0.9rem;
+    }
+    
+    .security-item {
+      padding: 1.25rem;
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(255, 255, 255, 1) 100%);
+      border-radius: 12px;
+      border-left: 4px solid #10b981;
+      margin-bottom: 1rem;
+      transition: all 0.3s ease;
+    }
+    
+    .security-item:hover {
+      transform: translateX(5px);
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.15);
     }
   </style>
 </head>
@@ -184,20 +301,28 @@
               <span class="text-muted fw-light">Resort /</span> Hồ sơ của tôi
             </h4>
 
-            <!-- Profile Header -->
+            <!-- Profile Header - Nalika Style -->
             <div class="profile-header">
               <div class="row align-items-center">
                 <div class="col-auto">
-                  <img src="../assets/img/avatars/1.png" alt="Avatar" class="profile-avatar" id="profileAvatar" />
+                  <div class="position-relative">
+                    <img src="../assets/img/avatars/1.png" alt="Avatar" class="profile-avatar" id="profileAvatar" />
+                    <span class="position-absolute bottom-0 end-0 bg-success border border-white border-3 rounded-circle" style="width: 24px; height: 24px;"></span>
+                  </div>
                 </div>
                 <div class="col">
-                  <h3 class="mb-1" id="profileFullName">Admin User</h3>
-                  <p class="mb-2" id="profileRole">Quản trị viên</p>
-                  <p class="mb-0" id="profileEmail">admin@resort.com</p>
+                  <h3 class="mb-2" id="profileFullName">Admin User</h3>
+                  <p class="mb-2 fs-5" id="profileRole">
+                    <span class="badge bg-light text-dark px-3 py-2">Quản trị viên</span>
+                  </p>
+                  <p class="mb-0 d-flex align-items-center gap-2">
+                    <i class="bx bx-envelope fs-5"></i>
+                    <span id="profileEmail">admin@resort.com</span>
+                  </p>
                 </div>
                 <div class="col-auto">
                   <button class="btn btn-light edit-btn" onclick="editProfile()">
-                    <i class="bx bx-edit me-2"></i> Chỉnh sửa
+                    <i class="bx bx-edit me-2"></i> Chỉnh sửa hồ sơ
                   </button>
                 </div>
               </div>
@@ -210,31 +335,51 @@
                   <div class="card-header">
                     <h5 class="mb-0">📋 Thông tin cá nhân</h5>
                   </div>
-                  <div class="card-body">
+                  <div class="card-body p-0">
                     <div class="info-item">
-                      <div class="info-label">Họ và tên</div>
+                      <div class="info-label">
+                        <i class="bx bx-user text-primary"></i>
+                        Họ và tên
+                      </div>
                       <div class="info-value" id="infoFullName">-</div>
                     </div>
                     <div class="info-item">
-                      <div class="info-label">Email</div>
+                      <div class="info-label">
+                        <i class="bx bx-envelope text-primary"></i>
+                        Email
+                      </div>
                       <div class="info-value" id="infoEmail">-</div>
                     </div>
                     <div class="info-item">
-                      <div class="info-label">Số điện thoại</div>
+                      <div class="info-label">
+                        <i class="bx bx-phone text-primary"></i>
+                        Số điện thoại
+                      </div>
                       <div class="info-value" id="infoPhone">-</div>
                     </div>
                     <div class="info-item">
-                      <div class="info-label">Vai trò</div>
-                      <div class="info-value" id="infoRole">-</div>
+                      <div class="info-label">
+                        <i class="bx bx-briefcase text-primary"></i>
+                        Vai trò
+                      </div>
+                      <div class="info-value">
+                        <span class="badge bg-primary" id="infoRole">-</span>
+                      </div>
                     </div>
                     <div class="info-item">
-                      <div class="info-label">Ngày tạo tài khoản</div>
+                      <div class="info-label">
+                        <i class="bx bx-calendar text-primary"></i>
+                        Ngày tạo tài khoản
+                      </div>
                       <div class="info-value" id="infoCreatedDate">-</div>
                     </div>
                     <div class="info-item">
-                      <div class="info-label">Trạng thái</div>
+                      <div class="info-label">
+                        <i class="bx bx-check-circle text-primary"></i>
+                        Trạng thái
+                      </div>
                       <div class="info-value">
-                        <span class="badge bg-success" id="infoStatus">Đang hoạt động</span>
+                        <span class="badge bg-success px-3 py-2" id="infoStatus">Đang hoạt động</span>
                       </div>
                     </div>
                   </div>
@@ -246,18 +391,31 @@
                   <div class="card-header">
                     <h5 class="mb-0">🔐 Bảo mật</h5>
                   </div>
-                  <div class="card-body">
-                    <div class="info-item">
-                      <div class="info-label">Mật khẩu</div>
-                      <div class="info-value">••••••••</div>
-                      <button class="btn btn-sm btn-outline-primary mt-2" onclick="changePassword()">
-                        <i class="bx bx-lock me-1"></i> Đổi mật khẩu
-                      </button>
+                  <div class="card-body p-3">
+                    <div class="security-item">
+                      <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                          <div class="info-label mb-1">
+                            <i class="bx bx-lock text-success"></i>
+                            Mật khẩu
+                          </div>
+                          <div class="info-value small">••••••••</div>
+                        </div>
+                        <button class="btn btn-sm btn-success" onclick="changePassword()">
+                          <i class="bx bx-edit me-1"></i> Đổi
+                        </button>
+                      </div>
                     </div>
-                    <div class="info-item">
-                      <div class="info-label">Xác thực 2 lớp</div>
-                      <div class="info-value">
-                        <span class="badge bg-secondary">Chưa bật</span>
+                    <div class="security-item">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                          <div class="info-label mb-1">
+                            <i class="bx bx-shield text-warning"></i>
+                            Xác thực 2 lớp
+                          </div>
+                          <div class="info-value small">Bảo vệ tài khoản</div>
+                        </div>
+                        <span class="badge bg-warning">Chưa bật</span>
                       </div>
                     </div>
                   </div>
@@ -267,13 +425,21 @@
                   <div class="card-header">
                     <h5 class="mb-0">📊 Thống kê</h5>
                   </div>
-                  <div class="card-body">
+                  <div class="card-body p-3">
                     <div class="info-item">
-                      <div class="info-label">Tổng đăng nhập</div>
-                      <div class="info-value" id="statLogins">-</div>
+                      <div class="info-label">
+                        <i class="bx bx-log-in text-info"></i>
+                        Tổng đăng nhập
+                      </div>
+                      <div class="info-value">
+                        <span class="stat-badge" id="statLogins">-</span>
+                      </div>
                     </div>
                     <div class="info-item">
-                      <div class="info-label">Lần đăng nhập cuối</div>
+                      <div class="info-label">
+                        <i class="bx bx-time text-info"></i>
+                        Lần đăng nhập cuối
+                      </div>
                       <div class="info-value" id="statLastLogin">-</div>
                     </div>
                   </div>
