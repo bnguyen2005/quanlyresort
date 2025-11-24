@@ -333,12 +333,25 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <!-- Menu Loader -->
-  <script src="../js/load-menu.js"></script>
   <script>
+    // Load menu directly without load-menu.js dependency
     document.addEventListener('DOMContentLoaded', function() {
-      window.loadCommonMenu('common-menu').then(() => {
-        console.log('✅ Menu loaded for reports page');
-      });
+      const menuVersion = Date.now();
+      fetch('layout-menu.html?v=' + menuVersion)
+        .then(response => {
+          if (!response.ok) throw new Error('Failed to load menu: ' + response.status);
+          return response.text();
+        })
+        .then(html => {
+          const menuContainer = document.getElementById('common-menu');
+          if (menuContainer) {
+            menuContainer.innerHTML = html;
+            console.log('✅ Menu loaded for reports page');
+          }
+        })
+        .catch(error => {
+          console.error('❌ Error loading menu:', error);
+        });
     });
   </script>
 
