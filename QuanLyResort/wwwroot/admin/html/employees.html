@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="../assets/css/demo.css" />
   <link rel="stylesheet" href="../assets/css/fix-scrollbar.css?v=20250127" />
   <link rel="stylesheet" href="../assets/css/admin-custom-theme.css?v=20250127" />
+  <link rel="stylesheet" href="../assets/css/nalika-style.css?v=20250127" />
   <link rel="stylesheet" href="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" />
   <script src="../assets/vendor/js/helpers.js"></script>
@@ -104,80 +105,64 @@
         <div class="content-wrapper">
           <div class="container-xxl flex-grow-1 container-p-y">
             
-            <!-- Stats Cards -->
+            <!-- Stats Cards - Nalika Style -->
             <div class="row mb-4">
               <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
-                <div class="card">
-                  <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                      <div class="card-info">
-                        <p class="card-text">Tổng NV</p>
-                        <h4 class="card-title mb-0" id="totalEmployees">0</h4>
-                      </div>
-                      <div class="card-icon">
-                        <span class="badge bg-label-primary rounded p-2">
-                          <i class="bx bx-user bx-sm"></i>
-                        </span>
-                      </div>
+                <div class="nalika-stats-card">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h3 class="card-title mb-2" id="totalEmployees">0</h3>
+                      <small class="text-white">Tổng nhân viên</small>
+                    </div>
+                    <div class="avatar">
+                      <i class="bx bx-user"></i>
                     </div>
                   </div>
                 </div>
               </div>
               <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
-                <div class="card">
-                  <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                      <div class="card-info">
-                        <p class="card-text">Đang làm</p>
-                        <h4 class="card-title mb-0 text-success" id="activeEmployees">0</h4>
-                      </div>
-                      <div class="card-icon">
-                        <span class="badge bg-label-success rounded p-2">
-                          <i class="bx bx-check-circle bx-sm"></i>
-                        </span>
-                      </div>
+                <div class="nalika-stats-card success">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h3 class="card-title mb-2" id="activeEmployees">0</h3>
+                      <small class="text-white">Đang làm việc</small>
+                    </div>
+                    <div class="avatar">
+                      <i class="bx bx-check-circle"></i>
                     </div>
                   </div>
                 </div>
               </div>
               <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
-                <div class="card">
-                  <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                      <div class="card-info">
-                        <p class="card-text">Đã nghỉ</p>
-                        <h4 class="card-title mb-0 text-danger" id="inactiveEmployees">0</h4>
-                      </div>
-                      <div class="card-icon">
-                        <span class="badge bg-label-danger rounded p-2">
-                          <i class="bx bx-x-circle bx-sm"></i>
-                        </span>
-                      </div>
+                <div class="nalika-stats-card danger">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h3 class="card-title mb-2" id="inactiveEmployees">0</h3>
+                      <small class="text-white">Đã nghỉ việc</small>
+                    </div>
+                    <div class="avatar">
+                      <i class="bx bx-x-circle"></i>
                     </div>
                   </div>
                 </div>
               </div>
               <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
-                <div class="card">
-                  <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                      <div class="card-info">
-                        <p class="card-text">Phòng ban</p>
-                        <h4 class="card-title mb-0" id="totalDepartments">0</h4>
-                      </div>
-                      <div class="card-icon">
-                        <span class="badge bg-label-info rounded p-2">
-                          <i class="bx bx-buildings bx-sm"></i>
-                        </span>
-                      </div>
+                <div class="nalika-stats-card info">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h3 class="card-title mb-2" id="totalDepartments">0</h3>
+                      <small class="text-white">Phòng ban</small>
+                    </div>
+                    <div class="avatar">
+                      <i class="bx bx-buildings"></i>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- Filters & Actions -->
-            <div class="card mb-4">
+            <!-- Filters & Actions - Nalika Style -->
+            <div class="nalika-card mb-4">
               <div class="card-body">
                 <div class="row">
                   <div class="col-md-3">
