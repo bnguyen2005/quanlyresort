@@ -1917,8 +1917,8 @@
         }
         
         // Validate payment method
-        const paymentMethod = document.getElementById('orderPaymentMethod')?.value || '';
-        if (!paymentMethod) {
+        const selectedPaymentMethod = document.getElementById('orderPaymentMethod')?.value || '';
+        if (!selectedPaymentMethod) {
           const message = 'Vui lòng chọn phương thức thanh toán';
           if (typeof showToast === 'function') {
             showToast(message, 'warning');
@@ -2057,8 +2057,8 @@
         }
         
         // Nếu chọn thanh toán QR, mở modal thanh toán ngay
-        const paymentMethod = document.getElementById('orderPaymentMethod')?.value || '';
-        if (paymentMethod === 'QR' && order.orderId && typeof openRestaurantPayment === 'function') {
+        const orderPaymentMethod = document.getElementById('orderPaymentMethod')?.value || '';
+        if (orderPaymentMethod === 'QR' && order.orderId && typeof openRestaurantPayment === 'function') {
           // Đợi modal đóng xong rồi mới mở modal thanh toán
           setTimeout(() => {
             console.log('[Order] 💳 Opening payment modal for order:', order.orderId);
