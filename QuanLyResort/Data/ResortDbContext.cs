@@ -244,7 +244,7 @@ public class ResortDbContext : DbContext
                 "Status IN ('Pending', 'Confirmed', 'Preparing', 'Ready', 'Delivered', 'Cancelled')"));
             
             entity.ToTable(tb => tb.HasCheckConstraint("CK_RestaurantOrder_PaymentStatus", 
-                "PaymentStatus IN ('Unpaid', 'Paid', 'Refunded')"));
+                "PaymentStatus IN ('Unpaid', 'Paid', 'Refunded', 'AwaitingConfirmation')"));
             
             entity.ToTable(tb => tb.HasCheckConstraint("CK_RestaurantOrder_TotalAmount", 
                 "TotalAmount >= 0"));

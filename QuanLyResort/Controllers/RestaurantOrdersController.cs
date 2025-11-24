@@ -543,7 +543,15 @@ public class RestaurantOrdersController : ControllerBase
                 order.Status = "Confirmed";
             }
 
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception dbEx)
+            {
+                _logger.LogError(dbEx, $"[PayOrder] Database error when saving order {id}. OrderNumber: {order.OrderNumber}, PaymentStatus: {order.PaymentStatus}, Status: {order.Status}");
+                return StatusCode(500, new { message = "Lỗi khi lưu thông tin thanh toán", error = dbEx.Message });
+            }
 
             _logger.LogInformation($"Order {order.OrderNumber} paid via {request.PaymentMethod}");
 
