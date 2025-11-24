@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="vi" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default" data-assets-path="../assets/" data-template="vertical-menu-template-free">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+  
+  <title>Cài đặt - Resort Management</title>
+  
+  <meta name="description" content="Cài đặt hệ thống" />
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="../assets/img/favicon/favicon.ico" />
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet" />
+  
+  <!-- Icons -->
+  <link rel="stylesheet" href="../assets/vendor/fonts/boxicons.css" />
+  
+  <!-- Core CSS -->
+  <link rel="stylesheet" href="../assets/vendor/css/core.css" class="template-customizer-core-css" />
+  <link rel="stylesheet" href="../assets/vendor/css/theme-default.css" class="template-customizer-theme-css" />
+  <link rel="stylesheet" href="../assets/css/demo.css" />
+  <link rel="stylesheet" href="../assets/css/fix-scrollbar.css" />
+  <link rel="stylesheet" href="../assets/css/admin-custom-theme.css" />
+  
+  <!-- Helpers -->
+  <script src="../assets/vendor/js/helpers.js"></script>
+  <script src="../assets/js/config.js"></script>
+  
+  <style>
+    .settings-card {
+      border-radius: 20px;
+      border: 1px solid rgba(200, 169, 126, 0.15);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      transition: all 0.3s ease;
+      margin-bottom: 1.5rem;
+    }
+    
+    .settings-card:hover {
+      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+      transform: translateY(-2px);
+    }
+    
+    .setting-item {
+      padding: 1.25rem;
+      border-bottom: 1px solid rgba(200, 169, 126, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.3s ease;
+    }
+    
+    .setting-item:last-child {
+      border-bottom: none;
+    }
+    
+    .setting-item:hover {
+      background: rgba(200, 169, 126, 0.05);
+    }
+    
+    .setting-info {
+      flex: 1;
+    }
+    
+    .setting-label {
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 0.25rem;
+    }
+    
+    .setting-description {
+      font-size: 0.875rem;
+      color: #6b7280;
+    }
+    
+    .form-switch .form-check-input {
+      width: 3rem;
+      height: 1.5rem;
+      cursor: pointer;
+    }
+    
+    .form-switch .form-check-input:checked {
+      background-color: var(--resort-primary);
+      border-color: var(--resort-primary);
+    }
+    
+    .save-btn {
+      border-radius: 12px;
+      padding: 0.75rem 2rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    
+    .save-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Layout wrapper -->
+  <div class="layout-wrapper layout-content-navbar">
+    <div class="layout-container">
+      <!-- Menu - Load from common component -->
+      <div id="common-menu"></div>
+      <script src="../js/load-menu.js"></script>
+      <!-- / Menu -->
+
+      <!-- Layout container -->
+      <div class="layout-page">
+        <!-- Navbar -->
+        <nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme" id="layout-navbar">
+          <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
+            <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
+              <i class="bx bx-menu bx-sm"></i>
+            </a>
+          </div>
+
+          <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+            <div class="navbar-nav align-items-center">
+              <div class="nav-item d-flex align-items-center">
+                <h4 class="mb-0">⚙️ Cài đặt</h4>
+              </div>
+            </div>
+
+            <ul class="navbar-nav flex-row align-items-center ms-auto">
+              <li class="nav-item navbar-dropdown dropdown-user dropdown">
+                <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
+                  <div class="avatar avatar-online">
+                    <img src="../assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                  </div>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li>
+                    <a class="dropdown-item" href="profile.html">
+                      <div class="d-flex">
+                        <div class="flex-shrink-0 me-3">
+                          <div class="avatar avatar-online">
+                            <img src="../assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                          </div>
+                        </div>
+                        <div class="flex-grow-1">
+                          <span class="fw-semibold d-block" id="userDisplayName">Admin</span>
+                          <small class="text-muted" id="userRole">Quản trị viên</small>
+                        </div>
+                      </div>
+                    </a>
+                  </li>
+                  <li><div class="dropdown-divider"></div></li>
+                  <li>
+                    <a class="dropdown-item" href="profile.html">
+                      <i class="bx bx-user me-2"></i>
+                      <span class="align-middle">Hồ sơ của tôi</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item" href="settings.html">
+                      <i class="bx bx-cog me-2"></i>
+                      <span class="align-middle">Cài đặt</span>
+                    </a>
+                  </li>
+                  <li><div class="dropdown-divider"></div></li>
+                  <li>
+                    <a class="dropdown-item" href="javascript:void(0);" onclick="commonLogout(); return false;">
+                      <i class="bx bx-power-off me-2"></i>
+                      <span class="align-middle">Đăng xuất</span>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </nav>
+        <!-- / Navbar -->
+
+        <!-- Content wrapper -->
+        <div class="content-wrapper">
+          <!-- Content -->
+          <div class="container-xxl flex-grow-1 container-p-y">
+            <h4 class="fw-bold py-3 mb-4">
+              <span class="text-muted fw-light">Resort /</span> Cài đặt
+            </h4>
+
+            <!-- Notification Settings -->
+            <div class="card settings-card">
+              <div class="card-header">
+                <h5 class="mb-0">🔔 Thông báo</h5>
+              </div>
+              <div class="card-body">
+                <div class="setting-item">
+                  <div class="setting-info">
+                    <div class="setting-label">Hiển thị thông báo</div>
+                    <div class="setting-description">Nhận thông báo về các hoạt động quan trọng</div>
+                  </div>
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="notificationsEnabled" checked>
+                  </div>
+                </div>
+                <div class="setting-item">
+                  <div class="setting-info">
+                    <div class="setting-label">Thông báo email</div>
+                    <div class="setting-description">Gửi thông báo qua email</div>
+                  </div>
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="emailNotifications" checked>
+                  </div>
+                </div>
+                <div class="setting-item">
+                  <div class="setting-info">
+                    <div class="setting-label">Thông báo đặt phòng mới</div>
+                    <div class="setting-description">Nhận thông báo khi có đặt phòng mới</div>
+                  </div>
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="bookingNotifications" checked>
+                  </div>
+                </div>
+                <div class="setting-item">
+                  <div class="setting-info">
+                    <div class="setting-label">Thông báo thanh toán</div>
+                    <div class="setting-description">Nhận thông báo về các giao dịch thanh toán</div>
+                  </div>
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="paymentNotifications" checked>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Privacy Settings -->
+            <div class="card settings-card">
+              <div class="card-header">
+                <h5 class="mb-0">🔒 Bảo mật & Quyền riêng tư</h5>
+              </div>
+              <div class="card-body">
+                <div class="setting-item">
+                  <div class="setting-info">
+                    <div class="setting-label">Xác thực 2 lớp</div>
+                    <div class="setting-description">Bảo vệ tài khoản bằng xác thực 2 lớp</div>
+                  </div>
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="twoFactorAuth">
+                  </div>
+                </div>
+                <div class="setting-item">
+                  <div class="setting-info">
+                    <div class="setting-label">Đăng nhập tự động</div>
+                    <div class="setting-description">Giữ đăng nhập khi đóng trình duyệt</div>
+                  </div>
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="autoLogin" checked>
+                  </div>
+                </div>
+                <div class="setting-item">
+                  <div class="setting-info">
+                    <div class="setting-label">Hiển thị hoạt động</div>
+                    <div class="setting-description">Cho phép người khác xem hoạt động của bạn</div>
+                  </div>
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="showActivity" checked>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Display Settings -->
+            <div class="card settings-card">
+              <div class="card-header">
+                <h5 class="mb-0">🎨 Hiển thị</h5>
+              </div>
+              <div class="card-body">
+                <div class="setting-item">
+                  <div class="setting-info">
+                    <div class="setting-label">Chế độ tối</div>
+                    <div class="setting-description">Chuyển sang giao diện tối</div>
+                  </div>
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="darkMode">
+                  </div>
+                </div>
+                <div class="setting-item">
+                  <div class="setting-info">
+                    <div class="setting-label">Ngôn ngữ</div>
+                    <div class="setting-description">Chọn ngôn ngữ hiển thị</div>
+                  </div>
+                  <div>
+                    <select class="form-select" id="languageSelect" style="width: auto; min-width: 150px;">
+                      <option value="vi" selected>Tiếng Việt</option>
+                      <option value="en">English</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="setting-item">
+                  <div class="setting-info">
+                    <div class="setting-label">Mật độ hiển thị</div>
+                    <div class="setting-description">Điều chỉnh khoảng cách giữa các phần tử</div>
+                  </div>
+                  <div>
+                    <select class="form-select" id="densitySelect" style="width: auto; min-width: 150px;">
+                      <option value="comfortable" selected>Thoải mái</option>
+                      <option value="compact">Gọn gàng</option>
+                      <option value="spacious">Rộng rãi</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- System Settings -->
+            <div class="card settings-card">
+              <div class="card-header">
+                <h5 class="mb-0">⚙️ Hệ thống</h5>
+              </div>
+              <div class="card-body">
+                <div class="setting-item">
+                  <div class="setting-info">
+                    <div class="setting-label">Tự động làm mới dữ liệu</div>
+                    <div class="setting-description">Tự động tải lại dữ liệu mới mỗi 5 phút</div>
+                  </div>
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="autoRefresh" checked>
+                  </div>
+                </div>
+                <div class="setting-item">
+                  <div class="setting-info">
+                    <div class="setting-label">Hiển thị biểu đồ</div>
+                    <div class="setting-description">Hiển thị các biểu đồ thống kê trên dashboard</div>
+                  </div>
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="showCharts" checked>
+                  </div>
+                </div>
+                <div class="setting-item">
+                  <div class="setting-info">
+                    <div class="setting-label">Lưu lịch sử tìm kiếm</div>
+                    <div class="setting-description">Lưu lại các tìm kiếm gần đây</div>
+                  </div>
+                  <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="saveSearchHistory" checked>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Save Button -->
+            <div class="row">
+              <div class="col-12 text-end">
+                <button class="btn btn-primary save-btn" onclick="saveSettings()">
+                  <i class="bx bx-save me-2"></i> Lưu cài đặt
+                </button>
+              </div>
+            </div>
+          </div>
+          <!-- / Content -->
+        </div>
+        <!-- / Content wrapper -->
+      </div>
+      <!-- / Layout container -->
+    </div>
+    <!-- / Layout wrapper -->
+
+    <!-- Core JS -->
+    <script src="../assets/vendor/libs/jquery/jquery.js"></script>
+    <script src="../assets/vendor/libs/popper/popper.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../assets/vendor/js/menu.js"></script>
+    <script src="../assets/js/main.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/common-navbar.js"></script>
+    
+    <script>
+      // Load settings from localStorage
+      function loadSettings() {
+        const settings = JSON.parse(localStorage.getItem('userSettings') || '{}');
+        
+        // Notification settings
+        document.getElementById('notificationsEnabled').checked = settings.notificationsEnabled !== false;
+        document.getElementById('emailNotifications').checked = settings.emailNotifications !== false;
+        document.getElementById('bookingNotifications').checked = settings.bookingNotifications !== false;
+        document.getElementById('paymentNotifications').checked = settings.paymentNotifications !== false;
+        
+        // Privacy settings
+        document.getElementById('twoFactorAuth').checked = settings.twoFactorAuth === true;
+        document.getElementById('autoLogin').checked = settings.autoLogin !== false;
+        document.getElementById('showActivity').checked = settings.showActivity !== false;
+        
+        // Display settings
+        document.getElementById('darkMode').checked = settings.darkMode === true;
+        document.getElementById('languageSelect').value = settings.language || 'vi';
+        document.getElementById('densitySelect').value = settings.density || 'comfortable';
+        
+        // System settings
+        document.getElementById('autoRefresh').checked = settings.autoRefresh !== false;
+        document.getElementById('showCharts').checked = settings.showCharts !== false;
+        document.getElementById('saveSearchHistory').checked = settings.saveSearchHistory !== false;
+      }
+      
+      // Save settings to localStorage
+      function saveSettings() {
+        const settings = {
+          notificationsEnabled: document.getElementById('notificationsEnabled').checked,
+          emailNotifications: document.getElementById('emailNotifications').checked,
+          bookingNotifications: document.getElementById('bookingNotifications').checked,
+          paymentNotifications: document.getElementById('paymentNotifications').checked,
+          twoFactorAuth: document.getElementById('twoFactorAuth').checked,
+          autoLogin: document.getElementById('autoLogin').checked,
+          showActivity: document.getElementById('showActivity').checked,
+          darkMode: document.getElementById('darkMode').checked,
+          language: document.getElementById('languageSelect').value,
+          density: document.getElementById('densitySelect').value,
+          autoRefresh: document.getElementById('autoRefresh').checked,
+          showCharts: document.getElementById('showCharts').checked,
+          saveSearchHistory: document.getElementById('saveSearchHistory').checked
+        };
+        
+        localStorage.setItem('userSettings', JSON.stringify(settings));
+        
+        // Show success message
+        if (typeof showToast === 'function') {
+          showToast('Đã lưu cài đặt thành công!', 'success');
+        } else {
+          alert('Đã lưu cài đặt thành công!');
+        }
+      }
+      
+      // Initialize on page load
+      document.addEventListener('DOMContentLoaded', function() {
+        loadSettings();
+        loadNavbarUserInfo();
+      });
+    </script>
+  </body>
+</html>
+
