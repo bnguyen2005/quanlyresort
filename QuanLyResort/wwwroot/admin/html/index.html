@@ -1010,7 +1010,9 @@
     })();
   </script>
   <script>
-    const API_BASE = `${window.location.origin}/api/dashboard`;
+    // Use Reports API for accurate data including payments
+    const API_BASE = `${window.location.origin}/api/reports`;
+    const DASHBOARD_API = `${window.location.origin}/api/dashboard`;
     
     // Ensure stats cards are clickable
     document.addEventListener('DOMContentLoaded', function() {
@@ -1071,24 +1073,28 @@
       }, 100);
     });
 
-    // Load dashboard statistics
+    // Load dashboard statistics from Reports API (includes payments)
     async function loadDashboardStats() {
-      // Try both token and adminToken for compatibility
       const token = localStorage.getItem('token') || localStorage.getItem('adminToken');
       console.log('📊 Loading dashboard stats with token:', !!token);
 
       if (!token) {
         console.warn('⚠️ No token found, showing zero values');
         updateStatsCards({
-          today: { bookings: 0, revenue: 0, checkIns: 0, checkOuts: 0 },
-          occupancy: { rate: 0, occupied: 0, total: 0, available: 0 },
-          growth: { revenue: 0, bookings: 0 }
+          todayRevenue: 0,
+          todayOccupancy: 0,
+          thisMonthRevenue: 0,
+          revenueGrowth: 0,
+          totalBookings: 0,
+          activeBookings: 0,
+          pendingBookings: 0
         });
         return;
       }
 
       try {
-        const response = await fetch(`${API_BASE}/stats`, {
+        // Use Reports API for accurate payment data
+        const response = await fetch(`${API_BASE}/dashboard-stats`, {
           headers: { 
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -1104,29 +1110,74 @@
         } else {
           const errorText = await response.text();
           console.error('❌ Dashboard API error:', response.status, errorText);
-          console.log('📊 Showing zero values instead of sample data');
+          // Try fallback to dashboard API
+          try {
+            const fallbackResponse = await fetch(`${DASHBOARD_API}/stats`, {
+              headers: { 
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }
+            });
+            if (fallbackResponse.ok) {
+              const fallbackData = await fallbackResponse.json();
+              console.log('✅ Using fallback dashboard data');
+              updateStatsCards(fallbackData);
+              return;
+            }
+          } catch (e) {
+            console.error('❌ Fallback API also failed:', e);
+          }
+          console.log('📊 Showing zero values');
           updateStatsCards({
-            today: { bookings: 0, revenue: 0, checkIns: 0, checkOuts: 0 },
-            occupancy: { rate: 0, occupied: 0, total: 0, available: 0 },
-            growth: { revenue: 0, bookings: 0 }
+            todayRevenue: 0,
+            todayOccupancy: 0,
+            thisMonthRevenue: 0,
+            revenueGrowth: 0,
+            totalBookings: 0,
+            activeBookings: 0,
+            pendingBookings: 0
           });
         }
       } catch (error) {
         console.error('❌ Error loading dashboard stats:', error);
         updateStatsCards({
-          today: { bookings: 0, revenue: 0, checkIns: 0, checkOuts: 0 },
-          occupancy: { rate: 0, occupied: 0, total: 0, available: 0 },
-          growth: { revenue: 0, bookings: 0 }
+          todayRevenue: 0,
+          todayOccupancy: 0,
+          thisMonthRevenue: 0,
+          revenueGrowth: 0,
+          totalBookings: 0,
+          activeBookings: 0,
+          pendingBookings: 0
         });
       }
     }
 
     function updateStatsCards(data) {
       const formatCurrencyFn = window.formatCurrency || formatCurrency;
-      document.getElementById('todayBookings').textContent = data.today.bookings;
-      document.getElementById('todayRevenue').textContent = formatCurrencyFn(data.today.revenue);
-      document.getElementById('occupancyRate').textContent = data.occupancy.rate + '%';
-      document.getElementById('todayCheckIns').textContent = data.today.checkIns;
+      
+      // Handle both API response formats
+      const todayRevenue = data.todayRevenue || (data.today?.revenue || 0);
+      const todayOccupancy = data.todayOccupancy || (data.occupancy?.rate || 0);
+      const revenueGrowth = data.revenueGrowth || (data.growth?.revenue || 0);
+      const totalBookings = data.totalBookings || 0;
+      const activeBookings = data.activeBookings || 0;
+      const pendingBookings = data.pendingBookings || 0;
+      const todayBookings = data.today?.bookings || 0;
+      const todayCheckIns = data.today?.checkIns || 0;
+      
+      // Update main stats cards
+      if (document.getElementById('todayBookings')) {
+        document.getElementById('todayBookings').textContent = todayBookings;
+      }
+      if (document.getElementById('todayRevenue')) {
+        document.getElementById('todayRevenue').textContent = formatCurrencyFn(todayRevenue);
+      }
+      if (document.getElementById('occupancyRate')) {
+        document.getElementById('occupancyRate').textContent = Math.round(todayOccupancy) + '%';
+      }
+      if (document.getElementById('todayCheckIns')) {
+        document.getElementById('todayCheckIns').textContent = todayCheckIns;
+      }
       
       // Update percentage indicators on stats cards
       const bookingPercentage = document.getElementById('bookingPercentage');
@@ -1135,34 +1186,170 @@
       const checkinPercentage = document.getElementById('checkinPercentage');
       
       if (bookingPercentage) {
-        const bookingGrowth = data.growth.bookings || 0;
-        bookingPercentage.textContent = (bookingGrowth >= 0 ? '+' : '') + bookingGrowth + '%';
+        const bookingGrowth = data.growth?.bookings || 0;
+        bookingPercentage.textContent = (bookingGrowth >= 0 ? '+' : '') + Math.round(bookingGrowth) + '%';
       }
       
       if (revenuePercentage) {
-        const revenueGrowth = data.growth.revenue || 0;
-        revenuePercentage.textContent = (revenueGrowth >= 0 ? '+' : '') + revenueGrowth + '%';
+        revenuePercentage.textContent = (revenueGrowth >= 0 ? '+' : '') + Math.round(revenueGrowth) + '%';
       }
       
       if (occupancyPercentage) {
-        occupancyPercentage.textContent = data.occupancy.rate + '%';
+        occupancyPercentage.textContent = Math.round(todayOccupancy) + '%';
       }
       
       if (checkinPercentage) {
-        // Calculate check-in growth (simplified - can be improved with actual data)
-        const checkinGrowth = data.growth.checkIns || 0;
-        checkinPercentage.textContent = (checkinGrowth >= 0 ? '+' : '') + checkinGrowth + '%';
+        const checkinGrowth = data.growth?.checkIns || 0;
+        checkinPercentage.textContent = (checkinGrowth >= 0 ? '+' : '') + Math.round(checkinGrowth) + '%';
       }
       
       // Update growth indicators
       const revenueGrowthEl = document.getElementById('revenueGrowth');
       const bookingGrowthEl = document.getElementById('bookingGrowth');
       
-      revenueGrowthEl.textContent = (data.growth.revenue >= 0 ? '+' : '') + data.growth.revenue + '%';
-      revenueGrowthEl.className = data.growth.revenue >= 0 ? 'growth-positive' : 'growth-negative';
+      if (revenueGrowthEl) {
+        revenueGrowthEl.textContent = (revenueGrowth >= 0 ? '+' : '') + Math.round(revenueGrowth) + '%';
+        revenueGrowthEl.className = revenueGrowth >= 0 ? 'growth-positive' : 'growth-negative';
+      }
       
-      bookingGrowthEl.textContent = (data.growth.bookings >= 0 ? '+' : '') + data.growth.bookings + '%';
-      bookingGrowthEl.className = data.growth.bookings >= 0 ? 'growth-positive' : 'growth-negative';
+      if (bookingGrowthEl) {
+        const bookingGrowth = data.growth?.bookings || 0;
+        bookingGrowthEl.textContent = (bookingGrowth >= 0 ? '+' : '') + Math.round(bookingGrowth) + '%';
+        bookingGrowthEl.className = bookingGrowth >= 0 ? 'growth-positive' : 'growth-negative';
+      }
+      
+      // Update order statistics
+      updateOrderStatistics({
+        total: totalBookings,
+        active: activeBookings,
+        pending: pendingBookings
+      });
+      
+      // Load quick stats
+      loadQuickStats();
+    }
+    
+    // Load quick stats (customers, rooms, services, invoices)
+    async function loadQuickStats() {
+      const token = localStorage.getItem('token') || localStorage.getItem('adminToken');
+      if (!token) return;
+      
+      try {
+        // Load customers count
+        const customersResponse = await fetch(`${window.location.origin}/api/customermanagement`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (customersResponse.ok) {
+          const customers = await customersResponse.json();
+          if (document.getElementById('totalCustomers')) {
+            document.getElementById('totalCustomers').textContent = customers.length || 0;
+          }
+        }
+        
+        // Load rooms count
+        const roomsResponse = await fetch(`${window.location.origin}/api/rooms/statistics`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (roomsResponse.ok) {
+          const roomsData = await roomsResponse.json();
+          const availableRooms = roomsData.availableRooms || roomsData.totalRooms - (roomsData.occupiedRooms || 0);
+          if (document.getElementById('availableRooms')) {
+            document.getElementById('availableRooms').textContent = availableRooms || 0;
+          }
+        }
+        
+        // Load services count (from charges and restaurant orders)
+        const servicesResponse = await fetch(`${API_BASE}/service-usage?days=30`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (servicesResponse.ok) {
+          const servicesData = await servicesResponse.json();
+          const activeServices = servicesData.services?.length || 0;
+          if (document.getElementById('activeServices')) {
+            document.getElementById('activeServices').textContent = activeServices;
+          }
+        }
+        
+        // Load monthly invoices count
+        const thisMonth = new Date();
+        thisMonth.setDate(1);
+        thisMonth.setHours(0, 0, 0, 0);
+        const invoicesResponse = await fetch(`${window.location.origin}/api/invoices`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (invoicesResponse.ok) {
+          const invoices = await invoicesResponse.json();
+          const monthlyInvoices = invoices.filter(inv => {
+            if (!inv.paidDate) return false;
+            const paidDate = new Date(inv.paidDate);
+            return paidDate >= thisMonth && inv.status === 'Paid';
+          }).length;
+          if (document.getElementById('monthlyInvoices')) {
+            document.getElementById('monthlyInvoices').textContent = monthlyInvoices;
+          }
+        }
+      } catch (error) {
+        console.error('❌ Error loading quick stats:', error);
+      }
+    }
+    
+    function updateOrderStatistics(data) {
+      const total = data.total || 0;
+      const active = data.active || 0;
+      const pending = data.pending || 0;
+      const cancelled = total - active - pending;
+      
+      // Update stat boxes
+      if (document.getElementById('totalBookings')) {
+        document.getElementById('totalBookings').textContent = total;
+      }
+      if (document.getElementById('confirmedBookings')) {
+        document.getElementById('confirmedBookings').textContent = active;
+      }
+      if (document.getElementById('pendingBookings')) {
+        document.getElementById('pendingBookings').textContent = pending;
+      }
+      if (document.getElementById('cancelledBookings')) {
+        document.getElementById('cancelledBookings').textContent = cancelled;
+      }
+      
+      // Calculate percentages
+      const confirmedPct = total > 0 ? Math.round((active / total) * 100) : 0;
+      const pendingPct = total > 0 ? Math.round((pending / total) * 100) : 0;
+      const cancelledPct = total > 0 ? Math.round((cancelled / total) * 100) : 0;
+      
+      // Update percentage displays
+      if (document.getElementById('confirmedPct')) {
+        document.getElementById('confirmedPct').textContent = confirmedPct + '%';
+      }
+      if (document.getElementById('pendingPct')) {
+        document.getElementById('pendingPct').textContent = pendingPct + '%';
+      }
+      if (document.getElementById('cancelledPct')) {
+        document.getElementById('cancelledPct').textContent = cancelledPct + '%';
+      }
+      
+      // Update progress bars
+      if (document.getElementById('confirmedProgress')) {
+        document.getElementById('confirmedProgress').style.width = confirmedPct + '%';
+      }
+      if (document.getElementById('pendingProgress')) {
+        document.getElementById('pendingProgress').style.width = pendingPct + '%';
+      }
+      if (document.getElementById('cancelledProgress')) {
+        document.getElementById('cancelledProgress').style.width = cancelledPct + '%';
+      }
+      
+      // Update percentage labels
+      if (document.getElementById('confirmedPercent')) {
+        document.getElementById('confirmedPercent').textContent = confirmedPct + '%';
+      }
+      if (document.getElementById('pendingPercent')) {
+        document.getElementById('pendingPercent').textContent = pendingPct + '%';
+      }
+      if (document.getElementById('cancelledPercent')) {
+        document.getElementById('cancelledPercent').textContent = cancelledPct + '%';
+      }
     }
 
     async function loadRevenueTrends() {
@@ -1174,7 +1361,8 @@
           return;
         }
         
-        const response = await fetch(`${API_BASE}/revenue-trends?days=30`, {
+        // Try Reports API first (includes restaurant orders)
+        let response = await fetch(`${API_BASE}/revenue-summary?days=30`, {
           headers: { 
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -1186,12 +1374,29 @@
         if (response.ok) {
           const data = await response.json();
           console.log('✅ Revenue trends data loaded:', data);
-          createRevenueChart(data || []);
+          // Convert to chart format
+          const chartData = (data.dailyRevenue || []).map(item => ({
+            date: item.date,
+            amount: item.amount
+          }));
+          createRevenueChart(chartData);
         } else {
-          const errorText = await response.text();
-          console.error('❌ Revenue trends API error:', response.status, errorText);
-          console.log('📊 Showing empty chart instead of sample data');
-          createRevenueChart([]);
+          // Fallback to dashboard API
+          response = await fetch(`${DASHBOARD_API}/revenue-trends?days=30`, {
+            headers: { 
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            createRevenueChart(data || []);
+          } else {
+            const errorText = await response.text();
+            console.error('❌ Revenue trends API error:', response.status, errorText);
+            console.log('📊 Showing empty chart');
+            createRevenueChart([]);
+          }
         }
       } catch (error) {
         console.error('❌ Error loading revenue trends:', error);
@@ -1327,7 +1532,8 @@
           return;
         }
         
-        const response = await fetch(`${API_BASE}/occupancy-trends?days=7`, {
+        // Try Reports API first
+        let response = await fetch(`${API_BASE}/occupancy-report?days=7`, {
           headers: { 
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -1336,10 +1542,24 @@
 
         if (response.ok) {
           const data = await response.json();
-          createOccupancyChart(data || []);
+          // Convert to chart format if needed
+          const chartData = data.dailyOccupancy || data || [];
+          createOccupancyChart(chartData);
         } else {
-          console.warn('⚠️ Cannot load occupancy trends, showing empty chart');
-          createOccupancyChart([]);
+          // Fallback to dashboard API
+          response = await fetch(`${DASHBOARD_API}/occupancy-trends?days=7`, {
+            headers: { 
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            createOccupancyChart(data || []);
+          } else {
+            console.warn('⚠️ Cannot load occupancy trends, showing empty chart');
+            createOccupancyChart([]);
+          }
         }
       } catch (error) {
         console.error('Error loading occupancy trends:', error);
@@ -1408,7 +1628,8 @@
           return;
         }
         
-        const response = await fetch(`${API_BASE}/service-revenue?days=30`, {
+        // Use Reports API (includes restaurant orders)
+        let response = await fetch(`${API_BASE}/service-usage?days=30`, {
           headers: { 
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -1417,10 +1638,28 @@
 
         if (response.ok) {
           const data = await response.json();
-          createServiceChart(data || []);
+          // Convert to chart format
+          const chartData = (data.services || []).map(service => ({
+            serviceName: service.serviceName,
+            revenue: service.totalRevenue,
+            usage: service.totalUsage
+          }));
+          createServiceChart(chartData);
         } else {
-          console.warn('⚠️ Cannot load service revenue, showing empty chart');
-          createServiceChart([]);
+          // Fallback to dashboard API
+          response = await fetch(`${DASHBOARD_API}/service-revenue?days=30`, {
+            headers: { 
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            createServiceChart(data || []);
+          } else {
+            console.warn('⚠️ Cannot load service revenue, showing empty chart');
+            createServiceChart([]);
+          }
         }
       } catch (error) {
         console.error('Error loading service revenue:', error);
@@ -1541,7 +1780,8 @@
           return;
         }
         
-        const response = await fetch(`${API_BASE}/top-customers?limit=10`, {
+        // Use Dashboard API for top customers
+        const response = await fetch(`${DASHBOARD_API}/top-customers?limit=10`, {
           headers: { 
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -1599,7 +1839,8 @@
           return;
         }
         
-        const response = await fetch(`${API_BASE}/recent-activities?limit=15`, {
+        // Use Dashboard API for recent activities
+        const response = await fetch(`${DASHBOARD_API}/recent-activities?limit=15`, {
           headers: { 
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
