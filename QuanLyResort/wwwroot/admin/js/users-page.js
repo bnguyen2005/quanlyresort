@@ -57,10 +57,13 @@ function initUserPage() {
   }
 }
 
+let allUsers = []; // Store all users for stats calculation
+
 async function loadUsers() {
   console.log('🔵 [loadUsers] Function called');
   const role = document.getElementById('filterRole').value;
   const isActive = document.getElementById('filterStatus').value;
+  const search = document.getElementById('searchInput')?.value?.trim() || '';
   
   let url = `${API_BASE}/usermanagement?`;
   if (role) url += `role=${role}&`;
@@ -81,7 +84,22 @@ async function loadUsers() {
     if (!response.ok) throw new Error('Failed to load users');
 
     const users = await response.json();
+    allUsers = users; // Store for stats
     console.log('🔵 [loadUsers] Users loaded:', users.length, users);
+    
+    // Update stats
+    updateStats(users);
+    
+    // Apply search filter
+    let filteredUsers = users;
+    if (search) {
+      const searchLower = search.toLowerCase();
+      filteredUsers = users.filter(user => 
+        (user.username && user.username.toLowerCase().includes(searchLower)) ||
+        (user.email && user.email.toLowerCase().includes(searchLower)) ||
+        (user.fullName && user.fullName.toLowerCase().includes(searchLower))
+      );
+    }
     
     if (dataTable) {
       dataTable.destroy();
@@ -99,7 +117,7 @@ async function loadUsers() {
     };
 
     const tbody = document.querySelector('#usersTable tbody');
-    tbody.innerHTML = users.map(user => `
+    tbody.innerHTML = filteredUsers.map(user => `
       <tr>
         <td>${user.userId}</td>
         <td><strong>${user.username}</strong></td>
@@ -530,7 +548,7 @@ async function toggleActive(id, currentStatus) {
 
 async function deleteUser(id) {
   // Find user name for confirmation
-  const user = users.find(u => u.userId === id);
+  const user = allUsers.find(u => u.userId === id);
   const userName = user ? (user.fullName || user.username || user.email) : `User #${id}`;
   
   // Confirm delete
@@ -572,6 +590,36 @@ async function performDeleteUser(id) {
     }
   }
 }
+
+// Update stats cards
+function updateStats(users) {
+  const total = users.length;
+  const active = users.filter(u => u.isActive).length;
+  const inactive = users.filter(u => !u.isActive).length;
+  const admin = users.filter(u => u.role === 'Admin').length;
+  
+  const totalEl = document.getElementById('totalUsers');
+  const activeEl = document.getElementById('activeUsers');
+  const inactiveEl = document.getElementById('inactiveUsers');
+  const adminEl = document.getElementById('adminUsers');
+  
+  if (totalEl) totalEl.textContent = total;
+  if (activeEl) activeEl.textContent = active;
+  if (inactiveEl) inactiveEl.textContent = inactive;
+  if (adminEl) adminEl.textContent = admin;
+}
+
+// Add search on Enter key
+document.addEventListener('DOMContentLoaded', function() {
+  const searchInput = document.getElementById('searchInput');
+  if (searchInput) {
+    searchInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        loadUsers();
+      }
+    });
+  }
+});
 
 // Không cần khai báo logout() ở đây vì api.js đã có
 // Navbar sẽ dùng commonLogout() từ common-navbar.js hoặc logout() từ api.js

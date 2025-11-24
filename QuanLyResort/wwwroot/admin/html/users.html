@@ -105,42 +105,111 @@
         <div class="content-wrapper">
           <div class="container-xxl flex-grow-1 container-p-y">
             
-            <!-- Filters & Actions -->
-            <div class="card mb-4">
+            <!-- Stats Cards - Nalika Style -->
+            <div class="row mb-4">
+              <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+                <div class="nalika-stats-card">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h3 class="card-title mb-2" id="totalUsers">0</h3>
+                      <small class="text-white">Tổng số Users</small>
+                    </div>
+                    <div class="avatar">
+                      <i class="bx bx-user"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+                <div class="nalika-stats-card success">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h3 class="card-title mb-2" id="activeUsers">0</h3>
+                      <small class="text-white">Đang hoạt động</small>
+                    </div>
+                    <div class="avatar">
+                      <i class="bx bx-check-circle"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+                <div class="nalika-stats-card danger">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h3 class="card-title mb-2" id="inactiveUsers">0</h3>
+                      <small class="text-white">Đã khóa</small>
+                    </div>
+                    <div class="avatar">
+                      <i class="bx bx-lock"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+                <div class="nalika-stats-card info">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h3 class="card-title mb-2" id="adminUsers">0</h3>
+                      <small class="text-white">Quản trị viên</small>
+                    </div>
+                    <div class="avatar">
+                      <i class="bx bx-shield"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Filters & Actions - Nalika Style -->
+            <div class="nalika-card mb-4">
               <div class="card-body">
-                <div class="row">
+                <div class="row g-3">
                   <div class="col-md-3">
-                    <label class="form-label">Lọc theo Role</label>
-                    <select id="filterRole" class="form-select">
+                    <label class="form-label nalika-form-label">
+                      <i class="bx bx-user-circle"></i>
+                      Lọc theo Role
+                    </label>
+                    <select id="filterRole" class="form-select nalika-form-select">
                       <option value="">Tất cả</option>
-                      <option value="Admin">Admin</option>
-                      <option value="Manager">Manager</option>
-                      <option value="Business">Business</option>
-                      <option value="FrontDesk">FrontDesk</option>
-                      <option value="Cashier">Cashier</option>
-                      <option value="Accounting">Accounting</option>
-                      <option value="Inventory">Inventory</option>
-                      <option value="Housekeeping">Housekeeping</option>
-                      <option value="Maintenance">Maintenance</option>
-                      <option value="Customer">Customer</option>
+                      <option value="Admin">Admin - Quản trị viên</option>
+                      <option value="Manager">Manager - Quản lý</option>
+                      <option value="Business">Business - Kinh doanh</option>
+                      <option value="FrontDesk">FrontDesk - Lễ tân</option>
+                      <option value="Cashier">Cashier - Thu ngân</option>
+                      <option value="Accounting">Accounting - Kế toán</option>
+                      <option value="Inventory">Inventory - Kho</option>
+                      <option value="Housekeeping">Housekeeping - Dọn phòng</option>
+                      <option value="Maintenance">Maintenance - Kỹ thuật</option>
+                      <option value="Customer">Customer - Khách hàng</option>
                     </select>
                   </div>
                   <div class="col-md-3">
-                    <label class="form-label">Trạng thái</label>
-                    <select id="filterStatus" class="form-select">
+                    <label class="form-label nalika-form-label">
+                      <i class="bx bx-check-circle"></i>
+                      Trạng thái
+                    </label>
+                    <select id="filterStatus" class="form-select nalika-form-select">
                       <option value="">Tất cả</option>
                       <option value="true" selected>Đang hoạt động</option>
                       <option value="false">Đã khóa</option>
                     </select>
                   </div>
                   <div class="col-md-4">
+                    <label class="form-label nalika-form-label">
+                      <i class="bx bx-search"></i>
+                      Tìm kiếm
+                    </label>
+                    <input type="text" id="searchInput" class="form-control nalika-form-control" placeholder="Tìm theo username, email, tên...">
+                  </div>
+                  <div class="col-md-2">
                     <label class="form-label">&nbsp;</label>
-                    <div>
-                      <button class="btn btn-primary" onclick="loadUsers()">
-                        <i class="bx bx-search me-1"></i> Tìm kiếm
+                    <div class="d-flex gap-2">
+                      <button class="btn btn-primary nalika-btn-primary w-100" onclick="loadUsers()">
+                        <i class="bx bx-search me-1"></i> Tìm
                       </button>
-                      <button class="btn btn-success" onclick="openCreateModal()">
-                        <i class="bx bx-plus me-1"></i> Tạo User
+                      <button class="btn btn-success nalika-btn-success" onclick="openCreateModal()">
+                        <i class="bx bx-plus"></i>
                       </button>
                     </div>
                   </div>
@@ -181,12 +250,15 @@
     </div>
   </div>
 
-  <!-- Create/Edit User Modal -->
-  <div class="modal fade" id="userModal" tabindex="-1" aria-hidden="true">
+  <!-- Create/Edit User Modal - Nalika Style -->
+  <div class="modal fade nalika-modal" id="userModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="modalTitle">Tạo User Mới</h5>
+          <h5 class="modal-title" id="modalTitle">
+            <i class="bx bx-user-plus me-2"></i>
+            Tạo User Mới
+          </h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
@@ -263,7 +335,7 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-          <button type="button" class="btn btn-primary" onclick="saveUser()">
+          <button type="button" class="btn btn-primary nalika-btn-primary" onclick="saveUser()">
             <i class="bx bx-save me-1"></i> Lưu
           </button>
         </div>
@@ -271,12 +343,15 @@
     </div>
   </div>
 
-  <!-- Change Password Modal -->
-  <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-hidden="true">
+  <!-- Change Password Modal - Nalika Style -->
+  <div class="modal fade nalika-modal" id="changePasswordModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Đổi mật khẩu</h5>
+          <h5 class="modal-title">
+            <i class="bx bx-key me-2"></i>
+            Đổi mật khẩu
+          </h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
@@ -292,7 +367,9 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-          <button type="button" class="btn btn-primary" onclick="changePassword()">Đổi mật khẩu</button>
+          <button type="button" class="btn btn-primary nalika-btn-primary" onclick="changePassword()">
+            <i class="bx bx-key me-1"></i> Đổi mật khẩu
+          </button>
         </div>
       </div>
     </div>
