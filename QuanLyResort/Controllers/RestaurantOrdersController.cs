@@ -471,10 +471,17 @@ public class RestaurantOrdersController : ControllerBase
                 return BadRequest(new { message = "Đơn hàng đã được thanh toán" });
             }
 
-            // Validate PaymentMethod
+            // Validate PaymentMethod - use default if empty
             var validPaymentMethods = new[] { "Cash", "Card", "QR", "RoomCharge", "BankTransfer" };
-            if (string.IsNullOrEmpty(request.PaymentMethod) || !validPaymentMethods.Contains(request.PaymentMethod))
+            if (string.IsNullOrEmpty(request.PaymentMethod))
             {
+                _logger.LogWarning($"[PayOrder] PaymentMethod is empty, defaulting to Cash for order {id}");
+                request.PaymentMethod = "Cash";
+            }
+            
+            if (!validPaymentMethods.Contains(request.PaymentMethod))
+            {
+                _logger.LogWarning($"[PayOrder] Invalid PaymentMethod: {request.PaymentMethod} for order {id}");
                 return BadRequest(new { message = $"PaymentMethod không hợp lệ. Chỉ chấp nhận: {string.Join(", ", validPaymentMethods)}" });
             }
 
