@@ -569,46 +569,109 @@
     async function loadRevenueReport(startDate, endDate) {
       try {
         console.log('📊 Loading revenue report...', startDate, endDate);
-        // Try both token and adminToken for compatibility
         const token = localStorage.getItem('token') || localStorage.getItem('adminToken');
-        console.log('🔑 Token exists:', !!token);
-        
         if (!token) {
           console.warn('⚠️ No token for revenue report, cannot load data');
-          // Show empty charts instead of sample data
           createRevenueChart([]);
           createRevenueTypeChart([]);
           return;
         }
         
-        const response = await fetch(`${REPORTS_API_BASE}/revenue-summary?startDate=${startDate}&endDate=${endDate}`, {
-          headers: { 
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
+        const headers = {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        };
 
-        console.log('📡 Revenue API response:', response.status);
-        
+        // Try Reports API first
+        let response = await fetch(`${REPORTS_API_BASE}/revenue-summary?startDate=${startDate}&endDate=${endDate}`, { headers });
+        let data = null;
+
         if (response.ok) {
-          const data = await response.json();
-          console.log('📈 Revenue data:', data);
-          console.log('📅 Daily revenue count:', data.dailyRevenue?.length);
-          console.log('🏷️ Revenue types count:', data.revenueByType?.length);
-          
-          createRevenueChart(data.dailyRevenue);
-          createRevenueTypeChart(data.revenueByType);
+          data = await response.json();
+          console.log('📈 Revenue data from Reports API:', data);
         } else {
-          const errorText = await response.text();
-          console.error('❌ Revenue API error:', response.status, errorText);
+          const errorText = await response.text().catch(() => '');
+          console.warn('⚠️ Reports revenue API failed, trying fallback. Status:', response.status, errorText);
           
-          // Show empty charts when API fails (no sample data)
+          // Fallback: Try dashboard API with days parameter
+          const start = new Date(startDate);
+          const end = new Date(endDate);
+          const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+          
+          response = await fetch(`${DASHBOARD_API}/revenue-trends?days=${days}`, { headers });
+          if (response.ok) {
+            const dashboardData = await response.json();
+            console.log('📈 Revenue data from Dashboard API:', dashboardData);
+            // Convert dashboard format to reports format
+            data = {
+              dailyRevenue: dashboardData.map(item => ({
+                date: item.date || item.dateString,
+                amount: item.revenue || item.amount || 0
+              })),
+              revenueByType: [] // Dashboard API doesn't provide this
+            };
+          } else {
+            console.error('❌ Dashboard revenue API also failed:', response.status);
+          }
+        }
+
+        if (!data) {
           console.warn('⚠️ Cannot load revenue data, showing empty charts');
           createRevenueChart([]);
           createRevenueTypeChart([]);
+          return;
         }
+
+        // Process daily revenue: ensure date format is correct and fill missing dates
+        let dailyRevenue = (data.dailyRevenue || []).map(item => {
+          let dateStr = item.date;
+          // Handle DateTime objects from API
+          if (typeof dateStr === 'string' && dateStr.includes('T')) {
+            dateStr = dateStr.split('T')[0];
+          } else if (dateStr instanceof Date || (typeof dateStr === 'string' && !dateStr.includes('-'))) {
+            dateStr = new Date(dateStr).toISOString().split('T')[0];
+          }
+          return {
+            date: dateStr,
+            amount: Number(item.amount || 0)
+          };
+        });
+
+        // Fill missing dates in range
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        const filledRevenue = [];
+        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+          const dateStr = d.toISOString().split('T')[0];
+          const existing = dailyRevenue.find(r => r.date === dateStr || r.date === dateStr.split('T')[0]);
+          filledRevenue.push({
+            date: dateStr,
+            amount: existing ? existing.amount : 0
+          });
+        }
+
+        console.log('📅 Processed daily revenue count:', filledRevenue.length);
+        console.log('🏷️ Revenue types count:', data.revenueByType?.length);
+        
+        // Ensure revenueByType exists, if not try to derive from data
+        let revenueByType = data.revenueByType || [];
+        if (revenueByType.length === 0 && data.totalInvoices !== undefined && data.totalRestaurantOrders !== undefined) {
+          // Derive revenue by type from totals if available
+          revenueByType = [];
+          if (data.totalInvoices > 0) {
+            revenueByType.push({ type: 'Đặt phòng', amount: data.totalInvoices });
+          }
+          if (data.totalRestaurantOrders > 0) {
+            revenueByType.push({ type: 'Nhà hàng', amount: data.totalRestaurantOrders });
+          }
+        }
+        
+        createRevenueChart(filledRevenue);
+        createRevenueTypeChart(revenueByType);
       } catch (error) {
         console.error('❌ Error loading revenue report:', error);
+        createRevenueChart([]);
+        createRevenueTypeChart([]);
       }
     }
 
