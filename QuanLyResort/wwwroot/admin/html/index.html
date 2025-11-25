@@ -1668,54 +1668,101 @@
           return;
         }
         
-        // Use Dashboard API for top customers
-        const response = await fetch(`${DASHBOARD_API}/top-customers?limit=10`, {
-          headers: { 
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
+        const headers = {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        };
+
+        // Try to get top customers this month first
+        let response = await fetch(`${DASHBOARD_API}/top-customers?limit=10&thisMonth=true`, { headers });
+        let data = null;
 
         if (response.ok) {
-          const data = await response.json();
-          updateTopCustomers(data || []);
-        } else {
-          console.warn('⚠️ Cannot load top customers, showing empty list');
-          updateTopCustomers([]);
+          data = await response.json();
+          console.log('📊 Top customers this month:', data?.length || 0);
         }
+
+        // If no data this month, fallback to all-time top customers
+        if (!data || data.length === 0) {
+          console.log('📊 No customers this month, loading all-time top customers...');
+          response = await fetch(`${DASHBOARD_API}/top-customers?limit=10`, { headers });
+          if (response.ok) {
+            data = await response.json();
+            console.log('📊 All-time top customers:', data?.length || 0);
+          } else {
+            const errorText = await response.text().catch(() => '');
+            console.error('❌ Top customers API error:', response.status, errorText);
+          }
+        }
+
+        updateTopCustomers(data || []);
       } catch (error) {
-        console.error('Error loading top customers:', error);
+        console.error('❌ Error loading top customers:', error);
         updateTopCustomers([]);
       }
     }
 
     function updateTopCustomers(customers) {
       const container = document.getElementById('topCustomersContainer');
+      if (!container) {
+        console.error('❌ Top customers container not found');
+        return;
+      }
+      
       container.innerHTML = '';
 
       if (!customers || customers.length === 0) {
-        container.innerHTML = '<div class="text-center text-muted py-4">Chưa có dữ liệu khách hàng</div>';
+        container.innerHTML = '<div class="text-center text-muted py-4"><i class="bx bx-info-circle"></i><br>Chưa có dữ liệu khách hàng</div>';
         return;
       }
 
+      const formatCurrencySafe = window.formatCurrency || formatCurrency || ((amount) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount));
+      const formatDate = (dateStr) => {
+        if (!dateStr) return '';
+        try {
+          const date = new Date(dateStr);
+          return date.toLocaleDateString('vi-VN');
+        } catch {
+          return dateStr;
+        }
+      };
+
       customers.forEach((customer, index) => {
         const customerDiv = document.createElement('div');
-        customerDiv.className = 'customer-item';
-        const customerName = customer.customerName || customer.fullName || 'Khách hàng';
-        const totalSpent = customer.totalSpent || 0;
-        const bookingCount = customer.bookingCount || 0;
+        customerDiv.className = 'customer-item d-flex justify-content-between align-items-center mb-3 p-3 border rounded';
+        customerDiv.style.cssText = 'background: #f8f9fa; transition: all 0.3s;';
+        customerDiv.onmouseenter = function() { this.style.background = '#e9ecef'; this.style.transform = 'translateX(5px)'; };
+        customerDiv.onmouseleave = function() { this.style.background = '#f8f9fa'; this.style.transform = 'translateX(0)'; };
+        
+        const customerName = escapeHtml(customer.customerName || customer.fullName || 'Khách hàng');
+        const totalSpent = Number(customer.totalSpent || 0);
+        const bookingCount = Number(customer.bookingCount || 0);
+        const lastBookingDate = customer.lastBookingDate ? formatDate(customer.lastBookingDate) : '';
+        
         customerDiv.innerHTML = `
-          <div>
-            <strong>#${index + 1} ${customerName}</strong>
-            <br>
-            <small class="text-muted">${bookingCount} đặt phòng</small>
+          <div class="flex-grow-1">
+            <div class="d-flex align-items-center mb-1">
+              <span class="badge bg-primary me-2">#${index + 1}</span>
+              <strong>${customerName}</strong>
+            </div>
+            <div class="text-muted small">
+              <i class="bx bx-calendar-check"></i> ${bookingCount} đặt phòng
+              ${lastBookingDate ? ` • Lần cuối: ${lastBookingDate}` : ''}
+            </div>
           </div>
-          <div class="text-end">
-            <strong class="text-success">${(window.formatCurrency || formatCurrency)(totalSpent)}</strong>
+          <div class="text-end ms-3">
+            <div class="text-success fw-bold">${formatCurrencySafe(totalSpent)}</div>
+            ${customer.loyaltyPoints ? `<small class="text-muted">${customer.loyaltyPoints} điểm</small>` : ''}
           </div>
         `;
         container.appendChild(customerDiv);
       });
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
     }
 
     async function loadRecentActivities() {

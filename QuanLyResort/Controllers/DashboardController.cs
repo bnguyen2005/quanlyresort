@@ -318,12 +318,31 @@ namespace QuanLyResort.Controllers
 
         // GET: api/dashboard/top-customers
         [HttpGet("top-customers")]
-        public async Task<ActionResult<object>> GetTopCustomers([FromQuery] int limit = 10)
+        public async Task<ActionResult<object>> GetTopCustomers([FromQuery] int limit = 10, [FromQuery] bool thisMonth = false)
         {
             try
             {
+                var thisMonthStart = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+                
                 // Lấy top customers từ Customer table (TotalSpent đã được cập nhật)
-                var topCustomers = await _context.Customers
+                // Nếu thisMonth = true, chỉ lấy customers có invoices trong tháng này
+                var query = _context.Customers.AsQueryable();
+                
+                if (thisMonth)
+                {
+                    // Lấy customers có invoices trong tháng này
+                    var customersThisMonth = await _context.Invoices
+                        .Where(i => i.IssueDate >= thisMonthStart && 
+                                   i.Status != "Cancelled" &&
+                                   i.CustomerId.HasValue)
+                        .Select(i => i.CustomerId!.Value)
+                        .Distinct()
+                        .ToListAsync();
+                    
+                    query = query.Where(c => customersThisMonth.Contains(c.CustomerId));
+                }
+                
+                var topCustomers = await query
                     .Where(c => c.TotalSpent > 0)
                     .OrderByDescending(c => c.TotalSpent)
                     .Take(limit)
@@ -333,8 +352,14 @@ namespace QuanLyResort.Controllers
                         customerName = c.FullName,
                         email = c.Email,
                         totalSpent = c.TotalSpent,
-                        bookingCount = _context.Bookings.Count(b => b.CustomerId == c.CustomerId && b.Status != "Cancelled"),
-                        loyaltyPoints = c.LoyaltyPoints
+                        // Đếm từ Invoices thay vì Bookings
+                        bookingCount = _context.Invoices.Count(i => i.CustomerId == c.CustomerId && i.Status != "Cancelled"),
+                        loyaltyPoints = c.LoyaltyPoints,
+                        lastBookingDate = _context.Invoices
+                            .Where(i => i.CustomerId == c.CustomerId && i.Status != "Cancelled")
+                            .OrderByDescending(i => i.IssueDate)
+                            .Select(i => i.IssueDate)
+                            .FirstOrDefault()
                     })
                     .ToListAsync();
 
