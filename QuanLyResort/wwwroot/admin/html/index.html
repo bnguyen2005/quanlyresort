@@ -1822,10 +1822,6 @@
       };
     }
 
-    function formatDateTime(dateString) {
-      return new Date(dateString).toLocaleString('vi-VN');
-    }
-
     // Auto refresh every 5 minutes
     function startAutoRefresh() {
       refreshInterval = setInterval(refreshAllData, 300000); // 5 minutes
