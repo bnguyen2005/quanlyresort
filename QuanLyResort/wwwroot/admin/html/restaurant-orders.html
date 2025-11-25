@@ -94,6 +94,62 @@
           <!-- Content -->
           <div class="container-xxl flex-grow-1 container-p-y">
             
+            <!-- Stats Overview -->
+            <div class="row g-3 mb-4">
+              <div class="col-lg-3 col-md-6 col-12">
+                <div class="nalika-stats-card">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h3 class="card-title mb-2" id="totalOrders">0</h3>
+                      <small class="text-white">Tổng đơn đặt món</small>
+                    </div>
+                    <div class="avatar flex-shrink-0">
+                      <i class="bx bx-receipt text-white"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-3 col-md-6 col-12">
+                <div class="nalika-stats-card success">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h3 class="card-title mb-2" id="paidOrders">0</h3>
+                      <small class="text-white">Đã thanh toán</small>
+                    </div>
+                    <div class="avatar flex-shrink-0">
+                      <i class="bx bx-check-shield text-white"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-3 col-md-6 col-12">
+                <div class="nalika-stats-card danger">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h3 class="card-title mb-2" id="unpaidOrders">0</h3>
+                      <small class="text-white">Chưa thanh toán</small>
+                    </div>
+                    <div class="avatar flex-shrink-0">
+                      <i class="bx bx-time text-white"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-3 col-md-6 col-12">
+                <div class="nalika-stats-card info">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h3 class="card-title mb-2" id="restaurantRevenue">0 ₫</h3>
+                      <small class="text-white">Doanh thu đã thu</small>
+                    </div>
+                    <div class="avatar flex-shrink-0">
+                      <i class="bx bx-dollar-circle text-white"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <!-- Filters -->
             <div class="card mb-4">
               <div class="card-body">
@@ -505,6 +561,7 @@
         const orders = await apiGet(finalUrl);
         
         console.log('[loadOrders] ✅ Success! Received orders:', orders?.length || 0, orders);
+        updateOrdersStats(Array.isArray(orders) ? orders : []);
         
         const tbody = document.querySelector('#ordersTable tbody');
         if (!tbody) {
@@ -570,6 +627,7 @@
           `;
           tbody.innerHTML = emptyRow;
           console.log('[loadOrders] ℹ️ No orders found, showing empty message');
+          updateOrdersStats([]);
           
           // CRITICAL: Don't initialize DataTable when table is empty (has colspan row)
           // DataTables cannot handle colspan rows during initialization
@@ -639,6 +697,7 @@
         } else {
           alert('Lỗi khi tải danh sách đơn đặt món: ' + error.message);
         }
+        updateOrdersStats([]);
       } finally {
         hidePageLoading();
       }
@@ -739,7 +798,7 @@
         bootstrap.Modal.getInstance(document.getElementById('updateStatusModal')).hide();
         loadOrders();
       } catch (error) {
-        console.error('Error updating status:', error);
+      console.error('Error updating status:', error);
         if (typeof showToast === 'function') {
           showToast('Lỗi khi cập nhật trạng thái: ' + error.message, 'danger');
         } else {
@@ -758,6 +817,25 @@
 
     function formatCurrency(amount) {
       return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount || 0);
+    }
+
+    function updateOrdersStats(orders) {
+      const total = orders?.length || 0;
+      const paid = orders?.filter(order => order.paymentStatus === 'Paid').length || 0;
+      const unpaid = orders?.filter(order => order.paymentStatus !== 'Paid').length || 0;
+      const revenue = orders
+        ?.filter(order => order.paymentStatus === 'Paid')
+        .reduce((sum, order) => sum + (order.totalAmount || 0), 0) || 0;
+
+      const totalEl = document.getElementById('totalOrders');
+      const paidEl = document.getElementById('paidOrders');
+      const unpaidEl = document.getElementById('unpaidOrders');
+      const revenueEl = document.getElementById('restaurantRevenue');
+
+      if (totalEl) totalEl.textContent = total;
+      if (paidEl) paidEl.textContent = paid;
+      if (unpaidEl) unpaidEl.textContent = unpaid;
+      if (revenueEl) revenueEl.textContent = formatCurrency(revenue);
     }
 
     function getStatusBadge(status) {

@@ -31,6 +31,7 @@
   <link rel="stylesheet" href="../assets/css/demo.css" />
   <link rel="stylesheet" href="../assets/css/fix-scrollbar.css" />
   <link rel="stylesheet" href="../assets/css/admin-custom-theme.css" />
+  <link rel="stylesheet" href="../assets/css/nalika-style.css?v=20250127" />
   
   <!-- Vendors CSS -->
   <link rel="stylesheet" href="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
@@ -40,119 +41,6 @@
 
   <!-- Page CSS -->
   <style>
-    /* Modern Stats Cards - Inspired by Nalika Template */
-    .stats-card {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-radius: 20px;
-      padding: 2rem;
-      color: white;
-      margin-bottom: 1.5rem;
-      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
-      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      position: relative;
-      overflow: hidden;
-      border: none;
-    }
-    
-    .stats-card::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      right: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-      transition: all 0.5s ease;
-    }
-    
-    .stats-card:hover {
-      transform: translateY(-8px) scale(1.02);
-      box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
-    }
-    
-    .stats-card:hover::before {
-      transform: rotate(45deg);
-    }
-    
-    .stats-card .card-title {
-      font-size: 2.5rem;
-      font-weight: 700;
-      margin-bottom: 0.5rem;
-      text-shadow: 0 2px 10px rgba(0,0,0,0.2);
-    }
-    
-    .stats-card small {
-      font-size: 0.95rem;
-      opacity: 0.95;
-      font-weight: 500;
-      letter-spacing: 0.5px;
-    }
-    
-    .stats-card .avatar {
-      width: 70px;
-      height: 70px;
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 15px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      backdrop-filter: blur(10px);
-      border: 2px solid rgba(255, 255, 255, 0.3);
-    }
-    
-    .stats-card .avatar i {
-      font-size: 2.5rem;
-    }
-    
-    .stats-card.success {
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-      box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
-    }
-    
-    .stats-card.success:hover {
-      box-shadow: 0 12px 35px rgba(16, 185, 129, 0.4);
-    }
-    
-    .stats-card.warning {
-      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-      box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
-    }
-    
-    .stats-card.warning:hover {
-      box-shadow: 0 12px 35px rgba(245, 158, 11, 0.4);
-    }
-    
-    .stats-card.danger {
-      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-      box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
-    }
-    
-    .stats-card.danger:hover {
-      box-shadow: 0 12px 35px rgba(239, 68, 68, 0.4);
-    }
-    
-    .stats-card.info {
-      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-      box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
-    }
-    
-    .stats-card.info:hover {
-      box-shadow: 0 12px 35px rgba(59, 130, 246, 0.4);
-    }
-    
-    /* Percentage indicator */
-    .stats-card .percentage {
-      position: absolute;
-      top: 1rem;
-      right: 1rem;
-      background: rgba(255, 255, 255, 0.25);
-      padding: 0.5rem 1rem;
-      border-radius: 20px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      backdrop-filter: blur(10px);
-    }
-    
     /* Modern Chart Container */
     .chart-container {
       background: rgba(255, 255, 255, 0.98);
@@ -647,7 +535,7 @@
             <div class="row mb-4">
               <div class="col-lg-3 col-md-6 col-12 mb-4">
                 <a href="bookings.html" style="text-decoration: none; color: inherit;">
-                  <div class="stats-card" style="cursor: pointer;">
+                  <div class="nalika-stats-card" style="cursor: pointer;">
                     <div class="percentage" id="bookingPercentage">+0%</div>
                     <div class="d-flex justify-content-between align-items-center">
                       <div>
@@ -663,7 +551,7 @@
               </div>
               <div class="col-lg-3 col-md-6 col-12 mb-4">
                 <a href="reports.html" style="text-decoration: none; color: inherit;">
-                  <div class="stats-card success" style="cursor: pointer;">
+                  <div class="nalika-stats-card success" style="cursor: pointer;">
                     <div class="percentage" id="revenuePercentage">+0%</div>
                     <div class="d-flex justify-content-between align-items-center">
                       <div>
@@ -679,7 +567,7 @@
               </div>
               <div class="col-lg-3 col-md-6 col-12 mb-4">
                 <a href="rooms.html" style="text-decoration: none; color: inherit;">
-                  <div class="stats-card warning" style="cursor: pointer;">
+                  <div class="nalika-stats-card warning" style="cursor: pointer;">
                     <div class="percentage" id="occupancyPercentage">0%</div>
                     <div class="d-flex justify-content-between align-items-center">
                       <div>
@@ -695,7 +583,7 @@
               </div>
               <div class="col-lg-3 col-md-6 col-12 mb-4">
                 <a href="bookings.html?filter=checkin" style="text-decoration: none; color: inherit;">
-                  <div class="stats-card info" style="cursor: pointer;">
+                  <div class="nalika-stats-card info" style="cursor: pointer;">
                     <div class="percentage" id="checkinPercentage">+0%</div>
                     <div class="d-flex justify-content-between align-items-center">
                       <div>
@@ -1017,7 +905,7 @@
     // Ensure stats cards are clickable
     document.addEventListener('DOMContentLoaded', function() {
       // Add click handlers to stats cards if not already wrapped in <a>
-      const statsCards = document.querySelectorAll('.stats-card');
+      const statsCards = document.querySelectorAll('.nalika-stats-card');
       statsCards.forEach(card => {
         if (!card.closest('a')) {
           card.style.cursor = 'pointer';

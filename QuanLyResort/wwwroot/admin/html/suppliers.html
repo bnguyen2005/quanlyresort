@@ -41,6 +41,61 @@
               <button class="btn btn-primary" onclick="openCreateModal()"><i class="bx bx-plus me-1"></i> Thêm</button>
             </div>
 
+            <div class="row mb-4">
+              <div class="col-lg-3 col-md-6 col-12 mb-4">
+                <div class="nalika-stats-card">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h3 class="card-title mb-2" id="suppliersTotal">0</h3>
+                      <small class="text-white">Tổng nhà cung cấp</small>
+                    </div>
+                    <div class="avatar flex-shrink-0">
+                      <i class="bx bx-store text-white"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-3 col-md-6 col-12 mb-4">
+                <div class="nalika-stats-card success">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h3 class="card-title mb-2" id="activeSuppliersCount">0</h3>
+                      <small class="text-white">Đang hợp tác</small>
+                    </div>
+                    <div class="avatar flex-shrink-0">
+                      <i class="bx bx-check-circle text-white"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-3 col-md-6 col-12 mb-4">
+                <div class="nalika-stats-card danger">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h3 class="card-title mb-2" id="inactiveSuppliersCount">0</h3>
+                      <small class="text-white">Đang tạm dừng</small>
+                    </div>
+                    <div class="avatar flex-shrink-0">
+                      <i class="bx bx-hide text-white"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-3 col-md-6 col-12 mb-4">
+                <div class="nalika-stats-card info">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h3 class="card-title mb-2" id="avgItemsPerSupplier">0</h3>
+                      <small class="text-white">Sản phẩm/nhà cung cấp</small>
+                    </div>
+                    <div class="avatar flex-shrink-0">
+                      <i class="bx bx-layer text-white"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div class="card">
               <div class="card-body">
                 <div class="table-responsive">
@@ -155,6 +210,7 @@
         const resp = await fetch(url, { headers: token? { 'Authorization': `Bearer ${token}` } : {}, cache: 'no-store' });
         if (!resp.ok) throw new Error('Không tải được danh sách NCC');
         const data = await resp.json();
+        updateSupplierStats(Array.isArray(data) ? data : []);
         const tbody = document.querySelector('#suppliersTable tbody');
         tbody.innerHTML = data.map(s => `
           <tr>
@@ -183,6 +239,7 @@
       } catch (e) {
         console.error(e);
         showToast('Lỗi tải danh sách NCC', 'danger');
+        updateSupplierStats([]);
       } finally { hidePageLoading(); }
     }
 
@@ -239,6 +296,25 @@
           }
         }
       } catch (_) { /* ignore */ }
+    }
+
+    function updateSupplierStats(suppliers) {
+      const list = Array.isArray(suppliers) ? suppliers : [];
+      const total = list.length;
+      const active = list.filter(s => s.isActive !== false).length;
+      const inactive = Math.max(total - active, 0);
+      const totalItems = list.reduce((sum, s) => sum + (s.itemCount || 0), 0);
+      const avgItems = total ? Math.round(totalItems / total) : 0;
+
+      const totalEl = document.getElementById('suppliersTotal');
+      const activeEl = document.getElementById('activeSuppliersCount');
+      const inactiveEl = document.getElementById('inactiveSuppliersCount');
+      const avgEl = document.getElementById('avgItemsPerSupplier');
+
+      if (totalEl) totalEl.textContent = total;
+      if (activeEl) activeEl.textContent = active;
+      if (inactiveEl) inactiveEl.textContent = inactive;
+      if (avgEl) avgEl.textContent = avgItems;
     }
 
     function openCreateModal() {

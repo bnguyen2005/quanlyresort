@@ -17,16 +17,13 @@
   <link rel="stylesheet" href="../assets/css/demo.css" />
   <link rel="stylesheet" href="../assets/css/fix-scrollbar.css" />
   <link rel="stylesheet" href="../assets/css/admin-custom-theme.css" />
+  <link rel="stylesheet" href="../assets/css/nalika-style.css?v=20250127" />
   <!-- Removed perfect-scrollbar.css to prevent duplicate scrollbar -->
   <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" />
   
   <style>
     /* Stats cards sẽ được override bởi admin-custom-theme.css */
     /* Giữ lại các style riêng cho trang reports */
-    .stats-card h3 {
-      color: white;
-      margin-bottom: 0.5rem;
-    }
     .chart-container {
       background: white;
       border-radius: 10px;
@@ -53,21 +50,16 @@
     .report-section {
       margin-bottom: 2rem;
     }
-    .metric-card {
-      text-align: center;
-      padding: 1rem;
-      border-radius: 8px;
-      background: white;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
     .metric-value {
-      font-size: 2rem;
-      font-weight: bold;
-      color: #5a67d8;
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.35rem;
     }
     .metric-label {
-      color: #666;
-      font-size: 0.9rem;
+      color: rgba(255,255,255,0.9);
+      font-weight: 500;
+      letter-spacing: 0.4px;
     }
     .growth-positive {
       color: #28a745;
@@ -192,32 +184,60 @@
             <!-- Dashboard Stats -->
             <div class="report-section">
               <h5>📈 Tổng quan hôm nay</h5>
-              <div class="row" id="dashboardStats">
-                <div class="col-md-3">
-                  <div class="metric-card">
-                    <div class="metric-value" id="todayRevenue">0 ₫</div>
-                    <div class="metric-label">Doanh thu hôm nay</div>
-                  </div>
-                </div>
-                <div class="col-md-3">
-                  <div class="metric-card">
-                    <div class="metric-value" id="todayOccupancy">0%</div>
-                    <div class="metric-label">Tỷ lệ lấp đầy</div>
-                  </div>
-                </div>
-                <div class="col-md-3">
-                  <div class="metric-card">
-                    <div class="metric-value" id="activeBookings">0</div>
-                    <div class="metric-label">Đặt phòng đang hoạt động</div>
-                  </div>
-                </div>
-                <div class="col-md-3">
-                  <div class="metric-card">
-                    <div class="metric-value" id="revenueGrowth">0%</div>
-                    <div class="metric-label">Tăng trưởng tháng này</div>
+            <div class="row" id="dashboardStats">
+              <div class="col-md-3">
+                <div class="nalika-stats-card">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <div class="metric-value" id="todayRevenue">0 ₫</div>
+                      <div class="metric-label">Doanh thu hôm nay</div>
+                    </div>
+                    <div class="avatar">
+                      <i class="bx bx-line-chart"></i>
+                    </div>
                   </div>
                 </div>
               </div>
+              <div class="col-md-3">
+                <div class="nalika-stats-card warning">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <div class="metric-value" id="todayOccupancy">0%</div>
+                      <div class="metric-label">Tỷ lệ lấp đầy</div>
+                    </div>
+                    <div class="avatar">
+                      <i class="bx bx-building-house"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="nalika-stats-card success">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <div class="metric-value" id="activeBookings">0</div>
+                      <div class="metric-label">Đặt phòng đang hoạt động</div>
+                    </div>
+                    <div class="avatar">
+                      <i class="bx bx-bed"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="nalika-stats-card info">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <div class="metric-value" id="revenueGrowth">0%</div>
+                      <div class="metric-label">Tăng trưởng tháng này</div>
+                    </div>
+                    <div class="avatar">
+                      <i class="bx bx-trending-up"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
             </div>
 
             <!-- Revenue Charts -->

@@ -76,11 +76,13 @@ async function loadMenuItems() {
 
     console.log('[loadMenuItems] Request URL:', url);
     const services = await apiGet(url);
+    const servicesList = Array.isArray(services) ? services : [];
     
-    console.log('[loadMenuItems] ✅ Success! Received services:', services?.length || 0);
+    console.log('[loadMenuItems] ✅ Success! Received services:', servicesList.length);
+    updateMenuStats(servicesList);
     
     // Filter by unit if specified
-    let filteredServices = services || [];
+    let filteredServices = servicesList.slice();
     if (unit) {
       filteredServices = filteredServices.filter(s => s.unit === unit);
     }
@@ -158,6 +160,7 @@ async function loadMenuItems() {
       `;
       tbody.innerHTML = emptyRow;
       console.log('[loadMenuItems] ℹ️ No menu items found');
+      updateMenuStats([]);
       return; // Don't initialize DataTable for empty state
     }
     
@@ -445,6 +448,25 @@ function formatVND(amount) {
     style: 'currency', 
     currency: 'VND' 
   }).format(amount || 0);
+}
+
+function updateMenuStats(services) {
+  const items = Array.isArray(services) ? services : [];
+  const total = items.length;
+  const active = items.filter(item => item.isActive).length;
+  const hidden = Math.max(total - active, 0);
+  const totalPrice = items.reduce((sum, item) => sum + (item.price || 0), 0);
+  const avgPrice = total ? totalPrice / total : 0;
+
+  const totalEl = document.getElementById('totalMenuItems');
+  const activeEl = document.getElementById('activeMenuItems');
+  const hiddenEl = document.getElementById('hiddenMenuItems');
+  const avgPriceEl = document.getElementById('avgMenuPrice');
+
+  if (totalEl) totalEl.textContent = total;
+  if (activeEl) activeEl.textContent = active;
+  if (hiddenEl) hiddenEl.textContent = hidden;
+  if (avgPriceEl) avgPriceEl.textContent = formatVND(avgPrice);
 }
 
 /**

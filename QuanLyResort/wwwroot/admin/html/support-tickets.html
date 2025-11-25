@@ -92,6 +92,61 @@
               </div>
             </div>
 
+            <div class="row mb-4">
+              <div class="col-lg-3 col-md-6 col-12 mb-4">
+                <div class="nalika-stats-card">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h3 class="card-title mb-2" id="totalTickets">0</h3>
+                      <small class="text-white">Tổng tickets</small>
+                    </div>
+                    <div class="avatar">
+                      <i class="bx bx-support text-white"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-3 col-md-6 col-12 mb-4">
+                <div class="nalika-stats-card warning">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h3 class="card-title mb-2" id="openTickets">0</h3>
+                      <small class="text-white">Đang mở</small>
+                    </div>
+                    <div class="avatar">
+                      <i class="bx bx-timer text-white"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-3 col-md-6 col-12 mb-4">
+                <div class="nalika-stats-card info">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h3 class="card-title mb-2" id="inProgressTickets">0</h3>
+                      <small class="text-white">Đang xử lý</small>
+                    </div>
+                    <div class="avatar">
+                      <i class="bx bx-loader-circle text-white"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-3 col-md-6 col-12 mb-4">
+                <div class="nalika-stats-card success">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h3 class="card-title mb-2" id="resolvedTickets">0</h3>
+                      <small class="text-white">Đã giải quyết</small>
+                    </div>
+                    <div class="avatar">
+                      <i class="bx bx-badge-check text-white"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <!-- Filters -->
             <div class="card mb-4">
               <div class="card-body">
@@ -414,6 +469,7 @@
         console.log(`${logPrefix} [${timestamp}] ✅ Processed tickets count:`, allTickets.length);
         
         renderTickets();
+        updateTicketStats(allTickets);
         console.log(`${logPrefix} [${timestamp}] ========== END loadTickets (SUCCESS) ==========`);
       } catch (error) {
         console.error(`${logPrefix} [${timestamp}] ❌ ========== ERROR in loadTickets ==========`);
@@ -428,6 +484,7 @@
         } else {
           alert('Lỗi khi tải tickets: ' + error.message);
         }
+        updateTicketStats([]);
       }
     }
 
@@ -464,6 +521,24 @@
       } catch (e) {
         console.error('[Tickets] Error initializing DataTable:', e);
       }
+    }
+
+    function updateTicketStats(tickets) {
+      const list = Array.isArray(tickets) ? tickets : [];
+      const total = list.length;
+      const openCount = list.filter(t => t.status === 'Open').length;
+      const inProgressCount = list.filter(t => t.status === 'InProgress' || t.status === 'WaitingCustomer').length;
+      const resolvedCount = list.filter(t => t.status === 'Resolved' || t.status === 'Closed').length;
+
+      const totalEl = document.getElementById('totalTickets');
+      const openEl = document.getElementById('openTickets');
+      const inProgressEl = document.getElementById('inProgressTickets');
+      const resolvedEl = document.getElementById('resolvedTickets');
+
+      if (totalEl) totalEl.textContent = total;
+      if (openEl) openEl.textContent = openCount;
+      if (inProgressEl) inProgressEl.textContent = inProgressCount;
+      if (resolvedEl) resolvedEl.textContent = resolvedCount;
     }
 
     // Render tickets

@@ -97,6 +97,7 @@ async function loadCoupons() {
         console.warn('⚠️ [loadCoupons] API endpoint /api/coupons not found (404). Backend API may not be implemented yet.');
         renderCouponsTable([]);
         showToast('API mã giảm giá chưa được triển khai. Vui lòng liên hệ quản trị viên.', 'warning');
+        updateCouponStats([]);
         return;
       }
       const errorText = await response.text().catch(() => '');
@@ -118,11 +119,13 @@ async function loadCoupons() {
     
     console.log('🔵 [loadCoupons] Coupons array:', couponsArray.length || 0);
     renderCouponsTable(couponsArray);
+    updateCouponStats(couponsArray);
     
   } catch (error) {
     console.error('❌ [loadCoupons] Error:', error);
     showToast('Lỗi khi tải danh sách mã giảm giá: ' + error.message, 'danger');
     renderCouponsTable([]);
+    updateCouponStats([]);
   }
 }
 
@@ -246,6 +249,27 @@ function renderCouponsTable(couponsData) {
       showToast('Lỗi khởi tạo bảng dữ liệu: ' + e.message, 'danger');
     }
   }, 150);
+}
+
+function updateCouponStats(couponsData) {
+  const list = Array.isArray(couponsData) ? couponsData : [];
+  const total = list.length;
+  const active = list.filter(coupon => coupon.isActive !== false).length;
+  const inactive = Math.max(total - active, 0);
+  const totalUsage = list.reduce((sum, coupon) => {
+    const uses = coupon.usesCount ?? coupon.usedCount ?? 0;
+    return sum + uses;
+  }, 0);
+
+  const totalEl = document.getElementById('totalCoupons');
+  const activeEl = document.getElementById('activeCoupons');
+  const inactiveEl = document.getElementById('inactiveCoupons');
+  const usageEl = document.getElementById('totalCouponUsage');
+
+  if (totalEl) totalEl.textContent = total;
+  if (activeEl) activeEl.textContent = active;
+  if (inactiveEl) inactiveEl.textContent = inactive;
+  if (usageEl) usageEl.textContent = totalUsage;
 }
 
 function openCreateModal() {

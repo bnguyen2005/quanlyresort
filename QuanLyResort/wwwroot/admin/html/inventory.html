@@ -33,32 +33,6 @@
 
   <!-- Page CSS -->
   <style>
-    .stats-card {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-radius: 15px;
-      padding: 1.5rem;
-      color: white;
-      margin-bottom: 1.5rem;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    }
-    
-    .stats-card.danger {
-      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-    }
-    
-    .stats-card.success {
-      background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
-    }
-    
-    .stats-card.warning {
-      background: linear-gradient(135deg, #feca57 0%, #ff9ff3 100%);
-    }
-    
-    .stats-card h3 {
-      color: white;
-      margin-bottom: 0.5rem;
-    }
-    
     .inventory-filters {
       background: #f8f9fa;
       padding: 1rem;
@@ -202,8 +176,8 @@
             <!-- Stats Cards -->
             <div class="row">
               <div class="col-lg-3 col-md-6 col-12 mb-4">
-                <div class="stats-card">
-                  <div class="d-flex justify-content-between">
+                <div class="nalika-stats-card">
+                  <div class="d-flex justify-content-between align-items-center">
                     <div>
                       <h3 class="card-title mb-2" id="totalItems">0</h3>
                       <small class="text-white">Tổng sản phẩm</small>
@@ -215,8 +189,8 @@
                 </div>
               </div>
               <div class="col-lg-3 col-md-6 col-12 mb-4">
-                <div class="stats-card danger">
-                  <div class="d-flex justify-content-between">
+                <div class="nalika-stats-card danger">
+                  <div class="d-flex justify-content-between align-items-center">
                     <div>
                       <h3 class="card-title mb-2" id="lowStockItems">0</h3>
                       <small class="text-white">Sắp hết hàng</small>
@@ -228,8 +202,8 @@
                 </div>
               </div>
               <div class="col-lg-3 col-md-6 col-12 mb-4">
-                <div class="stats-card success">
-                  <div class="d-flex justify-content-between">
+                <div class="nalika-stats-card success">
+                  <div class="d-flex justify-content-between align-items-center">
                     <div>
                       <h3 class="card-title mb-2" id="totalValue">0₫</h3>
                       <small class="text-white">Giá trị tồn kho</small>
@@ -241,8 +215,8 @@
                 </div>
               </div>
               <div class="col-lg-3 col-md-6 col-12 mb-4">
-                <div class="stats-card warning">
-                  <div class="d-flex justify-content-between">
+                <div class="nalika-stats-card warning">
+                  <div class="d-flex justify-content-between align-items-center">
                     <div>
                       <h3 class="card-title mb-2" id="totalSuppliers">0</h3>
                       <small class="text-white">Nhà cung cấp</small>
