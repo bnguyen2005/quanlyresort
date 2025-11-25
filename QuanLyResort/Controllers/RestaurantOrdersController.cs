@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuanLyResort.Data;
 using QuanLyResort.Models;
+using QuanLyResort.Services;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 
@@ -14,11 +15,16 @@ public class RestaurantOrdersController : ControllerBase
 {
     private readonly ResortDbContext _context;
     private readonly ILogger<RestaurantOrdersController> _logger;
+    private readonly INotificationManager _notificationManager;
 
-    public RestaurantOrdersController(ResortDbContext context, ILogger<RestaurantOrdersController> logger)
+    public RestaurantOrdersController(
+        ResortDbContext context, 
+        ILogger<RestaurantOrdersController> logger,
+        INotificationManager notificationManager)
     {
         _context = context;
         _logger = logger;
+        _notificationManager = notificationManager;
     }
 
     /// <summary>
@@ -206,6 +212,19 @@ public class RestaurantOrdersController : ControllerBase
             }
 
             _logger.LogInformation($"[CreateOrder] ✅ Restaurant order created: {order.OrderNumber} by CustomerId: {request.CustomerId}");
+
+            // Send order confirmation notification
+            if (request.CustomerId.HasValue && createdOrder != null)
+            {
+                _ = Task.Run(async () =>
+                {
+                    await _notificationManager.SendOrderConfirmationAsync(
+                        request.CustomerId.Value,
+                        order.OrderNumber,
+                        order.TotalAmount
+                    );
+                });
+            }
 
             return CreatedAtAction(nameof(GetOrderById), new { id = order.OrderId }, createdOrder);
         }
@@ -626,6 +645,20 @@ public class RestaurantOrdersController : ControllerBase
 
             _logger.LogInformation($"Order {order.OrderNumber} paid via {request.PaymentMethod}");
 
+            // Send payment confirmation notification (only if payment is actually completed)
+            if (order.PaymentStatus == "Paid" && order.CustomerId.HasValue)
+            {
+                _ = Task.Run(async () =>
+                {
+                    await _notificationManager.SendPaymentConfirmationAsync(
+                        order.CustomerId.Value,
+                        order.OrderNumber,
+                        order.TotalAmount,
+                        request.PaymentMethod
+                    );
+                });
+            }
+
             return Ok(new { message = "Thanh toán thành công", order });
         }
         catch (Exception ex)
@@ -718,6 +751,20 @@ public class RestaurantOrdersController : ControllerBase
             await _context.SaveChangesAsync();
             
             _logger.LogInformation($"[ApproveCashPayment] ✅✅✅ SUCCESS: Order {id} (OrderNumber: {order.OrderNumber}) approved! Final Status='{order.Status}', PaymentStatus='{order.PaymentStatus}'");
+            
+            // Send payment confirmation notification after admin approval
+            if (order.PaymentStatus == "Paid" && order.CustomerId.HasValue)
+            {
+                _ = Task.Run(async () =>
+                {
+                    await _notificationManager.SendPaymentConfirmationAsync(
+                        order.CustomerId.Value,
+                        order.OrderNumber,
+                        order.TotalAmount,
+                        "Cash"
+                    );
+                });
+            }
             
             return Ok(new { message = "Xác nhận thanh toán tiền mặt thành công", order });
         }

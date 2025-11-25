@@ -19,14 +19,22 @@ public class InvoicesController : ControllerBase
     private readonly IAuditService _auditService;
     private readonly IBookingService _bookingService;
     private readonly ILogger<InvoicesController> _logger;
+    private readonly INotificationManager _notificationManager;
 
-    public InvoicesController(IInvoiceService invoiceService, ResortDbContext context, IAuditService auditService, IBookingService bookingService, ILogger<InvoicesController> logger)
+    public InvoicesController(
+        IInvoiceService invoiceService, 
+        ResortDbContext context, 
+        IAuditService auditService, 
+        IBookingService bookingService, 
+        ILogger<InvoicesController> logger,
+        INotificationManager notificationManager)
     {
         _invoiceService = invoiceService;
         _context = context;
         _auditService = auditService;
         _bookingService = bookingService;
         _logger = logger;
+        _notificationManager = notificationManager;
     }
 
     [HttpGet]
@@ -245,6 +253,22 @@ public class InvoicesController : ControllerBase
                 var finalBooking = await _bookingService.GetBookingByIdAsync(bookingId);
                 finalBookingStatus = finalBooking?.Status ?? "Unknown";
                 _logger.LogInformation($"[ProcessPayment] ✅✅✅ FINAL: Invoice {id} paid, Booking {bookingId} final status: '{finalBookingStatus}'");
+            }
+            
+            // Send payment confirmation notification
+            if (invoice != null && invoice.Status == "Paid" && invoice.CustomerId > 0)
+            {
+                var invoiceNumber = invoice.InvoiceNumber ?? $"INV{id:D6}";
+                var paymentAmount = invoice.PaidAmount > 0 ? invoice.PaidAmount : invoice.TotalAmount;
+                _ = Task.Run(async () =>
+                {
+                    await _notificationManager.SendPaymentConfirmationAsync(
+                        invoice.CustomerId,
+                        invoiceNumber,
+                        paymentAmount,
+                        request.PaymentMethod
+                    );
+                });
             }
             
             return Ok(new { 

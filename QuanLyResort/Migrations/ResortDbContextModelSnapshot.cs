@@ -950,7 +950,7 @@ namespace QuanLyResort.Migrations
                         {
                             t.HasCheckConstraint("CK_RestaurantOrder_PaymentMethod", "PaymentMethod IS NULL OR PaymentMethod IN ('Cash', 'Card', 'QR', 'RoomCharge', 'BankTransfer')");
 
-                            t.HasCheckConstraint("CK_RestaurantOrder_PaymentStatus", "PaymentStatus IN ('Unpaid', 'Paid', 'Refunded')");
+                            t.HasCheckConstraint("CK_RestaurantOrder_PaymentStatus", "PaymentStatus IN ('Unpaid', 'Paid', 'Refunded', 'AwaitingConfirmation')");
 
                             t.HasCheckConstraint("CK_RestaurantOrder_Status", "Status IN ('Pending', 'Confirmed', 'Preparing', 'Ready', 'Delivered', 'Cancelled')");
 
@@ -1522,6 +1522,18 @@ namespace QuanLyResort.Migrations
                     b.Property<string>("Role")
                         .IsRequired()
                         .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("TwoFactorEnabledAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TwoFactorRecoveryCodes")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TwoFactorSecret")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Username")

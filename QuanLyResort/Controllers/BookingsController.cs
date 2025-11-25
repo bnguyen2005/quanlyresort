@@ -16,12 +16,18 @@ public class BookingsController : ControllerBase
     private readonly IBookingService _bookingService;
     private readonly ResortDbContext _context;
     private readonly ILogger<BookingsController> _logger;
+    private readonly INotificationManager _notificationManager;
 
-    public BookingsController(IBookingService bookingService, ResortDbContext context, ILogger<BookingsController> logger)
+    public BookingsController(
+        IBookingService bookingService, 
+        ResortDbContext context, 
+        ILogger<BookingsController> logger,
+        INotificationManager notificationManager)
     {
         _bookingService = bookingService;
         _context = context;
         _logger = logger;
+        _notificationManager = notificationManager;
     }
 
     [HttpPost]
@@ -65,6 +71,23 @@ public class BookingsController : ControllerBase
             
             // Ensure invoice is loaded for response
             var bookingWithInvoice = await _bookingService.GetBookingByIdAsync(createdBooking.BookingId);
+            
+            // Send notification (email, SMS, in-app)
+            if (bookingWithInvoice != null && bookingWithInvoice.Invoice != null)
+            {
+                var bookingCode = $"BK{createdBooking.BookingId:D6}";
+                var totalAmount = bookingWithInvoice.Invoice.TotalAmount;
+                _ = Task.Run(async () =>
+                {
+                    await _notificationManager.SendBookingConfirmationAsync(
+                        request.CustomerId,
+                        bookingCode,
+                        request.CheckInDate,
+                        request.CheckOutDate,
+                        totalAmount
+                    );
+                });
+            }
             
             return CreatedAtAction(nameof(GetBookingById), new { id = createdBooking.BookingId }, bookingWithInvoice);
         }
