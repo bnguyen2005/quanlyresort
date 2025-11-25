@@ -341,26 +341,48 @@ namespace QuanLyResort.Controllers
                     query = query.Where(c => customersThisMonth.Contains(c.CustomerId));
                 }
                 
-                var topCustomers = await query
+                // Load customers với TotalSpent > 0 (không order ở đây vì SQLite không hỗ trợ ORDER BY decimal)
+                var customers = await query
                     .Where(c => c.TotalSpent > 0)
-                    .OrderByDescending(c => c.TotalSpent)
-                    .Take(limit)
                     .Select(c => new
                     {
                         customerId = c.CustomerId,
                         customerName = c.FullName,
                         email = c.Email,
                         totalSpent = c.TotalSpent,
-                        // Đếm từ Invoices thay vì Bookings
-                        bookingCount = _context.Invoices.Count(i => i.CustomerId == c.CustomerId && i.Status != "Cancelled"),
-                        loyaltyPoints = c.LoyaltyPoints,
-                        lastBookingDate = _context.Invoices
-                            .Where(i => i.CustomerId == c.CustomerId && i.Status != "Cancelled")
-                            .OrderByDescending(i => i.IssueDate)
-                            .Select(i => i.IssueDate)
-                            .FirstOrDefault()
+                        loyaltyPoints = c.LoyaltyPoints
                     })
                     .ToListAsync();
+
+                // Load booking counts và last booking dates riêng
+                var customerIds = customers.Select(c => c.customerId).ToList();
+                var invoiceCounts = await _context.Invoices
+                    .Where(i => customerIds.Contains(i.CustomerId) && i.Status != "Cancelled")
+                    .GroupBy(i => i.CustomerId)
+                    .Select(g => new { CustomerId = g.Key, Count = g.Count() })
+                    .ToListAsync();
+                
+                var lastBookingDates = await _context.Invoices
+                    .Where(i => customerIds.Contains(i.CustomerId) && i.Status != "Cancelled")
+                    .GroupBy(i => i.CustomerId)
+                    .Select(g => new { CustomerId = g.Key, LastDate = g.Max(i => i.IssueDate) })
+                    .ToListAsync();
+
+                // Combine data và sắp xếp trên client side (LINQ to Objects)
+                var topCustomers = customers
+                    .Select(c => new
+                    {
+                        customerId = c.customerId,
+                        customerName = c.customerName,
+                        email = c.email,
+                        totalSpent = c.totalSpent,
+                        bookingCount = invoiceCounts.FirstOrDefault(ic => ic.CustomerId == c.customerId)?.Count ?? 0,
+                        loyaltyPoints = c.loyaltyPoints,
+                        lastBookingDate = lastBookingDates.FirstOrDefault(lb => lb.CustomerId == c.customerId)?.LastDate
+                    })
+                    .OrderByDescending(c => c.totalSpent)
+                    .Take(limit)
+                    .ToList();
 
                 return Ok(topCustomers);
             }
