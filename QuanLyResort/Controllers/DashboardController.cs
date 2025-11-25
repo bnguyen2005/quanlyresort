@@ -325,7 +325,7 @@ namespace QuanLyResort.Controllers
                 var thisMonthStart = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
                 
                 // Tính toán TotalSpent từ Invoices đã thanh toán (Status = "Paid")
-                // Thay vì dùng TotalSpent từ Customer table
+                // Load invoices trước, sau đó tính tổng trên client side (SQLite không hỗ trợ Sum decimal)
                 var invoiceQuery = _context.Invoices
                     .Where(i => i.Status == "Paid" && i.CustomerId > 0);
                 
@@ -336,17 +336,27 @@ namespace QuanLyResort.Controllers
                                                            i.PaidDate.Value >= thisMonthStart);
                 }
                 
-                // Tính tổng chi tiêu và số lượng đặt phòng cho mỗi customer
-                var customerStats = await invoiceQuery
+                // Load invoices (không tính Sum ở đây vì SQLite không hỗ trợ)
+                var invoices = await invoiceQuery
+                    .Select(i => new
+                    {
+                        CustomerId = i.CustomerId,
+                        Amount = i.PaidAmount > 0 ? i.PaidAmount : i.TotalAmount,
+                        IssueDate = i.IssueDate
+                    })
+                    .ToListAsync();
+
+                // Tính tổng chi tiêu và số lượng đặt phòng cho mỗi customer trên client side
+                var customerStats = invoices
                     .GroupBy(i => i.CustomerId)
                     .Select(g => new
                     {
                         CustomerId = g.Key,
-                        TotalSpent = g.Sum(i => i.PaidAmount > 0 ? i.PaidAmount : i.TotalAmount),
+                        TotalSpent = g.Sum(i => i.Amount),
                         BookingCount = g.Count(),
                         LastBookingDate = g.Max(i => i.IssueDate)
                     })
-                    .ToListAsync();
+                    .ToList();
 
                 // Lấy thông tin customers từ Customer table
                 var customerIds = customerStats.Select(s => s.CustomerId).ToList();
