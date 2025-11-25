@@ -700,10 +700,6 @@
             if (awaitingConfirmationMsg) {
               awaitingConfirmationMsg.style.display = 'block';
             }
-            // Show unpaid badge
-            if (unpaidBadgeContainer) {
-              unpaidBadgeContainer.innerHTML = '<div class="unpaid-badge">Chưa thanh toán</div>';
-            }
           } else if (isCashPayment && (b.status === 'Pending' || b.status === 'Confirmed') && b.status !== 'Paid') {
             // Phương thức thanh toán là Cash - ẩn nút thanh toán, hiển thị message thanh toán tại khách sạn
             btnPay.style.display = 'none';
@@ -725,10 +721,6 @@
               awaitingConfirmationMsg.style.border = '2px solid #ffc107';
               awaitingConfirmationMsg.style.color = '#856404';
             }
-            // Show unpaid badge
-            if (unpaidBadgeContainer) {
-              unpaidBadgeContainer.innerHTML = '<div class="unpaid-badge">Chưa thanh toán</div>';
-            }
           } else if (canPay) {
             // Có thể thanh toán - hiển thị nút thanh toán
             btnPay.style.display = 'inline-flex';
@@ -737,10 +729,6 @@
             // Hide awaiting confirmation message
             if (awaitingConfirmationMsg) {
               awaitingConfirmationMsg.style.display = 'none';
-            }
-            // Show unpaid badge
-            if (unpaidBadgeContainer) {
-              unpaidBadgeContainer.innerHTML = '<div class="unpaid-badge">Chưa thanh toán</div>';
             }
           } else {
             // Đã thanh toán hoặc không thể thanh toán - ẩn tất cả

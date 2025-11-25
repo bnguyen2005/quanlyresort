@@ -972,11 +972,9 @@
         const hasCashRequest = hasCashPaymentRequest(booking);
         const isCashPayment = booking.paymentMethod === 'Cash' || booking.paymentMethod === 'PayAtHotel';
         const canPay = canPayBooking(booking);
-        const showUnpaidBadge = (booking.status === 'Pending' || booking.status === 'Confirmed') && booking.status !== 'Paid';
         
         return `
           <div class="booking-card" style="animation-delay:${0.1 * idx}s">
-            ${showUnpaidBadge ? '<div class="unpaid-badge">Chưa thanh toán</div>' : ''}
             <div class="booking-header">
               <div>
                 <div class="booking-code">#${booking.bookingCode || booking.bookingId}</div>
