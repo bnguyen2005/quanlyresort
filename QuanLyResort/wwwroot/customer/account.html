@@ -565,21 +565,46 @@
     }
 
     function renderProfile(customer) {
-      document.getElementById('profileName').textContent = customer.fullName || customer.email || 'Khách hàng';
-      document.getElementById('profileEmail').textContent = customer.email || '';
+      // Normalize field names từ API response (có thể là CustomerId hoặc customerId)
+      const normalized = {
+        fullName: customer.fullName || customer.FullName || '',
+        email: customer.email || customer.Email || '',
+        phoneNumber: customer.phoneNumber || customer.PhoneNumber || '',
+        dateOfBirth: customer.dateOfBirth || customer.DateOfBirth,
+        nationality: customer.nationality || customer.Nationality || 'Vietnam',
+        address: customer.address || customer.Address || '',
+        idCardNumber: customer.idCardNumber || customer.IdCardNumber || '',
+        passportNumber: customer.passportNumber || customer.PassportNumber || '',
+        totalSpent: customer.totalSpent || customer.TotalSpent || 0,
+        loyaltyPoints: customer.loyaltyPoints || customer.LoyaltyPoints || 0,
+        customerType: customer.customerType || customer.CustomerType || 'Regular',
+        customerId: customer.customerId || customer.CustomerId
+      };
       
-      document.getElementById('fullName').value = customer.fullName || '';
-      document.getElementById('email').value = customer.email || '';
-      document.getElementById('phoneNumber').value = customer.phoneNumber || '';
-      document.getElementById('dateOfBirth').value = formatDate(customer.dateOfBirth);
-      document.getElementById('nationality').value = customer.nationality || 'Vietnam';
-      document.getElementById('address').value = customer.address || '';
-      document.getElementById('idCardNumber').value = customer.idCardNumber || '';
-      document.getElementById('passportNumber').value = customer.passportNumber || '';
+      document.getElementById('profileName').textContent = normalized.fullName || normalized.email || 'Khách hàng';
+      document.getElementById('profileEmail').textContent = normalized.email || '';
       
-      document.getElementById('totalSpent').textContent = vnd(customer.totalSpent || 0);
-      document.getElementById('loyaltyPoints').textContent = customer.loyaltyPoints || 0;
-      document.getElementById('customerType').textContent = customer.customerType === 'VIP' ? 'VIP' : 'Thường';
+      document.getElementById('fullName').value = normalized.fullName;
+      document.getElementById('email').value = normalized.email;
+      document.getElementById('phoneNumber').value = normalized.phoneNumber;
+      document.getElementById('dateOfBirth').value = formatDate(normalized.dateOfBirth);
+      document.getElementById('nationality').value = normalized.nationality;
+      document.getElementById('address').value = normalized.address;
+      document.getElementById('idCardNumber').value = normalized.idCardNumber;
+      document.getElementById('passportNumber').value = normalized.passportNumber;
+      
+      document.getElementById('totalSpent').textContent = vnd(normalized.totalSpent);
+      document.getElementById('loyaltyPoints').textContent = normalized.loyaltyPoints;
+      document.getElementById('customerType').textContent = normalized.customerType === 'VIP' ? 'VIP' : 'Thường';
+      
+      // Đảm bảo email luôn readonly
+      document.getElementById('email').readOnly = true;
+      document.getElementById('email').style.cursor = 'not-allowed';
+      
+      // Cập nhật customerId nếu có
+      if (normalized.customerId && !customerId) {
+        customerId = normalized.customerId;
+      }
       
       // Load booking count
       loadBookingCount();
@@ -609,13 +634,21 @@
       isEditing = !isEditing;
       const inputs = document.querySelectorAll('.info-value input, .info-value textarea, .info-value select');
       inputs.forEach(input => {
-        input.readOnly = !isEditing;
+        // Email luôn readonly, không cho sửa
+        if (input.id === 'email') {
+          input.readOnly = true;
+          input.style.cursor = 'not-allowed';
+          input.style.opacity = '0.7';
+        } else {
+          input.readOnly = !isEditing;
+        }
+        
         if (isEditing && input.id !== 'email') { // Email không cho sửa
           input.style.borderBottom = '2px solid #C8A97E';
           input.style.padding = '8px 12px';
           input.style.background = 'rgba(200,169,126,0.05)';
           input.style.borderRadius = '8px';
-        } else {
+        } else if (input.id !== 'email') {
           input.style.borderBottom = 'none';
           input.style.padding = '8px 0';
           input.style.background = 'transparent';
@@ -658,18 +691,23 @@
           return;
         }
 
+        // Email không thể thay đổi, lấy từ originalData
+        const email = originalData.email || originalData.Email || document.getElementById('email').value.trim();
+        
         const updateData = {
           fullName: fullName,
-          email: document.getElementById('email').value.trim(), // Email không thay đổi được nhưng vẫn gửi
+          email: email, // Email không thay đổi được, lấy từ dữ liệu gốc
           phoneNumber: document.getElementById('phoneNumber').value.trim(),
           dateOfBirth: document.getElementById('dateOfBirth').value || null,
           nationality: document.getElementById('nationality').value.trim() || 'Vietnam',
           address: document.getElementById('address').value.trim(),
           idCardNumber: document.getElementById('idCardNumber').value.trim(),
           passportNumber: document.getElementById('passportNumber').value.trim(),
-          customerType: originalData.customerType || 'Regular',
-          notes: originalData.notes || ''
+          customerType: originalData.customerType || originalData.CustomerType || 'Regular',
+          notes: originalData.notes || originalData.Notes || ''
         };
+        
+        console.log('📤 [saveProfile] Sending update data:', updateData);
 
         showPageLoading('Đang lưu thông tin...');
         
@@ -690,8 +728,50 @@
         }
 
         const response = await resp.json();
-        // API trả về { message: "...", customer: {...} }
-        const updated = response.customer || response;
+        console.log('✅ [saveProfile] API Response:', response);
+        
+        // API trả về { message: "...", customer: {...} } hoặc trực tiếp customer object
+        let updated = response.customer || response;
+        
+        // Đảm bảo customerId được lấy đúng từ response
+        if (updated.customerId && !customerId) {
+          customerId = updated.customerId;
+        } else if (updated.CustomerId && !customerId) {
+          customerId = updated.CustomerId;
+        }
+        
+        // Normalize field names (API có thể trả về CustomerId hoặc customerId)
+        if (updated.CustomerId && !updated.customerId) {
+          updated.customerId = updated.CustomerId;
+        }
+        if (updated.FullName && !updated.fullName) {
+          updated.fullName = updated.FullName;
+        }
+        if (updated.Email && !updated.email) {
+          updated.email = updated.Email;
+        }
+        if (updated.PhoneNumber && !updated.phoneNumber) {
+          updated.phoneNumber = updated.PhoneNumber;
+        }
+        if (updated.DateOfBirth && !updated.dateOfBirth) {
+          updated.dateOfBirth = updated.DateOfBirth;
+        }
+        if (updated.Nationality && !updated.nationality) {
+          updated.nationality = updated.Nationality;
+        }
+        if (updated.Address && !updated.address) {
+          updated.address = updated.Address;
+        }
+        if (updated.IdCardNumber && !updated.idCardNumber) {
+          updated.idCardNumber = updated.IdCardNumber;
+        }
+        if (updated.PassportNumber && !updated.passportNumber) {
+          updated.passportNumber = updated.PassportNumber;
+        }
+        if (updated.CustomerType && !updated.customerType) {
+          updated.customerType = updated.CustomerType;
+        }
+        
         originalData = {...updated};
         
         const successMsg = 'Cập nhật thông tin thành công!';
@@ -701,8 +781,9 @@
           alert(successMsg);
         }
         
+        // Reload profile để đảm bảo dữ liệu mới nhất từ server
+        await loadProfile();
         toggleEdit();
-        renderProfile(updated);
         
       } catch(e) {
         console.error('Error saving profile:', e);
