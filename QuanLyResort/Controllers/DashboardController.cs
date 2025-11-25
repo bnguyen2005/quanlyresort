@@ -333,9 +333,8 @@ namespace QuanLyResort.Controllers
                     // Lấy customers có invoices trong tháng này
                     var customersThisMonth = await _context.Invoices
                         .Where(i => i.IssueDate >= thisMonthStart && 
-                                   i.Status != "Cancelled" &&
-                                   i.CustomerId.HasValue)
-                        .Select(i => i.CustomerId!.Value)
+                                   i.Status != "Cancelled")
+                        .Select(i => i.CustomerId)
                         .Distinct()
                         .ToListAsync();
                     
