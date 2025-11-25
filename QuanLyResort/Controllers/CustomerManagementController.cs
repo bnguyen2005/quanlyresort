@@ -398,6 +398,7 @@ public class CustomerManagementController : ControllerBase
                 customer.TotalSpent,
                 customer.LoyaltyPoints,
                 customer.Notes,
+                customer.AvatarUrl,
                 customer.CreatedAt,
                 customer.UpdatedAt
             };
@@ -407,6 +408,111 @@ public class CustomerManagementController : ControllerBase
         catch (Exception ex)
         {
             return StatusCode(500, new { message = "Failed to update customer", error = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Upload ảnh đại diện cho khách hàng
+    /// POST /api/customermanagement/{id}/upload-avatar
+    /// </summary>
+    [HttpPost("{id:int}/upload-avatar")]
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> UploadAvatar(int id, [FromForm] IFormFile? file)
+    {
+        try
+        {
+            // Check if customer is trying to update their own data
+            var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
+            var userCustomerId = User.FindFirst("CustomerId")?.Value;
+            
+            if (userRole == "Customer" && userCustomerId != null && int.Parse(userCustomerId) != id)
+            {
+                return Forbid("Bạn chỉ có thể cập nhật ảnh đại diện của chính mình");
+            }
+
+            var customer = await _context.Customers.FindAsync(id);
+            if (customer == null)
+                return NotFound(new { message = "Customer not found" });
+
+            var oldAvatarUrl = customer.AvatarUrl;
+
+            // Nếu không có file, xóa avatar
+            if (file == null || file.Length == 0)
+            {
+                customer.AvatarUrl = null;
+                customer.UpdatedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+
+                // Xóa file cũ nếu có
+                if (!string.IsNullOrEmpty(oldAvatarUrl) && oldAvatarUrl.StartsWith("/"))
+                {
+                    var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", oldAvatarUrl.TrimStart('/'));
+                    if (System.IO.File.Exists(oldFilePath))
+                    {
+                        try { System.IO.File.Delete(oldFilePath); } catch { }
+                    }
+                }
+
+                await _auditService.LogAsync("Customer", id, "RemoveAvatar", User.Identity?.Name ?? "System", oldAvatarUrl, null);
+                return Ok(new { message = "Avatar removed successfully.", avatarUrl = (string?)null });
+            }
+
+            // Validate file type
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+            var fileExtension = Path.GetExtension(file.FileName).ToLowerInvariant();
+            if (!allowedExtensions.Contains(fileExtension))
+            {
+                return BadRequest(new { message = "Invalid file type. Allowed: JPG, JPEG, PNG, GIF, WEBP" });
+            }
+
+            // Validate file size (max 10MB)
+            const long maxFileSize = 10 * 1024 * 1024; // 10MB
+            if (file.Length > maxFileSize)
+            {
+                return BadRequest(new { message = "File size exceeds 10MB limit." });
+            }
+
+            // Tạo thư mục uploads nếu chưa có
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "avatars");
+            if (!Directory.Exists(uploadsFolder))
+            {
+                Directory.CreateDirectory(uploadsFolder);
+            }
+
+            // Generate unique filename
+            var fileName = $"avatar_{id}_{DateTime.UtcNow:yyyyMMddHHmmss}{fileExtension}";
+            var filePath = Path.Combine(uploadsFolder, fileName);
+
+            // Save file
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            // Xóa file cũ nếu có
+            if (!string.IsNullOrEmpty(oldAvatarUrl) && oldAvatarUrl.StartsWith("/"))
+            {
+                var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", oldAvatarUrl.TrimStart('/'));
+                if (System.IO.File.Exists(oldFilePath) && oldFilePath != filePath)
+                {
+                    try { System.IO.File.Delete(oldFilePath); } catch { }
+                }
+            }
+
+            // Update customer with new avatar URL
+            var avatarUrl = $"/uploads/avatars/{fileName}";
+            customer.AvatarUrl = avatarUrl;
+            customer.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+
+            await _auditService.LogAsync("Customer", id, "UploadAvatar", User.Identity?.Name ?? "System", oldAvatarUrl, avatarUrl);
+
+            return Ok(new { message = "Avatar uploaded successfully.", avatarUrl });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error uploading avatar for customer {CustomerId}", id);
+            return StatusCode(500, new { message = "Failed to upload avatar", error = ex.Message });
         }
     }
 

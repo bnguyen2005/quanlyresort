@@ -50,6 +50,11 @@
       background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse"><path d="M 100 0 L 0 0 0 100" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23grid)"/></svg>');
       opacity: 0.3;
     }
+    .profile-avatar-container {
+      position: relative;
+      display: inline-block;
+      margin: 0 auto 25px;
+    }
     .profile-avatar {
       width: 140px;
       height: 140px;
@@ -58,7 +63,6 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 0 auto 25px;
       font-size: 70px;
       box-shadow: 0 15px 50px rgba(0,0,0,0.3);
       position: relative;
@@ -68,6 +72,43 @@
     }
     .profile-avatar:hover {
       transform: scale(1.05);
+    }
+    .profile-avatar-img {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 5px solid rgba(255,255,255,0.3);
+      box-shadow: 0 15px 50px rgba(0,0,0,0.3);
+      transition: transform 0.3s ease;
+    }
+    .profile-avatar-img:hover {
+      transform: scale(1.05);
+    }
+    .avatar-upload-btn {
+      position: absolute;
+      bottom: 5px;
+      right: 5px;
+      width: 45px;
+      height: 45px;
+      background: linear-gradient(135deg, #C8A97E 0%, #B89968 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      transition: all 0.3s ease;
+      z-index: 2;
+      border: 3px solid white;
+    }
+    .avatar-upload-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+    }
+    .avatar-upload-btn i {
+      font-size: 18px;
     }
     
     .profile-card {
@@ -283,7 +324,14 @@
 
   <div class="profile-header">
     <div class="container">
-      <div class="profile-avatar">👤</div>
+      <div class="profile-avatar-container">
+        <img id="profileAvatarImg" src="" alt="Avatar" class="profile-avatar-img" style="display: none; width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+        <div id="profileAvatarPlaceholder" class="profile-avatar">👤</div>
+        <label for="avatarUpload" class="avatar-upload-btn" title="Tải ảnh đại diện">
+          <i class="fas fa-camera"></i>
+        </label>
+        <input type="file" id="avatarUpload" accept="image/*" style="display: none;" onchange="handleAvatarUpload(event)">
+      </div>
       <h1 class="display-5 mb-2" id="profileName" style="position: relative; z-index: 1;">Đang tải...</h1>
       <p class="lead mb-0" id="profileEmail" style="position: relative; z-index: 1;">Đang tải...</p>
     </div>
@@ -578,7 +626,8 @@
         totalSpent: customer.totalSpent || customer.TotalSpent || 0,
         loyaltyPoints: customer.loyaltyPoints || customer.LoyaltyPoints || 0,
         customerType: customer.customerType || customer.CustomerType || 'Regular',
-        customerId: customer.customerId || customer.CustomerId
+        customerId: customer.customerId || customer.CustomerId,
+        avatarUrl: customer.avatarUrl || customer.AvatarUrl || null
       };
       
       document.getElementById('profileName').textContent = normalized.fullName || normalized.email || 'Khách hàng';
@@ -596,6 +645,18 @@
       document.getElementById('totalSpent').textContent = vnd(normalized.totalSpent);
       document.getElementById('loyaltyPoints').textContent = normalized.loyaltyPoints;
       document.getElementById('customerType').textContent = normalized.customerType === 'VIP' ? 'VIP' : 'Thường';
+      
+      // Update avatar display
+      const avatarImg = document.getElementById('profileAvatarImg');
+      const avatarPlaceholder = document.getElementById('profileAvatarPlaceholder');
+      if (normalized.avatarUrl) {
+        avatarImg.src = normalized.avatarUrl;
+        avatarImg.style.display = 'block';
+        avatarPlaceholder.style.display = 'none';
+      } else {
+        avatarImg.style.display = 'none';
+        avatarPlaceholder.style.display = 'flex';
+      }
       
       // Đảm bảo email luôn readonly
       document.getElementById('email').readOnly = true;
@@ -795,6 +856,127 @@
         }
       } finally {
         hidePageLoading();
+      }
+    }
+
+    // Handle avatar upload
+    async function handleAvatarUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        const msg = 'Chỉ chấp nhận file ảnh: JPG, PNG, GIF, WEBP';
+        if (window.showToast) {
+          showToast(msg, 'error');
+        } else {
+          alert(msg);
+        }
+        event.target.value = '';
+        return;
+      }
+
+      // Validate file size (max 10MB)
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (file.size > maxSize) {
+        const msg = 'Kích thước file không được vượt quá 10MB';
+        if (window.showToast) {
+          showToast(msg, 'error');
+        } else {
+          alert(msg);
+        }
+        event.target.value = '';
+        return;
+      }
+
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          const msg = 'Vui lòng đăng nhập lại';
+          if (window.showToast) {
+            showToast(msg, 'warning');
+          } else {
+            alert(msg);
+          }
+          return;
+        }
+
+        if (!customerId) {
+          const msg = 'Không tìm thấy thông tin khách hàng';
+          if (window.showToast) {
+            showToast(msg, 'error');
+          } else {
+            alert(msg);
+          }
+          return;
+        }
+
+        showPageLoading('Đang tải ảnh đại diện...');
+
+        // Create FormData
+        const formData = new FormData();
+        formData.append('file', file);
+
+        // Upload avatar
+        const API_UPLOAD = location.origin + '/api/customermanagement/' + customerId + '/upload-avatar';
+        const resp = await fetch(API_UPLOAD, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          body: formData
+        });
+
+        if (!resp.ok) {
+          const errorData = await resp.json().catch(() => ({message: 'Lỗi tải ảnh'}));
+          throw new Error(errorData.message || 'Lỗi tải ảnh');
+        }
+
+        const response = await resp.json();
+        console.log('✅ [handleAvatarUpload] Avatar uploaded:', response);
+
+        // Update avatar display
+        if (response.avatarUrl) {
+          const avatarImg = document.getElementById('profileAvatarImg');
+          const avatarPlaceholder = document.getElementById('profileAvatarPlaceholder');
+          avatarImg.src = response.avatarUrl;
+          avatarImg.style.display = 'block';
+          avatarPlaceholder.style.display = 'none';
+          
+          // Update originalData
+          originalData.avatarUrl = response.avatarUrl;
+          originalData.AvatarUrl = response.avatarUrl;
+        } else {
+          // Avatar removed
+          const avatarImg = document.getElementById('profileAvatarImg');
+          const avatarPlaceholder = document.getElementById('profileAvatarPlaceholder');
+          avatarImg.style.display = 'none';
+          avatarPlaceholder.style.display = 'flex';
+          
+          originalData.avatarUrl = null;
+          originalData.AvatarUrl = null;
+        }
+
+        const successMsg = response.message || 'Cập nhật ảnh đại diện thành công!';
+        if (window.showToast) {
+          showToast(successMsg, 'success');
+        } else {
+          alert(successMsg);
+        }
+
+      } catch(e) {
+        console.error('Error uploading avatar:', e);
+        const msg = 'Lỗi: ' + e.message;
+        if (window.showToast) {
+          showToast(msg, 'error');
+        } else {
+          alert(msg);
+        }
+      } finally {
+        hidePageLoading();
+        // Reset file input
+        event.target.value = '';
       }
     }
 

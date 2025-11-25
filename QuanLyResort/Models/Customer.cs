@@ -45,6 +45,9 @@ public class Customer
     [StringLength(1000)]
     public string? Notes { get; set; }
 
+    [StringLength(500)]
+    public string? AvatarUrl { get; set; }
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public DateTime? UpdatedAt { get; set; }
