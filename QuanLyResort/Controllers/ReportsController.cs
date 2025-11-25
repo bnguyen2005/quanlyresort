@@ -565,13 +565,55 @@ public class ReportsController : ControllerBase
             ? Math.Round((thisMonthRevenue - lastMonthRevenue) / lastMonthRevenue * 100, 2)
             : 0;
 
+        // Today's bookings - đặt phòng được tạo hôm nay
+        var todayBookings = await _context.Bookings
+            .Where(b => b.CreatedAt.Date == today && b.Status != "Cancelled")
+            .CountAsync();
+
+        // Today's check-ins - bookings có CheckInDate = today và đã check-in
+        var todayCheckIns = await _context.Bookings
+            .Where(b => b.CheckInDate.Date == today && 
+                       (b.Status == "CheckedIn" || b.Status == "Confirmed"))
+            .CountAsync();
+
         // Bookings stats
         var totalBookings = await _context.Bookings.CountAsync();
         var activeBookings = await _context.Bookings.CountAsync(b => b.Status == "CheckedIn");
         var pendingBookings = await _context.Bookings.CountAsync(b => b.Status == "Confirmed");
 
+        // This month vs last month bookings for growth calculation
+        var thisMonthBookings = await _context.Bookings
+            .Where(b => b.CreatedAt >= thisMonth && b.CreatedAt < thisMonth.AddMonths(1) && b.Status != "Cancelled")
+            .CountAsync();
+
+        var lastMonthBookings = await _context.Bookings
+            .Where(b => b.CreatedAt >= lastMonth && b.CreatedAt < thisMonth && b.Status != "Cancelled")
+            .CountAsync();
+
+        var bookingGrowth = lastMonthBookings > 0 
+            ? Math.Round((double)(thisMonthBookings - lastMonthBookings) / lastMonthBookings * 100, 2)
+            : 0;
+
         return Ok(new
         {
+            today = new
+            {
+                bookings = todayBookings,
+                revenue = todayRevenue,
+                checkIns = todayCheckIns
+            },
+            occupancy = new
+            {
+                rate = Math.Round(todayOccupancyRate, 2),
+                occupied = occupiedRooms,
+                total = totalRooms,
+                available = totalRooms - occupiedRooms
+            },
+            growth = new
+            {
+                revenue = revenueGrowth,
+                bookings = bookingGrowth
+            },
             todayRevenue,
             todayOccupancy = Math.Round(todayOccupancyRate, 2),
             thisMonthRevenue,
