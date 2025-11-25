@@ -497,14 +497,7 @@
                 <td>${paymentBadge}</td>
                 <td>${orderDate}</td>
                 <td>
-                  <div class="action-buttons">
-                    <button class="action-btn action-btn-view" onclick="viewOrderDetails(${order.orderId})" title="Xem chi tiết">
-                      <i class="bx bx-show"></i>
-                    </button>
-                    <button class="action-btn action-btn-edit" onclick="updateOrderStatus(${order.orderId}, '${order.status}')" title="Cập nhật trạng thái">
-                      <i class="bx bx-edit"></i>
-                    </button>
-                  </div>
+                  ${getActionButtons(order)}
                 </td>
               </tr>
             `;
@@ -744,9 +737,65 @@
         'Unpaid': '<span class="badge bg-danger">Chưa thanh toán</span>',
         'Paid': '<span class="badge bg-success">Đã thanh toán</span>',
         'Refunded': '<span class="badge bg-warning">Đã hoàn tiền</span>',
-        'AwaitingConfirmation': '<span class="badge bg-warning">Chờ xác nhận</span>'
+        'AwaitingConfirmation': '<span class="badge bg-warning text-dark">Chờ xác nhận</span>'
       };
       return badges[paymentStatus] || `<span class="badge bg-secondary">${paymentStatus}</span>`;
+    }
+
+    async function approveCashPayment(orderId) {
+      const confirmMessage = 'Xác nhận đơn này đã thanh toán tại nhà hàng?';
+      if (!confirm(confirmMessage)) return;
+
+      const approveBtn = document.querySelector(`[data-approve-order="${orderId}"]`);
+      if (approveBtn) {
+        approveBtn.disabled = true;
+        approveBtn.classList.add('disabled');
+      }
+
+      try {
+        await apiPost(`/restaurant-orders/${orderId}/approve-cash-payment`, {});
+
+        if (typeof showToast === 'function') {
+          showToast('Đã xác nhận thanh toán tiền mặt thành công!', 'success');
+        } else {
+          alert('Đã xác nhận thanh toán tiền mặt thành công!');
+        }
+
+        loadOrders();
+      } catch (error) {
+        console.error('[approveCashPayment] Error:', error);
+        if (typeof showToast === 'function') {
+          showToast('Không thể xác nhận thanh toán: ' + (error.message || 'Lỗi không xác định'), 'danger');
+        } else {
+          alert('Không thể xác nhận thanh toán: ' + (error.message || 'Lỗi không xác định'));
+        }
+      } finally {
+        if (approveBtn) {
+          approveBtn.disabled = false;
+          approveBtn.classList.remove('disabled');
+        }
+      }
+    }
+
+    function getActionButtons(order) {
+      const viewBtn = `
+        <button class="action-btn action-btn-view" onclick="viewOrderDetails(${order.orderId})" title="Xem chi tiết">
+          <i class="bx bx-show"></i>
+        </button>`;
+
+      const statusBtn = `
+        <button class="action-btn action-btn-edit" onclick="updateOrderStatus(${order.orderId}, '${order.status}')" title="Cập nhật trạng thái">
+          <i class="bx bx-edit"></i>
+        </button>`;
+
+      const cashBtn = (order.paymentStatus === 'AwaitingConfirmation')
+        ? `
+          <button class="action-btn action-btn-approve" data-approve-order="${order.orderId}" onclick="approveCashPayment(${order.orderId})" title="Xác nhận thanh toán tại nhà hàng">
+            <i class="bx bx-check-shield"></i>
+          </button>`
+        : '';
+
+      return `<div class="action-buttons">${viewBtn}${statusBtn}${cashBtn}</div>`;
     }
     
     // Fix dropdown positioning for DataTables - CRITICAL FIX
