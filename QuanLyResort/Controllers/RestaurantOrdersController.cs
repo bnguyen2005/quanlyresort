@@ -400,6 +400,77 @@ public class RestaurantOrdersController : ControllerBase
     }
 
     /// <summary>
+    /// Cập nhật trạng thái thanh toán đơn đặt món (admin)
+    /// PATCH /api/restaurant-orders/{id}/payment-status
+    /// </summary>
+    [HttpPatch("{id}/payment-status")]
+    [Authorize(Roles = "Admin,Manager,FrontDesk,Cashier")]
+    public async Task<IActionResult> UpdatePaymentStatus(int id, [FromBody] UpdatePaymentStatusRequest request)
+    {
+        try
+        {
+            var order = await _context.RestaurantOrders.FindAsync(id);
+            if (order == null)
+            {
+                return NotFound(new { message = "Đơn đặt món không tồn tại" });
+            }
+
+            var validStatuses = new[] { "Unpaid", "Paid", "Refunded", "AwaitingConfirmation" };
+            var validMethods = new[] { "Cash", "Card", "QR", "RoomCharge", "BankTransfer" };
+
+            if (string.IsNullOrEmpty(request.PaymentStatus) || !validStatuses.Contains(request.PaymentStatus))
+            {
+                return BadRequest(new { message = $"PaymentStatus không hợp lệ. Chỉ chấp nhận: {string.Join(", ", validStatuses)}" });
+            }
+
+            string? paymentMethodToUse = request.PaymentMethod ?? order.PaymentMethod;
+
+            if (request.PaymentStatus == "Paid")
+            {
+                if (string.IsNullOrEmpty(paymentMethodToUse))
+                {
+                    return BadRequest(new { message = "Vui lòng chọn phương thức thanh toán khi đánh dấu đơn đã thanh toán." });
+                }
+
+                if (!validMethods.Contains(paymentMethodToUse))
+                {
+                    return BadRequest(new { message = $"PaymentMethod không hợp lệ. Chỉ chấp nhận: {string.Join(", ", validMethods)}" });
+                }
+            }
+            else if (request.PaymentStatus == "AwaitingConfirmation")
+            {
+                // AwaitingConfirmation chỉ áp dụng cho tiền mặt
+                paymentMethodToUse = "Cash";
+            }
+            else
+            {
+                // Với Unpaid/Refunded, có thể bỏ trống phương thức
+                paymentMethodToUse = null;
+            }
+
+            var oldStatus = order.PaymentStatus;
+            order.PaymentStatus = request.PaymentStatus;
+            order.PaymentMethod = paymentMethodToUse;
+            order.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation($"[UpdatePaymentStatus] Order {order.OrderNumber} payment status updated: {oldStatus} -> {request.PaymentStatus}, Method: {paymentMethodToUse}");
+
+            return Ok(new
+            {
+                message = "Cập nhật trạng thái thanh toán thành công",
+                order
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating payment status");
+            return StatusCode(500, new { message = "Lỗi khi cập nhật trạng thái thanh toán", error = ex.Message });
+        }
+    }
+
+    /// <summary>
     /// Thanh toán đơn đặt món
     /// POST /api/restaurant-orders/{id}/pay
     /// </summary>
@@ -687,6 +758,12 @@ public class OrderItemRequest
 public class UpdateOrderStatusRequest
 {
     public string Status { get; set; } = string.Empty;
+}
+
+public class UpdatePaymentStatusRequest
+{
+    public string PaymentStatus { get; set; } = string.Empty;
+    public string? PaymentMethod { get; set; }
 }
 
 public class PayOrderRequest

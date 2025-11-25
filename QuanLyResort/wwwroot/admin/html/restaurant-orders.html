@@ -226,6 +226,46 @@
     </div>
   </div>
 
+  <!-- Update Payment Status Modal -->
+  <div class="modal fade" id="updatePaymentStatusModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Cập nhật trạng thái thanh toán</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="updatePaymentOrderId">
+          <div class="mb-3">
+            <label class="form-label">Trạng thái thanh toán</label>
+            <select id="newPaymentStatus" class="form-select" onchange="handlePaymentStatusChange()">
+              <option value="Unpaid">Chưa thanh toán</option>
+              <option value="AwaitingConfirmation">Chờ xác nhận tiền mặt</option>
+              <option value="Paid">Đã thanh toán</option>
+              <option value="Refunded">Đã hoàn tiền</option>
+            </select>
+          </div>
+          <div class="mb-3" id="paymentMethodGroup" style="display: none;">
+            <label class="form-label">Phương thức thanh toán</label>
+            <select id="newPaymentMethod" class="form-select">
+              <option value="">-- Chọn phương thức --</option>
+              <option value="Cash">Tiền mặt tại quầy</option>
+              <option value="Card">Thẻ ngân hàng</option>
+              <option value="QR">QR/Chuyển khoản</option>
+              <option value="RoomCharge">Ghi nợ phòng</option>
+              <option value="BankTransfer">Chuyển khoản ngân hàng</option>
+            </select>
+            <small class="text-muted d-block mt-1">Bắt buộc khi đánh dấu đơn đã thanh toán.</small>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+          <button type="button" class="btn btn-success" onclick="savePaymentStatusUpdate()">Lưu</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script src="../assets/vendor/libs/jquery/jquery.js"></script>
   <script src="../assets/vendor/libs/popper/popper.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -777,6 +817,74 @@
       }
     }
 
+    function openPaymentStatusModal(orderId, paymentStatus, paymentMethod) {
+      document.getElementById('updatePaymentOrderId').value = orderId;
+      document.getElementById('newPaymentStatus').value = paymentStatus || 'Unpaid';
+      document.getElementById('newPaymentMethod').value = paymentMethod || '';
+      handlePaymentStatusChange();
+      new bootstrap.Modal(document.getElementById('updatePaymentStatusModal')).show();
+    }
+
+    function handlePaymentStatusChange() {
+      const paymentStatus = document.getElementById('newPaymentStatus').value;
+      const methodGroup = document.getElementById('paymentMethodGroup');
+      if (!methodGroup) return;
+      if (paymentStatus === 'Paid') {
+        methodGroup.style.display = 'block';
+      } else {
+        methodGroup.style.display = 'none';
+        document.getElementById('newPaymentMethod').value = '';
+      }
+    }
+
+    async function savePaymentStatusUpdate() {
+      try {
+        const orderId = document.getElementById('updatePaymentOrderId').value;
+        const paymentStatus = document.getElementById('newPaymentStatus').value;
+        const paymentMethod = document.getElementById('newPaymentMethod').value;
+
+        if (paymentStatus === 'Paid' && !paymentMethod) {
+          if (typeof showToast === 'function') {
+            showToast('Vui lòng chọn phương thức thanh toán.', 'warning');
+          } else {
+            alert('Vui lòng chọn phương thức thanh toán.');
+          }
+          return;
+        }
+
+        const payload = {
+          paymentStatus
+        };
+
+        if (paymentStatus === 'Paid') {
+          payload.paymentMethod = paymentMethod;
+        }
+
+        await apiPatch(`/restaurant-orders/${orderId}/payment-status`, payload);
+
+        if (typeof showToast === 'function') {
+          showToast('Cập nhật trạng thái thanh toán thành công!', 'success');
+        } else {
+          alert('Cập nhật trạng thái thanh toán thành công!');
+        }
+
+        bootstrap.Modal.getInstance(document.getElementById('updatePaymentStatusModal')).hide();
+        loadOrders();
+      } catch (error) {
+        console.error('Error updating payment status:', error);
+        if (typeof showToast === 'function') {
+          showToast('Lỗi khi cập nhật trạng thái thanh toán: ' + error.message, 'danger');
+        } else {
+          alert('Lỗi khi cập nhật trạng thái thanh toán: ' + error.message);
+        }
+      }
+    }
+
+    function escapeAttribute(value) {
+      if (!value) return '';
+      return String(value).replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    }
+
     function getActionButtons(order) {
       const viewBtn = `
         <button class="action-btn action-btn-view" onclick="viewOrderDetails(${order.orderId})" title="Xem chi tiết">
@@ -788,6 +896,11 @@
           <i class="bx bx-edit"></i>
         </button>`;
 
+      const paymentBtn = `
+        <button class="action-btn action-btn-pay" onclick="openPaymentStatusModal(${order.orderId}, '${escapeAttribute(order.paymentStatus)}', '${escapeAttribute(order.paymentMethod || '')}')" title="Cập nhật trạng thái thanh toán">
+          <i class="bx bx-credit-card"></i>
+        </button>`;
+
       const cashBtn = (order.paymentStatus === 'AwaitingConfirmation')
         ? `
           <button class="action-btn action-btn-approve" data-approve-order="${order.orderId}" onclick="approveCashPayment(${order.orderId})" title="Xác nhận thanh toán tại nhà hàng">
@@ -795,7 +908,7 @@
           </button>`
         : '';
 
-      return `<div class="action-buttons">${viewBtn}${statusBtn}${cashBtn}</div>`;
+      return `<div class="action-buttons">${viewBtn}${statusBtn}${paymentBtn}${cashBtn}</div>`;
     }
     
     // Fix dropdown positioning for DataTables - CRITICAL FIX
