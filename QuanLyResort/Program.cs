@@ -84,6 +84,10 @@ builder.Services.AddScoped<VietQRService>();
 builder.Services.AddHttpClient<AIChatService>();
 builder.Services.AddScoped<AIChatService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<ISmsService, SmsService>();
+builder.Services.AddScoped<INotificationManager, NotificationManager>();
+builder.Services.AddScoped<ILocalizationService, LocalizationService>();
+builder.Services.AddScoped<ITwoFactorAuthService, TwoFactorAuthService>();
 
 // Add SignalR
 builder.Services.AddSignalR();

@@ -36,6 +36,12 @@ public class User
 
     public DateTime? LastLoginAt { get; set; }
 
+    // Two-Factor Authentication
+    public string? TwoFactorSecret { get; set; }
+    public bool TwoFactorEnabled { get; set; } = false;
+    public DateTime? TwoFactorEnabledAt { get; set; }
+    public string? TwoFactorRecoveryCodes { get; set; }
+
     // Navigation properties
     public int? CustomerId { get; set; }
     public Customer? Customer { get; set; }

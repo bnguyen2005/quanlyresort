@@ -1,0 +1,51 @@
+# Build results
+bin/
+obj/
+*.dll
+*.pdb
+*.exe
+
+# Database files
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio cache/options
+.vs/
+.vscode/
+
+# Rider
+.idea/
+
+# User secrets
+appsettings.Development.json
+appsettings.Production.json
+
+# Logs
+logs/
+*.log
+
+# Environment variables
+.env
+.env.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*~
+
+# Migration files (keep structure, ignore compiled)
+Migrations/*.Designer.cs
+
