@@ -359,7 +359,11 @@
 
   <script>
     // API base URL - sử dụng endpoint từ ReportsController
-    const API_BASE = (typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : `${window.location.origin}/api`) + '/reports';
+    const REPORTS_API_BASE = (typeof window.API_BASE_URL !== 'undefined' ? window.API_BASE_URL : `${window.location.origin}/api`) + '/reports';
+    const API_ROOT_BASE = (typeof window.API_BASE_URL !== 'undefined' ? window.API_BASE_URL : `${window.location.origin}/api`);
+    const formatCurrencySafe = (typeof window.formatCurrency === 'function')
+      ? window.formatCurrency
+      : (amount) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount || 0);
     let revenueChart, occupancyChart, revenueTypeChart, customerTypeChart, serviceChart;
 
     // Initialize page
@@ -475,7 +479,7 @@
         if (!token) {
           console.warn('⚠️ No token found, cannot load dashboard stats');
           // Show empty/zero values instead of sample data
-          document.getElementById('todayRevenue').textContent = formatCurrency(0);
+          document.getElementById('todayRevenue').textContent = formatCurrencySafe(0);
           document.getElementById('todayOccupancy').textContent = '0%';
           document.getElementById('activeBookings').textContent = '0';
           const growthElement = document.getElementById('revenueGrowth');
@@ -485,7 +489,7 @@
         }
         
         // Use reports dashboard-stats endpoint
-        const apiBase = (typeof API_BASE_URL !== 'undefined' ? API_BASE_URL : `${window.location.origin}/api`);
+        const apiBase = API_ROOT_BASE;
         const response = await fetch(`${apiBase}/reports/dashboard-stats`, {
           headers: { 
             'Authorization': `Bearer ${token}`,
@@ -499,7 +503,7 @@
           const data = await response.json();
           console.log('📈 Dashboard data:', data);
           
-          document.getElementById('todayRevenue').textContent = formatCurrency(data.todayRevenue || 0);
+          document.getElementById('todayRevenue').textContent = formatCurrencySafe(data.todayRevenue || 0);
           document.getElementById('todayOccupancy').textContent = (data.todayOccupancy || 0) + '%';
           document.getElementById('activeBookings').textContent = data.activeBookings || 0;
           
@@ -513,7 +517,7 @@
           
           // Show zero values when API fails (no sample data)
           console.warn('⚠️ Cannot load dashboard stats, showing zero values');
-          document.getElementById('todayRevenue').textContent = formatCurrency(0);
+          document.getElementById('todayRevenue').textContent = formatCurrencySafe(0);
           document.getElementById('todayOccupancy').textContent = '0%';
           document.getElementById('activeBookings').textContent = '0';
           
@@ -553,7 +557,7 @@
           return;
         }
         
-        const response = await fetch(`${API_BASE}/revenue-summary?startDate=${startDate}&endDate=${endDate}`, {
+        const response = await fetch(`${REPORTS_API_BASE}/revenue-summary?startDate=${startDate}&endDate=${endDate}`, {
           headers: { 
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -598,7 +602,7 @@
           return;
         }
         
-        const response = await fetch(`${API_BASE}/occupancy-report?startDate=${startDate}&endDate=${endDate}`, {
+        const response = await fetch(`${REPORTS_API_BASE}/occupancy-report?startDate=${startDate}&endDate=${endDate}`, {
           headers: { 
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -638,7 +642,7 @@
           return;
         }
         
-        const response = await fetch(`${API_BASE}/customer-analytics?startDate=${startDate}&endDate=${endDate}`, {
+        const response = await fetch(`${REPORTS_API_BASE}/customer-analytics?startDate=${startDate}&endDate=${endDate}`, {
           headers: { 
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -676,7 +680,7 @@
           return;
         }
         
-        const response = await fetch(`${API_BASE}/service-usage?startDate=${startDate}&endDate=${endDate}`, {
+        const response = await fetch(`${REPORTS_API_BASE}/service-usage?startDate=${startDate}&endDate=${endDate}`, {
           headers: { 
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -770,7 +774,7 @@
               beginAtZero: true,
               ticks: {
                 callback: function(value) {
-                  return formatCurrency(value);
+                  return formatCurrencySafe(value);
                 }
               }
             }
@@ -779,7 +783,7 @@
             tooltip: {
               callbacks: {
                 label: function(context) {
-                  return 'Doanh thu: ' + formatCurrency(context.parsed.y);
+                  return 'Doanh thu: ' + formatCurrencySafe(context.parsed.y);
                 }
               }
             }
@@ -856,7 +860,7 @@
             tooltip: {
               callbacks: {
                 label: function(context) {
-                  return context.label + ': ' + formatCurrency(context.parsed);
+                  return context.label + ': ' + formatCurrencySafe(context.parsed);
                 }
               }
             }
@@ -1035,7 +1039,7 @@
               beginAtZero: true,
               ticks: {
                 callback: function(value) {
-                  return formatCurrency(value);
+                  return formatCurrencySafe(value);
                 }
               }
             }
@@ -1044,7 +1048,7 @@
             tooltip: {
               callbacks: {
                 label: function(context) {
-                  return 'Doanh thu: ' + formatCurrency(context.parsed.x);
+                  return 'Doanh thu: ' + formatCurrencySafe(context.parsed.x);
                 }
               }
             }
@@ -1069,7 +1073,7 @@
       tbody.innerHTML = topCustomers.map(customer => `
         <tr>
           <td><strong>${customer.customerName}</strong></td>
-          <td>${formatCurrency(customer.totalSpent)}</td>
+          <td>${formatCurrencySafe(customer.totalSpent)}</td>
           <td>${customer.bookingCount}</td>
           <td>${new Date(customer.lastBooking).toLocaleDateString('vi-VN')}</td>
         </tr>
@@ -1255,7 +1259,7 @@
         try {
           const token = localStorage.getItem('token') || localStorage.getItem('adminToken');
           if (token) {
-            const response = await fetch(`${API_BASE}/revenue-summary?startDate=${startDate}&endDate=${endDate}`, {
+            const response = await fetch(`${REPORTS_API_BASE}/revenue-summary?startDate=${startDate}&endDate=${endDate}`, {
               headers: { 
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
@@ -1327,13 +1331,6 @@
     }
 
     // Utility functions
-    function formatCurrency(amount) {
-      return new Intl.NumberFormat('vi-VN', {
-        style: 'currency',
-        currency: 'VND'
-      }).format(amount);
-    }
-
     function logout() {
       console.log('🚪 Logging out from reports...');
       
