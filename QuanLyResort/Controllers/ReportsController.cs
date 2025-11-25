@@ -189,14 +189,6 @@ public class ReportsController : ControllerBase
         var start = startDate ?? DateTime.Today.AddDays(-30);
         var end = endDate ?? DateTime.Today.AddDays(1);
 
-        // Total revenue from charges, invoices, and restaurant orders
-        // SQLite không hỗ trợ SumAsync trên decimal trực tiếp -> chuyển sang client-side aggregation
-        var chargesList = await _context.Charges
-            .Where(c => c.ChargeDate >= start && c.ChargeDate < end)
-            .Select(c => c.TotalAmount)
-            .ToListAsync();
-        var totalCharges = chargesList.Sum(c => (decimal?)c) ?? 0;
-        
         // Invoices đã thanh toán trong khoảng thời gian
         // Load all paid invoices first, then filter by date in memory (handle UTC conversion)
         var invoicesList = await _context.Invoices
@@ -221,27 +213,13 @@ public class ReportsController : ControllerBase
             .ToListAsync();
         var totalRestaurantOrders = restaurantOrdersList.Sum(o => (decimal?)o) ?? 0;
         
-        // Tổng doanh thu = charges + invoices + restaurant orders
-        var totalRevenue = totalCharges + totalInvoices + totalRestaurantOrders;
+        // Tổng doanh thu = invoices + restaurant orders
+        var totalRevenue = totalInvoices + totalRestaurantOrders;
 
         // Revenue by type - client-side aggregation
-        // Include Charges, Invoices (Bookings), and Restaurant Orders
-        var chargesByTypeList = await _context.Charges
-            .Where(c => c.ChargeDate >= start && c.ChargeDate < end)
-            .Select(c => new { Type = c.ChargeType ?? "Dịch vụ", c.TotalAmount })
-            .ToListAsync();
-        
-        // Add Invoices as "Đặt phòng"
-        var invoicesByType = invoicesInRange.Select(i => new { Type = "Đặt phòng", Amount = i }).ToList();
-        
-        // Add Restaurant Orders as "Nhà hàng"
-        var restaurantByType = restaurantOrdersList.Select(r => new { Type = "Nhà hàng", Amount = r }).ToList();
-        
-        // Combine all revenue types
-        var revenueByType = chargesByTypeList
-            .Select(c => new { Type = c.Type, Amount = c.TotalAmount })
-            .Concat(invoicesByType)
-            .Concat(restaurantByType)
+        // Include Invoices (Bookings) and Restaurant Orders
+        var revenueByType = invoicesInRange.Select(i => new { Type = "Đặt phòng", Amount = i })
+            .Concat(restaurantOrdersList.Select(r => new { Type = "Nhà hàng", Amount = r }))
             .GroupBy(r => r.Type)
             .Select(g => new
             {
@@ -252,12 +230,7 @@ public class ReportsController : ControllerBase
             .OrderByDescending(r => r.amount)
             .ToList();
 
-        // Daily revenue trend - client-side aggregation (charges + invoices + restaurant orders)
-        var dailyChargesList = await _context.Charges
-            .Where(c => c.ChargeDate >= start && c.ChargeDate < end)
-            .Select(c => new { c.ChargeDate, c.TotalAmount })
-            .ToListAsync();
-        
+        // Daily revenue trend - dựa trên invoices + restaurant
         // Load all paid invoices first, then filter by date range
         var allPaidInvoices = await _context.Invoices
             .Where(i => i.PaidDate.HasValue && i.Status == "Paid")
@@ -279,10 +252,9 @@ public class ReportsController : ControllerBase
             })
             .ToListAsync();
         
-        // Combine charges, invoices, and restaurant orders by date
-        var dailyData = dailyChargesList
-            .Select(c => new { Date = c.ChargeDate.Date, Amount = c.TotalAmount })
-            .Concat(dailyInvoicesList.Select(i => new { Date = i.PaidDate.Date, Amount = i.PaidAmount }))
+        // Combine invoices và restaurant orders theo ngày
+        var dailyData = dailyInvoicesList
+            .Select(i => new { Date = i.PaidDate.Date, Amount = i.PaidAmount })
             .Concat(dailyRestaurantOrdersList.Select(r => new { Date = r.Date, Amount = r.Amount }))
             .GroupBy(d => d.Date)
             .Select(g => new
@@ -307,7 +279,6 @@ public class ReportsController : ControllerBase
         {
             startDate = start,
             endDate = end.AddDays(-1),
-            totalCharges,
             totalInvoices,
             totalRestaurantOrders,
             totalRevenue,
@@ -325,15 +296,26 @@ public class ReportsController : ControllerBase
 
         var totalRooms = await _context.Rooms.CountAsync();
         
+        // Load stay data from invoices (only Paid invoices with assigned rooms)
+        var invoiceStays = await _context.Invoices
+            .Where(i => i.Status == "Paid" && i.Booking != null && i.Booking.RoomId.HasValue)
+            .Select(i => new 
+            { 
+                RoomId = i.Booking!.RoomId!.Value,
+                CheckIn = i.Booking.CheckInDate.Date,
+                CheckOut = i.Booking.CheckOutDate.Date
+            })
+            .ToListAsync();
+        
         // Daily occupancy
         var dailyOccupancy = new List<object>();
-        for (var date = start; date <= end; date = date.AddDays(1))
+        for (var date = start.Date; date <= end.Date; date = date.AddDays(1))
         {
-            var occupiedRooms = await _context.Bookings
-                .Where(b => b.Status == "CheckedIn" &&
-                       b.CheckInDate <= date &&
-                       b.CheckOutDate > date)
-                .CountAsync();
+            var occupiedRooms = invoiceStays
+                .Where(s => s.CheckIn <= date && s.CheckOut > date)
+                .Select(s => s.RoomId)
+                .Distinct()
+                .Count();
 
             var occupancyRate = totalRooms > 0 ? (decimal)occupiedRooms / totalRooms * 100 : 0;
 
@@ -434,51 +416,26 @@ public class ReportsController : ControllerBase
         var thisMonth = new DateTime(today.Year, today.Month, 1);
         var lastMonth = thisMonth.AddMonths(-1);
 
-        // Today's stats
-        // Doanh thu từ 2 nguồn:
-        // 1. Charges (room charges, service charges sau khi check-in)
-        // 2. Invoices với PaidDate = today (bookings đã thanh toán online)
-        // Note: PaidDate được lưu là UTC, cần so sánh với UTC date range
-        var todayUtc = DateTime.UtcNow.Date;
-        var todayStartUtc = todayUtc;
-        var todayEndUtc = todayUtc.AddDays(1);
-        
-        // Also check local date range for charges (ChargeDate might be local)
         var todayLocal = DateTime.Today;
         var todayStartLocal = todayLocal;
         var todayEndLocal = todayLocal.AddDays(1);
+        var todayUtc = DateTime.UtcNow.Date;
         
-        // Charges - check both UTC and local ranges
-        var todayChargesList = await _context.Charges
-            .Where(c => (c.ChargeDate >= todayStartUtc && c.ChargeDate < todayEndUtc) ||
-                       (c.ChargeDate >= todayStartLocal && c.ChargeDate < todayEndLocal))
-            .Select(c => c.TotalAmount)
-            .ToListAsync();
-        var chargesRevenue = todayChargesList.Sum(c => (decimal?)c) ?? 0;
-        
-        // Invoices - PaidDate is stored as UTC, so compare with UTC date range
-        // But also check if it falls within today's local date when converted
-        var allPaidInvoices = await _context.Invoices
-            .Where(i => i.PaidDate.HasValue && i.Status == "Paid")
-            .Select(i => new { i.PaidDate, i.PaidAmount })
-            .ToListAsync();
-        
-        // Filter invoices: check if PaidDate (UTC) falls within today
-        // Since PaidDate is UTC, convert to local time for comparison
-        var invoicesToday = allPaidInvoices
-            .Where(i => i.PaidDate.HasValue)
-            .Where(i => {
-                var paidDate = i.PaidDate!.Value;
-                // Convert UTC to local time and check if date matches today
-                var paidDateLocal = TimeZoneInfo.ConvertTimeFromUtc(paidDate, TimeZoneInfo.Local).Date;
-                return paidDateLocal == todayLocal;
+        // Invoices - PaidDate is stored as UTC, so convert and compare to local today
+        var paidInvoicesToday = await _context.Invoices
+            .Where(i => i.Status == "Paid" && i.PaidDate.HasValue)
+            .Select(i => new 
+            { 
+                i.PaidDate, 
+                Amount = i.PaidAmount > 0 ? i.PaidAmount : i.TotalAmount 
             })
-            .Select(i => i.PaidAmount)
-            .ToList();
-        var invoicesRevenue = invoicesToday.Sum(i => (decimal?)i) ?? 0;
+            .ToListAsync();
+        
+        var invoicesRevenue = paidInvoicesToday
+            .Where(i => TimeZoneInfo.ConvertTimeFromUtc(i.PaidDate!.Value, TimeZoneInfo.Local).Date == todayLocal)
+            .Sum(i => (decimal?)i.Amount) ?? 0;
         
         // Restaurant Orders đã thanh toán hôm nay
-        // Tính từ UpdatedAt hoặc CreatedAt nếu PaymentStatus = "Paid"
         var todayRestaurantOrdersList = await _context.RestaurantOrders
             .Where(o => o.PaymentStatus == "Paid" && 
                       ((o.UpdatedAt.HasValue && o.UpdatedAt.Value.Date == todayLocal) ||
@@ -487,32 +444,24 @@ public class ReportsController : ControllerBase
             .ToListAsync();
         var restaurantRevenue = todayRestaurantOrdersList.Sum(o => (decimal?)o) ?? 0;
         
-        // Debug logging
-        _logger.LogInformation($"Today revenue calculation - Charges: {chargesRevenue}, Invoices: {invoicesRevenue}, Restaurant: {restaurantRevenue}, Total: {chargesRevenue + invoicesRevenue + restaurantRevenue}");
-        _logger.LogInformation($"Today UTC: {todayUtc}, Today Local: {todayLocal}");
-        _logger.LogInformation($"Total paid invoices: {allPaidInvoices.Count}, Invoices today: {invoicesToday.Count}, Restaurant orders today: {todayRestaurantOrdersList.Count}");
-        
-        // Tổng doanh thu hôm nay = Charges + Invoices + Restaurant Orders
-        var todayRevenue = chargesRevenue + invoicesRevenue + restaurantRevenue;
+        // Tổng doanh thu hôm nay = Invoices + Restaurant Orders
+        var todayRevenue = invoicesRevenue + restaurantRevenue;
 
-        // Calculate today occupancy directly
+        // Calculate today occupancy dựa trên invoices + rooms
         var totalRooms = await _context.Rooms.CountAsync();
-        var occupiedRooms = await _context.Bookings
-            .Where(b => b.Status == "CheckedIn" &&
-                   b.CheckInDate <= today &&
-                   b.CheckOutDate > today)
+        var occupiedRooms = await _context.Invoices
+            .Where(i => i.Status == "Paid" &&
+                   i.Booking != null &&
+                   i.Booking.CheckInDate <= todayLocal &&
+                   i.Booking.CheckOutDate > todayLocal)
+            .Select(i => i.Booking!.RoomId)
+            .Where(roomId => roomId.HasValue)
+            .Select(roomId => roomId!.Value)
+            .Distinct()
             .CountAsync();
         var todayOccupancyRate = totalRooms > 0 ? (decimal)occupiedRooms / totalRooms * 100 : 0;
 
-        // This month stats - client-side aggregation
-        // Tính từ Charges, Invoices, và Restaurant Orders
-        var thisMonthChargesList = await _context.Charges
-            .Where(c => c.ChargeDate >= thisMonth && c.ChargeDate < thisMonth.AddMonths(1))
-            .Select(c => c.TotalAmount)
-            .ToListAsync();
-        var thisMonthChargesRevenue = thisMonthChargesList.Sum(c => (decimal?)c) ?? 0;
-        
-        // Invoices tháng này
+        // This month stats - dựa trên invoices + restaurant
         var thisMonthInvoicesList = await _context.Invoices
             .Where(i => i.PaidDate.HasValue && 
                        i.PaidDate.Value >= thisMonth && 
@@ -531,16 +480,9 @@ public class ReportsController : ControllerBase
             .ToListAsync();
         var thisMonthRestaurantRevenue = thisMonthRestaurantOrdersList.Sum(o => (decimal?)o) ?? 0;
         
-        var thisMonthRevenue = thisMonthChargesRevenue + thisMonthInvoicesRevenue + thisMonthRestaurantRevenue;
+        var thisMonthRevenue = thisMonthInvoicesRevenue + thisMonthRestaurantRevenue;
 
         // Last month stats
-        var lastMonthChargesList = await _context.Charges
-            .Where(c => c.ChargeDate >= lastMonth && c.ChargeDate < thisMonth)
-            .Select(c => c.TotalAmount)
-            .ToListAsync();
-        var lastMonthChargesRevenue = lastMonthChargesList.Sum(c => (decimal?)c) ?? 0;
-        
-        // Invoices tháng trước
         var lastMonthInvoicesList = await _context.Invoices
             .Where(i => i.PaidDate.HasValue && 
                        i.PaidDate.Value >= lastMonth && 
@@ -559,35 +501,54 @@ public class ReportsController : ControllerBase
             .ToListAsync();
         var lastMonthRestaurantRevenue = lastMonthRestaurantOrdersList.Sum(o => (decimal?)o) ?? 0;
         
-        var lastMonthRevenue = lastMonthChargesRevenue + lastMonthInvoicesRevenue + lastMonthRestaurantRevenue;
+        var lastMonthRevenue = lastMonthInvoicesRevenue + lastMonthRestaurantRevenue;
 
         var revenueGrowth = lastMonthRevenue > 0 
             ? Math.Round((thisMonthRevenue - lastMonthRevenue) / lastMonthRevenue * 100, 2)
             : 0;
 
-        // Today's bookings - đặt phòng được tạo hôm nay
-        var todayBookings = await _context.Bookings
-            .Where(b => b.CreatedAt.Date == today && b.Status != "Cancelled")
+        // Today's bookings - dựa trên invoices phát hành hôm nay
+        var todayBookings = await _context.Invoices
+            .Where(i => i.Status != "Cancelled" &&
+                        i.IssueDate >= todayStartLocal &&
+                        i.IssueDate < todayEndLocal)
             .CountAsync();
 
-        // Today's check-ins - bookings có CheckInDate = today và đã check-in
-        var todayCheckIns = await _context.Bookings
-            .Where(b => b.CheckInDate.Date == today && 
-                       (b.Status == "CheckedIn" || b.Status == "Confirmed"))
+        // Today's check-ins - dựa trên thông tin check-in của booking gắn với invoice
+        var todayCheckIns = await _context.Invoices
+            .Where(i => i.Status == "Paid" &&
+                        i.Booking != null &&
+                        i.Booking.CheckInDate >= todayStartLocal &&
+                        i.Booking.CheckInDate < todayEndLocal)
             .CountAsync();
 
-        // Bookings stats
-        var totalBookings = await _context.Bookings.CountAsync();
-        var activeBookings = await _context.Bookings.CountAsync(b => b.Status == "CheckedIn");
-        var pendingBookings = await _context.Bookings.CountAsync(b => b.Status == "Confirmed");
-
-        // This month vs last month bookings for growth calculation
-        var thisMonthBookings = await _context.Bookings
-            .Where(b => b.CreatedAt >= thisMonth && b.CreatedAt < thisMonth.AddMonths(1) && b.Status != "Cancelled")
+        // Invoice-based booking stats
+        var totalBookings = await _context.Invoices
+            .Where(i => i.Status != "Cancelled")
             .CountAsync();
 
-        var lastMonthBookings = await _context.Bookings
-            .Where(b => b.CreatedAt >= lastMonth && b.CreatedAt < thisMonth && b.Status != "Cancelled")
+        var activeBookings = await _context.Invoices
+            .Where(i => i.Status == "Paid" &&
+                        i.Booking != null &&
+                        i.Booking.CheckInDate <= todayLocal &&
+                        i.Booking.CheckOutDate > todayLocal)
+            .CountAsync();
+
+        var pendingBookings = await _context.Invoices
+            .Where(i => i.Status == "Issued" || i.Status == "PartiallyPaid")
+            .CountAsync();
+
+        // This month vs last month invoice counts
+        var thisMonthBookings = await _context.Invoices
+            .Where(i => i.Status != "Cancelled" &&
+                        i.IssueDate >= thisMonth &&
+                        i.IssueDate < thisMonth.AddMonths(1))
+            .CountAsync();
+
+        var lastMonthBookings = await _context.Invoices
+            .Where(i => i.Status != "Cancelled" &&
+                        i.IssueDate >= lastMonth &&
+                        i.IssueDate < thisMonth)
             .CountAsync();
 
         var bookingGrowth = lastMonthBookings > 0 
