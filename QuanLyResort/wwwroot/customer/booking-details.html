@@ -691,9 +691,13 @@
           const hasCashRequest = hasCashPaymentRequest(b);
           const isCashPayment = b.paymentMethod === 'Cash' || b.paymentMethod === 'PayAtHotel';
           const canPay = canPayBooking(b);
+          // Kiểm tra paymentStatus - chỉ hiển thị thông báo chờ xác nhận khi chưa thanh toán
+          const paymentStatus = b.paymentStatus || b.invoice?.paymentStatus || b.invoice?.status;
+          const isPaid = paymentStatus === 'Paid' || b.status === 'Paid' || b.invoice?.status === 'Paid';
+          const showAwaitingConfirmation = hasCashRequest && !isPaid;
           
-          if (hasCashRequest) {
-            // Đã request cash payment - ẩn nút thanh toán, hiển thị message chờ admin
+          if (showAwaitingConfirmation) {
+            // Đã request cash payment và chưa thanh toán - ẩn nút thanh toán, hiển thị message chờ admin
             btnPay.style.display = 'none';
             btnPay.dataset.ready = 'false';
             // Show awaiting confirmation message
@@ -730,8 +734,16 @@
             if (awaitingConfirmationMsg) {
               awaitingConfirmationMsg.style.display = 'none';
             }
+          } else if (isPaid) {
+            // Đã thanh toán - ẩn tất cả thông báo chờ xác nhận
+            btnPay.style.display = 'none';
+            btnPay.dataset.ready = 'false';
+            // Hide awaiting confirmation message
+            if (awaitingConfirmationMsg) {
+              awaitingConfirmationMsg.style.display = 'none';
+            }
           } else {
-            // Đã thanh toán hoặc không thể thanh toán - ẩn tất cả
+            // Không thể thanh toán - ẩn tất cả
             btnPay.style.display = 'none';
             btnPay.dataset.ready = 'false';
             // Hide awaiting confirmation message
