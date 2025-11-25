@@ -380,7 +380,7 @@
   <script>
     // API base URL - sử dụng endpoint từ ReportsController
     const REPORTS_API_BASE = (typeof window.API_BASE_URL !== 'undefined' ? window.API_BASE_URL : `${window.location.origin}/api`) + '/reports';
-    const API_ROOT_BASE = (typeof window.API_BASE_URL !== 'undefined' ? window.API_BASE_URL : `${window.location.origin}/api`);
+    const DASHBOARD_API = (typeof window.API_BASE_URL !== 'undefined' ? window.API_BASE_URL : `${window.location.origin}/api`) + '/dashboard';
     const formatCurrencySafe = (typeof window.formatCurrency === 'function')
       ? window.formatCurrency
       : (amount) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount || 0);
@@ -509,8 +509,7 @@
         }
         
         // Use reports dashboard-stats endpoint
-        const apiBase = API_ROOT_BASE;
-        const response = await fetch(`${apiBase}/reports/dashboard-stats`, {
+        const response = await fetch(`${DASHBOARD_API}/stats`, {
           headers: { 
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -622,7 +621,7 @@
           return;
         }
         
-        const response = await fetch(`${REPORTS_API_BASE}/occupancy-report?startDate=${startDate}&endDate=${endDate}`, {
+        const response = await fetch(`${DASHBOARD_API}/occupancy-report?startDate=${startDate}&endDate=${endDate}`, {
           headers: { 
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
