@@ -324,62 +324,58 @@ namespace QuanLyResort.Controllers
             {
                 var thisMonthStart = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
                 
-                // Lấy top customers từ Customer table (TotalSpent đã được cập nhật)
-                // Nếu thisMonth = true, chỉ lấy customers có invoices trong tháng này
-                var query = _context.Customers.AsQueryable();
+                // Tính toán TotalSpent từ Invoices đã thanh toán (Status = "Paid")
+                // Thay vì dùng TotalSpent từ Customer table
+                var invoiceQuery = _context.Invoices
+                    .Where(i => i.Status == "Paid" && i.CustomerId > 0);
                 
                 if (thisMonth)
                 {
-                    // Lấy customers có invoices trong tháng này
-                    var customersThisMonth = await _context.Invoices
-                        .Where(i => i.IssueDate >= thisMonthStart && 
-                                   i.Status != "Cancelled")
-                        .Select(i => i.CustomerId)
-                        .Distinct()
-                        .ToListAsync();
-                    
-                    query = query.Where(c => customersThisMonth.Contains(c.CustomerId));
+                    // Chỉ lấy invoices trong tháng này
+                    invoiceQuery = invoiceQuery.Where(i => i.PaidDate.HasValue && 
+                                                           i.PaidDate.Value >= thisMonthStart);
                 }
                 
-                // Load customers với TotalSpent > 0 (không order ở đây vì SQLite không hỗ trợ ORDER BY decimal)
-                var customers = await query
-                    .Where(c => c.TotalSpent > 0)
+                // Tính tổng chi tiêu và số lượng đặt phòng cho mỗi customer
+                var customerStats = await invoiceQuery
+                    .GroupBy(i => i.CustomerId)
+                    .Select(g => new
+                    {
+                        CustomerId = g.Key,
+                        TotalSpent = g.Sum(i => i.PaidAmount > 0 ? i.PaidAmount : i.TotalAmount),
+                        BookingCount = g.Count(),
+                        LastBookingDate = g.Max(i => i.IssueDate)
+                    })
+                    .ToListAsync();
+
+                // Lấy thông tin customers từ Customer table
+                var customerIds = customerStats.Select(s => s.CustomerId).ToList();
+                var customers = await _context.Customers
+                    .Where(c => customerIds.Contains(c.CustomerId))
                     .Select(c => new
                     {
                         customerId = c.CustomerId,
                         customerName = c.FullName,
                         email = c.Email,
-                        totalSpent = c.TotalSpent,
                         loyaltyPoints = c.LoyaltyPoints
                     })
                     .ToListAsync();
 
-                // Load booking counts và last booking dates riêng
-                var customerIds = customers.Select(c => c.customerId).ToList();
-                var invoiceCounts = await _context.Invoices
-                    .Where(i => customerIds.Contains(i.CustomerId) && i.Status != "Cancelled")
-                    .GroupBy(i => i.CustomerId)
-                    .Select(g => new { CustomerId = g.Key, Count = g.Count() })
-                    .ToListAsync();
-                
-                var lastBookingDates = await _context.Invoices
-                    .Where(i => customerIds.Contains(i.CustomerId) && i.Status != "Cancelled")
-                    .GroupBy(i => i.CustomerId)
-                    .Select(g => new { CustomerId = g.Key, LastDate = g.Max(i => i.IssueDate) })
-                    .ToListAsync();
-
-                // Combine data và sắp xếp trên client side (LINQ to Objects)
+                // Combine data và sắp xếp theo TotalSpent giảm dần
                 var topCustomers = customers
-                    .Select(c => new
-                    {
-                        customerId = c.customerId,
-                        customerName = c.customerName,
-                        email = c.email,
-                        totalSpent = c.totalSpent,
-                        bookingCount = invoiceCounts.FirstOrDefault(ic => ic.CustomerId == c.customerId)?.Count ?? 0,
-                        loyaltyPoints = c.loyaltyPoints,
-                        lastBookingDate = lastBookingDates.FirstOrDefault(lb => lb.CustomerId == c.customerId)?.LastDate
-                    })
+                    .Join(customerStats,
+                        c => c.customerId,
+                        s => s.CustomerId,
+                        (c, s) => new
+                        {
+                            customerId = c.customerId,
+                            customerName = c.customerName,
+                            email = c.email,
+                            totalSpent = s.TotalSpent,
+                            bookingCount = s.BookingCount,
+                            loyaltyPoints = c.loyaltyPoints,
+                            lastBookingDate = s.LastBookingDate
+                        })
                     .OrderByDescending(c => c.totalSpent)
                     .Take(limit)
                     .ToList();
