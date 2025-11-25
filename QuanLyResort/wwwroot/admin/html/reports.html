@@ -184,60 +184,60 @@
             <!-- Dashboard Stats -->
             <div class="report-section">
               <h5>📈 Tổng quan hôm nay</h5>
-            <div class="row" id="dashboardStats">
-              <div class="col-md-3">
+              <div class="row" id="dashboardStats">
+                <div class="col-md-3">
                 <div class="nalika-stats-card">
                   <div class="d-flex justify-content-between align-items-center">
                     <div>
-                      <div class="metric-value" id="todayRevenue">0 ₫</div>
-                      <div class="metric-label">Doanh thu hôm nay</div>
+                    <div class="metric-value" id="todayRevenue">0 ₫</div>
+                    <div class="metric-label">Doanh thu hôm nay</div>
                     </div>
                     <div class="avatar">
                       <i class="bx bx-line-chart"></i>
                     </div>
                   </div>
+                  </div>
                 </div>
-              </div>
-              <div class="col-md-3">
+                <div class="col-md-3">
                 <div class="nalika-stats-card warning">
                   <div class="d-flex justify-content-between align-items-center">
                     <div>
-                      <div class="metric-value" id="todayOccupancy">0%</div>
-                      <div class="metric-label">Tỷ lệ lấp đầy</div>
+                    <div class="metric-value" id="todayOccupancy">0%</div>
+                    <div class="metric-label">Tỷ lệ lấp đầy</div>
                     </div>
                     <div class="avatar">
                       <i class="bx bx-building-house"></i>
                     </div>
                   </div>
+                  </div>
                 </div>
-              </div>
-              <div class="col-md-3">
+                <div class="col-md-3">
                 <div class="nalika-stats-card success">
                   <div class="d-flex justify-content-between align-items-center">
                     <div>
-                      <div class="metric-value" id="activeBookings">0</div>
-                      <div class="metric-label">Đặt phòng đang hoạt động</div>
+                    <div class="metric-value" id="activeBookings">0</div>
+                    <div class="metric-label">Đặt phòng đang hoạt động</div>
                     </div>
                     <div class="avatar">
                       <i class="bx bx-bed"></i>
                     </div>
                   </div>
+                  </div>
                 </div>
-              </div>
-              <div class="col-md-3">
+                <div class="col-md-3">
                 <div class="nalika-stats-card info">
                   <div class="d-flex justify-content-between align-items-center">
                     <div>
-                      <div class="metric-value" id="revenueGrowth">0%</div>
-                      <div class="metric-label">Tăng trưởng tháng này</div>
+                    <div class="metric-value" id="revenueGrowth">0%</div>
+                    <div class="metric-label">Tăng trưởng tháng này</div>
                     </div>
                     <div class="avatar">
                       <i class="bx bx-trending-up"></i>
                     </div>
                   </div>
+                  </div>
                 </div>
               </div>
-            </div>
             </div>
 
             <!-- Revenue Charts -->
@@ -369,12 +369,12 @@
           const menuContainer = document.getElementById('common-menu');
           if (menuContainer) {
             menuContainer.innerHTML = html;
-            console.log('✅ Menu loaded for reports page');
+        console.log('✅ Menu loaded for reports page');
           }
         })
         .catch(error => {
           console.error('❌ Error loading menu:', error);
-        });
+      });
     });
   </script>
 
@@ -418,13 +418,13 @@
 
     function initializeReports() {
       try {
-        initializeDateFilters();
+      initializeDateFilters();
         setupEventListeners();
         
         // Load data với delay nhỏ để đảm bảo DOM sẵn sàng
         setTimeout(() => {
-          loadDashboardStats();
-          loadAllReports();
+      loadDashboardStats();
+      loadAllReports();
         }, 100);
       } catch (error) {
         console.error('❌ Error initializing reports:', error);
@@ -493,61 +493,65 @@
     async function loadDashboardStats() {
       try {
         console.log('📊 Loading dashboard stats...');
-        // Try both token and adminToken for compatibility
         const token = localStorage.getItem('token') || localStorage.getItem('adminToken');
-        console.log('🔑 Token exists:', !!token);
-        
         if (!token) {
           console.warn('⚠️ No token found, cannot load dashboard stats');
-          // Show empty/zero values instead of sample data
-          document.getElementById('todayRevenue').textContent = formatCurrencySafe(0);
-          document.getElementById('todayOccupancy').textContent = '0%';
-          document.getElementById('activeBookings').textContent = '0';
-          const growthElement = document.getElementById('revenueGrowth');
-          growthElement.textContent = '0%';
-          growthElement.className = 'metric-value';
+          hydrateDashboardTiles();
           return;
         }
         
-        // Use reports dashboard-stats endpoint
-        const response = await fetch(`${DASHBOARD_API}/stats`, {
-          headers: { 
+        const headers = {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
-          }
-        });
+        };
 
-        console.log('📡 Dashboard API response:', response.status);
-        
+        let data = null;
+        let response = await fetch(`${REPORTS_API_BASE}/dashboard-stats`, { headers });
         if (response.ok) {
-          const data = await response.json();
-          console.log('📈 Dashboard data:', data);
-          
-          document.getElementById('todayRevenue').textContent = formatCurrencySafe(data.todayRevenue || 0);
-          document.getElementById('todayOccupancy').textContent = (data.todayOccupancy || 0) + '%';
-          document.getElementById('activeBookings').textContent = data.activeBookings || 0;
-          
-          const growthElement = document.getElementById('revenueGrowth');
-          const growth = data.revenueGrowth || 0;
-          growthElement.textContent = growth + '%';
-          growthElement.className = 'metric-value ' + (growth >= 0 ? 'growth-positive' : 'growth-negative');
+          data = await response.json();
         } else {
-          const errorText = await response.text();
-          console.error('❌ Dashboard API error:', response.status, errorText);
-          
-          // Show zero values when API fails (no sample data)
-          console.warn('⚠️ Cannot load dashboard stats, showing zero values');
-          document.getElementById('todayRevenue').textContent = formatCurrencySafe(0);
-          document.getElementById('todayOccupancy').textContent = '0%';
-          document.getElementById('activeBookings').textContent = '0';
+          const fallbackText = await response.text().catch(() => '');
+          console.warn('⚠️ Reports dashboard API failed, trying fallback. Status:', response.status, fallbackText);
+          const fallbackResp = await fetch(`${DASHBOARD_API}/stats`, { headers });
+          if (fallbackResp.ok) {
+            data = await fallbackResp.json();
+          } else {
+            console.error('❌ Dashboard fallback API failed:', fallbackResp.status);
+          }
+        }
+
+        if (!data) {
+          hydrateDashboardTiles();
+          return;
+        }
+
+        const todayRevenue = data.todayRevenue ?? data.today?.revenue ?? 0;
+        const occupancyRate = data.todayOccupancy ?? data.occupancy?.rate ?? 0;
+        const activeBookings = data.activeBookings ?? data.occupancy?.occupied ?? data.totals?.thisMonthBookings ?? 0;
+        const growthValue = data.revenueGrowth ?? data.growth?.revenue ?? 0;
+
+        document.getElementById('todayRevenue').textContent = formatCurrencySafe(todayRevenue);
+        document.getElementById('todayOccupancy').textContent = `${Number(occupancyRate || 0).toFixed(1)}%`;
+        document.getElementById('activeBookings').textContent = activeBookings || 0;
           
           const growthElement = document.getElementById('revenueGrowth');
-          growthElement.textContent = '0%';
-          growthElement.className = 'metric-value';
-        }
+        const growthNumber = Number(growthValue) || 0;
+        growthElement.textContent = `${growthNumber.toFixed(1)}%`;
+        growthElement.className = 'metric-value ' + (growthNumber >= 0 ? 'growth-positive' : 'growth-negative');
       } catch (error) {
         console.error('❌ Error loading dashboard stats:', error);
+        hydrateDashboardTiles();
       }
+    }
+
+    function hydrateDashboardTiles(values = { revenue: 0, occupancy: 0, active: 0, growth: 0 }) {
+      document.getElementById('todayRevenue').textContent = formatCurrencySafe(values.revenue || 0);
+      document.getElementById('todayOccupancy').textContent = `${Number(values.occupancy || 0).toFixed(1)}%`;
+      document.getElementById('activeBookings').textContent = values.active || 0;
+      const growthElement = document.getElementById('revenueGrowth');
+      const growthNumber = Number(values.growth) || 0;
+      growthElement.textContent = `${growthNumber.toFixed(1)}%`;
+      growthElement.className = 'metric-value ' + (growthNumber >= 0 ? 'growth-positive' : 'growth-negative');
     }
 
     async function loadAllReports() {
@@ -622,7 +626,9 @@
           return;
         }
         
-        const response = await fetch(`${DASHBOARD_API}/occupancy-report?startDate=${startDate}&endDate=${endDate}`, {
+        let dailyData = [];
+        try {
+          const response = await fetch(`${REPORTS_API_BASE}/occupancy-report?startDate=${startDate}&endDate=${endDate}`, {
           headers: { 
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -631,14 +637,48 @@
 
         if (response.ok) {
           const data = await response.json();
-          createOccupancyChart(data.dailyOccupancy);
+            dailyData = Array.isArray(data)
+              ? data
+              : (data?.dailyOccupancy || []);
         } else {
-          const errorText = await response.text();
-          console.error('❌ Occupancy API error:', response.status, errorText);
-          // Show empty chart when API fails (no sample data)
-          console.warn('⚠️ Cannot load occupancy data, showing empty chart');
-          createOccupancyChart([]);
+            const errorText = await response.text().catch(() => '');
+            console.warn('⚠️ Reports occupancy API error:', response.status, errorText);
+          }
+        } catch (err) {
+          console.warn('⚠️ Error calling reports occupancy API:', err);
         }
+
+        if (!dailyData || dailyData.length === 0) {
+          console.warn('⚠️ No occupancy data from reports API, trying dashboard fallback');
+          const rangeMs = Math.max(1, new Date(endDate).getTime() - new Date(startDate).getTime());
+          const daysRange = Math.max(1, Math.ceil(rangeMs / (1000 * 60 * 60 * 24)));
+
+          try {
+            const fallbackResp = await fetch(`${DASHBOARD_API}/occupancy-trends?days=${daysRange}`, {
+              headers: { 
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }
+            });
+
+            if (fallbackResp.ok) {
+              const fallbackData = await fallbackResp.json();
+              dailyData = (fallbackData || []).map(item => ({
+                date: item.date,
+                occupancyRate: item.occupancyRate ?? item.rate ?? 0,
+                occupiedRooms: item.occupiedRooms ?? item.occupied ?? 0,
+                totalRooms: item.totalRooms ?? item.total ?? 0,
+                availableRooms: (item.totalRooms ?? item.total ?? 0) - (item.occupiedRooms ?? item.occupied ?? 0)
+              }));
+            } else {
+              console.warn('⚠️ Dashboard occupancy fallback failed:', fallbackResp.status);
+            }
+          } catch (fallbackError) {
+            console.error('❌ Error loading fallback occupancy data:', fallbackError);
+          }
+        }
+
+        createOccupancyChart(dailyData || []);
       } catch (error) {
         console.error('❌ Error loading occupancy report:', error);
         // Show empty chart on error (no sample data)
@@ -749,7 +789,7 @@
       if (revenueChart) {
         console.log('🗑️ Destroying existing revenue chart');
         try {
-          revenueChart.destroy();
+        revenueChart.destroy();
         } catch (e) {
           console.warn('⚠️ Error destroying chart:', e);
         }
@@ -760,20 +800,20 @@
         const container = canvas.parentElement;
         if (container) {
           container.innerHTML = `
-            <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666;">
-              <div style="text-align: center;">
-                <i class="bx bx-info-circle" style="font-size: 3rem; margin-bottom: 1rem; color: #999;"></i>
-                <p style="font-size: 1.1rem; margin: 0;">Không có dữ liệu doanh thu trong khoảng thời gian đã chọn</p>
-              </div>
+          <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666;">
+            <div style="text-align: center;">
+              <i class="bx bx-info-circle" style="font-size: 3rem; margin-bottom: 1rem; color: #999;"></i>
+              <p style="font-size: 1.1rem; margin: 0;">Không có dữ liệu doanh thu trong khoảng thời gian đã chọn</p>
             </div>
-          `;
+          </div>
+        `;
         }
         return;
       }
 
       console.log('🏗️ Building revenue chart...');
       try {
-        revenueChart = new Chart(ctx, {
+      revenueChart = new Chart(ctx, {
         type: 'line',
         data: {
           labels: dailyRevenue.map(d => new Date(d.date).toLocaleDateString('vi-VN')),
@@ -1110,9 +1150,9 @@
           return;
         }
 
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF();
-        
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF();
+      
         const startDate = document.getElementById('startDate').value;
         const endDate = document.getElementById('endDate').value;
         const dateStr = new Date().toLocaleDateString('vi-VN');
