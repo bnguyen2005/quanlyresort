@@ -350,29 +350,48 @@ public class ReportsController : ControllerBase
         var start = startDate ?? DateTime.Today.AddDays(-30);
         var end = endDate ?? DateTime.Today.AddDays(1);
 
-        // Top customers by spending - client-side aggregation
-        var chargesList = await _context.Charges
-            .Include(c => c.Booking)
-            .ThenInclude(b => b.Customer)
-            .Where(c => c.ChargeDate >= start && c.ChargeDate < end && c.Booking != null)
-            .Select(c => new { 
-                c.Booking!.CustomerId, 
-                CustomerName = c.Booking.Customer!.FullName,
-                c.BookingId,
-                c.TotalAmount,
-                c.ChargeDate
+        // Top customers by spending - dựa trên invoices + restaurant orders đã thanh toán
+        var paidInvoices = await _context.Invoices
+            .Include(i => i.Customer)
+            .Where(i => i.Status == "Paid" &&
+                        i.CustomerId > 0 &&
+                        i.PaidDate.HasValue &&
+                        i.PaidDate.Value >= start &&
+                        i.PaidDate.Value < end)
+            .Select(i => new
+            {
+                i.CustomerId,
+                CustomerName = i.Customer!.FullName,
+                Amount = i.PaidAmount > 0 ? i.PaidAmount : i.TotalAmount,
+                TransactionDate = i.PaidDate ?? i.IssueDate
             })
             .ToListAsync();
-        
-        var topCustomers = chargesList
+
+        var paidRestaurantOrders = await _context.RestaurantOrders
+            .Include(o => o.Customer)
+            .Where(o => o.PaymentStatus == "Paid" &&
+                        o.CustomerId.HasValue &&
+                        ((o.UpdatedAt.HasValue && o.UpdatedAt.Value >= start && o.UpdatedAt.Value < end) ||
+                         (!o.UpdatedAt.HasValue && o.CreatedAt >= start && o.CreatedAt < end)))
+            .Select(o => new
+            {
+                CustomerId = o.CustomerId!.Value,
+                CustomerName = o.Customer != null ? o.Customer.FullName : "Khách hàng nhà hàng",
+                Amount = o.TotalAmount,
+                TransactionDate = o.UpdatedAt ?? o.CreatedAt
+            })
+            .ToListAsync();
+
+        var combinedCustomerSpending = paidInvoices
+            .Concat(paidRestaurantOrders)
             .GroupBy(c => new { c.CustomerId, c.CustomerName })
             .Select(g => new
             {
                 customerId = g.Key.CustomerId,
                 customerName = g.Key.CustomerName,
-                totalSpent = g.Sum(c => (decimal?)c.TotalAmount) ?? 0,
-                bookingCount = g.Select(c => c.BookingId).Distinct().Count(),
-                lastBooking = g.Max(c => c.ChargeDate)
+                totalSpent = g.Sum(x => (decimal?)x.Amount) ?? 0,
+                bookingCount = g.Count(),
+                lastBooking = g.Max(x => x.TransactionDate)
             })
             .OrderByDescending(x => x.totalSpent)
             .Take(10)
@@ -403,7 +422,7 @@ public class ReportsController : ControllerBase
         {
             startDate = start,
             endDate = end.AddDays(-1),
-            topCustomers,
+            topCustomers = combinedCustomerSpending,
             customerTypes,
             newCustomers
         });
