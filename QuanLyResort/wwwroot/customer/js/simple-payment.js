@@ -1126,7 +1126,7 @@ function showHotelPaymentConfirmation(bookingId, bookingCode, amount) {
                   </div>
                   <div>
                     <strong style="color: #1a1a1a; font-size: 16px;">Địa chỉ:</strong>
-                    <span style="color: #6b7280; font-size: 15px; margin-left: 8px;">123 Đường Biển Xanh, Thành phố Biển, Việt Nam</span>
+                    <span style="color: #6b7280; font-size: 15px; margin-left: 8px;">Huflit Hốc Môn, Hồ Chí Minh</span>
                   </div>
                 </div>
                 <div style="background: #f0fdf4; padding: 16px; border-radius: 8px; border: 1px solid #86efac;">

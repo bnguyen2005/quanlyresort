@@ -54,7 +54,7 @@ function initMap() {
     }
     
     // Địa chỉ Resort Deluxe
-    var resortAddress = '123 Đường Biển Xanh, Thành phố Biển, Việt Nam';
+    var resortAddress = 'Huflit Hốc Môn, Hồ Chí Minh';
     // Tọa độ Resort (mặc định - Nha Trang)
     var resortLatlng = new google.maps.LatLng(12.2388, 109.1967);
     
