@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Test Rooms Data Loading</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background: #d4edda; }
+        .error { background: #f8d7da; }
+        .warning { background: #fff3cd; }
+        button { padding: 10px 20px; margin: 5px; }
+        .log { background: #f8f9fa; padding: 10px; margin: 10px 0; border-radius: 5px; font-family: monospace; white-space: pre-wrap; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Test Rooms Data Loading</h1>
+    
+    <div class="test-section">
+        <h3>1. Test API Connection</h3>
+        <button onclick="testAPI()">Test API</button>
+        <div id="apiResult" class="log"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>2. Test DataTables</h3>
+        <button onclick="testDataTables()">Test DataTables</button>
+        <div id="datatablesResult" class="log"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>3. Test Rooms Loading</h3>
+        <button onclick="testRoomsLoading()">Test Rooms Loading</button>
+        <div id="roomsResult" class="log"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>4. Test Authentication</h3>
+        <button onclick="testAuth()">Test Auth</button>
+        <div id="authResult" class="log"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>5. Rooms Data Table</h3>
+        <div id="roomsTable"></div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+    
+    <script>
+        const API_BASE = 'http://localhost:5130/api';
+        
+        function log(elementId, message) {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            element.textContent += `[${timestamp}] ${message}\n`;
+        }
+        
+        async function testAPI() {
+            log('apiResult', 'Testing API endpoints...');
+            
+            try {
+                // Test rooms
+                const roomsResponse = await fetch(`${API_BASE}/rooms`);
+                const roomsData = await roomsResponse.json();
+                log('apiResult', `✅ /api/rooms: ${roomsResponse.status} - ${roomsData.length} rooms`);
+                
+                // Test room types
+                const roomTypesResponse = await fetch(`${API_BASE}/room-types`);
+                const roomTypesData = await roomTypesResponse.json();
+                log('apiResult', `✅ /api/room-types: ${roomTypesResponse.status} - ${roomTypesData.length} types`);
+                
+                // Test floors
+                const floorsResponse = await fetch(`${API_BASE}/rooms/floors`);
+                const floorsData = await floorsResponse.json();
+                log('apiResult', `✅ /api/rooms/floors: ${floorsResponse.status} - ${floorsData.length} floors`);
+                
+            } catch (error) {
+                log('apiResult', `❌ API Error: ${error.message}`);
+            }
+        }
+        
+        function testDataTables() {
+            log('datatablesResult', 'Testing DataTables...');
+            
+            if (typeof $ !== 'undefined') {
+                log('datatablesResult', '✅ jQuery loaded');
+                
+                if (typeof $.fn.DataTable !== 'undefined') {
+                    log('datatablesResult', '✅ DataTables loaded');
+                    
+                    // Test creating a simple table
+                    try {
+                        const testTable = document.createElement('table');
+                        testTable.id = 'testTable';
+                        testTable.innerHTML = `
+                            <thead>
+                                <tr><th>Name</th><th>Value</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Test</td><td>Data</td></tr>
+                            </tbody>
+                        `;
+                        document.body.appendChild(testTable);
+                        
+                        $('#testTable').DataTable();
+                        log('datatablesResult', '✅ DataTables can create tables');
+                        
+                        // Remove test table
+                        document.body.removeChild(testTable);
+                        
+                    } catch (error) {
+                        log('datatablesResult', `❌ DataTables error: ${error.message}`);
+                    }
+                } else {
+                    log('datatablesResult', '❌ DataTables not loaded');
+                }
+            } else {
+                log('datatablesResult', '❌ jQuery not loaded');
+            }
+        }
+        
+        async function testRoomsLoading() {
+            log('roomsResult', 'Testing rooms loading...');
+            
+            try {
+                const response = await fetch(`${API_BASE}/rooms`);
+                const rooms = await response.json();
+                
+                log('roomsResult', `✅ Loaded ${rooms.length} rooms`);
+                
+                // Display rooms in table
+                const tableHtml = `
+                    <table id="roomsTable" class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Room ID</th>
+                                <th>Room Number</th>
+                                <th>Room Type</th>
+                                <th>Floor</th>
+                                <th>Price</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rooms.map(room => `
+                                <tr>
+                                    <td>${room.roomId}</td>
+                                    <td>${room.roomNumber}</td>
+                                    <td>${room.roomType}</td>
+                                    <td>${room.floor}</td>
+                                    <td>${room.pricePerNight ? room.pricePerNight.toLocaleString('vi-VN') + 'đ' : 'N/A'}</td>
+                                    <td>${room.isAvailable ? 'Available' : 'Occupied'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+                
+                document.getElementById('roomsTable').innerHTML = tableHtml;
+                
+                // Initialize DataTables
+                if (typeof $ !== 'undefined' && typeof $.fn.DataTable !== 'undefined') {
+                    $('#roomsTable').DataTable({
+                        responsive: true,
+                        pageLength: 10,
+                        language: {
+                            search: "Tìm kiếm:",
+                            lengthMenu: "Hiển thị _MENU_ bản ghi",
+                            info: "Hiển thị _START_ đến _END_ của _TOTAL_ bản ghi",
+                            paginate: {
+                                first: "Đầu",
+                                last: "Cuối",
+                                next: "Tiếp",
+                                previous: "Trước"
+                            }
+                        }
+                    });
+                    log('roomsResult', '✅ DataTables initialized successfully');
+                } else {
+                    log('roomsResult', '⚠️ DataTables not available, showing plain table');
+                }
+                
+            } catch (error) {
+                log('roomsResult', `❌ Error loading rooms: ${error.message}`);
+            }
+        }
+        
+        async function testAuth() {
+            log('authResult', 'Testing authentication...');
+            
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user');
+            
+            if (token) {
+                log('authResult', `✅ Token exists: ${token.substring(0, 20)}...`);
+            } else {
+                log('authResult', '❌ No token found');
+            }
+            
+            if (user) {
+                const userObj = JSON.parse(user);
+                log('authResult', `✅ User: ${userObj.username} (${userObj.role})`);
+            } else {
+                log('authResult', '❌ No user found');
+            }
+            
+            // Test login
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'admin@resort.test',
+                        password: 'P@ssw0rd123'
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    log('authResult', '✅ Login successful');
+                } else {
+                    log('authResult', `❌ Login failed: ${response.status}`);
+                }
+            } catch (error) {
+                log('authResult', `❌ Login error: ${error.message}`);
+            }
+        }
+        
+        // Auto-run tests on page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                testAPI();
+                testDataTables();
+                testAuth();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

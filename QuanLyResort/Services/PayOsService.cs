@@ -1,0 +1,409 @@
+using System.Security.Cryptography;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+
+namespace QuanLyResort.Services;
+
+/// <summary>
+/// Service để tạo PayOs payment link
+/// </summary>
+public class PayOsService
+{
+    private readonly IConfiguration _configuration;
+    private readonly ILogger<PayOsService> _logger;
+    private readonly HttpClient _httpClient;
+    private readonly string _clientId;
+    private readonly string _apiKey;
+    private readonly string _checksumKey;
+    private readonly string _baseUrl = "https://api-merchant.payos.vn";
+
+    public PayOsService(
+        IConfiguration configuration,
+        ILogger<PayOsService> logger,
+        HttpClient httpClient)
+    {
+        _configuration = configuration;
+        _logger = logger;
+        _httpClient = httpClient;
+        
+        var payOsConfig = _configuration.GetSection("BankWebhook:PayOs");
+        _clientId = payOsConfig["ClientId"] ?? throw new ArgumentNullException(nameof(payOsConfig), "PayOs ClientId is not configured");
+        _apiKey = payOsConfig["ApiKey"] ?? throw new ArgumentNullException(nameof(payOsConfig), "PayOs ApiKey is not configured");
+        _checksumKey = payOsConfig["ChecksumKey"] ?? payOsConfig["SecretKey"] ?? throw new ArgumentNullException(nameof(payOsConfig), "PayOs ChecksumKey/SecretKey is not configured");
+        
+        _logger.LogInformation("[PAYOS] ✅ Service initialized with ClientId: {ClientId}", _clientId.Substring(0, Math.Min(8, _clientId.Length)));
+    }
+
+    /// <summary>
+    /// Tạo PayOs payment link
+    /// </summary>
+    public async Task<PayOsPaymentLinkResponse?> CreatePaymentLinkAsync(
+        long orderCode,
+        decimal amount,
+        string description,
+        string returnUrl,
+        string cancelUrl,
+        DateTime? expiredAt = null)
+    {
+        try
+        {
+            _logger.LogInformation("[PAYOS] 🔄 Creating payment link: OrderCode={OrderCode}, Amount={Amount:N0} VND", orderCode, amount);
+
+            // Convert amount to integer (PayOs expects integer/long)
+            var amountLong = (long)Math.Round(amount);
+
+            // PayOs signature format: SORT THEO ALPHABET (alphabetical order)
+            // Format: amount={amount}&cancelUrl={cancelUrl}&description={description}&orderCode={orderCode}&returnUrl={returnUrl}
+            // Reference: PayOs API Documentation - https://payos.vn/docs/api/
+            // "data theo định dạng được sort theo alphabet: amount=$amount&cancelUrl=$cancelUrl&description=$description&orderCode=$orderCode&returnUrl=$returnUrl"
+            var signatureString = $"amount={amountLong}&cancelUrl={cancelUrl}&description={description}&orderCode={orderCode}&returnUrl={returnUrl}";
+            
+            _logger.LogInformation("🔐 [PAYOS] Signature string: {SignatureString}", signatureString);
+            
+            // Create signature using HMAC_SHA256
+            var signature = ComputeHmacSha256(signatureString, _checksumKey);
+            
+            _logger.LogInformation("🔐 [PAYOS] Computed signature: {Signature}", signature.Substring(0, Math.Min(16, signature.Length)) + "...");
+
+            // Prepare request body
+            // expiredAt must be Int32 Unix Timestamp (not double)
+            var expiredAtUnix = 0;
+            if (expiredAt.HasValue)
+            {
+                var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+                expiredAtUnix = (int)(expiredAt.Value.ToUniversalTime().Subtract(epoch).TotalSeconds);
+            }
+            
+            // PayOs expects long for orderCode and amount
+            var requestBody = new
+            {
+                orderCode = orderCode,
+                amount = amountLong,
+                description = description,
+                cancelUrl = cancelUrl,
+                returnUrl = returnUrl,
+                expiredAt = expiredAtUnix > 0 ? (long?)expiredAtUnix : null,
+                signature = signature
+            };
+
+            var jsonBody = JsonSerializer.Serialize(requestBody);
+            _logger.LogInformation("📤 [PAYOS] Request body: {Body}", jsonBody);
+
+            // Create HTTP request
+            var request = new HttpRequestMessage(HttpMethod.Post, $"{_baseUrl}/v2/payment-requests")
+            {
+                Content = new StringContent(jsonBody, Encoding.UTF8, "application/json")
+            };
+            
+            request.Headers.Add("x-client-id", _clientId);
+            request.Headers.Add("x-api-key", _apiKey);
+
+            // Send request
+            var response = await _httpClient.SendAsync(request);
+            var responseContent = await response.Content.ReadAsStringAsync();
+
+            _logger.LogInformation("📥 [PAYOS] Response status: {Status}", response.StatusCode);
+            _logger.LogInformation("📥 [PAYOS] Response body: {Body}", responseContent);
+
+            // Parse response even if status code is not success to get error details
+            PayOsPaymentLinkResponse? result = null;
+            try
+            {
+                result = JsonSerializer.Deserialize<PayOsPaymentLinkResponse>(responseContent);
+            }
+            catch (JsonException jsonEx)
+            {
+                _logger.LogError(jsonEx, "❌ [PAYOS] Failed to deserialize response: {ResponseBody}", responseContent);
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogError("❌ [PAYOS] HTTP Error: {Status} - {Content}", response.StatusCode, responseContent);
+                }
+                return null;
+            }
+
+            // Check HTTP status first
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogError("❌ [PAYOS] HTTP Error: {Status} - {Content}", response.StatusCode, responseContent);
+                if (result != null)
+                {
+                    _logger.LogError("❌ [PAYOS] PayOs Error Code: {Code}, Desc: {Desc}", 
+                        result.Code ?? "NULL", result.Desc ?? "NULL");
+                    // Return result để controller có thể lấy error message
+                    return result;
+                }
+                // If can't parse response, return null
+                return null;
+            }
+            
+            // Check PayOs response code
+            if (result?.Code != "00")
+            {
+                _logger.LogError("❌ [PAYOS] PayOs API returned error. Code: {Code}, Desc: {Desc}", 
+                    result?.Code ?? "NULL", result?.Desc ?? "NULL");
+                return result; // Return để controller có thể lấy error message
+            }
+            
+            if (result.Data != null)
+            {
+                _logger.LogInformation("✅ [PAYOS] Payment link created: PaymentLinkId={PaymentLinkId}", 
+                    result.Data.PaymentLinkId);
+                
+                // Log QR code details
+                var hasQrCode = !string.IsNullOrEmpty(result.Data.QrCode);
+                _logger.LogInformation("🔍 [PAYOS] QR Code available: {HasQR}, Length: {Length}", 
+                    hasQrCode, result.Data.QrCode?.Length ?? 0);
+                
+                if (hasQrCode)
+                {
+                    _logger.LogInformation("🔍 [PAYOS] QR Code preview (first 50 chars): {Preview}", 
+                        result.Data.QrCode.Substring(0, Math.Min(50, result.Data.QrCode.Length)));
+                }
+                else
+                {
+                    _logger.LogWarning("⚠️ [PAYOS] QR Code is NULL or empty. Trying to get from GetAsync...");
+                    // Nếu CreateAsync không trả về QR code, gọi GetAsync để lấy QR code
+                    if (!string.IsNullOrEmpty(result.Data.PaymentLinkId))
+                    {
+                        var paymentLinkDetails = await GetPaymentLinkAsync(result.Data.PaymentLinkId);
+                        if (paymentLinkDetails?.Data != null && !string.IsNullOrEmpty(paymentLinkDetails.Data.QrCode))
+                        {
+                            _logger.LogInformation("✅ [PAYOS] Got QR code from GetAsync");
+                            result.Data.QrCode = paymentLinkDetails.Data.QrCode;
+                        }
+                        else
+                        {
+                            _logger.LogWarning("⚠️ [PAYOS] GetAsync also did not return QR code. PaymentLinkId={PaymentLinkId}, CheckoutUrl={CheckoutUrl}", 
+                                result.Data.PaymentLinkId, result.Data.CheckoutUrl);
+                        }
+                    }
+                }
+                
+                return result;
+            }
+            else
+            {
+                _logger.LogWarning("⚠️ [PAYOS] Payment link creation failed: Code={Code}, Desc={Desc}, Response={Response}", 
+                    result?.Code ?? "NULL", result?.Desc ?? "NULL", responseContent);
+                return null;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "❌ [PAYOS] Error creating payment link");
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Lấy thông tin payment link từ PayOs theo orderCode
+    /// </summary>
+    public async Task<PayOsPaymentLinkResponse?> GetPaymentLinkByOrderCodeAsync(long orderCode)
+    {
+        try
+        {
+            _logger.LogInformation("🔄 [PAYOS] Getting payment link by orderCode: {OrderCode}", orderCode);
+
+            // Create HTTP request
+            // PayOs API: GET /v2/payment-requests/{idOrOrderCode}
+            // Có thể dùng orderCode hoặc paymentLinkId
+            var request = new HttpRequestMessage(HttpMethod.Get, $"{_baseUrl}/v2/payment-requests/{orderCode}");
+            
+            request.Headers.Add("x-client-id", _clientId);
+            request.Headers.Add("x-api-key", _apiKey);
+
+            // Send request
+            var response = await _httpClient.SendAsync(request);
+            var responseContent = await response.Content.ReadAsStringAsync();
+
+            _logger.LogInformation("📥 [PAYOS] GetByOrderCode Response status: {Status}", response.StatusCode);
+            _logger.LogInformation("📥 [PAYOS] GetByOrderCode Response body: {Body}", responseContent);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogError("❌ [PAYOS] GetByOrderCode HTTP Error: {Status} - {Content}", response.StatusCode, responseContent);
+                return null;
+            }
+
+            var result = JsonSerializer.Deserialize<PayOsPaymentLinkResponse>(responseContent);
+            
+            if (result?.Code == "00" && result.Data != null)
+            {
+                var hasQrCode = !string.IsNullOrEmpty(result.Data.QrCode);
+                _logger.LogInformation("✅ [PAYOS] GetByOrderCode success. QR Code available: {HasQR}, Length: {Length}", 
+                    hasQrCode, result.Data.QrCode?.Length ?? 0);
+                
+                // Nếu không có QR code, thử lấy bằng payment link ID
+                if (!hasQrCode)
+                {
+                    // PayOs có thể trả về field "id" thay vì "paymentLinkId" trong response
+                    var paymentLinkId = result.Data.PaymentLinkId ?? result.Data.Id;
+                    if (!string.IsNullOrEmpty(paymentLinkId))
+                    {
+                        _logger.LogWarning("⚠️ [PAYOS] GetByOrderCode không có QR code. Thử lấy bằng PaymentLinkId: {PaymentLinkId}", paymentLinkId);
+                        var fullDetails = await GetPaymentLinkAsync(paymentLinkId);
+                        if (fullDetails?.Data != null && !string.IsNullOrEmpty(fullDetails.Data.QrCode))
+                        {
+                            _logger.LogInformation("✅ [PAYOS] Đã lấy QR code từ GetPaymentLinkAsync");
+                            // Merge data: giữ nguyên data từ GetByOrderCode, nhưng lấy QR code từ GetPaymentLinkAsync
+                            result.Data.QrCode = fullDetails.Data.QrCode;
+                            result.Data.CheckoutUrl = fullDetails.Data.CheckoutUrl ?? result.Data.CheckoutUrl;
+                            result.Data.AccountNumber = fullDetails.Data.AccountNumber ?? result.Data.AccountNumber;
+                            result.Data.AccountName = fullDetails.Data.AccountName ?? result.Data.AccountName;
+                        }
+                        else
+                        {
+                            _logger.LogWarning("⚠️ [PAYOS] GetPaymentLinkAsync cũng không trả về QR code");
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogWarning("⚠️ [PAYOS] Không có PaymentLinkId hoặc Id trong response");
+                    }
+                }
+                
+                return result;
+            }
+            else
+            {
+                _logger.LogWarning("⚠️ [PAYOS] GetByOrderCode failed: Code={Code}, Desc={Desc}", 
+                    result?.Code ?? "NULL", result?.Desc ?? "NULL");
+                return null;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "❌ [PAYOS] Error getting payment link by orderCode");
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Lấy thông tin payment link từ PayOs (để lấy QR code nếu CreateAsync không trả về)
+    /// </summary>
+    public async Task<PayOsPaymentLinkResponse?> GetPaymentLinkAsync(string paymentLinkId)
+    {
+        try
+        {
+            _logger.LogInformation("🔄 [PAYOS] Getting payment link: PaymentLinkId={PaymentLinkId}", paymentLinkId);
+
+            // Create HTTP request
+            var request = new HttpRequestMessage(HttpMethod.Get, $"{_baseUrl}/v2/payment-requests/{paymentLinkId}");
+            
+            request.Headers.Add("x-client-id", _clientId);
+            request.Headers.Add("x-api-key", _apiKey);
+
+            // Send request
+            var response = await _httpClient.SendAsync(request);
+            var responseContent = await response.Content.ReadAsStringAsync();
+
+            _logger.LogInformation("📥 [PAYOS] GetAsync Response status: {Status}", response.StatusCode);
+            _logger.LogInformation("📥 [PAYOS] GetAsync Response body: {Body}", responseContent);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogError("❌ [PAYOS] GetAsync HTTP Error: {Status} - {Content}", response.StatusCode, responseContent);
+                return null;
+            }
+
+            var result = JsonSerializer.Deserialize<PayOsPaymentLinkResponse>(responseContent);
+            
+            if (result?.Code == "00" && result.Data != null)
+            {
+                var hasQrCode = !string.IsNullOrEmpty(result.Data.QrCode);
+                _logger.LogInformation("✅ [PAYOS] GetAsync success. QR Code available: {HasQR}, Length: {Length}", 
+                    hasQrCode, result.Data.QrCode?.Length ?? 0);
+                return result;
+            }
+            else
+            {
+                _logger.LogWarning("⚠️ [PAYOS] GetAsync failed: Code={Code}, Desc={Desc}", 
+                    result?.Code ?? "NULL", result?.Desc ?? "NULL");
+                return null;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "❌ [PAYOS] Error getting payment link");
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Compute HMAC SHA256
+    /// PayOs uses lowercase hexadecimal format
+    /// </summary>
+    private string ComputeHmacSha256(string data, string key)
+    {
+        using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(key));
+        var hashBytes = hmac.ComputeHash(Encoding.UTF8.GetBytes(data));
+        return BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
+    }
+}
+
+/// <summary>
+/// Response từ PayOs khi tạo payment link
+/// </summary>
+public class PayOsPaymentLinkResponse
+{
+    [JsonPropertyName("code")]
+    public string Code { get; set; } = string.Empty;
+    
+    [JsonPropertyName("desc")]
+    public string Desc { get; set; } = string.Empty;
+    
+    [JsonPropertyName("data")]
+    public PayOsPaymentLinkData? Data { get; set; }
+    
+    [JsonPropertyName("signature")]
+    public string? Signature { get; set; }
+}
+
+/// <summary>
+/// Data trong PayOs payment link response
+/// </summary>
+public class PayOsPaymentLinkData
+{
+    [JsonPropertyName("bin")]
+    public string? Bin { get; set; }
+    
+    [JsonPropertyName("accountNumber")]
+    public string? AccountNumber { get; set; }
+    
+    [JsonPropertyName("accountName")]
+    public string? AccountName { get; set; }
+    
+    [JsonPropertyName("currency")]
+    public string? Currency { get; set; }
+    
+    [JsonPropertyName("paymentLinkId")]
+    public string? PaymentLinkId { get; set; }
+    
+    [JsonPropertyName("id")]
+    public string? Id { get; set; } // PayOs có thể trả về "id" thay vì "paymentLinkId"
+    
+    [JsonPropertyName("amount")]
+    public int Amount { get; set; }
+    
+    [JsonPropertyName("description")]
+    public string? Description { get; set; }
+    
+    [JsonPropertyName("orderCode")]
+    public int OrderCode { get; set; }
+    
+    [JsonPropertyName("expiredAt")]
+    public long ExpiredAt { get; set; }
+    
+    [JsonPropertyName("status")]
+    public string? Status { get; set; }
+    
+    [JsonPropertyName("checkoutUrl")]
+    public string? CheckoutUrl { get; set; }
+    
+    [JsonPropertyName("qrCode")]
+    public string? QrCode { get; set; } // Base64 QR code image
+}
+

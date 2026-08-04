@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="vi" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default" data-assets-path="../assets/" data-template="vertical-menu-template-free">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+  <title>Báo cáo & Thống kê - Resort Management</title>
+  
+  <!-- NO CACHE -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  
+  <link rel="icon" type="image/x-icon" href="../assets/img/favicon/favicon.ico" />
+  <link rel="stylesheet" href="../assets/vendor/fonts/boxicons.css" />
+  <link rel="stylesheet" href="../assets/vendor/css/core.css" class="template-customizer-core-css" />
+  <link rel="stylesheet" href="../assets/vendor/css/theme-default.css" class="template-customizer-theme-css" />
+  <link rel="stylesheet" href="../assets/css/demo.css" />
+  <link rel="stylesheet" href="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.css" />
+</head>
+<body>
+  <div class="layout-wrapper layout-content-navbar">
+    <div class="layout-container">
+
+      <!-- Menu - Load from common component -->
+      <div id="common-menu"></div>
+
+      <!-- Layout container -->
+      <div class="layout-page">
+        
+        <!-- Navbar -->
+        <nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme" id="layout-navbar">
+          <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
+            <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
+              <i class="bx bx-menu bx-sm"></i>
+            </a>
+          </div>
+
+          <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+            <div class="navbar-nav align-items-center">
+              <div class="nav-item d-flex align-items-center">
+                <h4 class="mb-0">📊 Báo cáo & Thống kê</h4>
+              </div>
+            </div>
+
+            <ul class="navbar-nav flex-row align-items-center ms-auto">
+              <li class="nav-item navbar-dropdown dropdown-user dropdown">
+                <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
+                  <div class="avatar avatar-online">
+                    <img src="../assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                  </div>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li>
+                    <a class="dropdown-item" href="#">
+                      <div class="d-flex">
+                        <div class="flex-shrink-0 me-3">
+                          <div class="avatar avatar-online">
+                            <img src="../assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                          </div>
+                        </div>
+                        <div class="flex-grow-1">
+                          <span class="fw-semibold d-block" id="userFullName">Admin</span>
+                          <small class="text-muted" id="userRole">Administrator</small>
+                        </div>
+                      </div>
+                    </a>
+                  </li>
+                  <li><div class="dropdown-divider"></div></li>
+                  <li>
+                    <a class="dropdown-item" href="html/index.html">
+                      <i class="bx bx-home-circle me-2"></i>
+                      <span class="align-middle">Dashboard</span>
+                    </a>
+                  </li>
+                  <li><div class="dropdown-divider"></div></li>
+                  <li>
+                    <a class="dropdown-item" href="javascript:void(0);" id="logoutBtn">
+                      <i class="bx bx-power-off me-2"></i>
+                      <span class="align-middle">Đăng xuất</span>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </nav>
+        <!-- / Navbar -->
+
+        <!-- Content wrapper -->
+        <div class="content-wrapper">
+          <div class="container-xxl flex-grow-1 container-p-y">
+            
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <div>
+                <h4 class="fw-bold mb-0">📊 Báo cáo & Thống kê</h4>
+                <p class="text-muted mb-0">Theo dõi hiệu suất kinh doanh và phân tích dữ liệu</p>
+              </div>
+              <div class="d-flex gap-2">
+                <input type="date" id="reportDate" class="form-control" style="width: auto;">
+                <button type="button" class="btn btn-primary" id="btnRefreshReports">
+                  <i class="bx bx-refresh me-1"></i> Làm mới
+                </button>
+              </div>
+            </div>
+
+            <!-- Daily Overview Cards -->
+            <div class="row mb-4">
+              <div class="col-md-3 col-6 mb-4">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="card-title d-flex align-items-start justify-content-between">
+                      <div class="avatar flex-shrink-0">
+                        <span class="avatar-initial rounded bg-label-primary"><i class="bx bx-home-alt"></i></span>
+                      </div>
+                    </div>
+                    <span class="fw-semibold d-block mb-1">Tỷ lệ lấp đầy</span>
+                    <h3 class="card-title mb-2" id="occupancyRate">0%</h3>
+                    <small class="text-muted" id="occupancyDetails">0/0 phòng</small>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3 col-6 mb-4">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="card-title d-flex align-items-start justify-content-between">
+                      <div class="avatar flex-shrink-0">
+                        <span class="avatar-initial rounded bg-label-success"><i class="bx bx-dollar"></i></span>
+                      </div>
+                    </div>
+                    <span class="fw-semibold d-block mb-1">Doanh thu hôm nay</span>
+                    <h3 class="card-title mb-2" id="dailyRevenue">0đ</h3>
+                    <small class="text-muted" id="revenueBreakdown">Phòng: 0đ | Dịch vụ: 0đ</small>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3 col-6 mb-4">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="card-title d-flex align-items-start justify-content-between">
+                      <div class="avatar flex-shrink-0">
+                        <span class="avatar-initial rounded bg-label-info"><i class="bx bx-credit-card"></i></span>
+                      </div>
+                    </div>
+                    <span class="fw-semibold d-block mb-1">Thanh toán</span>
+                    <h3 class="card-title mb-2" id="totalPayments">0đ</h3>
+                    <small class="text-muted" id="paymentDetails">Đã thu</small>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3 col-6 mb-4">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="card-title d-flex align-items-start justify-content-between">
+                      <div class="avatar flex-shrink-0">
+                        <span class="avatar-initial rounded bg-label-warning"><i class="bx bx-trending-up"></i></span>
+                      </div>
+                    </div>
+                    <span class="fw-semibold d-block mb-1">Dịch vụ phổ biến</span>
+                    <h3 class="card-title mb-2" id="topService">—</h3>
+                    <small class="text-muted" id="serviceRevenue">0đ</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="row mb-4">
+              <!-- Occupancy Chart -->
+              <div class="col-md-6 mb-4">
+                <div class="card">
+                  <div class="card-header">
+                    <h5 class="mb-0">📈 Tỷ lệ lấp đầy phòng</h5>
+                  </div>
+                  <div class="card-body">
+                    <canvas id="occupancyChart" height="300"></canvas>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Revenue Chart -->
+              <div class="col-md-6 mb-4">
+                <div class="card">
+                  <div class="card-header">
+                    <h5 class="mb-0">💰 Phân tích doanh thu</h5>
+                  </div>
+                  <div class="card-body">
+                    <canvas id="revenueChart" height="300"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Service Usage Table -->
+            <div class="card">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">🛎️ Sử dụng dịch vụ (30 ngày qua)</h5>
+                <div class="d-flex gap-2">
+                  <input type="date" id="serviceStartDate" class="form-control form-control-sm" style="width: auto;">
+                  <input type="date" id="serviceEndDate" class="form-control form-control-sm" style="width: auto;">
+                  <button type="button" class="btn btn-sm btn-outline-primary" id="btnFilterServices">
+                    <i class="bx bx-filter me-1"></i> Lọc
+                  </button>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="table-responsive text-nowrap">
+                  <table id="serviceUsageTable" class="table table-hover">
+                    <thead>
+                      <tr>
+                        <th>Tên dịch vụ</th>
+                        <th>Số lần sử dụng</th>
+                        <th>Tổng doanh thu</th>
+                        <th>Doanh thu TB/lần</th>
+                        <th>Xu hướng</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Revenue Breakdown Table -->
+            <div class="card">
+              <div class="card-header">
+                <h5 class="mb-0">💳 Chi tiết doanh thu hôm nay</h5>
+              </div>
+              <div class="card-body">
+                <div class="table-responsive text-nowrap">
+                  <table id="revenueBreakdownTable" class="table table-hover">
+                    <thead>
+                      <tr>
+                        <th>Loại phí</th>
+                        <th>Số giao dịch</th>
+                        <th>Tổng số tiền</th>
+                        <th>Tỷ lệ</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+          </div>
+          <!-- / Content -->
+
+          <footer class="content-footer footer bg-footer-theme">
+            <div class="container-xxl d-flex flex-wrap justify-content-between py-2 flex-md-row flex-column">
+              <div class="mb-2 mb-md-0">
+                © <script>document.write(new Date().getFullYear());</script> Resort Management System
+              </div>
+            </div>
+          </footer>
+
+          <div class="content-backdrop fade"></div>
+        </div>
+        <!-- / Content wrapper -->
+      </div>
+      <!-- / Layout page -->
+    </div>
+
+    <div class="layout-overlay layout-menu-toggle"></div>
+  </div>
+
+  <!-- Core JS -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
+  <script src="../js/api.js"></script>
+
+  <script>
+    // Biến global
+    let occupancyChart;
+    let revenueChart;
+    let serviceUsageTable;
+    let revenueBreakdownTable;
+    let currentDate = new Date().toISOString().split('T')[0];
+
+    // Khởi tạo khi DOM ready
+    document.addEventListener('DOMContentLoaded', async function() {
+      console.log('🚀 Reports page loaded');
+      
+      // Load menu
+      try {
+        const menuResponse = await fetch('html/layout-menu.html?v=' + Date.now());
+        const menuHtml = await menuResponse.text();
+        document.getElementById('common-menu').innerHTML = menuHtml;
+      } catch (error) {
+        console.error('Error loading menu:', error);
+      }
+      
+      // Check auth
+      const token = localStorage.getItem('token');
+      const userStr = localStorage.getItem('user');
+      
+      if (!token || !userStr) {
+        alert('Vui lòng đăng nhập!');
+        window.location.href = '/customer/login.html';
+        return;
+      }
+      
+      const user = JSON.parse(userStr);
+      if (user.role !== 'Admin' && user.role !== 'Manager' && user.role !== 'Accounting') {
+        alert('Bạn không có quyền truy cập!');
+        window.location.href = '/customer/index.html';
+        return;
+      }
+      
+      // Update UI
+      document.getElementById('userFullName').textContent = user.fullName || user.username;
+      const roleNames = { 'Admin': 'Quản trị viên', 'Manager': 'Quản lý', 'Accounting': 'Kế toán' };
+      document.getElementById('userRole').textContent = roleNames[user.role] || user.role;
+      
+      // Set default date
+      document.getElementById('reportDate').value = currentDate;
+      document.getElementById('serviceStartDate').value = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      document.getElementById('serviceEndDate').value = currentDate;
+      
+      // Load data
+      await loadAllReports();
+      
+      // Setup event listeners
+      setupEventListeners();
+    });
+
+    // Load tất cả báo cáo
+    async function loadAllReports() {
+      try {
+        await Promise.all([
+          loadDailyOccupancy(),
+          loadDailyRevenue(),
+          loadServiceUsage()
+        ]);
+      } catch (error) {
+        console.error('Error loading reports:', error);
+        alert('Lỗi tải báo cáo: ' + error.message);
+      }
+    }
+
+    // Load tỷ lệ lấp đầy hàng ngày
+    async function loadDailyOccupancy() {
+      try {
+        const data = await apiGet(`/reports/daily-occupancy?date=${currentDate}`);
+        console.log('✅ Daily occupancy loaded:', data);
+        
+        // Update cards
+        document.getElementById('occupancyRate').textContent = data.occupancyRate + '%';
+        document.getElementById('occupancyDetails').textContent = `${data.occupiedRooms}/${data.totalRooms} phòng`;
+        
+        // Update chart
+        updateOccupancyChart(data);
+        
+      } catch (error) {
+        console.error('❌ Error loading daily occupancy:', error);
+        throw error;
+      }
+    }
+
+    // Load doanh thu hàng ngày
+    async function loadDailyRevenue() {
+      try {
+        const data = await apiGet(`/reports/daily-revenue?date=${currentDate}`);
+        console.log('✅ Daily revenue loaded:', data);
+        
+        // Update cards
+        document.getElementById('dailyRevenue').textContent = formatCurrency(data.totalRevenue);
+        document.getElementById('revenueBreakdown').textContent = `Phòng: ${formatCurrency(data.roomRevenue)} | Dịch vụ: ${formatCurrency(data.serviceRevenue)}`;
+        document.getElementById('totalPayments').textContent = formatCurrency(data.totalPayments);
+        
+        // Update chart
+        updateRevenueChart(data);
+        
+        // Update breakdown table
+        updateRevenueBreakdownTable(data.breakdown);
+        
+      } catch (error) {
+        console.error('❌ Error loading daily revenue:', error);
+        throw error;
+      }
+    }
+
+    // Load sử dụng dịch vụ
+    async function loadServiceUsage() {
+      try {
+        const startDate = document.getElementById('serviceStartDate').value;
+        const endDate = document.getElementById('serviceEndDate').value;
+        
+        const data = await apiGet(`/reports/service-usage?startDate=${startDate}&endDate=${endDate}`);
+        console.log('✅ Service usage loaded:', data);
+        
+        // Update top service card
+        if (data.services.length > 0) {
+          const topService = data.services[0];
+          document.getElementById('topService').textContent = topService.serviceName;
+          document.getElementById('serviceRevenue').textContent = formatCurrency(topService.totalRevenue);
+        }
+        
+        // Update table
+        updateServiceUsageTable(data.services);
+        
+      } catch (error) {
+        console.error('❌ Error loading service usage:', error);
+        throw error;
+      }
+    }
+
+    // Update occupancy chart
+    function updateOccupancyChart(data) {
+      const ctx = document.getElementById('occupancyChart').getContext('2d');
+      
+      if (occupancyChart) {
+        occupancyChart.destroy();
+      }
+      
+      occupancyChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Đã thuê', 'Trống'],
+          datasets: [{
+            data: [data.occupiedRooms, data.availableRooms],
+            backgroundColor: ['#ffc107', '#28a745'],
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom'
+            },
+            title: {
+              display: true,
+              text: `Tỷ lệ lấp đầy: ${data.occupancyRate}%`
+            }
+          }
+        }
+      });
+    }
+
+    // Update revenue chart
+    function updateRevenueChart(data) {
+      const ctx = document.getElementById('revenueChart').getContext('2d');
+      
+      if (revenueChart) {
+        revenueChart.destroy();
+      }
+      
+      revenueChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Phòng', 'Dịch vụ', 'Tổng'],
+          datasets: [{
+            label: 'Doanh thu (VNĐ)',
+            data: [data.roomRevenue, data.serviceRevenue, data.totalRevenue],
+            backgroundColor: ['#007bff', '#28a745', '#ffc107'],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: function(value) {
+                  return formatCurrency(value);
+                }
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              display: false
+            }
+          }
+        }
+      });
+    }
+
+    // Update service usage table
+    function updateServiceUsageTable(services) {
+      if (serviceUsageTable) {
+        serviceUsageTable.destroy();
+      }
+      
+      const tbody = document.querySelector('#serviceUsageTable tbody');
+      tbody.innerHTML = '';
+      
+      services.forEach(service => {
+        const avgRevenue = service.transactionCount > 0 ? service.totalRevenue / service.transactionCount : 0;
+        const trend = service.totalRevenue > 1000000 ? '📈 Cao' : service.totalRevenue > 500000 ? '📊 Trung bình' : '📉 Thấp';
+        
+        const row = `
+          <tr>
+            <td><strong>${service.serviceName}</strong></td>
+            <td><span class="badge bg-primary">${service.totalUsage}</span></td>
+            <td><strong>${formatCurrency(service.totalRevenue)}</strong></td>
+            <td>${formatCurrency(avgRevenue)}</td>
+            <td>${trend}</td>
+          </tr>
+        `;
+        tbody.innerHTML += row;
+      });
+      
+      serviceUsageTable = $('#serviceUsageTable').DataTable({
+        language: {
+          url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/vi.json'
+        },
+        pageLength: 10,
+        order: [[2, 'desc']]
+      });
+    }
+
+    // Update revenue breakdown table
+    function updateRevenueBreakdownTable(breakdown) {
+      if (revenueBreakdownTable) {
+        revenueBreakdownTable.destroy();
+      }
+      
+      const tbody = document.querySelector('#revenueBreakdownTable tbody');
+      tbody.innerHTML = '';
+      
+      const totalAmount = breakdown.reduce((sum, item) => sum + item.amount, 0);
+      
+      breakdown.forEach(item => {
+        const percentage = totalAmount > 0 ? (item.amount / totalAmount * 100).toFixed(1) : 0;
+        
+        const row = `
+          <tr>
+            <td><strong>${item.chargeType}</strong></td>
+            <td><span class="badge bg-info">${item.count}</span></td>
+            <td><strong>${formatCurrency(item.amount)}</strong></td>
+            <td><span class="badge bg-secondary">${percentage}%</span></td>
+          </tr>
+        `;
+        tbody.innerHTML += row;
+      });
+      
+      revenueBreakdownTable = $('#revenueBreakdownTable').DataTable({
+        language: {
+          url: '//cdn.datatables.net/plug-ins/1.13.7/i18n/vi.json'
+        },
+        pageLength: 10,
+        order: [[2, 'desc']]
+      });
+    }
+
+    // Setup event listeners
+    function setupEventListeners() {
+      document.getElementById('logoutBtn').addEventListener('click', logout);
+      document.getElementById('btnRefreshReports').addEventListener('click', handleRefreshReports);
+      document.getElementById('btnFilterServices').addEventListener('click', handleFilterServices);
+      document.getElementById('reportDate').addEventListener('change', handleDateChange);
+    }
+
+    // Handle refresh reports
+    async function handleRefreshReports() {
+      currentDate = document.getElementById('reportDate').value;
+      await loadAllReports();
+    }
+
+    // Handle filter services
+    async function handleFilterServices() {
+      await loadServiceUsage();
+    }
+
+    // Handle date change
+    async function handleDateChange() {
+      currentDate = document.getElementById('reportDate').value;
+      await Promise.all([
+        loadDailyOccupancy(),
+        loadDailyRevenue()
+      ]);
+    }
+  </script>
+</body>
+</html>

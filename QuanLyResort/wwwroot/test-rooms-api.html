@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Rooms API - Resort Management</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f7f8fa;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 6px 18px rgba(17,17,17,0.06);
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #111;
+            margin-bottom: 24px;
+        }
+        .test-section {
+            margin-bottom: 32px;
+            padding: 20px;
+            border: 1px solid #e6e9ee;
+            border-radius: 8px;
+            background: #fafbfc;
+        }
+        .test-section h3 {
+            color: #007aff;
+            margin-top: 0;
+        }
+        button {
+            background: #007aff;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .result {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 16px;
+            margin-top: 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .success {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+        .error {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+        .loading {
+            color: #007aff;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: white;
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid #e6e9ee;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007aff;
+        }
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+        }
+        input, select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            margin: 5px;
+            font-size: 14px;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Rooms API - Resort Management</h1>
+        
+        <!-- Statistics -->
+        <div class="stats" id="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalRooms">-</div>
+                <div class="stat-label">Tổng phòng</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="availableRooms">-</div>
+                <div class="stat-label">Sẵn sàng</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="occupiedRooms">-</div>
+                <div class="stat-label">Đang dùng</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="maintenanceRooms">-</div>
+                <div class="stat-label">Bảo trì</div>
+            </div>
+        </div>
+
+        <!-- Test 1: Get All Rooms -->
+        <div class="test-section">
+            <h3>1. 📋 Lấy danh sách tất cả phòng</h3>
+            <button onclick="testGetAllRooms()">GET /api/rooms</button>
+            <button onclick="testGetRoomsWithFilters()">GET /api/rooms?isAvailable=true</button>
+            <div class="result" id="result1"></div>
+        </div>
+
+        <!-- Test 2: Get Room Statistics -->
+        <div class="test-section">
+            <h3>2. 📊 Lấy thống kê phòng</h3>
+            <button onclick="testGetStatistics()">GET /api/rooms/statistics</button>
+            <div class="result" id="result2"></div>
+        </div>
+
+        <!-- Test 3: Get Room Types -->
+        <div class="test-section">
+            <h3>3. 🏷️ Lấy danh sách loại phòng</h3>
+            <button onclick="testGetRoomTypes()">GET /api/room-types</button>
+            <div class="result" id="result3"></div>
+        </div>
+
+        <!-- Test 4: Get Floors -->
+        <div class="test-section">
+            <h3>4. 🏢 Lấy danh sách tầng</h3>
+            <button onclick="testGetFloors()">GET /api/rooms/floors</button>
+            <div class="result" id="result4"></div>
+        </div>
+
+        <!-- Test 5: Create Room -->
+        <div class="test-section">
+            <h3>5. ➕ Tạo phòng mới</h3>
+            <div class="form-group">
+                <label>Số phòng:</label>
+                <input type="text" id="roomNumber" placeholder="VD: 103" value="103">
+            </div>
+            <div class="form-group">
+                <label>Loại phòng:</label>
+                <select id="roomTypeId">
+                    <option value="">Chọn loại phòng</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Tầng:</label>
+                <input type="text" id="floor" placeholder="VD: 1" value="1">
+            </div>
+            <div class="form-group">
+                <label>Giá/đêm:</label>
+                <input type="number" id="pricePerNight" placeholder="500000" value="500000">
+            </div>
+            <div class="form-group">
+                <label>Sức chứa:</label>
+                <input type="number" id="maxOccupancy" placeholder="2" value="2">
+            </div>
+            <button onclick="testCreateRoom()">POST /api/rooms</button>
+            <div class="result" id="result5"></div>
+        </div>
+
+        <!-- Test 6: Update Room Status -->
+        <div class="test-section">
+            <h3>6. 🔄 Cập nhật trạng thái phòng</h3>
+            <div class="form-group">
+                <label>Room ID:</label>
+                <input type="number" id="updateRoomId" placeholder="1" value="1">
+            </div>
+            <div class="form-group">
+                <label>Trạng thái:</label>
+                <select id="isAvailable">
+                    <option value="true">Sẵn sàng</option>
+                    <option value="false">Đang dùng</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Housekeeping Status:</label>
+                <select id="housekeepingStatus">
+                    <option value="Clean">Sạch</option>
+                    <option value="Dirty">Bẩn</option>
+                    <option value="InProgress">Đang dọn</option>
+                    <option value="Ready">Sẵn sàng</option>
+                    <option value="Maintenance">Bảo trì</option>
+                </select>
+            </div>
+            <button onclick="testUpdateRoomStatus()">PATCH /api/rooms/{id}/status</button>
+            <div class="result" id="result6"></div>
+        </div>
+
+        <!-- Test 7: Authentication -->
+        <div class="test-section">
+            <h3>7. 🔐 Test Authentication</h3>
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" id="loginEmail" placeholder="admin@resort.test" value="admin@resort.test">
+            </div>
+            <div class="form-group">
+                <label>Password:</label>
+                <input type="password" id="loginPassword" placeholder="P@ssw0rd123" value="P@ssw0rd123">
+            </div>
+            <button onclick="testLogin()">POST /api/auth/login</button>
+            <button onclick="testAuthenticatedRequest()">Test Authenticated Request</button>
+            <div class="result" id="result7"></div>
+        </div>
+
+        <!-- Test 8: Error Handling -->
+        <div class="test-section">
+            <h3>8. ❌ Test Error Handling</h3>
+            <button onclick="testGetNonExistentRoom()">GET /api/rooms/99999</button>
+            <button onclick="testCreateInvalidRoom()">POST /api/rooms (Invalid Data)</button>
+            <button onclick="testUnauthorizedRequest()">GET /api/rooms/statistics (No Auth)</button>
+            <div class="result" id="result8"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5130/api';
+        let authToken = null;
+
+        // Load room types on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadRoomTypes();
+            loadStatistics();
+        });
+
+        async function loadRoomTypes() {
+            try {
+                const response = await fetch(`${API_BASE}/room-types`);
+                const roomTypes = await response.json();
+                
+                const select = document.getElementById('roomTypeId');
+                select.innerHTML = '<option value="">Chọn loại phòng</option>';
+                roomTypes.forEach(rt => {
+                    const option = document.createElement('option');
+                    option.value = rt.roomTypeId;
+                    option.textContent = `${rt.typeName} (${rt.typeCode})`;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading room types:', error);
+            }
+        }
+
+        async function loadStatistics() {
+            try {
+                const response = await fetch(`${API_BASE}/rooms/statistics`);
+                const stats = await response.json();
+                
+                document.getElementById('totalRooms').textContent = stats.totalRooms;
+                document.getElementById('availableRooms').textContent = stats.availableRooms;
+                document.getElementById('occupiedRooms').textContent = stats.occupiedRooms;
+                document.getElementById('maintenanceRooms').textContent = stats.maintenanceRooms;
+            } catch (error) {
+                console.error('Error loading statistics:', error);
+            }
+        }
+
+        function showResult(elementId, data, isError = false) {
+            const element = document.getElementById(elementId);
+            element.textContent = JSON.stringify(data, null, 2);
+            element.className = `result ${isError ? 'error' : 'success'}`;
+        }
+
+        function showLoading(elementId) {
+            const element = document.getElementById(elementId);
+            element.textContent = 'Loading...';
+            element.className = 'result loading';
+        }
+
+        async function testGetAllRooms() {
+            showLoading('result1');
+            try {
+                const response = await fetch(`${API_BASE}/rooms`);
+                const data = await response.json();
+                showResult('result1', data);
+            } catch (error) {
+                showResult('result1', { error: error.message }, true);
+            }
+        }
+
+        async function testGetRoomsWithFilters() {
+            showLoading('result1');
+            try {
+                const response = await fetch(`${API_BASE}/rooms?isAvailable=true`);
+                const data = await response.json();
+                showResult('result1', data);
+            } catch (error) {
+                showResult('result1', { error: error.message }, true);
+            }
+        }
+
+        async function testGetStatistics() {
+            showLoading('result2');
+            try {
+                const response = await fetch(`${API_BASE}/rooms/statistics`);
+                const data = await response.json();
+                showResult('result2', data);
+                loadStatistics(); // Update stats cards
+            } catch (error) {
+                showResult('result2', { error: error.message }, true);
+            }
+        }
+
+        async function testGetRoomTypes() {
+            showLoading('result3');
+            try {
+                const response = await fetch(`${API_BASE}/room-types`);
+                const data = await response.json();
+                showResult('result3', data);
+            } catch (error) {
+                showResult('result3', { error: error.message }, true);
+            }
+        }
+
+        async function testGetFloors() {
+            showLoading('result4');
+            try {
+                const response = await fetch(`${API_BASE}/rooms/floors`);
+                const data = await response.json();
+                showResult('result4', data);
+            } catch (error) {
+                showResult('result4', { error: error.message }, true);
+            }
+        }
+
+        async function testCreateRoom() {
+            showLoading('result5');
+            try {
+                const roomData = {
+                    roomNumber: document.getElementById('roomNumber').value,
+                    roomTypeId: parseInt(document.getElementById('roomTypeId').value) || null,
+                    floor: document.getElementById('floor').value || null,
+                    pricePerNight: parseFloat(document.getElementById('pricePerNight').value),
+                    maxOccupancy: parseInt(document.getElementById('maxOccupancy').value),
+                    description: 'Test room created via API',
+                    amenities: 'WiFi, TV, Air Conditioning',
+                    isAvailable: true,
+                    housekeepingStatus: 'Ready'
+                };
+
+                const response = await fetch(`${API_BASE}/rooms`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
+                    },
+                    body: JSON.stringify(roomData)
+                });
+
+                const data = await response.json();
+                showResult('result5', data);
+            } catch (error) {
+                showResult('result5', { error: error.message }, true);
+            }
+        }
+
+        async function testUpdateRoomStatus() {
+            showLoading('result6');
+            try {
+                const roomId = document.getElementById('updateRoomId').value;
+                const statusData = {
+                    isAvailable: document.getElementById('isAvailable').value === 'true',
+                    housekeepingStatus: document.getElementById('housekeepingStatus').value,
+                    notes: 'Status updated via API test'
+                };
+
+                const response = await fetch(`${API_BASE}/rooms/${roomId}/status`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
+                    },
+                    body: JSON.stringify(statusData)
+                });
+
+                const data = await response.json();
+                showResult('result6', data);
+            } catch (error) {
+                showResult('result6', { error: error.message }, true);
+            }
+        }
+
+        async function testLogin() {
+            showLoading('result7');
+            try {
+                const loginData = {
+                    email: document.getElementById('loginEmail').value,
+                    password: document.getElementById('loginPassword').value
+                };
+
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(loginData)
+                });
+
+                const data = await response.json();
+                if (data.token) {
+                    authToken = data.token;
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                }
+                showResult('result7', data);
+            } catch (error) {
+                showResult('result7', { error: error.message }, true);
+            }
+        }
+
+        async function testAuthenticatedRequest() {
+            showLoading('result7');
+            try {
+                const token = authToken || localStorage.getItem('token');
+                if (!token) {
+                    throw new Error('No authentication token available');
+                }
+
+                const response = await fetch(`${API_BASE}/rooms/statistics`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+                showResult('result7', data);
+            } catch (error) {
+                showResult('result7', { error: error.message }, true);
+            }
+        }
+
+        async function testGetNonExistentRoom() {
+            showLoading('result8');
+            try {
+                const response = await fetch(`${API_BASE}/rooms/99999`);
+                const data = await response.json();
+                showResult('result8', data);
+            } catch (error) {
+                showResult('result8', { error: error.message }, true);
+            }
+        }
+
+        async function testCreateInvalidRoom() {
+            showLoading('result8');
+            try {
+                const invalidRoomData = {
+                    // Missing required fields
+                    roomNumber: '',
+                    pricePerNight: -100
+                };
+
+                const response = await fetch(`${API_BASE}/rooms`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
+                    },
+                    body: JSON.stringify(invalidRoomData)
+                });
+
+                const data = await response.json();
+                showResult('result8', data);
+            } catch (error) {
+                showResult('result8', { error: error.message }, true);
+            }
+        }
+
+        async function testUnauthorizedRequest() {
+            showLoading('result8');
+            try {
+                // Clear token to test unauthorized access
+                const originalToken = authToken;
+                authToken = null;
+
+                const response = await fetch(`${API_BASE}/rooms/statistics`);
+                const data = await response.json();
+                
+                // Restore token
+                authToken = originalToken;
+                
+                showResult('result8', data);
+            } catch (error) {
+                showResult('result8', { error: error.message }, true);
+            }
+        }
+    </script>
+</body>
+</html>

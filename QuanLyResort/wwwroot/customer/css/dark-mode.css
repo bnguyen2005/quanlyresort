@@ -1,0 +1,178 @@
+/* Dark Mode Colors */
+:root[data-theme="dark"] {
+  --bg-color: #121212;
+  --bg-secondary: #1e1e1e;
+  --bg-card: #242424;
+  --text-primary: #e0e0e0;
+  --text-secondary: #a0a0a0;
+  --border-color: #333333;
+  
+  /* Bootstrap overrides */
+  --light: #1e1e1e;
+  --dark: #f8f9fa;
+  --white: #242424;
+}
+
+/* Global Background and Text */
+html[data-theme="dark"] body {
+  background-color: var(--bg-color) !important;
+  color: var(--text-primary) !important;
+  background-image: none !important;
+}
+
+/* Navbar */
+html[data-theme="dark"] .navbar {
+  background: var(--bg-secondary) !important;
+  border-bottom: 1px solid var(--border-color);
+}
+
+html[data-theme="dark"] .navbar-brand,
+html[data-theme="dark"] .nav-link {
+  color: var(--text-primary) !important;
+}
+
+/* Cards & Containers */
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .bg-white,
+html[data-theme="dark"] .room-card,
+html[data-theme="dark"] .review-card,
+html[data-theme="dark"] .booking-form-box,
+html[data-theme="dark"] .account-container,
+html[data-theme="dark"] .modal-content {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3) !important;
+}
+
+html[data-theme="dark"] .card-header,
+html[data-theme="dark"] .modal-header,
+html[data-theme="dark"] .modal-footer {
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* Inputs & Form Controls */
+html[data-theme="dark"] .form-control,
+html[data-theme="dark"] .custom-select {
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+html[data-theme="dark"] .form-control:focus {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-primary) !important;
+  border-color: #c8a97e !important;
+}
+
+/* Text */
+html[data-theme="dark"] h1, 
+html[data-theme="dark"] h2, 
+html[data-theme="dark"] h3, 
+html[data-theme="dark"] h4, 
+html[data-theme="dark"] h5, 
+html[data-theme="dark"] h6 {
+  color: var(--text-primary) !important;
+}
+
+html[data-theme="dark"] .text-muted {
+  color: var(--text-secondary) !important;
+}
+
+html[data-theme="dark"] p {
+  color: var(--text-primary);
+}
+
+/* Tables */
+html[data-theme="dark"] .table {
+  color: var(--text-primary) !important;
+}
+html[data-theme="dark"] .table th,
+html[data-theme="dark"] .table td {
+  border-color: var(--border-color) !important;
+}
+html[data-theme="dark"] .table-striped tbody tr:nth-of-type(odd) {
+  background-color: rgba(255,255,255,0.05) !important;
+}
+
+/* Buttons */
+html[data-theme="dark"] .btn-outline-primary {
+  border-color: #c8a97e;
+  color: #c8a97e;
+}
+html[data-theme="dark"] .btn-outline-primary:hover {
+  background-color: #c8a97e;
+  color: #fff;
+}
+
+/* Footer */
+html[data-theme="dark"] .site-footer {
+  background: var(--bg-secondary) !important;
+  color: var(--text-secondary) !important;
+  border-top: 1px solid var(--border-color);
+}
+
+/* Dropdown Menu */
+html[data-theme="dark"] .dropdown-menu {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+}
+html[data-theme="dark"] .dropdown-item {
+  color: var(--text-primary) !important;
+}
+html[data-theme="dark"] .dropdown-item:hover {
+  background-color: var(--bg-secondary) !important;
+}
+
+/* Dark Mode Toggle Switch */
+.theme-switch-wrapper {
+  display: flex;
+  align-items: center;
+  margin-left: 15px;
+}
+.theme-switch {
+  display: inline-block;
+  height: 24px;
+  position: relative;
+  width: 50px;
+}
+.theme-switch input {
+  display: none;
+}
+.slider {
+  background-color: #ccc;
+  bottom: 0;
+  cursor: pointer;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  transition: .4s;
+}
+.slider:before {
+  background-color: #fff;
+  bottom: 4px;
+  content: "";
+  height: 16px;
+  left: 4px;
+  position: absolute;
+  transition: .4s;
+  width: 16px;
+}
+input:checked + .slider {
+  background-color: #c8a97e;
+}
+input:checked + .slider:before {
+  transform: translateX(26px);
+}
+.slider.round {
+  border-radius: 24px;
+}
+.slider.round:before {
+  border-radius: 50%;
+}
+.theme-icon {
+  margin: 0 8px;
+  font-size: 14px;
+}

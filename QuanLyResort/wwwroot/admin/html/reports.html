@@ -1,0 +1,1686 @@
+<!DOCTYPE html>
+<html lang="vi" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default" data-assets-path="../assets/" data-template="vertical-menu-template-free">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+  <title>📊 Báo cáo & Thống kê - Resort Management</title>
+  
+  <!-- NO CACHE -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  
+  <link rel="icon" type="image/x-icon" href="../assets/img/favicon/favicon.ico" />
+  <link rel="stylesheet" href="../assets/vendor/fonts/boxicons.css" />
+  <link rel="stylesheet" href="../assets/vendor/css/core.css" class="template-customizer-core-css" />
+  <link rel="stylesheet" href="../assets/vendor/css/theme-default.css" class="template-customizer-theme-css" />
+  <link rel="stylesheet" href="../assets/css/demo.css" />
+  <link rel="stylesheet" href="../assets/css/fix-scrollbar.css" />
+  <link rel="stylesheet" href="../assets/css/admin-custom-theme.css" />
+  <link rel="stylesheet" href="../assets/css/nalika-style.css?v=20250127" />
+  <!-- Removed perfect-scrollbar.css to prevent duplicate scrollbar -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" />
+  
+  <style>
+    /* Stats cards sẽ được override bởi admin-custom-theme.css */
+    /* Giữ lại các style riêng cho trang reports */
+    .chart-container {
+      background: white;
+      border-radius: 10px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      margin-bottom: 1.5rem;
+      height: 400px;
+      max-height: 400px;
+      position: relative;
+    }
+    
+    .chart-container canvas {
+      max-width: 100% !important;
+      max-height: 350px !important;
+      width: auto !important;
+      height: auto !important;
+    }
+    .date-filter {
+      background: #f8f9fa;
+      padding: 1rem;
+      border-radius: 10px;
+      margin-bottom: 1.5rem;
+    }
+    .report-section {
+      margin-bottom: 2rem;
+    }
+    .metric-value {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.35rem;
+    }
+    .metric-label {
+      color: rgba(255,255,255,0.9);
+      font-weight: 500;
+      letter-spacing: 0.4px;
+    }
+    .growth-positive {
+      color: #28a745;
+    }
+    .growth-negative {
+      color: #dc3545;
+    }
+    /* Tránh duplicate scrollbar trong trang reports */
+    .content-wrapper {
+      overflow-y: auto !important;
+      overflow-x: hidden !important;
+    }
+    .table-responsive {
+      overflow-x: auto !important;
+      overflow-y: visible !important;
+    }
+    /* Tắt PerfectScrollbar nếu có */
+    .ps,
+    .ps__rail-y,
+    .ps__thumb-y {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout-wrapper layout-content-navbar">
+    <div class="layout-container">
+
+      <!-- Menu -->
+      <div id="common-menu"></div>
+
+      <!-- Layout container -->
+      <div class="layout-page">
+        
+        <!-- Navbar -->
+        <nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme" id="layout-navbar">
+          <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
+            <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
+              <i class="bx bx-menu bx-sm"></i>
+            </a>
+          </div>
+
+          <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+            <div class="navbar-nav align-items-center">
+              <div class="nav-item d-flex align-items-center">
+                <h4 class="mb-0">📊 Báo cáo & Thống kê</h4>
+              </div>
+            </div>
+
+            <ul class="navbar-nav flex-row align-items-center ms-auto">
+              <li class="nav-item navbar-dropdown dropdown-user dropdown">
+                <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
+                  <div class="avatar avatar-online">
+                    <img src="../assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                  </div>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li>
+                    <a class="dropdown-item" href="#">
+                      <div class="d-flex">
+                        <div class="flex-shrink-0 me-3">
+                          <div class="avatar avatar-online">
+                            <img src="../assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                          </div>
+                        </div>
+                        <div class="flex-grow-1">
+                          <span class="fw-semibold d-block" id="userDisplayName">Admin</span>
+                          <small class="text-muted" id="userRole">Quản trị viên</small>
+                        </div>
+                      </div>
+                    </a>
+                  </li>
+                  <li><div class="dropdown-divider"></div></li>
+                  <li>
+                    <a class="dropdown-item" href="javascript:void(0);" id="logoutBtn">
+                      <i class="bx bx-power-off me-2"></i>
+                      <span class="align-middle">Đăng xuất</span>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </nav>
+
+        <!-- Content wrapper -->
+        <div class="content-wrapper">
+          <div class="container-xxl flex-grow-1 container-p-y">
+
+            <!-- Date Filter -->
+            <div class="date-filter">
+              <div class="row">
+                <div class="col-md-3">
+                  <label class="form-label">Từ ngày:</label>
+                  <input type="date" id="startDate" class="form-control" />
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">Đến ngày:</label>
+                  <input type="date" id="endDate" class="form-control" />
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">Báo cáo nhanh:</label>
+                  <select id="quickFilter" class="form-select">
+                    <option value="today">Hôm nay</option>
+                    <option value="yesterday">Hôm qua</option>
+                    <option value="this-week">Tuần này</option>
+                    <option value="last-week">Tuần trước</option>
+                    <option value="this-month" selected>Tháng này</option>
+                    <option value="last-month">Tháng trước</option>
+                    <option value="this-year">Năm này</option>
+                  </select>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">&nbsp;</label>
+                  <button type="button" class="btn btn-primary d-block" onclick="loadAllReports()">
+                    <i class="bx bx-search"></i> Tạo báo cáo
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Dashboard Stats -->
+            <div class="report-section">
+              <h5>📈 Tổng quan hôm nay</h5>
+              <div class="row" id="dashboardStats">
+                <div class="col-md-3">
+                <div class="nalika-stats-card">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                    <div class="metric-value" id="todayRevenue">0 ₫</div>
+                    <div class="metric-label">Doanh thu hôm nay</div>
+                    </div>
+                    <div class="avatar">
+                      <i class="bx bx-line-chart"></i>
+                    </div>
+                  </div>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                <div class="nalika-stats-card warning">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                    <div class="metric-value" id="todayOccupancy">0%</div>
+                    <div class="metric-label">Tỷ lệ lấp đầy</div>
+                    </div>
+                    <div class="avatar">
+                      <i class="bx bx-building-house"></i>
+                    </div>
+                  </div>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                <div class="nalika-stats-card success">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                    <div class="metric-value" id="activeBookings">0</div>
+                    <div class="metric-label">Đặt phòng đang hoạt động</div>
+                    </div>
+                    <div class="avatar">
+                      <i class="bx bx-bed"></i>
+                    </div>
+                  </div>
+                  </div>
+                </div>
+                <div class="col-md-3">
+                <div class="nalika-stats-card info">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                    <div class="metric-value" id="revenueGrowth">0%</div>
+                    <div class="metric-label">Tăng trưởng tháng này</div>
+                    </div>
+                    <div class="avatar">
+                      <i class="bx bx-trending-up"></i>
+                    </div>
+                  </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Revenue Charts -->
+            <div class="report-section">
+              <h5>💰 Báo cáo doanh thu</h5>
+              <div class="row">
+                <div class="col-md-8">
+                  <div class="chart-container">
+                    <h6>Biểu đồ doanh thu theo ngày</h6>
+                    <canvas id="revenueChart" height="100"></canvas>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="chart-container">
+                    <h6>Doanh thu theo loại</h6>
+                    <canvas id="revenueTypeChart" height="200"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Occupancy Charts -->
+            <div class="report-section">
+              <h5>🏨 Báo cáo tỷ lệ lấp đầy</h5>
+              <div class="chart-container">
+                <h6>Tỷ lệ lấp đầy theo ngày</h6>
+                <canvas id="occupancyChart" height="100"></canvas>
+              </div>
+            </div>
+
+            <!-- Customer Analytics -->
+            <div class="report-section">
+              <h5>👥 Phân tích khách hàng</h5>
+              <div class="row">
+                <div class="col-md-8">
+                  <div class="chart-container">
+                    <h6>Top 10 khách hàng chi tiêu nhiều nhất</h6>
+                    <div class="table-responsive">
+                      <table class="table table-striped" id="topCustomersTable">
+                        <thead>
+                          <tr>
+                            <th>Khách hàng</th>
+                            <th>Tổng chi tiêu</th>
+                            <th>Số lần đặt</th>
+                            <th>Lần cuối</th>
+                          </tr>
+                        </thead>
+                        <tbody></tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="chart-container">
+                    <h6>Phân loại khách hàng</h6>
+                    <canvas id="customerTypeChart" height="200"></canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Service Usage -->
+            <div class="report-section">
+              <h5>🛎️ Sử dụng dịch vụ</h5>
+              <div class="chart-container">
+                <h6>Doanh thu theo dịch vụ</h6>
+                <canvas id="serviceChart" height="100"></canvas>
+              </div>
+            </div>
+
+            <!-- Export Options -->
+            <div class="report-section">
+              <h5>📤 Xuất báo cáo</h5>
+              <div class="row">
+                <div class="col-md-12">
+                  <button type="button" class="btn btn-success me-2" onclick="exportToPDF()">
+                    <i class="bx bx-file-pdf"></i> Xuất PDF
+                  </button>
+                  <button type="button" class="btn btn-info me-2" onclick="exportToExcel()">
+                    <i class="bx bx-file-excel"></i> Xuất Excel
+                  </button>
+                  <button type="button" class="btn btn-secondary" onclick="printReport()">
+                    <i class="bx bx-printer"></i> In báo cáo
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Core JS -->
+  <script src="../assets/vendor/libs/jquery/jquery.js"></script>
+  <script src="../assets/vendor/libs/popper/popper.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Removed perfect-scrollbar.js to prevent duplicate scrollbar -->
+  <script src="../assets/vendor/js/menu.js"></script>
+  <script src="../assets/vendor/js/helpers.js"></script>
+  <script src="../assets/js/main.js?v=20251027"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/common-navbar.js"></script>
+
+  <!-- Charts - Load before page script -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <!-- DataTables -->
+  <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+
+  <!-- PDF Export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- Excel Export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+  <!-- Menu Loader -->
+  <script>
+    // Load menu directly without load-menu.js dependency
+    document.addEventListener('DOMContentLoaded', function() {
+      const menuVersion = Date.now();
+      fetch('layout-menu.html?v=' + menuVersion)
+        .then(response => {
+          if (!response.ok) throw new Error('Failed to load menu: ' + response.status);
+          return response.text();
+        })
+        .then(html => {
+          const menuContainer = document.getElementById('common-menu');
+          if (menuContainer) {
+            menuContainer.innerHTML = html;
+        console.log('✅ Menu loaded for reports page');
+          }
+        })
+        .catch(error => {
+          console.error('❌ Error loading menu:', error);
+      });
+    });
+  </script>
+
+  <script>
+    // API base URL - sử dụng endpoint từ ReportsController
+    const REPORTS_API_BASE = (typeof window.API_BASE_URL !== 'undefined' ? window.API_BASE_URL : `${window.location.origin}/api`) + '/reports';
+    const DASHBOARD_API = (typeof window.API_BASE_URL !== 'undefined' ? window.API_BASE_URL : `${window.location.origin}/api`) + '/dashboard';
+    const formatCurrencySafe = (typeof window.formatCurrency === 'function')
+      ? window.formatCurrency
+      : (amount) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount || 0);
+    let revenueChart, occupancyChart, revenueTypeChart, customerTypeChart, serviceChart;
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('🔵 Reports page loaded');
+      console.log('🔍 Chart.js available:', typeof Chart !== 'undefined');
+      console.log('🔍 jQuery available:', typeof $ !== 'undefined');
+      
+      // Đợi Chart.js load xong nếu chưa có
+      if (typeof Chart === 'undefined') {
+        console.warn('⚠️ Chart.js not loaded yet, waiting...');
+        let retryCount = 0;
+        const maxRetries = 10;
+        const checkChart = setInterval(() => {
+          retryCount++;
+          if (typeof Chart !== 'undefined') {
+            console.log('✅ Chart.js loaded, initializing reports...');
+            clearInterval(checkChart);
+            initializeReports();
+          } else if (retryCount >= maxRetries) {
+            console.error('❌ Chart.js failed to load after', maxRetries, 'retries');
+            clearInterval(checkChart);
+            // Vẫn khởi tạo các phần không cần Chart.js
+            initializeReports();
+          }
+        }, 200);
+      } else {
+        initializeReports();
+      }
+    });
+
+    function initializeReports() {
+      try {
+      initializeDateFilters();
+        setupEventListeners();
+        
+        // Load data với delay nhỏ để đảm bảo DOM sẵn sàng
+        setTimeout(() => {
+      loadDashboardStats();
+      loadAllReports();
+        }, 100);
+      } catch (error) {
+        console.error('❌ Error initializing reports:', error);
+      }
+    }
+
+    function initializeDateFilters() {
+      const today = new Date();
+      const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+      
+      document.getElementById('startDate').value = firstDayOfMonth.toISOString().split('T')[0];
+      document.getElementById('endDate').value = today.toISOString().split('T')[0];
+    }
+
+    function setupEventListeners() {
+      // Quick filter change
+      document.getElementById('quickFilter').addEventListener('change', function() {
+        const value = this.value;
+        const today = new Date();
+        let startDate, endDate;
+
+        switch(value) {
+          case 'today':
+            startDate = endDate = today;
+            break;
+          case 'yesterday':
+            startDate = endDate = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+            break;
+          case 'this-week':
+            startDate = new Date(today.setDate(today.getDate() - today.getDay()));
+            endDate = new Date();
+            break;
+          case 'last-week':
+            const lastWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+            startDate = new Date(lastWeek.setDate(lastWeek.getDate() - lastWeek.getDay()));
+            endDate = new Date(startDate.getTime() + 6 * 24 * 60 * 60 * 1000);
+            break;
+          case 'this-month':
+            startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+            endDate = new Date();
+            break;
+          case 'last-month':
+            startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+            endDate = new Date(today.getFullYear(), today.getMonth(), 0);
+            break;
+          case 'this-year':
+            startDate = new Date(today.getFullYear(), 0, 1);
+            endDate = new Date();
+            break;
+        }
+
+        document.getElementById('startDate').value = startDate.toISOString().split('T')[0];
+        document.getElementById('endDate').value = endDate.toISOString().split('T')[0];
+      });
+
+      // Logout button
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          logout();
+        });
+      }
+    }
+
+    async function loadDashboardStats() {
+      try {
+        console.log('📊 Loading dashboard stats...');
+        const token = localStorage.getItem('token') || localStorage.getItem('adminToken');
+        if (!token) {
+          console.warn('⚠️ No token found, cannot load dashboard stats');
+          hydrateDashboardTiles();
+          return;
+        }
+        
+        const headers = {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        };
+
+        let data = null;
+        let response = await fetch(`${REPORTS_API_BASE}/dashboard-stats`, { headers });
+        if (response.ok) {
+          data = await response.json();
+        } else {
+          const fallbackText = await response.text().catch(() => '');
+          console.warn('⚠️ Reports dashboard API failed, trying fallback. Status:', response.status, fallbackText);
+          const fallbackResp = await fetch(`${DASHBOARD_API}/stats`, { headers });
+          if (fallbackResp.ok) {
+            data = await fallbackResp.json();
+          } else {
+            console.error('❌ Dashboard fallback API failed:', fallbackResp.status);
+          }
+        }
+
+        if (!data) {
+          hydrateDashboardTiles();
+          return;
+        }
+
+        const todayRevenue = data.todayRevenue ?? data.today?.revenue ?? 0;
+        const occupancyRate = data.todayOccupancy ?? data.occupancy?.rate ?? 0;
+        const activeBookings = data.activeBookings ?? data.occupancy?.occupied ?? data.totals?.thisMonthBookings ?? 0;
+        const growthValue = data.revenueGrowth ?? data.growth?.revenue ?? 0;
+
+        document.getElementById('todayRevenue').textContent = formatCurrencySafe(todayRevenue);
+        document.getElementById('todayOccupancy').textContent = `${Number(occupancyRate || 0).toFixed(1)}%`;
+        document.getElementById('activeBookings').textContent = activeBookings || 0;
+          
+          const growthElement = document.getElementById('revenueGrowth');
+        const growthNumber = Number(growthValue) || 0;
+        growthElement.textContent = `${growthNumber.toFixed(1)}%`;
+        growthElement.className = 'metric-value ' + (growthNumber >= 0 ? 'growth-positive' : 'growth-negative');
+      } catch (error) {
+        console.error('❌ Error loading dashboard stats:', error);
+        hydrateDashboardTiles();
+      }
+    }
+
+    function hydrateDashboardTiles(values = { revenue: 0, occupancy: 0, active: 0, growth: 0 }) {
+      document.getElementById('todayRevenue').textContent = formatCurrencySafe(values.revenue || 0);
+      document.getElementById('todayOccupancy').textContent = `${Number(values.occupancy || 0).toFixed(1)}%`;
+      document.getElementById('activeBookings').textContent = values.active || 0;
+      const growthElement = document.getElementById('revenueGrowth');
+      const growthNumber = Number(values.growth) || 0;
+      growthElement.textContent = `${growthNumber.toFixed(1)}%`;
+      growthElement.className = 'metric-value ' + (growthNumber >= 0 ? 'growth-positive' : 'growth-negative');
+    }
+
+    async function loadAllReports() {
+      const startDate = document.getElementById('startDate').value;
+      const endDate = document.getElementById('endDate').value;
+
+      await Promise.all([
+        loadRevenueReport(startDate, endDate),
+        loadOccupancyReport(startDate, endDate),
+        loadCustomerAnalytics(startDate, endDate),
+        loadServiceUsage(startDate, endDate)
+      ]);
+    }
+
+    async function loadRevenueReport(startDate, endDate) {
+      try {
+        console.log('📊 Loading revenue report...', startDate, endDate);
+        const token = localStorage.getItem('token') || localStorage.getItem('adminToken');
+        if (!token) {
+          console.warn('⚠️ No token for revenue report, cannot load data');
+          createRevenueChart([]);
+          createRevenueTypeChart([]);
+          return;
+        }
+        
+        const headers = {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        };
+
+        // Try Reports API first
+        let response = await fetch(`${REPORTS_API_BASE}/revenue-summary?startDate=${startDate}&endDate=${endDate}`, { headers });
+        let data = null;
+
+        if (response.ok) {
+          data = await response.json();
+          console.log('📈 Revenue data from Reports API:', data);
+        } else {
+          const errorText = await response.text().catch(() => '');
+          console.warn('⚠️ Reports revenue API failed, trying fallback. Status:', response.status, errorText);
+          
+          // Fallback: Try dashboard API with days parameter
+          const start = new Date(startDate);
+          const end = new Date(endDate);
+          const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+          
+          response = await fetch(`${DASHBOARD_API}/revenue-trends?days=${days}`, { headers });
+          if (response.ok) {
+            const dashboardData = await response.json();
+            console.log('📈 Revenue data from Dashboard API:', dashboardData);
+            // Convert dashboard format to reports format
+            data = {
+              dailyRevenue: dashboardData.map(item => ({
+                date: item.date || item.dateString,
+                amount: item.revenue || item.amount || 0
+              })),
+              revenueByType: [] // Dashboard API doesn't provide this
+            };
+          } else {
+            console.error('❌ Dashboard revenue API also failed:', response.status);
+          }
+        }
+
+        if (!data) {
+          console.warn('⚠️ Cannot load revenue data, showing empty charts');
+          createRevenueChart([]);
+          createRevenueTypeChart([]);
+          return;
+        }
+
+        // Process daily revenue: ensure date format is correct and fill missing dates
+        let dailyRevenue = (data.dailyRevenue || []).map(item => {
+          let dateStr = item.date;
+          // Handle DateTime objects from API
+          if (typeof dateStr === 'string' && dateStr.includes('T')) {
+            dateStr = dateStr.split('T')[0];
+          } else if (dateStr instanceof Date || (typeof dateStr === 'string' && !dateStr.includes('-'))) {
+            dateStr = new Date(dateStr).toISOString().split('T')[0];
+          }
+          return {
+            date: dateStr,
+            amount: Number(item.amount || 0)
+          };
+        });
+
+        // Fill missing dates in range
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        const filledRevenue = [];
+        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+          const dateStr = d.toISOString().split('T')[0];
+          const existing = dailyRevenue.find(r => r.date === dateStr || r.date === dateStr.split('T')[0]);
+          filledRevenue.push({
+            date: dateStr,
+            amount: existing ? existing.amount : 0
+          });
+        }
+
+        console.log('📅 Processed daily revenue count:', filledRevenue.length);
+        console.log('🏷️ Revenue types count:', data.revenueByType?.length);
+        
+        // Ensure revenueByType exists, if not try to derive from data
+        let revenueByType = data.revenueByType || [];
+        if (revenueByType.length === 0 && data.totalInvoices !== undefined && data.totalRestaurantOrders !== undefined) {
+          // Derive revenue by type from totals if available
+          revenueByType = [];
+          if (data.totalInvoices > 0) {
+            revenueByType.push({ type: 'Đặt phòng', amount: data.totalInvoices });
+          }
+          if (data.totalRestaurantOrders > 0) {
+            revenueByType.push({ type: 'Nhà hàng', amount: data.totalRestaurantOrders });
+          }
+        }
+        
+        createRevenueChart(filledRevenue);
+        createRevenueTypeChart(revenueByType);
+      } catch (error) {
+        console.error('❌ Error loading revenue report:', error);
+        createRevenueChart([]);
+        createRevenueTypeChart([]);
+      }
+    }
+
+    async function loadOccupancyReport(startDate, endDate) {
+      try {
+        // Try both token and adminToken for compatibility
+        const token = localStorage.getItem('token') || localStorage.getItem('adminToken');
+        console.log('📊 Loading occupancy report...', startDate, endDate);
+        console.log('🔑 Token exists:', !!token);
+        
+        if (!token) {
+          console.warn('⚠️ No token for occupancy report, cannot load data');
+          // Show empty chart instead of sample data
+          createOccupancyChart([]);
+          return;
+        }
+        
+        let dailyData = [];
+        try {
+          const response = await fetch(`${REPORTS_API_BASE}/occupancy-report?startDate=${startDate}&endDate=${endDate}`, {
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+            dailyData = Array.isArray(data)
+              ? data
+              : (data?.dailyOccupancy || []);
+        } else {
+            const errorText = await response.text().catch(() => '');
+            console.warn('⚠️ Reports occupancy API error:', response.status, errorText);
+          }
+        } catch (err) {
+          console.warn('⚠️ Error calling reports occupancy API:', err);
+        }
+
+        if (!dailyData || dailyData.length === 0) {
+          console.warn('⚠️ No occupancy data from reports API, trying dashboard fallback');
+          const rangeMs = Math.max(1, new Date(endDate).getTime() - new Date(startDate).getTime());
+          const daysRange = Math.max(1, Math.ceil(rangeMs / (1000 * 60 * 60 * 24)));
+
+          try {
+            const fallbackResp = await fetch(`${DASHBOARD_API}/occupancy-trends?days=${daysRange}`, {
+              headers: { 
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }
+            });
+
+            if (fallbackResp.ok) {
+              const fallbackData = await fallbackResp.json();
+              dailyData = (fallbackData || []).map(item => ({
+                date: item.date,
+                occupancyRate: item.occupancyRate ?? item.rate ?? 0,
+                occupiedRooms: item.occupiedRooms ?? item.occupied ?? 0,
+                totalRooms: item.totalRooms ?? item.total ?? 0,
+                availableRooms: (item.totalRooms ?? item.total ?? 0) - (item.occupiedRooms ?? item.occupied ?? 0)
+              }));
+            } else {
+              console.warn('⚠️ Dashboard occupancy fallback failed:', fallbackResp.status);
+            }
+          } catch (fallbackError) {
+            console.error('❌ Error loading fallback occupancy data:', fallbackError);
+          }
+        }
+
+        createOccupancyChart(dailyData || []);
+      } catch (error) {
+        console.error('❌ Error loading occupancy report:', error);
+        // Show empty chart on error (no sample data)
+        console.warn('⚠️ Error loading occupancy data, showing empty chart');
+        createOccupancyChart([]);
+      }
+    }
+
+    async function loadCustomerAnalytics(startDate, endDate) {
+      try {
+        // Try both token and adminToken for compatibility
+        const token = localStorage.getItem('token') || localStorage.getItem('adminToken');
+        console.log('📊 Loading customer analytics...', startDate, endDate);
+        console.log('🔑 Token exists:', !!token);
+        
+        if (!token) {
+          console.warn('⚠️ No token for customer analytics, cannot load data');
+          // Show empty data instead of sample data
+          updateTopCustomersTable([]);
+          createCustomerTypeChart([]);
+          return;
+        }
+        
+        const response = await fetch(`${REPORTS_API_BASE}/customer-analytics?startDate=${startDate}&endDate=${endDate}`, {
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          updateTopCustomersTable(data.topCustomers);
+          createCustomerTypeChart(data.customerTypes);
+        } else {
+          const errorText = await response.text();
+          console.error('❌ Customer analytics API error:', response.status, errorText);
+          // Show empty data when API fails (no sample data)
+          console.warn('⚠️ Cannot load customer analytics, showing empty data');
+          updateTopCustomersTable([]);
+          createCustomerTypeChart([]);
+        }
+      } catch (error) {
+        console.error('Error loading customer analytics:', error);
+      }
+    }
+
+    async function loadServiceUsage(startDate, endDate) {
+      try {
+        // Try both token and adminToken for compatibility
+        const token = localStorage.getItem('token') || localStorage.getItem('adminToken');
+        console.log('📊 Loading service usage...', startDate, endDate);
+        console.log('🔑 Token exists:', !!token);
+        
+        if (!token) {
+          console.warn('⚠️ No token for service usage, cannot load data');
+          // Show empty chart instead of sample data
+          createServiceChart([]);
+          return;
+        }
+        
+        const response = await fetch(`${REPORTS_API_BASE}/service-usage?startDate=${startDate}&endDate=${endDate}`, {
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          createServiceChart(data.services);
+        } else {
+          const errorText = await response.text();
+          console.error('❌ Service usage API error:', response.status, errorText);
+          // Show empty chart when API fails (no sample data)
+          console.warn('⚠️ Cannot load service usage data, showing empty chart');
+          createServiceChart([]);
+        }
+      } catch (error) {
+        console.error('❌ Error loading service usage:', error);
+        // Show empty chart on error (no sample data)
+        console.warn('⚠️ Error loading service usage data, showing empty chart');
+        createServiceChart([]);
+      }
+    }
+
+    // Chart creation functions
+    function createRevenueChart(dailyRevenue) {
+      console.log('📊 Creating revenue chart with data:', dailyRevenue);
+      
+      // Kiểm tra Chart.js
+      if (typeof Chart === 'undefined') {
+        console.error('❌ Chart.js not available!');
+        return;
+      }
+      
+      const canvas = document.getElementById('revenueChart');
+      console.log('🎯 Revenue canvas element:', canvas);
+      
+      if (!canvas) {
+        console.error('❌ Revenue chart canvas not found!');
+        return;
+      }
+      
+      const ctx = canvas.getContext('2d');
+      console.log('🖼️ Canvas context:', ctx);
+      
+      if (revenueChart) {
+        console.log('🗑️ Destroying existing revenue chart');
+        try {
+        revenueChart.destroy();
+        } catch (e) {
+          console.warn('⚠️ Error destroying chart:', e);
+        }
+      }
+
+      if (!dailyRevenue || dailyRevenue.length === 0) {
+        console.warn('⚠️ No daily revenue data to display');
+        const container = canvas.parentElement;
+        if (container) {
+          container.innerHTML = `
+          <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666;">
+            <div style="text-align: center;">
+              <i class="bx bx-info-circle" style="font-size: 3rem; margin-bottom: 1rem; color: #999;"></i>
+              <p style="font-size: 1.1rem; margin: 0;">Không có dữ liệu doanh thu trong khoảng thời gian đã chọn</p>
+            </div>
+          </div>
+        `;
+        }
+        return;
+      }
+
+      console.log('🏗️ Building revenue chart...');
+      try {
+      revenueChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: dailyRevenue.map(d => new Date(d.date).toLocaleDateString('vi-VN')),
+          datasets: [{
+            label: 'Doanh thu (₫)',
+            data: dailyRevenue.map(d => d.amount),
+            borderColor: '#5a67d8',
+            backgroundColor: 'rgba(90, 103, 216, 0.1)',
+            tension: 0.4,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: function(value) {
+                  return formatCurrencySafe(value);
+                }
+              }
+            }
+          },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return 'Doanh thu: ' + formatCurrencySafe(context.parsed.y);
+                }
+              }
+            }
+          }
+        }
+      });
+      
+      console.log('✅ Revenue chart created successfully');
+      } catch (error) {
+        console.error('❌ Error creating revenue chart:', error);
+        const container = canvas.parentElement;
+        if (container) {
+          container.innerHTML = `
+            <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #dc3545;">
+              <div style="text-align: center;">
+                <i class="bx bx-error-circle" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                <p style="font-size: 1.1rem; margin: 0;">Lỗi khi tạo biểu đồ: ${error.message}</p>
+              </div>
+            </div>
+          `;
+        }
+      }
+    }
+
+    function createRevenueTypeChart(revenueByType) {
+      if (typeof Chart === 'undefined') {
+        console.error('❌ Chart.js not available!');
+        return;
+      }
+      
+      const canvas = document.getElementById('revenueTypeChart');
+      if (!canvas) {
+        console.error('❌ Revenue type chart canvas not found!');
+        return;
+      }
+      
+      const ctx = canvas.getContext('2d');
+      
+      if (revenueTypeChart) {
+        try {
+          revenueTypeChart.destroy();
+        } catch (e) {
+          console.warn('⚠️ Error destroying chart:', e);
+        }
+      }
+      
+      if (!revenueByType || revenueByType.length === 0) {
+        console.warn('⚠️ No revenue by type data to display');
+        const container = document.getElementById('revenueTypeChart').parentElement;
+        container.innerHTML = `
+          <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666;">
+            <div style="text-align: center;">
+              <i class="bx bx-info-circle" style="font-size: 3rem; margin-bottom: 1rem; color: #999;"></i>
+              <p style="font-size: 1.1rem; margin: 0;">Không có dữ liệu doanh thu theo loại</p>
+            </div>
+          </div>
+        `;
+        return;
+      }
+      
+      revenueTypeChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: revenueByType.map(r => r.type),
+          datasets: [{
+            data: revenueByType.map(r => r.amount),
+            backgroundColor: ['#5a67d8', '#48bb78', '#ed8936', '#9f7aea', '#38b2ac']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return context.label + ': ' + formatCurrencySafe(context.parsed);
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function createOccupancyChart(dailyOccupancy) {
+      if (typeof Chart === 'undefined') {
+        console.error('❌ Chart.js not available!');
+        return;
+      }
+      
+      const canvas = document.getElementById('occupancyChart');
+      if (!canvas) {
+        console.error('❌ Occupancy chart canvas not found!');
+        return;
+      }
+      
+      const ctx = canvas.getContext('2d');
+      
+      if (occupancyChart) {
+        try {
+          occupancyChart.destroy();
+        } catch (e) {
+          console.warn('⚠️ Error destroying chart:', e);
+        }
+      }
+      
+      if (!dailyOccupancy || dailyOccupancy.length === 0) {
+        console.warn('⚠️ No occupancy data to display');
+        const container = document.getElementById('occupancyChart').parentElement;
+        container.innerHTML = `
+          <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666;">
+            <div style="text-align: center;">
+              <i class="bx bx-info-circle" style="font-size: 3rem; margin-bottom: 1rem; color: #999;"></i>
+              <p style="font-size: 1.1rem; margin: 0;">Không có dữ liệu tỷ lệ lấp đầy trong khoảng thời gian đã chọn</p>
+            </div>
+          </div>
+        `;
+        return;
+      }
+      
+      occupancyChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: dailyOccupancy.map(d => new Date(d.date).toLocaleDateString('vi-VN')),
+          datasets: [{
+            label: 'Tỷ lệ lấp đầy (%)',
+            data: dailyOccupancy.map(d => d.occupancyRate),
+            backgroundColor: '#48bb78',
+            borderColor: '#38a169',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100,
+              ticks: {
+                callback: function(value) {
+                  return value + '%';
+                }
+              }
+            }
+          },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return 'Tỷ lệ lấp đầy: ' + context.parsed.y + '%';
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function createCustomerTypeChart(customerTypes) {
+      const canvas = document.getElementById('customerTypeChart');
+      if (!canvas) return;
+      
+      const ctx = canvas.getContext('2d');
+      
+      if (customerTypeChart) customerTypeChart.destroy();
+      
+      if (!customerTypes || customerTypes.length === 0) {
+        console.warn('⚠️ No customer type data to display');
+        const container = canvas.parentElement;
+        container.innerHTML = `
+          <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666;">
+            <div style="text-align: center;">
+              <i class="bx bx-info-circle" style="font-size: 3rem; margin-bottom: 1rem; color: #999;"></i>
+              <p style="font-size: 1.1rem; margin: 0;">Không có dữ liệu phân loại khách hàng</p>
+            </div>
+          </div>
+        `;
+        return;
+      }
+      
+      customerTypeChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: customerTypes.map(c => c.type),
+          datasets: [{
+            data: customerTypes.map(c => c.count),
+            backgroundColor: ['#5a67d8', '#48bb78', '#ed8936', '#9f7aea']
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false
+        }
+      });
+    }
+
+    function createServiceChart(services) {
+      if (typeof Chart === 'undefined') {
+        console.error('❌ Chart.js not available!');
+        return;
+      }
+      
+      const canvas = document.getElementById('serviceChart');
+      if (!canvas) {
+        console.error('❌ Service chart canvas not found!');
+        return;
+      }
+      
+      const ctx = canvas.getContext('2d');
+      
+      if (serviceChart) {
+        try {
+          serviceChart.destroy();
+        } catch (e) {
+          console.warn('⚠️ Error destroying chart:', e);
+        }
+      }
+      
+      if (!services || services.length === 0) {
+        console.warn('⚠️ No service usage data to display');
+        const container = document.getElementById('serviceChart').parentElement;
+        container.innerHTML = `
+          <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #666;">
+            <div style="text-align: center;">
+              <i class="bx bx-info-circle" style="font-size: 3rem; margin-bottom: 1rem; color: #999;"></i>
+              <p style="font-size: 1.1rem; margin: 0;">Không có dữ liệu sử dụng dịch vụ trong khoảng thời gian đã chọn</p>
+            </div>
+          </div>
+        `;
+        return;
+      }
+      
+      serviceChart = new Chart(ctx, {
+        type: 'bar',
+        indexAxis: 'y',
+        data: {
+          labels: services.map(s => s.serviceName),
+          datasets: [{
+            label: 'Doanh thu (₫)',
+            data: services.map(s => s.totalRevenue),
+            backgroundColor: '#ed8936',
+            borderColor: '#dd6b20',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: {
+              beginAtZero: true,
+              ticks: {
+                callback: function(value) {
+                  return formatCurrencySafe(value);
+                }
+              }
+            }
+          },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return 'Doanh thu: ' + formatCurrencySafe(context.parsed.x);
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function updateTopCustomersTable(topCustomers) {
+      const tbody = document.querySelector('#topCustomersTable tbody');
+      if (!topCustomers || topCustomers.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="4" style="text-align: center; padding: 2rem; color: #666;">
+              <i class="bx bx-info-circle" style="font-size: 2rem; margin-bottom: 0.5rem; display: block; color: #999;"></i>
+              Không có dữ liệu khách hàng trong khoảng thời gian đã chọn
+            </td>
+          </tr>
+        `;
+        return;
+      }
+      tbody.innerHTML = topCustomers.map(customer => `
+        <tr>
+          <td><strong>${customer.customerName}</strong></td>
+          <td>${formatCurrencySafe(customer.totalSpent)}</td>
+          <td>${customer.bookingCount}</td>
+          <td>${new Date(customer.lastBooking).toLocaleDateString('vi-VN')}</td>
+        </tr>
+      `).join('');
+    }
+
+    // Export functions
+    async function exportToPDF() {
+      try {
+        console.log('📄 Exporting to PDF...');
+        
+        if (typeof window.jspdf === 'undefined') {
+          alert('Lỗi: Thư viện PDF chưa được tải. Vui lòng làm mới trang và thử lại.');
+          return;
+        }
+
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        
+        // Format ngày tháng đẹp hơn
+        const formatDate = (dateStr) => {
+          if (!dateStr) return '';
+          const date = new Date(dateStr);
+          const day = String(date.getDate()).padStart(2, '0');
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const year = date.getFullYear();
+          return `${day}/${month}/${year}`;
+        };
+        
+        const now = new Date();
+        const dateStr = formatDate(now.toISOString().split('T')[0]);
+        const timeStr = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        
+        // Helper function để vẽ đường viền
+        const drawRect = (x, y, w, h, color = [200, 169, 126]) => {
+          pdf.setDrawColor(...color);
+          pdf.setLineWidth(0.5);
+          pdf.rect(x, y, w, h);
+        };
+        
+        // Helper function để vẽ box có background
+        const drawBox = (x, y, w, h, bgColor = [248, 249, 250], borderColor = [200, 169, 126]) => {
+          pdf.setFillColor(...bgColor);
+          pdf.setDrawColor(...borderColor);
+          pdf.setLineWidth(0.3);
+          pdf.roundedRect(x, y, w, h, 2, 2, 'FD');
+        };
+        
+        let yPos = 10;
+        const pageWidth = 210;
+        const margin = 15;
+        const contentWidth = pageWidth - (margin * 2);
+        
+        // Header với background màu nâu đẹp (giống hình)
+        const headerBgColor = [200, 169, 126]; // Màu nâu nhạt
+        const headerBorderColor = [180, 150, 110]; // Màu nâu đậm hơn
+        drawBox(margin - 5, yPos - 5, contentWidth + 10, 32, headerBgColor, headerBorderColor);
+        
+        pdf.setTextColor(255, 255, 255);
+        pdf.setFontSize(20);
+        pdf.setFont('helvetica', 'bold');
+        pdf.text('BAO CAO RESORT MANAGEMENT', pageWidth / 2, yPos + 7, { align: 'center' });
+        
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'normal');
+        pdf.text('He thong quan ly resort chuyen nghiep', pageWidth / 2, yPos + 14, { align: 'center' });
+        
+        yPos += 28;
+        pdf.setTextColor(0, 0, 0);
+        
+        // Thông tin báo cáo với box đẹp hơn
+        drawBox(margin, yPos, contentWidth, 18, [250, 250, 250], [220, 220, 220]);
+        yPos += 6;
+        pdf.setFontSize(10);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(100, 100, 100);
+        pdf.text('Thong tin bao cao', margin + 5, yPos);
+        yPos += 7;
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(9);
+        pdf.setTextColor(60, 60, 60);
+        pdf.text(`Tu ngay: ${formatDate(startDate) || startDate}`, margin + 5, yPos);
+        pdf.text(`Den ngay: ${formatDate(endDate) || endDate}`, margin + 70, yPos);
+        pdf.text(`Ngay xuat: ${dateStr} ${timeStr}`, margin + 135, yPos);
+        
+        yPos += 12;
+        pdf.setTextColor(0, 0, 0);
+        
+        // Dashboard Stats với boxes đẹp hơn
+        pdf.setFontSize(12);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(50, 50, 50);
+        pdf.text('Tong quan hom nay', margin, yPos);
+        yPos += 8;
+        
+        const todayRevenue = document.getElementById('todayRevenue').textContent || '0 VND';
+        const todayOccupancy = document.getElementById('todayOccupancy').textContent || '0%';
+        const activeBookings = document.getElementById('activeBookings').textContent || '0';
+        const revenueGrowth = document.getElementById('revenueGrowth').textContent || '0%';
+        
+        const boxWidth = (contentWidth - 10) / 2;
+        const boxHeight = 28;
+        
+        // Box 1: Doanh thu (màu vàng cam)
+        drawBox(margin, yPos, boxWidth, boxHeight, [255, 247, 237], [255, 183, 77]);
+        pdf.setFontSize(8);
+        pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(100, 100, 100);
+        pdf.text('Doanh thu hom nay', margin + 5, yPos + 7);
+        pdf.setFontSize(12);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(255, 87, 34);
+        const revenueText = todayRevenue.length > 15 ? todayRevenue.substring(0, 15) + '...' : todayRevenue;
+        pdf.text(revenueText, margin + 5, yPos + 16);
+        pdf.setTextColor(0, 0, 0);
+        
+        // Box 2: Tỷ lệ lấp đầy (màu xanh dương)
+        drawBox(margin + boxWidth + 10, yPos, boxWidth, boxHeight, [237, 247, 255], [77, 182, 255]);
+        pdf.setFontSize(8);
+        pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(100, 100, 100);
+        pdf.text('Ty le lap day', margin + boxWidth + 15, yPos + 7);
+        pdf.setFontSize(12);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(33, 150, 243);
+        pdf.text(todayOccupancy, margin + boxWidth + 15, yPos + 16);
+        pdf.setTextColor(0, 0, 0);
+        
+        yPos += boxHeight + 8;
+        
+        // Box 3: Đặt phòng đang hoạt động (màu xanh lá)
+        drawBox(margin, yPos, boxWidth, boxHeight, [237, 255, 247], [77, 255, 160]);
+        pdf.setFontSize(8);
+        pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(100, 100, 100);
+        pdf.text('So phong dang hoat dong', margin + 5, yPos + 7);
+        pdf.setFontSize(12);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(46, 125, 50);
+        pdf.text(activeBookings, margin + 5, yPos + 16);
+        pdf.setTextColor(0, 0, 0);
+        
+        // Box 4: Tăng trưởng (màu xanh lá hoặc đỏ tùy giá trị)
+        const isNegative = revenueGrowth.includes('-') || parseFloat(revenueGrowth) < 0;
+        const growthColor = isNegative ? [255, 235, 238] : [237, 255, 247];
+        const growthBorderColor = isNegative ? [255, 77, 77] : [77, 255, 160];
+        const growthTextColor = isNegative ? [211, 47, 47] : [46, 125, 50];
+        drawBox(margin + boxWidth + 10, yPos, boxWidth, boxHeight, growthColor, growthBorderColor);
+        pdf.setFontSize(8);
+        pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(100, 100, 100);
+        pdf.text('Tang truong thang nay', margin + boxWidth + 15, yPos + 7);
+        pdf.setFontSize(12);
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(...growthTextColor);
+        pdf.text(revenueGrowth, margin + boxWidth + 15, yPos + 16);
+        pdf.setTextColor(0, 0, 0);
+        
+        yPos += boxHeight + 15;
+        
+        // Thêm Charts vào PDF
+        if (typeof html2canvas !== 'undefined') {
+          // Helper function để capture chart container
+          const captureChart = async (chartId, chartTitle) => {
+            try {
+              const chartCanvas = document.getElementById(chartId);
+              if (!chartCanvas) return false;
+              
+              // Tìm parent container có class chart-container
+              let container = chartCanvas.closest('.chart-container');
+              if (!container) {
+                // Nếu không tìm thấy, dùng parent element
+                container = chartCanvas.parentElement;
+              }
+              
+              if (!container) return false;
+              
+              if (yPos > 200) {
+                pdf.addPage();
+                yPos = 20;
+              }
+              
+              pdf.setFontSize(12);
+              pdf.setFont('helvetica', 'bold');
+              pdf.text(chartTitle, margin, yPos);
+              yPos += 8;
+              
+              // Capture toàn bộ container
+              const chartImg = await html2canvas(container, {
+                backgroundColor: '#ffffff',
+                scale: 1.5,
+                logging: false,
+                useCORS: true,
+                allowTaint: false
+              });
+              
+              const imgData = chartImg.toDataURL('image/png');
+              const imgWidth = contentWidth;
+              const imgHeight = (chartImg.height * imgWidth) / chartImg.width;
+              
+              // Giới hạn chiều cao tối đa để vừa trang
+              const maxHeight = 70;
+              const finalHeight = Math.min(imgHeight, maxHeight);
+              
+              if (finalHeight > 0) {
+                pdf.addImage(imgData, 'PNG', margin, yPos, imgWidth, finalHeight);
+                yPos += finalHeight + 10;
+                return true;
+              }
+              return false;
+            } catch (e) {
+              console.warn(`Error capturing ${chartId} chart:`, e);
+              return false;
+            }
+          };
+          
+          // Chart 1: Revenue Chart
+          if (revenueChart) {
+            await captureChart('revenueChart', 'Bieu do doanh thu theo ngay');
+          }
+          
+          // Chart 2: Revenue Type Chart
+          if (revenueTypeChart) {
+            await captureChart('revenueTypeChart', 'Doanh thu theo loai');
+          }
+          
+          // Chart 3: Occupancy Chart
+          if (occupancyChart) {
+            await captureChart('occupancyChart', 'Bieu do ty le lap day');
+          }
+          
+          // Chart 4: Customer Type Chart
+          if (customerTypeChart) {
+            await captureChart('customerTypeChart', 'Phan loai khach hang');
+          }
+          
+          // Chart 5: Service Chart
+          if (serviceChart) {
+            await captureChart('serviceChart', 'Doanh thu theo dich vu');
+          }
+        }
+        
+        // Top Customers Table với styling đẹp
+        const topCustomersTable = document.querySelector('#topCustomersTable');
+        if (topCustomersTable && topCustomersTable.querySelector('tbody tr:not([colspan])')) {
+          if (yPos > 250) {
+            pdf.addPage();
+            yPos = 20;
+          }
+          
+          pdf.setFontSize(12);
+          pdf.setFont('helvetica', 'bold');
+          pdf.text('Top 10 Khach hang chi tieu nhieu nhat', margin, yPos);
+          yPos += 10;
+          
+          // Table header với background
+          drawBox(margin, yPos, contentWidth, 8, [200, 169, 126], [180, 150, 110]);
+          pdf.setTextColor(255, 255, 255);
+          pdf.setFontSize(9);
+          pdf.setFont('helvetica', 'bold');
+          pdf.text('STT', margin + 3, yPos + 5.5);
+          pdf.text('Khach hang', margin + 15, yPos + 5.5);
+          pdf.text('Tong chi tieu', margin + 80, yPos + 5.5);
+          pdf.text('So lan dat', margin + 130, yPos + 5.5);
+          pdf.text('Lan cuoi', margin + 160, yPos + 5.5);
+          pdf.setTextColor(0, 0, 0);
+          yPos += 9;
+          
+          // Table rows
+          pdf.setFont('helvetica', 'normal');
+          pdf.setFontSize(8);
+          const rows = topCustomersTable.querySelectorAll('tbody tr:not([colspan])');
+          rows.forEach((row, index) => {
+            if (yPos > 270) {
+              pdf.addPage();
+              yPos = 20;
+              // Redraw header on new page
+              drawBox(margin, yPos, contentWidth, 8, [200, 169, 126], [180, 150, 110]);
+              pdf.setTextColor(255, 255, 255);
+              pdf.setFont('helvetica', 'bold');
+              pdf.text('STT', margin + 3, yPos + 5.5);
+              pdf.text('Khach hang', margin + 15, yPos + 5.5);
+              pdf.text('Tong chi tieu', margin + 80, yPos + 5.5);
+              pdf.text('So lan dat', margin + 130, yPos + 5.5);
+              pdf.text('Lan cuoi', margin + 160, yPos + 5.5);
+              pdf.setTextColor(0, 0, 0);
+              yPos += 9;
+            }
+            
+            // Alternating row colors
+            if (index % 2 === 0) {
+              drawBox(margin, yPos - 3, contentWidth, 6, [250, 250, 250], [240, 240, 240]);
+            }
+            
+            const cells = row.querySelectorAll('td');
+            if (cells.length >= 4) {
+              pdf.setFont('helvetica', 'normal');
+              pdf.text((index + 1).toString(), margin + 3, yPos);
+              pdf.text(cells[0].textContent.trim().substring(0, 30), margin + 15, yPos);
+              pdf.setFont('helvetica', 'bold');
+              pdf.setTextColor(46, 125, 50);
+              pdf.text(cells[1].textContent.trim(), margin + 80, yPos);
+              pdf.setTextColor(0, 0, 0);
+              pdf.setFont('helvetica', 'normal');
+              pdf.text(cells[2].textContent.trim(), margin + 130, yPos);
+              pdf.text(cells[3].textContent.trim() || '-', margin + 160, yPos);
+              yPos += 7;
+            }
+          });
+          
+          // Table border
+          drawRect(margin, yPos - rows.length * 7 - 3, contentWidth, rows.length * 7 + 3);
+        }
+        
+        // Footer với đường kẻ
+        const totalPages = pdf.internal.getNumberOfPages();
+        for (let i = 1; i <= totalPages; i++) {
+          pdf.setPage(i);
+          pdf.setDrawColor(200, 169, 126);
+          pdf.setLineWidth(0.5);
+          pdf.line(margin, 280, pageWidth - margin, 280);
+          
+          pdf.setFontSize(8);
+          pdf.setTextColor(128, 128, 128);
+          pdf.setFont('helvetica', 'normal');
+          pdf.text(`Trang ${i} / ${totalPages}`, pageWidth / 2, 285, { align: 'center' });
+          pdf.text(`Resort Management System - ${dateStr}`, margin, 285);
+        }
+        
+        const fileName = `bao-cao-resort-${startDate}-${endDate}.pdf`;
+        pdf.save(fileName);
+        
+        console.log('✅ PDF exported successfully');
+        if (typeof showToast === 'function') {
+          showToast('Xuất PDF thành công!', 'success');
+        }
+      } catch (error) {
+        console.error('❌ Error exporting PDF:', error);
+        alert('Lỗi xuất PDF: ' + error.message);
+      }
+    }
+
+    async function exportToExcel() {
+      try {
+        console.log('📊 Exporting to Excel...');
+        
+        if (typeof XLSX === 'undefined') {
+          alert('Lỗi: Thư viện Excel chưa được tải. Vui lòng làm mới trang và thử lại.');
+          return;
+        }
+
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        const dateStr = new Date().toLocaleDateString('vi-VN');
+        
+        // Tạo workbook mới
+        const wb = XLSX.utils.book_new();
+        
+        // Sheet 1: Tổng quan
+        const overviewData = [
+          ['BÁO CÁO RESORT MANAGEMENT'],
+          [''],
+          ['Từ ngày:', startDate],
+          ['Đến ngày:', endDate],
+          ['Ngày xuất:', dateStr],
+          [''],
+          ['📈 TỔNG QUAN HÔM NAY'],
+          [''],
+          ['Doanh thu hôm nay', document.getElementById('todayRevenue').textContent],
+          ['Tỷ lệ lấp đầy', document.getElementById('todayOccupancy').textContent],
+          ['Đặt phòng đang hoạt động', document.getElementById('activeBookings').textContent],
+          ['Tăng trưởng tháng này', document.getElementById('revenueGrowth').textContent],
+        ];
+        
+        const ws1 = XLSX.utils.aoa_to_sheet(overviewData);
+        XLSX.utils.book_append_sheet(wb, ws1, 'Tổng quan');
+        
+        // Sheet 2: Top Customers
+        const topCustomersTable = document.querySelector('#topCustomersTable');
+        if (topCustomersTable) {
+          const tableData = [];
+          
+          // Header
+          const headerRow = [];
+          topCustomersTable.querySelectorAll('thead th').forEach(th => {
+            headerRow.push(th.textContent.trim());
+          });
+          tableData.push(headerRow);
+          
+          // Data rows
+          topCustomersTable.querySelectorAll('tbody tr:not([colspan])').forEach(tr => {
+            const row = [];
+            tr.querySelectorAll('td').forEach(td => {
+              row.push(td.textContent.trim());
+            });
+            if (row.length > 0) {
+              tableData.push(row);
+            }
+          });
+          
+          if (tableData.length > 1) {
+            const ws2 = XLSX.utils.aoa_to_sheet(tableData);
+            XLSX.utils.book_append_sheet(wb, ws2, 'Top Khách hàng');
+          }
+        }
+        
+        // Sheet 3: Thống kê (nếu có dữ liệu từ API)
+        try {
+          const token = localStorage.getItem('token') || localStorage.getItem('adminToken');
+          if (token) {
+            const response = await fetch(`${REPORTS_API_BASE}/revenue-summary?startDate=${startDate}&endDate=${endDate}`, {
+              headers: { 
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }
+            });
+            
+            if (response.ok) {
+              const data = await response.json();
+              
+              // Doanh thu theo ngày
+              if (data.dailyRevenue && data.dailyRevenue.length > 0) {
+                const revenueData = [
+                  ['DOANH THU THEO NGÀY'],
+                  [''],
+                  ['Ngày', 'Doanh thu (₫)']
+                ];
+                
+                data.dailyRevenue.forEach(item => {
+                  revenueData.push([
+                    new Date(item.date).toLocaleDateString('vi-VN'),
+                    item.amount || 0
+                  ]);
+                });
+                
+                const ws3 = XLSX.utils.aoa_to_sheet(revenueData);
+                XLSX.utils.book_append_sheet(wb, ws3, 'Doanh thu');
+              }
+              
+              // Doanh thu theo loại
+              if (data.revenueByType && data.revenueByType.length > 0) {
+                const typeData = [
+                  ['DOANH THU THEO LOẠI'],
+                  [''],
+                  ['Loại', 'Doanh thu (₫)']
+                ];
+                
+                data.revenueByType.forEach(item => {
+                  typeData.push([
+                    item.type || 'N/A',
+                    item.amount || 0
+                  ]);
+                });
+                
+                const ws4 = XLSX.utils.aoa_to_sheet(typeData);
+                XLSX.utils.book_append_sheet(wb, ws4, 'Doanh thu loại');
+              }
+            }
+          }
+        } catch (error) {
+          console.warn('⚠️ Could not load additional data for Excel:', error);
+        }
+        
+        // Xuất file
+        const fileName = `bao-cao-resort-${startDate}-${endDate}.xlsx`;
+        XLSX.writeFile(wb, fileName);
+        
+        console.log('✅ Excel exported successfully');
+        if (typeof showToast === 'function') {
+          showToast('Xuất Excel thành công!', 'success');
+        }
+      } catch (error) {
+        console.error('❌ Error exporting Excel:', error);
+        alert('Lỗi xuất Excel: ' + error.message);
+      }
+    }
+
+    function printReport() {
+      window.print();
+    }
+  </script>
+</body>
+</html>

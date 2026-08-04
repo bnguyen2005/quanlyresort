@@ -1,0 +1,73 @@
+# 🔧 Render Environment Variables - Complete List
+# Copy từng dòng và paste vào Render Environment Variables
+# ⚠️ LƯU Ý: Thay "your-service-name.onrender.com" bằng URL thực tế sau khi deploy!
+
+# ============================================
+# ASP.NET Core Settings
+# ============================================
+ASPNETCORE_ENVIRONMENT=Production
+ASPNETCORE_URLS=http://0.0.0.0:10000
+PORT=10000
+
+# ============================================
+# Database
+# ============================================
+ConnectionStrings__DefaultConnection=Data Source=resort.db
+
+# ============================================
+# JWT Settings
+# ============================================
+JwtSettings__SecretKey=YourSuperSecretKeyForJWTTokenGeneration2025!@#$
+JwtSettings__Issuer=ResortManagementAPI
+JwtSettings__Audience=ResortManagementClient
+JwtSettings__ExpirationHours=24
+
+# ============================================
+# PayOs Settings
+# ============================================
+BankWebhook__PayOs__ClientId=90ad103f-aa49-4c33-9692-76d739a68b1b
+BankWebhook__PayOs__ApiKey=acb138f1-a0f0-4a1f-9692-16d54332a580
+BankWebhook__PayOs__ChecksumKey=44affe6d08bc7f9b8147ea701413ab2421739b97c69b3cb401d3d31f587cbb1c
+BankWebhook__PayOs__SecretKey=44affe6d08bc7f9b8147ea701413ab2421739b97c69b3cb401d3d31f587cbb1c
+BankWebhook__PayOs__VerifySignature=false
+BankWebhook__PayOs__WebhookUrl=https://your-service-name.onrender.com/api/simplepayment/webhook
+
+# ============================================
+# SePay Settings
+# ============================================
+SePay__AccountId=5365
+SePay__ApiBaseUrl=https://pgapi.sepay.vn
+SePay__ApiToken=PWGH9OZC4OEMDYNDIIGLWRMTQQQZNA49JU3FFY5LXI8STESEJA6EIBYCP7BOQXFH
+SePay__BankAccountNumber=0901329227
+SePay__BankCode=MB
+SePay__MerchantId=SP-LIVE-LT39A334
+SEPAY_WEBHOOK_URL=https://your-service-name.onrender.com/api/simplepayment/webhook
+
+# ============================================
+# VietQR Settings
+# ============================================
+VietQR__BankAccountNumber=0901329227
+VietQR__BankCode=MB
+
+# ============================================
+# AI Chat Settings (Groq)
+# ============================================
+AIChat__Provider=groq
+AIChat__ApiKey=YOUR_GROQ_API_KEY_HERE
+AIChat__ApiUrl=https://api.groq.com/openai/v1/chat/completions
+AIChat__Model=llama-3.1-8b-instant
+
+# ============================================
+# ⚠️ QUAN TRỌNG - CẦN THAY ĐỔI SAU KHI DEPLOY:
+# ============================================
+# 1. BankWebhook__PayOs__WebhookUrl
+#    Thay "your-service-name.onrender.com" bằng URL thực tế của Render service
+#    Ví dụ: https://quanlyresort-api.onrender.com/api/simplepayment/webhook
+#
+# 2. SEPAY_WEBHOOK_URL
+#    Thay "your-service-name.onrender.com" bằng URL thực tế của Render service
+#    Ví dụ: https://quanlyresort-api.onrender.com/api/simplepayment/webhook
+#
+# 3. Source="/data/resort.db" - KHÔNG CẦN THIẾT, có thể bỏ qua
+# ============================================
+

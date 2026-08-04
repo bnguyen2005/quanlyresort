@@ -1,0 +1,44 @@
+@import url('../tokens.css');
+
+/* Unified header across all pages */
+.ftco_navbar, .site-navbar, .navbar.ftco-navbar-light, 
+.navbar.ftco-navbar, #ftco-navbar,
+#header-placeholder nav {
+  background: #1a1a1a !important;
+  color: #fff;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 1030 !important;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+  width: 100% !important;
+  margin: 0 !important;
+}
+
+/* Ensure header placeholder doesn't break layout */
+#header-placeholder {
+  position: relative;
+  z-index: 1030;
+}
+.ftco_navbar .navbar-brand,
+.site-navbar .navbar-brand {
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.ftco_navbar .nav-link,
+.site-navbar .nav-link {
+  color: #fff !important;
+  padding: 12px 14px;
+}
+.ftco_navbar .nav-link:hover,
+.site-navbar .nav-link:hover { color: var(--color-primary-500) !important; }
+.ftco_navbar .nav-item.active > .nav-link,
+.site-navbar .nav-item.active > .nav-link { border-bottom: 2px solid var(--color-primary-500); }
+
+/* Ensure first section is not overlapped by sticky header when pages use negative margins */
+.hero-wrap,
+header.hero,
+.page-hero {
+  position: relative;
+  z-index: 1;
+}
+

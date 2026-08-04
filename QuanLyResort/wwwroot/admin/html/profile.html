@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="vi" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default" data-assets-path="../assets/" data-template="vertical-menu-template-free">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+  
+  <title>Hồ sơ của tôi - Resort Management</title>
+  
+  <meta name="description" content="Quản lý hồ sơ cá nhân" />
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="../assets/img/favicon/favicon.ico" />
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet" />
+  
+  <!-- Icons -->
+  <link rel="stylesheet" href="../assets/vendor/fonts/boxicons.css" />
+  
+  <!-- Core CSS -->
+  <link rel="stylesheet" href="../assets/vendor/css/core.css" class="template-customizer-core-css" />
+  <link rel="stylesheet" href="../assets/vendor/css/theme-default.css" class="template-customizer-theme-css" />
+  <link rel="stylesheet" href="../assets/css/demo.css" />
+  <link rel="stylesheet" href="../assets/css/fix-scrollbar.css" />
+  <link rel="stylesheet" href="../assets/css/admin-custom-theme.css" />
+  
+  <!-- Helpers -->
+  <script src="../assets/vendor/js/helpers.js"></script>
+  <script src="../assets/js/config.js"></script>
+  
+  <style>
+    /* Nalika Style - Profile Page */
+    .profile-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 24px;
+      padding: 3rem 2.5rem;
+      color: white;
+      margin-bottom: 2.5rem;
+      box-shadow: 0 10px 40px rgba(102, 126, 234, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .profile-header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      animation: rotate 20s linear infinite;
+    }
+    
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    .profile-avatar {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      border: 6px solid rgba(255, 255, 255, 0.4);
+      object-fit: cover;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+      position: relative;
+      z-index: 1;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    .profile-avatar:hover {
+      transform: scale(1.05);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+    }
+    
+    .profile-header h3 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      position: relative;
+      z-index: 1;
+    }
+    
+    .profile-header p {
+      font-size: 1.1rem;
+      opacity: 0.95;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .profile-card {
+      border-radius: 20px;
+      border: none;
+      box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.98);
+    }
+    
+    .profile-card:hover {
+      box-shadow: 0 8px 35px rgba(0,0,0,0.12);
+      transform: translateY(-4px);
+    }
+    
+    .profile-card .card-header {
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+      border-bottom: 2px solid rgba(102, 126, 234, 0.2);
+      padding: 1.5rem;
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: #374151;
+    }
+    
+    .info-item {
+      padding: 1.5rem;
+      border-bottom: 1px solid #f3f4f6;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    
+    .info-item:last-child {
+      border-bottom: none;
+    }
+    
+    .info-item::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+      transform: scaleY(0);
+      transition: transform 0.3s ease;
+    }
+    
+    .info-item:hover {
+      background: linear-gradient(90deg, rgba(102, 126, 234, 0.05) 0%, rgba(255, 255, 255, 1) 100%);
+      padding-left: 2rem;
+    }
+    
+    .info-item:hover::before {
+      transform: scaleY(1);
+    }
+    
+    .info-label {
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 0.75rem;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .info-label::before {
+      content: '•';
+      color: #667eea;
+      font-size: 1.2rem;
+    }
+    
+    .info-value {
+      color: #6b7280;
+      font-size: 1rem;
+      font-weight: 500;
+    }
+    
+    .edit-btn {
+      border-radius: 16px;
+      padding: 0.875rem 2.5rem;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      background: rgba(255, 255, 255, 0.95);
+      color: #667eea;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      position: relative;
+      z-index: 1;
+    }
+    
+    .edit-btn:hover {
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+      background: white;
+    }
+    
+    .stat-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+      border-radius: 12px;
+      font-weight: 600;
+      color: #667eea;
+      font-size: 0.9rem;
+    }
+    
+    .security-item {
+      padding: 1.25rem;
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(255, 255, 255, 1) 100%);
+      border-radius: 12px;
+      border-left: 4px solid #10b981;
+      margin-bottom: 1rem;
+      transition: all 0.3s ease;
+    }
+    
+    .security-item:hover {
+      transform: translateX(5px);
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.15);
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Layout wrapper -->
+  <div class="layout-wrapper layout-content-navbar">
+    <div class="layout-container">
+      <!-- Menu - Load from common component -->
+      <div id="common-menu"></div>
+      <script src="../js/load-menu.js"></script>
+      <!-- / Menu -->
+
+      <!-- Layout container -->
+      <div class="layout-page">
+        <!-- Navbar -->
+        <nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme" id="layout-navbar">
+          <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
+            <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
+              <i class="bx bx-menu bx-sm"></i>
+            </a>
+          </div>
+
+          <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+            <div class="navbar-nav align-items-center">
+              <div class="nav-item d-flex align-items-center">
+                <h4 class="mb-0">👤 Hồ sơ của tôi</h4>
+              </div>
+            </div>
+
+            <ul class="navbar-nav flex-row align-items-center ms-auto">
+              <li class="nav-item navbar-dropdown dropdown-user dropdown">
+                <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
+                  <div class="avatar avatar-online">
+                    <img src="../assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                  </div>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li>
+                    <a class="dropdown-item" href="profile.html">
+                      <div class="d-flex">
+                        <div class="flex-shrink-0 me-3">
+                          <div class="avatar avatar-online">
+                            <img src="../assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                          </div>
+                        </div>
+                        <div class="flex-grow-1">
+                          <span class="fw-semibold d-block" id="userDisplayName">Admin</span>
+                          <small class="text-muted" id="userRole">Quản trị viên</small>
+                        </div>
+                      </div>
+                    </a>
+                  </li>
+                  <li><div class="dropdown-divider"></div></li>
+                  <li>
+                    <a class="dropdown-item" href="profile.html">
+                      <i class="bx bx-user me-2"></i>
+                      <span class="align-middle">Hồ sơ của tôi</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item" href="settings.html">
+                      <i class="bx bx-cog me-2"></i>
+                      <span class="align-middle">Cài đặt</span>
+                    </a>
+                  </li>
+                  <li><div class="dropdown-divider"></div></li>
+                  <li>
+                    <a class="dropdown-item" href="javascript:void(0);" onclick="commonLogout(); return false;">
+                      <i class="bx bx-power-off me-2"></i>
+                      <span class="align-middle">Đăng xuất</span>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </nav>
+        <!-- / Navbar -->
+
+        <!-- Content wrapper -->
+        <div class="content-wrapper">
+          <!-- Content -->
+          <div class="container-xxl flex-grow-1 container-p-y">
+            <h4 class="fw-bold py-3 mb-4">
+              <span class="text-muted fw-light">Resort /</span> Hồ sơ của tôi
+            </h4>
+
+            <!-- Profile Header - Nalika Style -->
+            <div class="profile-header">
+              <div class="row align-items-center">
+                <div class="col-auto">
+                  <div class="position-relative">
+                    <img src="../assets/img/avatars/1.png" alt="Avatar" class="profile-avatar" id="profileAvatar" />
+                    <span class="position-absolute bottom-0 end-0 bg-success border border-white border-3 rounded-circle" style="width: 24px; height: 24px;"></span>
+                  </div>
+                </div>
+                <div class="col">
+                  <h3 class="mb-2" id="profileFullName">Admin User</h3>
+                  <p class="mb-2 fs-5" id="profileRole">
+                    <span class="badge bg-light text-dark px-3 py-2">Quản trị viên</span>
+                  </p>
+                  <p class="mb-0 d-flex align-items-center gap-2">
+                    <i class="bx bx-envelope fs-5"></i>
+                    <span id="profileEmail">admin@resort.com</span>
+                  </p>
+                </div>
+                <div class="col-auto">
+                  <button class="btn btn-light edit-btn" onclick="editProfile()">
+                    <i class="bx bx-edit me-2"></i> Chỉnh sửa hồ sơ
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Profile Information -->
+            <div class="row">
+              <div class="col-lg-8 mb-4">
+                <div class="card profile-card">
+                  <div class="card-header">
+                    <h5 class="mb-0">📋 Thông tin cá nhân</h5>
+                  </div>
+                  <div class="card-body p-0">
+                    <div class="info-item">
+                      <div class="info-label">
+                        <i class="bx bx-user text-primary"></i>
+                        Họ và tên
+                      </div>
+                      <div class="info-value" id="infoFullName">-</div>
+                    </div>
+                    <div class="info-item">
+                      <div class="info-label">
+                        <i class="bx bx-envelope text-primary"></i>
+                        Email
+                      </div>
+                      <div class="info-value" id="infoEmail">-</div>
+                    </div>
+                    <div class="info-item">
+                      <div class="info-label">
+                        <i class="bx bx-phone text-primary"></i>
+                        Số điện thoại
+                      </div>
+                      <div class="info-value" id="infoPhone">-</div>
+                    </div>
+                    <div class="info-item">
+                      <div class="info-label">
+                        <i class="bx bx-briefcase text-primary"></i>
+                        Vai trò
+                      </div>
+                      <div class="info-value">
+                        <span class="badge bg-primary" id="infoRole">-</span>
+                      </div>
+                    </div>
+                    <div class="info-item">
+                      <div class="info-label">
+                        <i class="bx bx-calendar text-primary"></i>
+                        Ngày tạo tài khoản
+                      </div>
+                      <div class="info-value" id="infoCreatedDate">-</div>
+                    </div>
+                    <div class="info-item">
+                      <div class="info-label">
+                        <i class="bx bx-check-circle text-primary"></i>
+                        Trạng thái
+                      </div>
+                      <div class="info-value">
+                        <span class="badge bg-success px-3 py-2" id="infoStatus">Đang hoạt động</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-lg-4 mb-4">
+                <div class="card profile-card">
+                  <div class="card-header">
+                    <h5 class="mb-0">🔐 Bảo mật</h5>
+                  </div>
+                  <div class="card-body p-3">
+                    <div class="security-item">
+                      <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                          <div class="info-label mb-1">
+                            <i class="bx bx-lock text-success"></i>
+                            Mật khẩu
+                          </div>
+                          <div class="info-value small">••••••••</div>
+                        </div>
+                        <button class="btn btn-sm btn-success" onclick="changePassword()">
+                          <i class="bx bx-edit me-1"></i> Đổi
+                        </button>
+                      </div>
+                    </div>
+                    <div class="security-item">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                          <div class="info-label mb-1">
+                            <i class="bx bx-shield text-warning"></i>
+                            Xác thực 2 lớp
+                          </div>
+                          <div class="info-value small">Bảo vệ tài khoản</div>
+                        </div>
+                        <span class="badge bg-warning">Chưa bật</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="card profile-card mt-4">
+                  <div class="card-header">
+                    <h5 class="mb-0">📊 Thống kê</h5>
+                  </div>
+                  <div class="card-body p-3">
+                    <div class="info-item">
+                      <div class="info-label">
+                        <i class="bx bx-log-in text-info"></i>
+                        Tổng đăng nhập
+                      </div>
+                      <div class="info-value">
+                        <span class="stat-badge" id="statLogins">-</span>
+                      </div>
+                    </div>
+                    <div class="info-item">
+                      <div class="info-label">
+                        <i class="bx bx-time text-info"></i>
+                        Lần đăng nhập cuối
+                      </div>
+                      <div class="info-value" id="statLastLogin">-</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- / Content -->
+        </div>
+        <!-- / Content wrapper -->
+      </div>
+      <!-- / Layout container -->
+    </div>
+    <!-- / Layout wrapper -->
+
+    <!-- Core JS -->
+    <script src="../assets/vendor/libs/jquery/jquery.js"></script>
+    <script src="../assets/vendor/libs/popper/popper.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../assets/vendor/js/menu.js"></script>
+    <script src="../assets/js/main.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/common-navbar.js"></script>
+    
+    <script>
+      const API_BASE = window.API_BASE_URL || 'https://quanlyresort-e0a8.onrender.com/api';
+      
+      // Load user profile
+      async function loadProfile() {
+        try {
+          const user = JSON.parse(localStorage.getItem('user') || '{}');
+          const token = localStorage.getItem('token') || localStorage.getItem('adminToken');
+          
+          if (!token) {
+            window.location.href = '/customer/login.html';
+            return;
+          }
+          
+          // Update profile header
+          document.getElementById('profileFullName').textContent = user.fullName || user.username || 'Admin';
+          document.getElementById('profileRole').textContent = getRoleDisplayName(user.role || 'Admin');
+          document.getElementById('profileEmail').textContent = user.email || 'admin@resort.com';
+          
+          // Update info section
+          document.getElementById('infoFullName').textContent = user.fullName || user.username || '-';
+          document.getElementById('infoEmail').textContent = user.email || '-';
+          document.getElementById('infoPhone').textContent = user.phoneNumber || user.phone || '-';
+          document.getElementById('infoRole').textContent = getRoleDisplayName(user.role || 'Admin');
+          document.getElementById('infoCreatedDate').textContent = user.createdDate ? new Date(user.createdDate).toLocaleDateString('vi-VN') : '-';
+          
+          // Try to fetch more details from API
+          try {
+            const response = await fetch(`${API_BASE}/users/me`, {
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }
+            });
+            
+            if (response.ok) {
+              const userData = await response.json();
+              // Update with API data
+              if (userData.fullName) document.getElementById('infoFullName').textContent = userData.fullName;
+              if (userData.email) document.getElementById('infoEmail').textContent = userData.email;
+              if (userData.phoneNumber) document.getElementById('infoPhone').textContent = userData.phoneNumber;
+              if (userData.createdDate) {
+                document.getElementById('infoCreatedDate').textContent = new Date(userData.createdDate).toLocaleDateString('vi-VN');
+              }
+            }
+          } catch (apiError) {
+            console.warn('Could not fetch user details from API:', apiError);
+          }
+          
+        } catch (error) {
+          console.error('Error loading profile:', error);
+        }
+      }
+      
+      function getRoleDisplayName(role) {
+        const roleNames = {
+          'Admin': 'Quản trị viên',
+          'Manager': 'Quản lý',
+          'FrontDesk': 'Lễ tân',
+          'Employee': 'Nhân viên',
+          'Customer': 'Khách hàng'
+        };
+        return roleNames[role] || role;
+      }
+      
+      function editProfile() {
+        // TODO: Open edit modal or redirect to edit page
+        alert('Tính năng chỉnh sửa hồ sơ đang được phát triển');
+      }
+      
+      function changePassword() {
+        // TODO: Open change password modal
+        alert('Tính năng đổi mật khẩu đang được phát triển');
+      }
+      
+      // Initialize on page load
+      document.addEventListener('DOMContentLoaded', function() {
+        loadProfile();
+        loadNavbarUserInfo();
+      });
+    </script>
+  </body>
+</html>
+

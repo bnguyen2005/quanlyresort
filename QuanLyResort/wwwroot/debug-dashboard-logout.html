@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Dashboard Logout</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css">
+    <style>
+        body { padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Debug Dashboard Logout</h1>
+    
+    <div class="test-section">
+        <h3>1. Test Bootstrap Dropdown</h3>
+        <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                Test Dropdown
+            </button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#" onclick="testClick('dropdown-item')">Test Item</a></li>
+                <li><a class="dropdown-item" href="#" id="testLogoutBtn">Test Logout</a></li>
+            </ul>
+        </div>
+        <div id="dropdownResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>2. Test Dashboard User Dropdown (Copy)</h3>
+        <div class="navbar-nav">
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                    <img src="/admin/assets/img/avatars/1.png" alt="User" style="width: 40px; height: 40px; border-radius: 50%;" />
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <a class="dropdown-item" href="#" id="dashboardLogoutBtn">
+                            <i class="bx bx-power-off me-2"></i>
+                            <span class="align-middle">Đăng xuất</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+        </div>
+        <div id="dashboardResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>3. Test Direct Button Click</h3>
+        <button class="btn btn-danger" id="directLogoutBtn">
+            <i class="bx bx-power-off me-2"></i>
+            Direct Logout Test
+        </button>
+        <div id="directResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>4. Console Logs</h3>
+        <div id="logs" style="background: #f5f5f5; padding: 10px; font-family: monospace; white-space: pre-wrap;"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Override console.log to show in page
+        const originalLog = console.log;
+        const logsDiv = document.getElementById('logs');
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            logsDiv.textContent += new Date().toLocaleTimeString() + ': ' + args.join(' ') + '\n';
+        };
+
+        function testClick(source) {
+            console.log(`✅ ${source} clicked successfully`);
+            document.getElementById('dropdownResult').innerHTML = `<div class="success">✅ ${source} works!</div>`;
+        }
+
+        function logout() {
+            console.log('🚪 Logout function called');
+            
+            // Clear tokens
+            localStorage.removeItem('adminToken');
+            localStorage.removeItem('token');
+            localStorage.removeItem('authToken');
+            
+            console.log('🧹 Tokens cleared');
+            
+            // Show result instead of redirect for testing
+            const result = '<div class="success">✅ Logout function executed! (Redirect disabled for testing)</div>';
+            document.getElementById('dashboardResult').innerHTML = result;
+            document.getElementById('directResult').innerHTML = result;
+            
+            console.log('✅ Logout completed');
+        }
+
+        // Test Bootstrap availability
+        console.log('🔍 Bootstrap available:', typeof bootstrap !== 'undefined');
+        console.log('🔍 jQuery available:', typeof $ !== 'undefined');
+
+        // Setup event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📄 DOM loaded');
+
+            // Test logout button
+            const testLogoutBtn = document.getElementById('testLogoutBtn');
+            if (testLogoutBtn) {
+                testLogoutBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('🔵 Test logout button clicked');
+                    logout();
+                });
+                console.log('✅ Test logout button listener added');
+            }
+
+            // Dashboard logout button
+            const dashboardLogoutBtn = document.getElementById('dashboardLogoutBtn');
+            if (dashboardLogoutBtn) {
+                dashboardLogoutBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('🔵 Dashboard logout button clicked');
+                    logout();
+                });
+                console.log('✅ Dashboard logout button listener added');
+            }
+
+            // Direct logout button
+            const directLogoutBtn = document.getElementById('directLogoutBtn');
+            if (directLogoutBtn) {
+                directLogoutBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('🔵 Direct logout button clicked');
+                    logout();
+                });
+                console.log('✅ Direct logout button listener added');
+            }
+
+            // Test dropdown events
+            document.addEventListener('show.bs.dropdown', function(e) {
+                console.log('📂 Dropdown opening:', e.target);
+            });
+
+            document.addEventListener('shown.bs.dropdown', function(e) {
+                console.log('📂 Dropdown opened:', e.target);
+            });
+
+            console.log('🚀 All event listeners setup complete');
+        });
+
+        // Test if we can access the actual dashboard elements
+        setTimeout(() => {
+            const actualLogoutBtn = document.getElementById('logoutBtn');
+            console.log('🔍 Actual dashboard logout button found:', !!actualLogoutBtn);
+            
+            if (actualLogoutBtn) {
+                console.log('🔍 Logout button HTML:', actualLogoutBtn.outerHTML);
+                console.log('🔍 Logout button parent:', actualLogoutBtn.parentElement?.outerHTML);
+            }
+        }, 2000);
+    </script>
+</body>
+</html>

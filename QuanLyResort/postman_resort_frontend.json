@@ -1,0 +1,450 @@
+{
+  "info": {
+    "name": "Resort Management API - Complete Flow",
+    "_postman_id": "resort-management-api-2025",
+    "description": "Complete API collection for Resort Management System including Admin and Customer flows",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://localhost:7000",
+      "type": "string"
+    },
+    {
+      "key": "admin_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "customer_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "Admin Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('admin_token', jsonData.token);",
+                  "    console.log('Admin token saved:', jsonData.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@resort.test\",\n  \"password\": \"P@ssw0rd123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Customer Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set('customer_token', jsonData.token);",
+                  "    console.log('Customer token saved:', jsonData.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"customer1@guest.test\",\n  \"password\": \"Guest@123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/customer-login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "customer-login"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Rooms",
+      "item": [
+        {
+          "name": "Get All Rooms",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/rooms",
+              "host": ["{{base_url}}"],
+              "path": ["api", "rooms"]
+            }
+          }
+        },
+        {
+          "name": "Get Available Rooms",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/rooms/available?roomType=Deluxe",
+              "host": ["{{base_url}}"],
+              "path": ["api", "rooms", "available"],
+              "query": [
+                {
+                  "key": "roomType",
+                  "value": "Deluxe"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Bookings Flow",
+      "item": [
+        {
+          "name": "Create Booking (Customer)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customer_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": 1,\n  \"requestedRoomType\": \"Deluxe\",\n  \"checkInDate\": \"2025-10-25\",\n  \"checkOutDate\": \"2025-10-28\",\n  \"numberOfGuests\": 2,\n  \"specialRequests\": \"Late check-in\",\n  \"source\": \"Online\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/bookings",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bookings"]
+            }
+          }
+        },
+        {
+          "name": "Get All Bookings (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/bookings",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bookings"]
+            }
+          }
+        },
+        {
+          "name": "Transfer to Front Desk",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{customer_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/bookings/1/transfer-to-frontdesk",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bookings", "1", "transfer-to-frontdesk"]
+            }
+          }
+        },
+        {
+          "name": "Assign Room (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roomId\": 3\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/bookings/2/assign-room",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bookings", "2", "assign-room"]
+            }
+          }
+        },
+        {
+          "name": "Check-in (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/bookings/2/checkin",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bookings", "2", "checkin"]
+            }
+          }
+        },
+        {
+          "name": "Add Charge (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"serviceId\": 1,\n  \"chargeType\": \"ServiceCharge\",\n  \"description\": \"Breakfast Buffet\",\n  \"amount\": 150000,\n  \"quantity\": 2,\n  \"outletName\": \"Main Restaurant\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/bookings/1/add-charge",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bookings", "1", "add-charge"]
+            }
+          }
+        },
+        {
+          "name": "Checkout (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/bookings/1/checkout",
+              "host": ["{{base_url}}"],
+              "path": ["api", "bookings", "1", "checkout"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Invoices & Payment",
+      "item": [
+        {
+          "name": "Get All Invoices (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/invoices",
+              "host": ["{{base_url}}"],
+              "path": ["api", "invoices"]
+            }
+          }
+        },
+        {
+          "name": "Pay Invoice (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 2100000,\n  \"paymentMethod\": \"Cash\",\n  \"paymentReference\": \"CASH-2025-001\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/invoices/1/pay",
+              "host": ["{{base_url}}"],
+              "path": ["api", "invoices", "1", "pay"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Reports & Audit",
+      "item": [
+        {
+          "name": "Daily Occupancy",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/reports/daily-occupancy",
+              "host": ["{{base_url}}"],
+              "path": ["api", "reports", "daily-occupancy"]
+            }
+          }
+        },
+        {
+          "name": "Daily Revenue",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/reports/daily-revenue",
+              "host": ["{{base_url}}"],
+              "path": ["api", "reports", "daily-revenue"]
+            }
+          }
+        },
+        {
+          "name": "Daily Reconciliation",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/audit/daily-reconciliation",
+              "host": ["{{base_url}}"],
+              "path": ["api", "audit", "daily-reconciliation"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Admin Operations",
+      "item": [
+        {
+          "name": "Seed Database",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/seed",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "seed"]
+            }
+          }
+        },
+        {
+          "name": "Get System Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/stats",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "stats"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Alerts",
+      "item": [
+        {
+          "name": "Get Alerts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/alerts",
+              "host": ["{{base_url}}"],
+              "path": ["api", "alerts"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
+

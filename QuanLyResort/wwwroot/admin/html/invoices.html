@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="vi" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default" data-assets-path="../assets/" data-template="vertical-menu-template-free">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+  <title>Quản lý Hóa đơn đặt phòng - Resort Management</title>
+  
+  <!-- NO CACHE -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  
+  <link rel="icon" type="image/x-icon" href="../assets/img/favicon/favicon.ico" />
+  <link rel="stylesheet" href="../assets/vendor/fonts/boxicons.css" />
+  <link rel="stylesheet" href="../assets/vendor/css/core.css" class="template-customizer-core-css" />
+  <link rel="stylesheet" href="../assets/vendor/css/theme-default.css" class="template-customizer-theme-css" />
+  <link rel="stylesheet" href="../assets/css/demo.css" />
+  <link rel="stylesheet" href="../assets/css/fix-scrollbar.css" />
+  <link rel="stylesheet" href="../assets/css/admin-custom-theme.css" />
+  <link rel="stylesheet" href="../assets/css/nalika-style.css?v=20250127" />
+  <link rel="stylesheet" href="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" />
+</head>
+<body>
+  <div class="layout-wrapper layout-content-navbar">
+    <div class="layout-container">
+
+      <!-- Menu - Load from common component -->
+      <div id="common-menu"></div>
+
+      <!-- Layout container -->
+      <div class="layout-page">
+        
+        <!-- Navbar -->
+        <nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme" id="layout-navbar">
+          <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
+            <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
+              <i class="bx bx-menu bx-sm"></i>
+            </a>
+          </div>
+
+          <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+            <div class="navbar-nav align-items-center">
+              <div class="nav-item d-flex align-items-center">
+                <h4 class="mb-0">🧾 Quản lý Hóa đơn đặt phòng</h4>
+              </div>
+            </div>
+
+            <ul class="navbar-nav flex-row align-items-center ms-auto">
+              <li class="nav-item navbar-dropdown dropdown-user dropdown">
+                <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
+                  <div class="avatar avatar-online">
+                    <img src="../assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                  </div>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li>
+                    <a class="dropdown-item" href="#">
+                      <div class="d-flex">
+                        <div class="flex-shrink-0 me-3">
+                          <div class="avatar avatar-online">
+                            <img src="../assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                          </div>
+                        </div>
+                        <div class="flex-grow-1">
+                          <span class="fw-semibold d-block" id="userFullName">Admin</span>
+                          <small class="text-muted" id="userRole">Administrator</small>
+                        </div>
+                      </div>
+                    </a>
+                  </li>
+                  <li><div class="dropdown-divider"></div></li>
+                  <li>
+                    <a class="dropdown-item" href="../html/index.html">
+                      <i class="bx bx-home-circle me-2"></i>
+                      <span class="align-middle">Dashboard</span>
+                    </a>
+                  </li>
+                  <li><div class="dropdown-divider"></div></li>
+                  <li>
+                    <a class="dropdown-item" href="javascript:void(0);" id="logoutBtn">
+                      <i class="bx bx-power-off me-2"></i>
+                      <span class="align-middle">Đăng xuất</span>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </nav>
+        <!-- / Navbar -->
+
+        <!-- Content wrapper -->
+        <div class="content-wrapper">
+          <div class="container-xxl flex-grow-1 container-p-y">
+            
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <div>
+                <h4 class="fw-bold mb-0">🧾 Danh sách Hóa đơn đặt phòng</h4>
+                <p class="text-muted mb-0">Quản lý hóa đơn đặt phòng và thanh toán</p>
+              </div>
+              <button type="button" class="btn btn-primary" onclick="exportToPDF()">
+                <i class="bx bx-printer me-1"></i> Xuất báo cáo
+              </button>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="row mb-4">
+              <div class="col-md-3 col-6 mb-4">
+                <div class="nalika-stats-card">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h3 class="card-title mb-2" id="totalInvoices">0</h3>
+                      <small class="text-white">Tổng hóa đơn</small>
+                    </div>
+                    <div class="avatar flex-shrink-0">
+                      <i class="bx bx-file text-white"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3 col-6 mb-4">
+                <div class="nalika-stats-card success">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h3 class="card-title mb-2" id="paidInvoices">0</h3>
+                      <small class="text-white">Đã thanh toán</small>
+                    </div>
+                    <div class="avatar flex-shrink-0">
+                      <i class="bx bx-check-circle text-white"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3 col-6 mb-4">
+                <div class="nalika-stats-card warning">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h3 class="card-title mb-2" id="pendingInvoices">0</h3>
+                      <small class="text-white">Chưa thanh toán</small>
+                    </div>
+                    <div class="avatar flex-shrink-0">
+                      <i class="bx bx-time-five text-white"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-3 col-6 mb-4">
+                <div class="nalika-stats-card info">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h3 class="card-title mb-2" id="totalRevenue">0đ</h3>
+                      <small class="text-white">Tổng doanh thu</small>
+                    </div>
+                    <div class="avatar flex-shrink-0">
+                      <i class="bx bx-dollar text-white"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="card mb-4">
+              <div class="card-body">
+                <div class="row g-3">
+                  <div class="col-md-3">
+                    <label class="form-label">Tìm kiếm</label>
+                    <input type="text" id="searchInput" class="form-control" placeholder="Số hóa đơn, khách hàng...">
+                  </div>
+                  <div class="col-md-2">
+                    <label class="form-label">Trạng thái</label>
+                    <select id="filterStatus" class="form-select">
+                      <option value="">Tất cả</option>
+                      <option value="Issued">Đã phát hành</option>
+                      <option value="PartiallyPaid">Thanh toán một phần</option>
+                      <option value="Paid">Đã thanh toán</option>
+                      <option value="Cancelled">Đã hủy</option>
+                    </select>
+                  </div>
+                  <div class="col-md-2">
+                    <label class="form-label">Từ ngày</label>
+                    <input type="date" id="fromDate" class="form-control">
+                  </div>
+                  <div class="col-md-2">
+                    <label class="form-label">Đến ngày</label>
+                    <input type="date" id="toDate" class="form-control">
+                  </div>
+                  <div class="col-md-3 d-flex align-items-end">
+                    <button type="button" class="btn btn-primary w-100" id="btnFilter">
+                      <i class="bx bx-search me-1"></i> Lọc
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Invoices Table - Nalika Style -->
+            <div class="nalika-card">
+              <div class="card-header">
+                <h5 class="mb-0">Danh sách hóa đơn đặt phòng</h5>
+              </div>
+              <div class="card-body">
+                <div class="table-responsive text-nowrap">
+                  <table id="invoicesTable" class="table table-hover nalika-table">
+                    <thead>
+                      <tr>
+                        <th>Số HĐ</th>
+                        <th>Khách hàng</th>
+                        <th>Ngày phát hành</th>
+                        <th>Tổng tiền</th>
+                        <th>Đã thanh toán</th>
+                        <th>Còn lại</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <!-- Data loaded here -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <!-- / Layout container -->
+  </div>
+
+  <div class="layout-overlay layout-menu-toggle"></div>
+  </div>
+
+  <!-- Toast container -->
+  <div class="position-fixed top-0 end-0 p-3" style="z-index:1080">
+    <div id="toastContainer"></div>
+  </div>
+
+  <!-- View Details Modal -->
+  <div class="modal fade" id="viewModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Chi tiết Hóa đơn đặt phòng</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="invoiceDetails">
+          <!-- Details loaded here -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+          <button type="button" class="btn btn-primary" id="btnExportInvoicePDF">
+            <i class="bx bx-file me-1"></i> Xuất PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment Modal -->
+  <div class="modal fade" id="paymentModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Thanh toán Hóa đơn đặt phòng</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="paymentForm">
+            <input type="hidden" id="paymentInvoiceId" />
+            <div class="mb-3">
+              <label for="paymentAmount" class="form-label">Số tiền <span class="text-danger">*</span></label>
+              <input type="number" class="form-control" id="paymentAmount" step="0.01" min="0" required>
+              <small class="text-muted">Số tiền còn lại: <strong id="remainingAmount">0đ</strong></small>
+            </div>
+            <div class="mb-3">
+              <label for="paymentMethod" class="form-label">Phương thức thanh toán <span class="text-danger">*</span></label>
+              <select class="form-select" id="paymentMethod" required>
+                <option value="">Chọn phương thức</option>
+                <option value="Cash">Tiền mặt</option>
+                <option value="CreditCard">Thẻ tín dụng</option>
+                <option value="BankTransfer">Chuyển khoản</option>
+                <option value="Momo">MoMo</option>
+                <option value="ZaloPay">ZaloPay</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="paymentReference" class="form-label">Số tham chiếu</label>
+              <input type="text" class="form-control" id="paymentReference" placeholder="Mã giao dịch, tham chiếu...">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+          <button type="button" class="btn btn-primary" id="btnProcessPayment">Xác nhận thanh toán</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Core JS -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/perfect-scrollbar@1.5.3/dist/perfect-scrollbar.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- Template helpers & config (required for Menu/Helpers) -->
+  <script src="../assets/vendor/js/helpers.js"></script>
+  <script src="../assets/js/config.js"></script>
+  <script src="../assets/vendor/js/menu.js"></script>
+  <script src="../assets/js/main.js"></script>
+  <script src="../../js/api.js"></script>
+  
+
+  <script>
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toastContainer');
+      const wrapper = document.createElement('div');
+      wrapper.className = `toast align-items-center text-bg-${type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'danger'} border-0`;
+      wrapper.setAttribute('role', 'alert');
+      wrapper.setAttribute('aria-live', 'assertive');
+      wrapper.setAttribute('aria-atomic', 'true');
+      wrapper.innerHTML = `
+        <div class="d-flex">
+          <div class="toast-body">${message}</div>
+          <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>`;
+      container.appendChild(wrapper);
+      const toast = new bootstrap.Toast(wrapper, { delay: 2500 });
+      toast.show();
+      wrapper.addEventListener('hidden.bs.toast', () => wrapper.remove());
+    }
+
+    let invoicesTable;
+    let currentInvoice = null;
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', async function() {
+      console.log('🚀 Invoices page loaded');
+      
+      // Load menu
+      try {
+        const menuResponse = await fetch('layout-menu.html?v=' + Date.now());
+        const menuHtml = await menuResponse.text();
+        document.getElementById('common-menu').innerHTML = menuHtml;
+      } catch (error) {
+        console.error('Error loading menu:', error);
+      }
+      
+      // Check auth
+      const token = localStorage.getItem('token');
+      const userStr = localStorage.getItem('user');
+      
+
+      const user = JSON.parse(userStr);
+      document.getElementById('userFullName').textContent = user.fullName || 'Admin';
+      document.getElementById('userRole').textContent = user.role || 'Administrator';
+      
+      await loadAllData();
+      setupEventListeners();
+      
+      // Auto-refresh every 30 seconds
+      setInterval(async () => {
+        try {
+          await Promise.all([
+            loadStatistics(),
+            loadInvoices()
+          ]);
+        } catch (error) {
+          console.error('Error auto-refreshing invoices:', error);
+        }
+      }, 30000); // 30 seconds
+    });
+
+    // Load all data
+    async function loadAllData() {
+      try {
+        await Promise.all([
+          loadStatistics(),
+          loadInvoices()
+        ]);
+      } catch (error) {
+        console.error('Error loading data:', error);
+        showToast('Lỗi tải dữ liệu: ' + error.message, 'danger');
+      }
+    }
+
+    // Load statistics
+    async function loadStatistics() {
+      try {
+        const data = await apiGet('/invoices/statistics');
+        document.getElementById('totalInvoices').textContent = data.totalInvoices;
+        document.getElementById('paidInvoices').textContent = data.paidInvoices;
+        document.getElementById('pendingInvoices').textContent = data.pendingInvoices;
+        document.getElementById('totalRevenue').textContent = formatCurrency(data.totalRevenue);
+      } catch (error) {
+        console.error('Error loading statistics:', error);
+      }
+    }
+
+    // Load invoices
+    async function loadInvoices() {
+      try {
+        const search = document.getElementById('searchInput').value;
+        const status = document.getElementById('filterStatus').value;
+        const fromDate = document.getElementById('fromDate').value;
+        const toDate = document.getElementById('toDate').value;
+
+        let url = '/invoices?';
+        if (search) url += `search=${encodeURIComponent(search)}&`;
+        if (status) url += `status=${encodeURIComponent(status)}&`;
+        if (fromDate) url += `fromDate=${fromDate}&`;
+        if (toDate) url += `toDate=${toDate}&`;
+
+        const invoices = await apiGet(url);
+
+        // Clear existing table
+        if (invoicesTable) {
+          invoicesTable.destroy();
+        }
+
+        const tbody = document.querySelector('#invoicesTable tbody');
+        tbody.innerHTML = '';
+
+        if (invoices && invoices.length > 0) {
+          invoices.forEach(invoice => {
+            const statusBadge = getStatusBadge(invoice.status);
+            const issueDate = new Date(invoice.issueDate).toLocaleDateString('vi-VN');
+
+            const bookingInfo = invoice.booking 
+              ? `${invoice.booking.requestedRoomType || 'N/A'} - #${invoice.bookingId}`
+              : `#${invoice.bookingId}`;
+            
+            const row = `
+              <tr>
+                <td><strong>${invoice.invoiceNumber}</strong></td>
+                <td>${invoice.customer?.fullName || 'N/A'}<br><small class="text-muted">${bookingInfo}</small></td>
+                <td>${issueDate}</td>
+                <td><strong>${formatCurrency(invoice.totalAmount)}</strong></td>
+                <td>${formatCurrency(invoice.paidAmount)}</td>
+                <td><strong>${formatCurrency(invoice.balanceDue)}</strong></td>
+                <td>${statusBadge}</td>
+                <td>
+                  <div class="action-buttons">
+                    <button class="action-btn action-btn-view" onclick="handleViewInvoice(${invoice.invoiceId})" title="Xem chi tiết">
+                      <i class="bx bx-show"></i>
+                    </button>
+                    ${invoice.balanceDue > 0 ? `
+                    <button class="action-btn action-btn-add" onclick="handleOpenPaymentModal(${invoice.invoiceId})" title="Thanh toán">
+                      <i class="bx bx-credit-card"></i>
+                    </button>
+                    ` : ''}
+                    ${invoice.status !== 'Paid' && invoice.status !== 'Cancelled' ? `
+                    <button class="action-btn action-btn-delete" onclick="handleCancelInvoice(${invoice.invoiceId})" title="Hủy hóa đơn">
+                      <i class="bx bx-x"></i>
+                    </button>
+                    ` : ''}
+                  </div>
+                </td>
+              </tr>
+            `;
+            tbody.innerHTML += row;
+          });
+        }
+
+        invoicesTable = $('#invoicesTable').DataTable({
+          pageLength: 10,
+          order: [[2, 'desc']]
+        });
+      } catch (error) {
+        console.error('Error loading invoices:', error);
+        showToast('Lỗi tải danh sách hóa đơn đặt phòng: ' + error.message, 'danger');
+      }
+    }
+
+    // Get status badge
+    function getStatusBadge(status) {
+      const badges = {
+        'Issued': '<span class="badge bg-warning">Đã phát hành</span>',
+        'PartiallyPaid': '<span class="badge bg-info">Thanh toán một phần</span>',
+        'Paid': '<span class="badge bg-success">Đã thanh toán</span>',
+        'Cancelled': '<span class="badge bg-danger">Đã hủy</span>'
+      };
+      return badges[status] || '<span class="badge bg-secondary">' + status + '</span>';
+    }
+
+    // View invoice details
+    async function handleViewInvoice(id) {
+      try {
+        const invoice = await apiGet(`/invoices/${id}`);
+        currentInvoice = invoice;
+        
+        // Format booking info
+        const booking = invoice.booking || {};
+        const roomInfo = booking.room 
+          ? `${booking.room.roomNumber} (${booking.room.roomTypeNavigation?.typeName || booking.room.roomType || 'N/A'})`
+          : (booking.requestedRoomType || 'Chưa gán phòng');
+        const checkInDate = booking.checkInDate ? new Date(booking.checkInDate).toLocaleDateString('vi-VN') : 'N/A';
+        const checkOutDate = booking.checkOutDate ? new Date(booking.checkOutDate).toLocaleDateString('vi-VN') : 'N/A';
+        
+        const detailsHtml = `
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <strong>Số hóa đơn:</strong> ${invoice.invoiceNumber}
+            </div>
+            <div class="col-md-6 mb-3">
+              <strong>Ngày phát hành:</strong> ${new Date(invoice.issueDate).toLocaleDateString('vi-VN')}
+            </div>
+            <div class="col-md-6 mb-3">
+              <strong>Khách hàng:</strong> ${invoice.customer?.fullName || 'N/A'}
+            </div>
+            <div class="col-md-6 mb-3">
+              <strong>Booking ID:</strong> #${invoice.bookingId}
+            </div>
+            ${booking.requestedRoomType ? `
+            <div class="col-md-6 mb-3">
+              <strong>Loại phòng:</strong> ${booking.requestedRoomType}
+            </div>
+            ` : ''}
+            ${roomInfo && roomInfo !== booking.requestedRoomType ? `
+            <div class="col-md-6 mb-3">
+              <strong>Phòng đã gán:</strong> ${roomInfo}
+            </div>
+            ` : ''}
+            ${booking.checkInDate ? `
+            <div class="col-md-6 mb-3">
+              <strong>Check-in:</strong> ${checkInDate}
+            </div>
+            ` : ''}
+            ${booking.checkOutDate ? `
+            <div class="col-md-6 mb-3">
+              <strong>Check-out:</strong> ${checkOutDate}
+            </div>
+            ` : ''}
+            ${booking.numberOfGuests ? `
+            <div class="col-md-6 mb-3">
+              <strong>Số khách:</strong> ${booking.numberOfGuests}
+            </div>
+            ` : ''}
+            <div class="col-12 mb-3">
+              <hr>
+              <h6>Thông tin thanh toán</h6>
+              <div class="row">
+                <div class="col-md-4">Tổng tiền:</div>
+                <div class="col-md-8"><strong>${formatCurrency(invoice.subTotal)}</strong></div>
+                <div class="col-md-4">Thuế (${invoice.taxRate || 10}%):</div>
+                <div class="col-md-8"><strong>${formatCurrency(invoice.taxAmount)}</strong></div>
+                <div class="col-md-4">Giảm giá:</div>
+                <div class="col-md-8"><strong>${formatCurrency(invoice.discountAmount || 0)}</strong></div>
+                <div class="col-md-4">Tổng cộng:</div>
+                <div class="col-md-8"><strong>${formatCurrency(invoice.totalAmount)}</strong></div>
+                <div class="col-md-4">Đã thanh toán:</div>
+                <div class="col-md-8"><strong class="text-success">${formatCurrency(invoice.paidAmount)}</strong></div>
+                <div class="col-md-4">Còn lại:</div>
+                <div class="col-md-8"><strong class="text-danger">${formatCurrency(invoice.balanceDue)}</strong></div>
+              </div>
+            </div>
+            ${invoice.paymentMethod ? `
+            <div class="col-12 mb-3">
+              <hr>
+              <strong>Phương thức thanh toán:</strong> ${invoice.paymentMethod}
+              ${invoice.paymentReference ? `<br><strong>Số tham chiếu:</strong> ${invoice.paymentReference}` : ''}
+              ${invoice.paidDate ? `<br><strong>Ngày thanh toán:</strong> ${new Date(invoice.paidDate).toLocaleDateString('vi-VN')}` : ''}
+            </div>
+            ` : ''}
+            <div class="col-12">
+              <strong>Trạng thái:</strong> ${getStatusBadge(invoice.status)}
+            </div>
+          </div>
+        `;
+        
+        document.getElementById('invoiceDetails').innerHTML = detailsHtml;
+        new bootstrap.Modal(document.getElementById('viewModal')).show();
+      } catch (error) {
+        showToast('Lỗi tải chi tiết hóa đơn đặt phòng: ' + error.message, 'danger');
+      }
+    }
+
+    // Open payment modal
+    async function handleOpenPaymentModal(id) {
+      try {
+        const invoice = await apiGet(`/invoices/${id}`);
+        currentInvoice = invoice;
+        
+        document.getElementById('paymentInvoiceId').value = id;
+        document.getElementById('paymentAmount').value = invoice.balanceDue;
+        document.getElementById('remainingAmount').textContent = formatCurrency(invoice.balanceDue);
+        
+        new bootstrap.Modal(document.getElementById('paymentModal')).show();
+      } catch (error) {
+        showToast('Lỗi tải thông tin thanh toán: ' + error.message, 'danger');
+      }
+    }
+
+    // Process payment
+    async function handleProcessPayment() {
+      try {
+        const invoiceId = document.getElementById('paymentInvoiceId').value;
+        const amount = parseFloat(document.getElementById('paymentAmount').value);
+        const paymentMethod = document.getElementById('paymentMethod').value;
+        const paymentReference = document.getElementById('paymentReference').value;
+
+        if (!paymentMethod) {
+          showToast('Vui lòng chọn phương thức thanh toán!', 'warning');
+          return;
+        }
+
+        const btn = document.getElementById('btnProcessPayment');
+        btn.disabled = true; btn.textContent = 'Đang xử lý...';
+        await apiPost(`/invoices/${invoiceId}/pay`, {
+          amount: amount,
+          paymentMethod: paymentMethod,
+          paymentReference: paymentReference
+        });
+        showToast('Thanh toán thành công!', 'success');
+        bootstrap.Modal.getInstance(document.getElementById('paymentModal')).hide();
+        await loadAllData();
+      } catch (error) {
+        showToast('Lỗi thanh toán: ' + error.message, 'danger');
+      } finally {
+        const btn = document.getElementById('btnProcessPayment');
+        btn.disabled = false; btn.textContent = 'Xác nhận thanh toán';
+      }
+    }
+
+    // Cancel invoice
+    async function handleCancelInvoice(id) {
+      if (!confirm('Bạn có chắc muốn hủy hóa đơn đặt phòng này?')) {
+        return;
+      }
+      
+      try {
+        await apiDelete(`/invoices/${id}`);
+        showToast('Hủy hóa đơn đặt phòng thành công!', 'success');
+        await loadAllData();
+      } catch (error) {
+        showToast('Lỗi hủy hóa đơn đặt phòng: ' + error.message, 'danger');
+      }
+    }
+
+    // Export to PDF
+    async function exportToPDF() {
+      try {
+        const invoices = await apiGet('/invoices');
+        if (!invoices || invoices.length === 0) {
+          showToast('Không có dữ liệu để xuất!', 'warning');
+          return;
+        }
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('p', 'mm', 'a4');
+        
+        doc.setFontSize(16);
+        doc.text('BÁO CÁO HÓA ĐƠN ĐẶT PHÒNG', 105, 20, { align: 'center' });
+        
+        doc.setFontSize(10);
+        let yPos = 30;
+        
+        invoices.forEach((invoice, index) => {
+          if (yPos > 270) {
+            doc.addPage();
+            yPos = 20;
+          }
+          
+          doc.setFont(undefined, 'bold');
+          doc.text(`${index + 1}. ${invoice.invoiceNumber}`, 14, yPos);
+          doc.setFont(undefined, 'normal');
+          yPos += 6;
+          
+          doc.text(`Khách hàng: ${invoice.customer?.fullName || 'N/A'}`, 20, yPos);
+          yPos += 5;
+          doc.text(`Ngày: ${new Date(invoice.issueDate).toLocaleDateString('vi-VN')}`, 20, yPos);
+          yPos += 5;
+          doc.text(`Tổng tiền: ${formatCurrency(invoice.totalAmount)}`, 20, yPos);
+          yPos += 5;
+          doc.text(`Trạng thái: ${invoice.status}`, 20, yPos);
+          yPos += 8;
+        });
+        
+        doc.save('bao-cao-hoa-don.pdf');
+      } catch (error) {
+        showToast('Lỗi xuất PDF: ' + error.message, 'danger');
+      }
+    }
+
+    // Export single invoice to PDF
+    async function handleExportInvoicePDF() {
+      if (!currentInvoice) return;
+      
+      try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('p', 'mm', 'a4');
+        
+        doc.setFontSize(18);
+        doc.text('HÓA ĐƠN ĐẶT PHÒNG', 105, 20, { align: 'center' });
+        
+        doc.setFontSize(10);
+        doc.text(`Số HĐ: ${currentInvoice.invoiceNumber}`, 14, 35);
+        doc.text(`Ngày: ${new Date(currentInvoice.issueDate).toLocaleDateString('vi-VN')}`, 14, 40);
+        doc.text(`Khách hàng: ${currentInvoice.customer?.fullName || 'N/A'}`, 14, 45);
+        
+        let yPos = 55;
+        doc.setFontSize(12);
+        doc.text('Chi tiết:', 14, yPos);
+        yPos += 8;
+        doc.setFontSize(10);
+        
+        doc.text(`Tổng tiền: ${formatCurrency(currentInvoice.subTotal)}`, 20, yPos);
+        yPos += 6;
+        doc.text(`Thuế (${currentInvoice.taxRate}%): ${formatCurrency(currentInvoice.taxAmount)}`, 20, yPos);
+        yPos += 6;
+        doc.text(`Giảm giá: ${formatCurrency(currentInvoice.discountAmount)}`, 20, yPos);
+        yPos += 6;
+        doc.setFont(undefined, 'bold');
+        doc.text(`Tổng cộng: ${formatCurrency(currentInvoice.totalAmount)}`, 20, yPos);
+        yPos += 6;
+        doc.setFont(undefined, 'normal');
+        doc.text(`Đã thanh toán: ${formatCurrency(currentInvoice.paidAmount)}`, 20, yPos);
+        yPos += 6;
+        doc.text(`Còn lại: ${formatCurrency(currentInvoice.balanceDue)}`, 20, yPos);
+        
+        doc.save(`hoa-don-${currentInvoice.invoiceNumber}.pdf`);
+      } catch (error) {
+        showToast('Lỗi xuất PDF: ' + error.message, 'danger');
+      }
+    }
+
+    // Setup event listeners
+    function setupEventListeners() {
+      document.getElementById('logoutBtn').addEventListener('click', logout);
+      document.getElementById('btnFilter').addEventListener('click', loadInvoices);
+      document.getElementById('btnProcessPayment').addEventListener('click', handleProcessPayment);
+      document.getElementById('btnExportInvoicePDF').addEventListener('click', handleExportInvoicePDF);
+      // Debounce search input
+      const searchEl = document.getElementById('searchInput');
+      let debounceTimer;
+      searchEl.addEventListener('input', function() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => loadInvoices(), 300);
+      });
+      searchEl.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); loadInvoices(); }
+      });
+    }
+  </script>
+</body>
+</html>
+

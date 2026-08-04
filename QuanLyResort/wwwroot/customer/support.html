@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <title>Hỗ trợ khách hàng | Resort Deluxe</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    
+    <link href="https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700" rel="stylesheet">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="/css/tokens.css">
+    <link rel="stylesheet" href="/css/globals.css">
+    <link rel="stylesheet" href="/css/grid.css">
+    <link rel="stylesheet" href="/css/components/navbar.css">
+    <link rel="stylesheet" href="css/navbar-auth.css">
+    <link rel="stylesheet" href="css/open-iconic-bootstrap.min.css">
+  
+    <style>
+      body {
+        font-family: 'Poppins', sans-serif;
+        padding-top: 0;
+        overflow-x: hidden;
+        background: #f8f9fa;
+      }
+      
+      .ftco-navbar {
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 1030 !important;
+        background-color: #1a1a1a !important;
+        transition: all 0.3s ease;
+        width: 100% !important;
+        margin: 0 !important;
+      }
+      
+      .rooms-hero {
+        background-image: url('images/bg_1.jpg');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        padding: 140px 0 100px;
+        color: #fff;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 60px;
+        min-height: 500px;
+        display: flex;
+        align-items: center;
+      }
+      
+      .rooms-hero::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: linear-gradient(135deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 100%);
+        z-index: 0;
+      }
+      
+      .rooms-hero-content {
+        position: relative;
+        z-index: 2;
+        width: 100%;
+      }
+      
+      .rooms-hero h1 {
+        font-size: 48px;
+        font-weight: 700;
+        margin-bottom: 20px;
+        color: #ffffff !important;
+        text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      }
+      
+      .support-section {
+        padding: 60px 0;
+      }
+      
+      .support-card {
+        background: white;
+        border-radius: 16px;
+        padding: 40px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        margin-bottom: 30px;
+      }
+      
+      .support-form .form-group {
+        margin-bottom: 25px;
+      }
+      
+      .support-form label {
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 8px;
+        display: block;
+      }
+      
+      .support-form .form-control,
+      .support-form .form-select {
+        padding: 12px 15px;
+        border-radius: 10px;
+        border: 2px solid #e5e7eb;
+        font-size: 15px;
+        transition: all 0.3s ease;
+      }
+      
+      .support-form .form-control:focus,
+      .support-form .form-select:focus {
+        outline: none;
+        border-color: #c8a97e;
+        box-shadow: 0 0 0 3px rgba(200,169,126,0.1);
+      }
+      
+      .support-form textarea {
+        min-height: 150px;
+        resize: vertical;
+      }
+      
+      .btn-submit-ticket {
+        background: linear-gradient(135deg, #c8a97e 0%, #b89968 100%);
+        color: white;
+        padding: 14px 30px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 16px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+      }
+      
+      .btn-submit-ticket:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(200,169,126,0.3);
+      }
+      
+      .btn-submit-ticket:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+      
+      .info-box {
+        background: linear-gradient(135deg, rgba(200,169,126,0.1) 0%, rgba(184,153,104,0.1) 100%);
+        border-left: 4px solid #c8a97e;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+      }
+      
+      .info-box h5 {
+        color: #c8a97e;
+        font-weight: 600;
+        margin-bottom: 10px;
+      }
+      
+      .quick-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-top: 20px;
+      }
+      
+      .quick-link-btn {
+        padding: 12px 20px;
+        background: white;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        text-decoration: none;
+        color: #374151;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+      
+      .quick-link-btn:hover {
+        border-color: #c8a97e;
+        color: #c8a97e;
+        transform: translateY(-2px);
+      }
+      
+      .success-message {
+        background: #d1fae5;
+        border: 2px solid #10b981;
+        color: #065f46;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        display: none;
+      }
+      
+      .success-message.show {
+        display: block;
+        animation: slideDown 0.3s ease;
+      }
+      
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      
+      @media (max-width: 768px) {
+        .rooms-hero h1 {
+          font-size: 36px;
+        }
+        .support-card {
+          padding: 25px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+
+    <!-- Header placeholder -->
+    <div id="header-placeholder"></div>
+    <script src="js/load-header.js"></script>
+
+    <section class="rooms-hero">
+      <div class="container">
+        <div class="rooms-hero-content">
+          <h1>Hỗ trợ khách hàng</h1>
+          <p>Chúng tôi luôn sẵn sàng hỗ trợ bạn</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="support-section">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-8">
+            <div class="support-card">
+              <h3 class="mb-4" style="color: #1a1a1a; font-weight: 700;">Gửi yêu cầu hỗ trợ</h3>
+              
+              <div class="success-message" id="successMessage">
+                <h5 style="color: #065f46; margin-bottom: 10px;">✅ Yêu cầu đã được gửi thành công!</h5>
+                <p style="margin: 0;">Mã ticket của bạn: <strong id="ticketNumber"></strong></p>
+                <p style="margin: 10px 0 0 0;">Chúng tôi sẽ phản hồi trong thời gian sớm nhất. Bạn có thể theo dõi trạng thái ticket trong <a href="my-tickets.html" style="color: #10b981; font-weight: 600;">Trang tickets của tôi</a>.</p>
+              </div>
+              
+              <form class="support-form" id="supportForm">
+                <div class="form-group">
+                  <label for="subject">Tiêu đề *</label>
+                  <input type="text" class="form-control" id="subject" name="subject" required placeholder="VD: Vấn đề về đặt phòng">
+                </div>
+                
+                <div class="form-group">
+                  <label for="category">Danh mục *</label>
+                  <select class="form-select" id="category" name="category" required>
+                    <option value="">Chọn danh mục</option>
+                    <option value="General">Tổng quát</option>
+                    <option value="Booking">Đặt phòng</option>
+                    <option value="Payment">Thanh toán</option>
+                    <option value="Restaurant">Nhà hàng</option>
+                    <option value="Services">Dịch vụ</option>
+                    <option value="Complaint">Khiếu nại</option>
+                    <option value="Other">Khác</option>
+                  </select>
+                </div>
+                
+                <div class="form-group">
+                  <label for="priority">Mức độ ưu tiên</label>
+                  <select class="form-select" id="priority" name="priority">
+                    <option value="Normal">Bình thường</option>
+                    <option value="High">Cao</option>
+                    <option value="Urgent">Khẩn cấp</option>
+                  </select>
+                </div>
+                
+                <div class="form-group">
+                  <label for="description">Mô tả chi tiết *</label>
+                  <textarea class="form-control" id="description" name="description" required placeholder="Vui lòng mô tả chi tiết vấn đề của bạn..."></textarea>
+                </div>
+                
+                <div id="contactInfoSection">
+                  <h5 class="mb-3" style="color: #374151; font-weight: 600;">Thông tin liên hệ</h5>
+                  
+                  <div class="form-group">
+                    <label for="contactName">Họ và tên</label>
+                    <input type="text" class="form-control" id="contactName" name="contactName" placeholder="Nhập họ tên của bạn">
+                  </div>
+                  
+                  <div class="form-group">
+                    <label for="contactEmail">Email *</label>
+                    <input type="email" class="form-control" id="contactEmail" name="contactEmail" required placeholder="email@example.com">
+                  </div>
+                  
+                  <div class="form-group">
+                    <label for="contactPhone">Số điện thoại</label>
+                    <input type="tel" class="form-control" id="contactPhone" name="contactPhone" placeholder="+84 901 329 227">
+                  </div>
+                </div>
+                
+                <button type="submit" class="btn-submit-ticket" id="submitBtn">
+                  <span class="spinner-border spinner-border-sm d-none" id="submitSpinner" role="status"></span>
+                  <span id="submitText">Gửi yêu cầu hỗ trợ</span>
+                </button>
+              </form>
+            </div>
+          </div>
+          
+          <div class="col-lg-4">
+            <div class="support-card">
+              <h5 style="color: #1a1a1a; font-weight: 700; margin-bottom: 20px;">Thông tin liên hệ</h5>
+              
+              <div class="mb-4">
+                <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                  <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #c8a97e 0%, #b89968 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                    <span style="font-size: 24px; color: #fff;">📞</span>
+                  </div>
+                  <div>
+                    <strong style="color: #1a1a1a; font-size: 16px;">Hotline</strong>
+                    <p style="color: #6b7280; margin: 0; font-size: 15px;">+84 901 329 227</p>
+                  </div>
+                </div>
+                
+                <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                  <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #c8a97e 0%, #b89968 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                    <span style="font-size: 24px; color: #fff;">📧</span>
+                  </div>
+                  <div>
+                    <strong style="color: #1a1a1a; font-size: 16px;">Email</strong>
+                    <p style="color: #6b7280; margin: 0; font-size: 15px;">support@resortdeluxe.vn</p>
+                  </div>
+                </div>
+                
+                <div style="display: flex; align-items: center;">
+                  <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #c8a97e 0%, #b89968 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                    <span style="font-size: 24px; color: #fff;">📍</span>
+                  </div>
+                  <div>
+                    <strong style="color: #1a1a1a; font-size: 16px;">Địa chỉ</strong>
+                    <p style="color: #6b7280; margin: 0; font-size: 15px;">Huflit Hốc Môn, Hồ Chí Minh</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="info-box">
+                <h5>💡 Mẹo</h5>
+                <p style="margin: 0; color: #6b7280; font-size: 14px; line-height: 1.6;">
+                  Trước khi gửi yêu cầu, bạn có thể tìm câu trả lời trong <a href="faq.html" style="color: #c8a97e; font-weight: 600;">Câu hỏi thường gặp</a>.
+                </p>
+              </div>
+              
+              <div class="quick-links">
+                <a href="faq.html" class="quick-link-btn">
+                  <span class="icon-help-circle"></span> FAQ
+                </a>
+                <a href="my-tickets.html" class="quick-link-btn" id="myTicketsLink" style="display: none;">
+                  <span class="icon-list"></span> Tickets của tôi
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+        <footer class="ftco-footer ftco-bg-dark ftco-section">
+      <div class="container">
+        <div class="row mb-5">
+          <div class="col-md">
+            <div class="ftco-footer-widget mb-4">
+              <h2 class="ftco-heading-2">RESORT DELUXE</h2>
+              <p>Khu nghỉ dưỡng cao cấp với không gian sang trọng, dịch vụ chu đáo và tiện nghi hiện đại, mang đến cho bạn kỳ nghỉ trọn vẹn.</p>
+              <ul class="ftco-footer-social list-unstyled float-md-left float-lft mt-5">
+                <li class="ftco-animate"><a href="#" style="display: block !important; visibility: visible !important; opacity: 1 !important;"><span class="icon-twitter"></span></a></li>
+                <li class="ftco-animate"><a href="#" style="display: block !important; visibility: visible !important; opacity: 1 !important;"><span class="icon-facebook"></span></a></li>
+                <li class="ftco-animate"><a href="#" style="display: block !important; visibility: visible !important; opacity: 1 !important;"><span class="icon-instagram"></span></a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-md">
+            <div class="ftco-footer-widget mb-4 ml-md-5">
+              <h2 class="ftco-heading-2">Liên kết hữu ích</h2>
+              <ul class="list-unstyled">
+                <li><a href="#" class="py-2 d-block">Blog</a></li>
+                <li><a href="#" class="py-2 d-block">Phòng</a></li>
+                <li><a href="#" class="py-2 d-block">Tiện ích</a></li>
+                <li><a href="#" class="py-2 d-block">Thẻ quà tặng</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-md">
+             <div class="ftco-footer-widget mb-4">
+              <h2 class="ftco-heading-2">Chính sách</h2>
+              <ul class="list-unstyled">
+                <li><a href="#" class="py-2 d-block">Tuyển dụng</a></li>
+                <li><a href="#" class="py-2 d-block">Về chúng tôi</a></li>
+                <li><a href="#" class="py-2 d-block">Liên hệ</a></li>
+                <li><a href="#" class="py-2 d-block">Dịch vụ</a></li>
+              </ul>
+            </div>
+          </div>
+          <div class="col-md">
+            <div class="ftco-footer-widget mb-4">
+                <h2 class="ftco-heading-2">Bạn cần hỗ trợ?</h2>
+            	<div class="block-23 mb-3">
+	              <ul>
+                <li><span class="icon icon-map-marker"></span><span class="text">Huflit Hốc Môn, Hồ Chí Minh</span></li>
+                <li><a href="#"><span class="icon icon-phone"></span><span class="text">+84 901 329 227</span></a></li>
+                <li><a href="#"><span class="icon icon-envelope"></span><span class="text">support@resortdeluxe.vn</span></a></li>
+	              </ul>
+	            </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12 text-center">
+            <p>Copyright ©<script>document.write(new Date().getFullYear());</script>2025 All rights reserved</p>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <script src="js/jquery.min.js"></script>
+    <script src="js/popper.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/navbar-auth.js"></script>
+    <script src="../js/api.js"></script>
+
+    <script>
+      // Check if user is logged in
+      const token = localStorage.getItem('token');
+      const userStr = localStorage.getItem('user');
+      
+      if (token && userStr) {
+        try {
+          const user = JSON.parse(userStr);
+          // Pre-fill contact info if logged in
+          if (user.email) {
+            document.getElementById('contactEmail').value = user.email;
+          }
+          if (user.fullName) {
+            document.getElementById('contactName').value = user.fullName;
+          }
+          // Show "My Tickets" link
+          document.getElementById('myTicketsLink').style.display = 'inline-flex';
+        } catch (e) {
+          console.error('[Support] Error parsing user:', e);
+        }
+      }
+
+      // Handle form submission
+      document.getElementById('supportForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const submitBtn = document.getElementById('submitBtn');
+        const submitSpinner = document.getElementById('submitSpinner');
+        const submitText = document.getElementById('submitText');
+        
+        // Disable button and show spinner
+        submitBtn.disabled = true;
+        submitSpinner.classList.remove('d-none');
+        submitText.textContent = 'Đang gửi...';
+        
+        try {
+          const formData = {
+            subject: document.getElementById('subject').value.trim(),
+            description: document.getElementById('description').value.trim(),
+            category: document.getElementById('category').value,
+            priority: document.getElementById('priority').value,
+            contactName: document.getElementById('contactName').value.trim(),
+            contactEmail: document.getElementById('contactEmail').value.trim(),
+            contactPhone: document.getElementById('contactPhone').value.trim()
+          };
+          
+          const response = await fetch(`${location.origin}/api/supporttickets`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token || ''}`
+            },
+            body: JSON.stringify(formData)
+          });
+          
+          if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Không thể gửi yêu cầu');
+          }
+          
+          const result = await response.json();
+          
+          // Show success message
+          document.getElementById('ticketNumber').textContent = result.ticket.ticketNumber;
+          document.getElementById('successMessage').classList.add('show');
+          
+          // Scroll to success message
+          document.getElementById('successMessage').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          
+          // Reset form
+          document.getElementById('supportForm').reset();
+          
+          if (typeof showToast === 'function') {
+            showToast(`Yêu cầu đã được gửi thành công! Mã ticket: ${result.ticket.ticketNumber}`, 'success');
+          }
+          
+        } catch (error) {
+          console.error('[Support] Error submitting ticket:', error);
+          if (typeof showToast === 'function') {
+            showToast('Lỗi: ' + error.message, 'danger');
+          } else {
+            alert('Lỗi: ' + error.message);
+          }
+        } finally {
+          // Re-enable button
+          submitBtn.disabled = false;
+          submitSpinner.classList.add('d-none');
+          submitText.textContent = 'Gửi yêu cầu hỗ trợ';
+        }
+      });
+    </script>
+  
+  <!-- AI Chat Widget -->
+  <script src="js/ai-chat.js"></script>
+  </body>
+</html>
+

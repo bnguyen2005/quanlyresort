@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Users</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .result { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+        .error { background: #ffe6e6; }
+        .success { background: #e6ffe6; }
+        pre { background: #f5f5f5; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Debug Users & Login</h1>
+    
+    <button onclick="checkUsers()">Check All Users</button>
+    <button onclick="tryDifferentCredentials()">Try Different Credentials</button>
+    <button onclick="testWithExistingToken()">Test with Existing Token</button>
+    
+    <div id="results"></div>
+
+    <script>
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `result ${type}`;
+            div.innerHTML = `<strong>${new Date().toLocaleTimeString()}:</strong> ${message}`;
+            document.getElementById('results').appendChild(div);
+            console.log(message);
+        }
+
+        // Danh sách credentials để thử
+        const credentialsList = [
+            { user: 'admin', pass: 'P@ssw0rd123', desc: 'Admin username' },
+            { user: 'admin@resort.test', pass: 'P@ssw0rd123', desc: 'Admin email' },
+            { user: 'baonguyen@gmail.com', pass: 'baonguyen', desc: 'Bao Nguyen (from logs)' },
+            { user: 'business@resort.test', pass: 'P@ssw0rd123', desc: 'Business user' },
+            { user: 'manager@resort.test', pass: 'P@ssw0rd123', desc: 'Manager user' }
+        ];
+
+        async function checkUsers() {
+            try {
+                log('👥 Checking users endpoint...', 'info');
+                
+                // Try to get users list (might be public or need auth)
+                const response = await fetch('http://localhost:5130/api/usermanagement', {
+                    headers: { 'Accept': 'application/json' }
+                });
+
+                log(`📡 Users response: ${response.status} ${response.statusText}`, 'info');
+                
+                if (response.status === 401) {
+                    log('🔒 Users endpoint requires authentication', 'info');
+                } else {
+                    const text = await response.text();
+                    if (text.trim()) {
+                        try {
+                            const data = JSON.parse(text);
+                            log(`✅ Found ${data.users?.length || 0} users`, 'success');
+                            if (data.users) {
+                                data.users.forEach(user => {
+                                    log(`👤 User: ${user.username} (${user.email}) - Role: ${user.role} - Active: ${user.isActive}`, 'info');
+                                });
+                            }
+                        } catch (e) {
+                            log(`📄 Response: ${text.substring(0, 200)}...`, 'info');
+                        }
+                    }
+                }
+                
+            } catch (error) {
+                log(`❌ Error checking users: ${error.message}`, 'error');
+            }
+        }
+
+        async function tryDifferentCredentials() {
+            log('🔑 Trying different credentials...', 'info');
+            
+            for (const cred of credentialsList) {
+                try {
+                    log(`🧪 Testing: ${cred.desc} (${cred.user})`, 'info');
+                    
+                    const response = await fetch('http://localhost:5130/api/auth/login', {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            emailOrUsername: cred.user,
+                            password: cred.pass
+                        })
+                    });
+
+                    const text = await response.text();
+                    
+                    if (response.ok && text.trim()) {
+                        try {
+                            const data = JSON.parse(text);
+                            localStorage.setItem('adminToken', data.token);
+                            log(`✅ SUCCESS! ${cred.desc} works! Token saved.`, 'success');
+                            log(`👤 User: ${data.user?.username} - Role: ${data.user?.role}`, 'success');
+                            return; // Stop on first success
+                        } catch (e) {
+                            log(`❌ ${cred.desc}: JSON parse error`, 'error');
+                        }
+                    } else {
+                        log(`❌ ${cred.desc}: ${response.status} - ${text.substring(0, 50)}`, 'error');
+                    }
+                    
+                    // Small delay between attempts
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    
+                } catch (error) {
+                    log(`❌ ${cred.desc}: Network error - ${error.message}`, 'error');
+                }
+            }
+            
+            log('🔍 All credentials failed. Database might not be seeded.', 'error');
+        }
+
+        async function testWithExistingToken() {
+            // Try to use any existing token from localStorage
+            const tokens = ['adminToken', 'token', 'authToken', 'jwt'];
+            
+            for (const tokenKey of tokens) {
+                const token = localStorage.getItem(tokenKey);
+                if (token) {
+                    log(`🔑 Testing existing token: ${tokenKey}`, 'info');
+                    
+                    try {
+                        const response = await fetch('http://localhost:5130/api/audit-log?pageSize=3', {
+                            headers: { 
+                                'Authorization': `Bearer ${token}`,
+                                'Accept': 'application/json'
+                            }
+                        });
+
+                        if (response.ok) {
+                            const text = await response.text();
+                            const data = JSON.parse(text);
+                            log(`✅ Token ${tokenKey} works! Found ${data.logs?.length || 0} audit logs`, 'success');
+                            return;
+                        } else {
+                            log(`❌ Token ${tokenKey} failed: ${response.status}`, 'error');
+                        }
+                    } catch (error) {
+                        log(`❌ Token ${tokenKey} error: ${error.message}`, 'error');
+                    }
+                }
+            }
+            
+            log('🔍 No valid tokens found in localStorage', 'info');
+        }
+
+        // Auto run on load
+        window.onload = () => {
+            log('🚀 Debug page loaded', 'info');
+            
+            // Show current tokens
+            const tokens = ['adminToken', 'token', 'authToken', 'jwt'];
+            tokens.forEach(key => {
+                const token = localStorage.getItem(key);
+                if (token) {
+                    log(`🔑 Found token ${key}: ${token.substring(0, 20)}...`, 'info');
+                }
+            });
+        };
+    </script>
+</body>
+</html>

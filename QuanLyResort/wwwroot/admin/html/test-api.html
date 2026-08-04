@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test API Loading</title>
+</head>
+<body>
+    <h1>Test API Loading</h1>
+    <div id="result"></div>
+    
+    <script src="../../js/api.js"></script>
+    <script>
+        console.log('Testing API loading...');
+        
+        // Test if apiGet is defined
+        if (typeof apiGet === 'function') {
+            console.log('✅ apiGet is defined');
+            document.getElementById('result').innerHTML = '✅ apiGet is defined';
+            
+            // Test API call
+            apiGet('/room-types').then(data => {
+                console.log('✅ API call successful:', data);
+                document.getElementById('result').innerHTML += '<br>✅ API call successful: ' + data.length + ' room types';
+            }).catch(error => {
+                console.error('❌ API call failed:', error);
+                document.getElementById('result').innerHTML += '<br>❌ API call failed: ' + error.message;
+            });
+        } else {
+            console.error('❌ apiGet is not defined');
+            document.getElementById('result').innerHTML = '❌ apiGet is not defined';
+        }
+    </script>
+</body>
+</html>

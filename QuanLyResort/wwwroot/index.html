@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔴 ROOT INDEX.HTML - FORCE REDIRECT</title>
+    <meta http-equiv="refresh" content="0;url=/portal.html">
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            text-align: center; 
+            padding: 50px; 
+            background: #ff0000; 
+            color: white; 
+        }
+        h1 { font-size: 60px; margin-bottom: 20px; }
+        p { font-size: 24px; margin: 10px 0; }
+        .debug { background: rgba(0,0,0,0.8); padding: 20px; margin: 20px; border-radius: 10px; }
+    </style>
+    <script>
+        console.log('🔴 === ROOT INDEX.HTML LOADED ===');
+        console.log('🔴 This is the ROOT index.html file - FORCE REDIRECT');
+        console.log('🔴 Current URL:', window.location.href);
+        console.log('🔴 Redirecting to customer page...');
+        
+        // Clear any cache
+        if ('caches' in window) {
+            caches.keys().then(function(names) {
+                names.forEach(function(name) {
+                    caches.delete(name);
+                });
+            });
+        }
+        
+        // Force redirect immediately - multiple methods
+        try {
+            window.location.replace('/portal.html');
+        } catch(e) {
+            console.error('Replace failed:', e);
+        }
+        
+        try {
+            window.location.href = '/portal.html';
+        } catch(e) {
+            console.error('Href failed:', e);
+        }
+        
+        // Backup redirects
+        setTimeout(function() {
+            console.log('🔴 Backup redirect 1...');
+            window.location.href = '/portal.html';
+        }, 100);
+        
+        setTimeout(function() {
+            console.log('🔴 Backup redirect 2...');
+            window.location.replace('/portal.html');
+        }, 500);
+        
+        setTimeout(function() {
+            console.log('🔴 Backup redirect 3...');
+            window.location.assign('/portal.html');
+        }, 1000);
+    </script>
+</head>
+<body>
+    <h1>🔴 ROOT INDEX.HTML</h1>
+    <p><strong>FORCE REDIRECT TO CUSTOMER PAGE</strong></p>
+    <p>If you see this page, something is wrong!</p>
+    
+    <div class="debug">
+        <h3>Debug Information:</h3>
+        <p>✅ File: ROOT index.html loaded</p>
+        <p>✅ Redirect script: Executed</p>
+        <p>✅ Meta refresh: Set to 0 seconds</p>
+        <p>⏰ Auto redirect in: <span id="countdown">3</span> seconds</p>
+        <p><a href="/portal.html" style="color: yellow; font-size: 20px;">Click here if not redirecting</a></p>
+    </div>
+    
+    <script>
+        // Display countdown
+        let countdown = 3;
+        const countdownElement = document.getElementById('countdown');
+        
+        const timer = setInterval(function() {
+            countdown--;
+            countdownElement.textContent = countdown;
+            
+            if (countdown <= 0) {
+                clearInterval(timer);
+                console.log('🔴 Countdown finished, forcing redirect...');
+                window.location.href = '/portal.html';
+            }
+        }, 1000);
+        
+        // Final redirect after 3 seconds
+        setTimeout(function() {
+            console.log('🔴 Final redirect attempt...');
+            window.location.href = '/portal.html';
+        }, 3000);
+    </script>
+</body>
+</html>

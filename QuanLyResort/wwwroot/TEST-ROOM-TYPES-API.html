@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Room Types API</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        pre { background: #f5f5f5; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Test Room Types API</h1>
+    
+    <div class="section">
+        <h3>1. Login Admin</h3>
+        <button onclick="loginAdmin()">Login Admin</button>
+        <div id="loginResult"></div>
+    </div>
+    
+    <div class="section">
+        <h3>2. Test GET /api/room-types (All)</h3>
+        <button onclick="testGetAllRoomTypes()">Get All Room Types</button>
+        <div id="getAllResult"></div>
+    </div>
+    
+    <div class="section">
+        <h3>3. Test GET /api/room-types/{id}</h3>
+        <input type="number" id="roomTypeId" placeholder="Room Type ID" value="2">
+        <button onclick="testGetRoomTypeById()">Get Room Type By ID</button>
+        <div id="getByIdResult"></div>
+    </div>
+    
+    <div class="section">
+        <h3>4. Test DELETE /api/room-types/{id}</h3>
+        <input type="number" id="deleteId" placeholder="Room Type ID to delete" value="2">
+        <button onclick="testDeleteRoomType()">Soft Delete Room Type</button>
+        <div id="deleteResult"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5130/api';
+        
+        async function loginAdmin() {
+            const result = document.getElementById('loginResult');
+            result.innerHTML = '<div class="info">🔄 Đang đăng nhập...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'admin@resort.test',
+                        password: 'P@ssw0rd123'
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    localStorage.setItem('adminToken', data.token);
+                    result.innerHTML = `<div class="success">✅ Đăng nhập thành công!</div>`;
+                } else {
+                    const error = await response.text();
+                    result.innerHTML = `<div class="error">❌ Login Failed: ${error}</div>`;
+                }
+            } catch (error) {
+                result.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+            }
+        }
+        
+        async function testGetAllRoomTypes() {
+            const result = document.getElementById('getAllResult');
+            result.innerHTML = '<div class="info">🔄 Testing GET /api/room-types...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/room-types`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    result.innerHTML = `
+                        <div class="success">✅ GET /api/room-types thành công!</div>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    const error = await response.text();
+                    result.innerHTML = `<div class="error">❌ GET Failed (${response.status}): ${error}</div>`;
+                }
+            } catch (error) {
+                result.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+            }
+        }
+        
+        async function testGetRoomTypeById() {
+            const result = document.getElementById('getByIdResult');
+            const id = document.getElementById('roomTypeId').value;
+            result.innerHTML = `<div class="info">🔄 Testing GET /api/room-types/${id}...</div>`;
+            
+            try {
+                const response = await fetch(`${API_BASE}/room-types/${id}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    result.innerHTML = `
+                        <div class="success">✅ GET /api/room-types/${id} thành công!</div>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    const error = await response.text();
+                    result.innerHTML = `<div class="error">❌ GET Failed (${response.status}): ${error}</div>`;
+                }
+            } catch (error) {
+                result.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+            }
+        }
+        
+        async function testDeleteRoomType() {
+            const result = document.getElementById('deleteResult');
+            const id = document.getElementById('deleteId').value;
+            result.innerHTML = `<div class="info">🔄 Testing DELETE /api/room-types/${id}...</div>`;
+            
+            const token = localStorage.getItem('adminToken');
+            if (!token) {
+                result.innerHTML = '<div class="error">❌ Không có token, hãy đăng nhập trước</div>';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/room-types/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    result.innerHTML = `
+                        <div class="success">✅ DELETE /api/room-types/${id} thành công!</div>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    const error = await response.text();
+                    result.innerHTML = `<div class="error">❌ DELETE Failed (${response.status}): ${error}</div>`;
+                }
+            } catch (error) {
+                result.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+            }
+        }
+        
+        // Auto login on load
+        window.onload = function() {
+            loginAdmin();
+        };
+    </script>
+</body>
+</html>

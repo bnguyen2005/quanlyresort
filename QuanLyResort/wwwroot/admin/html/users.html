@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="vi" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default" data-assets-path="../assets/" data-template="vertical-menu-template-free">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+  <title>Quản lý Users - Resort Management</title>
+  <link rel="icon" type="image/x-icon" href="../assets/img/favicon/favicon.ico" />
+  <link rel="stylesheet" href="../assets/vendor/fonts/boxicons.css" />
+  <link rel="stylesheet" href="../assets/vendor/css/core.css" class="template-customizer-core-css" />
+  <link rel="stylesheet" href="../assets/vendor/css/theme-default.css" class="template-customizer-theme-css" />
+  <link rel="stylesheet" href="../assets/css/demo.css" />
+  <link rel="stylesheet" href="../assets/css/fix-scrollbar.css" />
+  <link rel="stylesheet" href="../assets/css/admin-custom-theme.css" />
+  <link rel="stylesheet" href="../assets/css/nalika-style.css?v=20250127" />
+  <link rel="stylesheet" href="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" />
+  <script src="../assets/vendor/js/helpers.js"></script>
+</head>
+
+<body>
+  <div class="layout-wrapper layout-content-navbar">
+    <div class="layout-container">
+      
+      <!-- Menu - Load from common component -->
+      <div id="common-menu"></div>
+      <script>
+        // Load common menu with cache busting
+        (function() {
+          // Use timestamp to ALWAYS fetch fresh
+          const menuVersion = Date.now();
+          fetch('layout-menu.html?v=' + menuVersion)
+            .then(response => {
+              if (!response.ok) {
+                throw new Error('Failed to load menu: ' + response.status);
+              }
+              return response.text();
+            })
+            .then(html => {
+              const menuContainer = document.getElementById('common-menu');
+              if (menuContainer) {
+                menuContainer.innerHTML = html;
+                console.log('✅ Menu loaded successfully');
+              } else {
+                console.error('❌ Menu container not found');
+              }
+            })
+            .catch(error => {
+              console.error('❌ Error loading menu:', error);
+            });
+        })();
+      </script>
+      <!-- / Menu -->
+
+      <!-- Layout container -->
+      <div class="layout-page">
+        
+        <!-- Navbar -->
+        <nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme" id="layout-navbar">
+          <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
+            <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
+              <i class="bx bx-menu bx-sm"></i>
+            </a>
+          </div>
+
+          <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+            <div class="navbar-nav align-items-center">
+              <div class="nav-item d-flex align-items-center">
+                <h4 class="mb-0" id="pageTitle">👥 Quản lý Users</h4>
+              </div>
+            </div>
+
+            <ul class="navbar-nav flex-row align-items-center ms-auto">
+              <li class="nav-item navbar-dropdown dropdown-user dropdown">
+                <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
+                  <div class="avatar avatar-online">
+                    <img src="../assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                  </div>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li>
+                    <a class="dropdown-item" href="#">
+                      <div class="d-flex">
+                        <div class="flex-shrink-0 me-3">
+                          <div class="avatar avatar-online">
+                            <img src="../assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                          </div>
+                        </div>
+                        <div class="flex-grow-1">
+                          <span class="fw-semibold d-block" id="userFullName">Admin</span>
+                          <small class="text-muted" id="userRole">Admin</small>
+                        </div>
+                      </div>
+                    </a>
+                  </li>
+                  <li><div class="dropdown-divider"></div></li>
+                  <li><a class="dropdown-item" href="#" id="logoutBtn"><i class="bx bx-power-off me-2"></i><span class="align-middle">Đăng xuất</span></a></li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </nav>
+        <!-- / Navbar -->
+
+        <!-- Content wrapper -->
+        <div class="content-wrapper">
+          <div class="container-xxl flex-grow-1 container-p-y">
+            
+            <!-- Stats Cards - Nalika Style -->
+            <div class="row mb-4">
+              <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+                <div class="nalika-stats-card">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h3 class="card-title mb-2" id="totalUsers">0</h3>
+                      <small class="text-white">Tổng số Users</small>
+                    </div>
+                    <div class="avatar">
+                      <i class="bx bx-user"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+                <div class="nalika-stats-card success">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h3 class="card-title mb-2" id="activeUsers">0</h3>
+                      <small class="text-white">Đang hoạt động</small>
+                    </div>
+                    <div class="avatar">
+                      <i class="bx bx-check-circle"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+                <div class="nalika-stats-card danger">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h3 class="card-title mb-2" id="inactiveUsers">0</h3>
+                      <small class="text-white">Đã khóa</small>
+                    </div>
+                    <div class="avatar">
+                      <i class="bx bx-lock"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-3 col-md-6 col-sm-6 mb-4">
+                <div class="nalika-stats-card info">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <h3 class="card-title mb-2" id="adminUsers">0</h3>
+                      <small class="text-white">Quản trị viên</small>
+                    </div>
+                    <div class="avatar">
+                      <i class="bx bx-shield"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Filters & Actions - Nalika Style -->
+            <div class="nalika-card mb-4">
+              <div class="card-body">
+                <div class="row g-3">
+                  <div class="col-md-3">
+                    <label class="form-label nalika-form-label">
+                      <i class="bx bx-user-circle"></i>
+                      Lọc theo Role
+                    </label>
+                    <select id="filterRole" class="form-select nalika-form-select">
+                      <option value="">Tất cả</option>
+                      <option value="Admin">Admin - Quản trị viên</option>
+                      <option value="Manager">Manager - Quản lý</option>
+                      <option value="Business">Business - Kinh doanh</option>
+                      <option value="FrontDesk">FrontDesk - Lễ tân</option>
+                      <option value="Cashier">Cashier - Thu ngân</option>
+                      <option value="Accounting">Accounting - Kế toán</option>
+                      <option value="Inventory">Inventory - Kho</option>
+                      <option value="Housekeeping">Housekeeping - Dọn phòng</option>
+                      <option value="Maintenance">Maintenance - Kỹ thuật</option>
+                      <option value="Customer">Customer - Khách hàng</option>
+                    </select>
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label nalika-form-label">
+                      <i class="bx bx-check-circle"></i>
+                      Trạng thái
+                    </label>
+                    <select id="filterStatus" class="form-select nalika-form-select">
+                      <option value="">Tất cả</option>
+                      <option value="true" selected>Đang hoạt động</option>
+                      <option value="false">Đã khóa</option>
+                    </select>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label nalika-form-label">
+                      <i class="bx bx-search"></i>
+                      Tìm kiếm
+                    </label>
+                    <input type="text" id="searchInput" class="form-control nalika-form-control" placeholder="Tìm theo username, email, tên...">
+                  </div>
+                  <div class="col-md-2">
+                    <label class="form-label">&nbsp;</label>
+                    <div class="d-flex gap-2">
+                      <button class="btn btn-primary nalika-btn-primary w-100" onclick="loadUsers()">
+                        <i class="bx bx-search me-1"></i> Tìm
+                      </button>
+                      <button class="btn btn-success nalika-btn-success" onclick="openCreateModal()">
+                        <i class="bx bx-plus"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Users Table - Nalika Style -->
+            <div class="nalika-card">
+              <h5 class="card-header">Danh sách Users</h5>
+              <div class="table-responsive text-nowrap">
+                <table class="table table-hover nalika-table" id="usersTable">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Username</th>
+                      <th>Email</th>
+                      <th>Họ tên</th>
+                      <th>Role</th>
+                      <th>Trạng thái</th>
+                      <th>Ngày tạo</th>
+                      <th>Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody class="table-border-bottom-0">
+                    <!-- Data loaded via JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+        </div>
+        <!-- / Content -->
+
+      </div>
+      <!-- / Layout page -->
+    </div>
+  </div>
+
+  <!-- Create/Edit User Modal - Nalika Style -->
+  <div class="modal fade nalika-modal" id="userModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalTitle">
+            <i class="bx bx-user-plus me-2"></i>
+            Tạo User Mới
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form id="userForm" class="needs-validation" novalidate>
+            <input type="hidden" id="userId">
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Username <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="username" required
+                       minlength="3" maxlength="50"
+                       pattern="^[a-zA-Z0-9_]+$"
+                       data-pattern-message="chỉ được chứa chữ cái, số và dấu gạch dưới"
+                       data-label="Username">
+                <div class="invalid-feedback"></div>
+                <small class="text-muted">3-50 ký tự, chỉ chữ cái, số và _</small>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Email <span class="text-danger">*</span></label>
+                <input type="email" class="form-control" id="email" required
+                       maxlength="255"
+                       data-label="Email">
+                <div class="invalid-feedback"></div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Mật khẩu <span class="text-danger" id="passwordRequired">*</span></label>
+                <input type="password" class="form-control" id="password"
+                       minlength="6" maxlength="100"
+                       data-label="Mật khẩu">
+                <div class="invalid-feedback"></div>
+                <small class="text-muted">Tối thiểu 6 ký tự (bắt buộc khi tạo mới)</small>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Họ tên</label>
+                <input type="text" class="form-control" id="fullName"
+                       maxlength="255"
+                       data-label="Họ tên">
+                <div class="invalid-feedback"></div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Số điện thoại</label>
+                <input type="tel" class="form-control" id="phoneNumber"
+                       pattern="^[\d\s\-\+\(\)]+$"
+                       data-pattern-message="không đúng định dạng số điện thoại"
+                       maxlength="20"
+                       data-label="Số điện thoại">
+                <div class="invalid-feedback"></div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Role <span class="text-danger">*</span></label>
+                <select class="form-select" id="role" required data-label="Role">
+                  <option value="">-- Chọn role --</option>
+                  <option value="Admin">Admin - Quản trị viên</option>
+                  <option value="Manager">Manager - Quản lý</option>
+                  <option value="Business">Business - Kinh doanh</option>
+                  <option value="FrontDesk">FrontDesk - Lễ tân</option>
+                  <option value="Cashier">Cashier - Thu ngân</option>
+                  <option value="Accounting">Accounting - Kế toán</option>
+                  <option value="Inventory">Inventory - Kho</option>
+                  <option value="Housekeeping">Housekeeping - Dọn phòng</option>
+                  <option value="Maintenance">Maintenance - Kỹ thuật</option>
+                  <option value="Customer">Customer - Khách hàng</option>
+                </select>
+                <div class="invalid-feedback"></div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Trạng thái</label>
+                <div class="form-check form-switch mt-2">
+                  <input class="form-check-input" type="checkbox" id="isActive" checked>
+                  <label class="form-check-label" for="isActive">Đang hoạt động</label>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+          <button type="button" class="btn btn-primary nalika-btn-primary" onclick="saveUser()">
+            <i class="bx bx-save me-1"></i> Lưu
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Change Password Modal - Nalika Style -->
+  <div class="modal fade nalika-modal" id="changePasswordModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="bx bx-key me-2"></i>
+            Đổi mật khẩu
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" id="changePasswordUserId">
+          <div class="mb-3">
+            <label class="form-label">Mật khẩu mới <span class="text-danger">*</span></label>
+            <input type="password" class="form-control" id="newPassword" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Xác nhận mật khẩu <span class="text-danger">*</span></label>
+            <input type="password" class="form-control" id="confirmPassword" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+          <button type="button" class="btn btn-primary nalika-btn-primary" onclick="changePassword()">
+            <i class="bx bx-key me-1"></i> Đổi mật khẩu
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../assets/vendor/libs/jquery/jquery.js"></script>
+  <script src="../assets/vendor/libs/popper/popper.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+  <script src="../assets/vendor/js/menu.js"></script>
+  <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+  <script src="../assets/js/main.js"></script>
+  <script src="../../js/toast-notification.js"></script>
+  <script src="../../js/form-validation.js"></script>
+  <script src="../../js/confirm-dialog.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/common-navbar.js"></script>
+  <script src="../js/admin-validation.js"></script>
+  <script src="../js/users-page.js"></script>
+  
+  <script>
+    // Logout function đã được định nghĩa trong api.js và common-navbar.js
+    // Không cần định nghĩa lại ở đây để tránh conflict
+    // Setup logout button sẽ được xử lý bởi common-navbar.js
+  </script>
+</body>
+</html>
+

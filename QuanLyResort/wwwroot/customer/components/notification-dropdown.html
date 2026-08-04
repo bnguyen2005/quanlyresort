@@ -1,0 +1,93 @@
+<!-- Notification Dropdown Component -->
+<div class="notification-dropdown-wrapper">
+  <div class="dropdown">
+    <button class="btn btn-link text-white position-relative" type="button" id="notificationDropdownBtn" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      <i class="icon-bell" style="font-size: 1.5rem;"></i>
+      <span class="notification-badge badge badge-danger badge-pill" style="display: none; position: absolute; top: 0; right: 0; transform: translate(25%, -25%); min-width: 18px; height: 18px; font-size: 10px; line-height: 18px; padding: 0 4px;">0</span>
+    </button>
+    <div class="dropdown-menu dropdown-menu-right notification-dropdown" aria-labelledby="notificationDropdownBtn" style="min-width: 350px; max-width: 400px; max-height: 500px; overflow-y: auto;">
+      <div class="dropdown-header d-flex justify-content-between align-items-center">
+        <h6 class="mb-0">Thông báo</h6>
+        <div>
+          <button class="btn btn-sm btn-link text-primary p-0" id="markAllReadBtn" style="font-size: 0.75rem;">Đánh dấu tất cả đã đọc</button>
+        </div>
+      </div>
+      <div class="dropdown-divider"></div>
+      <div id="notificationList" class="notification-list">
+        <div class="text-center p-3 text-muted">
+          <i class="icon-bell" style="font-size: 2rem; opacity: 0.3;"></i>
+          <p class="mb-0 mt-2">Không có thông báo</p>
+        </div>
+      </div>
+      <div class="dropdown-divider"></div>
+      <div class="dropdown-footer text-center p-2">
+        <a href="#" class="text-primary" style="font-size: 0.875rem;">Xem tất cả</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.notification-dropdown-wrapper {
+  margin-left: 15px;
+}
+
+.notification-dropdown .notification-item {
+  padding: 12px 15px;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.notification-dropdown .notification-item:hover {
+  background-color: #f8f9fa;
+}
+
+.notification-dropdown .notification-item.unread {
+  background-color: #e7f3ff;
+  border-left: 3px solid #007bff;
+}
+
+.notification-dropdown .notification-item .notification-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.notification-dropdown .notification-item .notification-message {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.notification-dropdown .notification-item .notification-time {
+  font-size: 0.75rem;
+  color: #999;
+}
+
+.notification-dropdown .notification-item .notification-severity {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+.notification-dropdown .notification-item .notification-severity.Success {
+  background-color: #28a745;
+}
+
+.notification-dropdown .notification-item .notification-severity.Warning {
+  background-color: #ffc107;
+}
+
+.notification-dropdown .notification-item .notification-severity.Error {
+  background-color: #dc3545;
+}
+
+.notification-dropdown .notification-item .notification-severity.Info {
+  background-color: #17a2b8;
+}
+</style>
+

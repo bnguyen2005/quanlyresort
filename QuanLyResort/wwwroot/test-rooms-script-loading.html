@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Test Rooms Page Script Loading</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background: #d4edda; }
+        .error { background: #f8d7da; }
+        .warning { background: #fff3cd; }
+        button { padding: 10px 20px; margin: 5px; }
+        .log { background: #f8f9fa; padding: 10px; margin: 10px 0; border-radius: 5px; font-family: monospace; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Test Rooms Page Script Loading</h1>
+    
+    <div class="test-section">
+        <h3>1. Test Rooms Page Content</h3>
+        <button onclick="testRoomsContent()">Test Rooms Content</button>
+        <div id="contentResult" class="log"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>2. Test Script Loading</h3>
+        <button onclick="testScriptLoading()">Test Script Loading</button>
+        <div id="scriptResult" class="log"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>3. Test Function Declarations</h3>
+        <button onclick="testFunctionDeclarations()">Test Function Declarations</button>
+        <div id="functionResult" class="log"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>4. Test Service Worker</h3>
+        <button onclick="testServiceWorker()">Test Service Worker</button>
+        <div id="swResult" class="log"></div>
+    </div>
+
+    <script>
+        function log(elementId, message) {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            element.textContent += `[${timestamp}] ${message}\n`;
+        }
+        
+        async function testRoomsContent() {
+            log('contentResult', 'Testing rooms page content...');
+            
+            try {
+                const response = await fetch('/admin/html/rooms.html?v=20251026&nocache=1', {
+                    cache: 'no-store'
+                });
+                
+                if (response.ok) {
+                    const html = await response.text();
+                    log('contentResult', `✅ Rooms page loaded: ${html.length} characters`);
+                    
+                    // Check for duplicate function declarations
+                    const deleteRoomMatches = html.match(/function\s+deleteRoom\s*\(|async\s+function\s+deleteRoom\s*\(/g);
+                    if (deleteRoomMatches) {
+                        log('contentResult', `Found ${deleteRoomMatches.length} deleteRoom function declarations`);
+                        
+                        if (deleteRoomMatches.length > 1) {
+                            log('contentResult', '❌ Duplicate deleteRoom functions found');
+                        } else {
+                            log('contentResult', '✅ Only one deleteRoom function declaration');
+                        }
+                    } else {
+                        log('contentResult', '❌ No deleteRoom function found');
+                    }
+                    
+                    // Check for script tags
+                    const scriptMatches = html.match(/<script[^>]*>/g);
+                    if (scriptMatches) {
+                        log('contentResult', `Found ${scriptMatches.length} script tags`);
+                        scriptMatches.forEach((script, index) => {
+                            log('contentResult', `Script ${index + 1}: ${script}`);
+                        });
+                    }
+                    
+                } else {
+                    log('contentResult', `❌ Failed to load: ${response.status}`);
+                }
+            } catch (error) {
+                log('contentResult', `❌ Error: ${error.message}`);
+            }
+        }
+        
+        function testScriptLoading() {
+            log('scriptResult', 'Testing script loading...');
+            
+            // Test if we can load api.js
+            fetch('/js/api.js?v=20251026', { cache: 'no-store' })
+                .then(response => response.text())
+                .then(script => {
+                    log('scriptResult', `✅ api.js loaded: ${script.length} characters`);
+                    
+                    // Check if api.js contains deleteRoom
+                    if (script.includes('deleteRoom')) {
+                        log('scriptResult', '❌ api.js contains deleteRoom function');
+                    } else {
+                        log('scriptResult', '✅ api.js does not contain deleteRoom function');
+                    }
+                })
+                .catch(error => {
+                    log('scriptResult', `❌ Error loading api.js: ${error.message}`);
+                });
+        }
+        
+        function testFunctionDeclarations() {
+            log('functionResult', 'Testing function declarations...');
+            
+            // Test if we can declare functions without errors
+            try {
+                // Test declaring a function
+                function testFunction() {
+                    return 'test';
+                }
+                log('functionResult', '✅ Function declaration works');
+                
+                // Test declaring the same function again (should error)
+                try {
+                    function testFunction() {
+                        return 'test2';
+                    }
+                    log('functionResult', '❌ Duplicate function declaration should have errored');
+                } catch (error) {
+                    log('functionResult', `✅ Duplicate function correctly errored: ${error.message}`);
+                }
+                
+            } catch (error) {
+                log('functionResult', `❌ Function declaration error: ${error.message}`);
+            }
+        }
+        
+        function testServiceWorker() {
+            log('swResult', 'Testing Service Worker...');
+            
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(registrations => {
+                    log('swResult', `Found ${registrations.length} service workers`);
+                    
+                    registrations.forEach((registration, index) => {
+                        log('swResult', `SW ${index + 1}: ${registration.scope}`);
+                        
+                        // Check if it's caching admin pages
+                        if (registration.scope.includes('/admin/')) {
+                            log('swResult', '⚠️ Service Worker is scoped to admin pages');
+                        }
+                    });
+                });
+            } else {
+                log('swResult', '❌ Service Worker not supported');
+            }
+        }
+        
+        // Auto-run tests on page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                testRoomsContent();
+                testScriptLoading();
+                testFunctionDeclarations();
+                testServiceWorker();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

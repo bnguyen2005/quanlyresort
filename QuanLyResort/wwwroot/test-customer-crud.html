@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test CRUD Customer Management</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button { margin: 5px; padding: 8px 15px; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+        .form-group { margin: 10px 0; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select { width: 100%; padding: 8px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test CRUD Customer Management</h1>
+    
+    <div class="test-section info">
+        <h3>📋 Test Plan</h3>
+        <ol>
+            <li><strong>Authentication</strong> - Đăng nhập admin</li>
+            <li><strong>READ</strong> - Lấy danh sách customers</li>
+            <li><strong>CREATE</strong> - Tạo customer mới</li>
+            <li><strong>UPDATE</strong> - Cập nhật customer</li>
+            <li><strong>DELETE</strong> - Xóa customer</li>
+            <li><strong>STATISTICS</strong> - Lấy thống kê</li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h3>🔐 1. Authentication Test</h3>
+        <button onclick="testLogin()">Test Login Admin</button>
+        <div id="loginResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>📖 2. READ Test - Get All Customers</h3>
+        <button onclick="testGetAllCustomers()">Get All Customers</button>
+        <div id="getAllResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>➕ 3. CREATE Test - Add New Customer</h3>
+        <div class="form-group">
+            <label>Full Name:</label>
+            <input type="text" id="createFullName" value="">
+        </div>
+        <div class="form-group">
+            <label>Email:</label>
+            <input type="email" id="createEmail" value="">
+        </div>
+        <div class="form-group">
+            <label>Phone:</label>
+            <input type="tel" id="createPhone" value="">
+        </div>
+        <div class="form-group">
+            <label>Customer Type:</label>
+            <select id="createType">
+                <option value="Individual">Individual</option>
+                <option value="Corporate">Corporate</option>
+                <option value="Group">Group</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Nationality:</label>
+            <select id="createNationality">
+                <option value="Vietnam">Vietnam</option>
+                <option value="USA">USA</option>
+                <option value="China">China</option>
+            </select>
+        </div>
+        <button onclick="testCreateCustomer()">Create Customer</button>
+        <div id="createResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>✏️ 4. UPDATE Test - Update Customer</h3>
+        <div class="form-group">
+            <label>Customer ID:</label>
+            <input type="number" id="updateId" placeholder="Enter customer ID">
+        </div>
+        <div class="form-group">
+            <label>New Full Name:</label>
+            <input type="text" id="updateFullName" value="">
+        </div>
+        <div class="form-group">
+            <label>New Phone:</label>
+            <input type="tel" id="updatePhone" value="">
+        </div>
+        <button onclick="testUpdateCustomer()">Update Customer</button>
+        <div id="updateResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>🗑️ 5. DELETE Test - Delete Customer</h3>
+        <div class="form-group">
+            <label>Customer ID to Delete:</label>
+            <input type="number" id="deleteId" placeholder="Enter customer ID">
+        </div>
+        <button onclick="testDeleteCustomer()" style="background-color: #dc3545; color: white;">Delete Customer</button>
+        <div id="deleteResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>📊 6. STATISTICS Test</h3>
+        <button onclick="testGetStatistics()">Get Statistics</button>
+        <div id="statisticsResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>🔍 7. SEARCH Test</h3>
+        <div class="form-group">
+            <label>Search Term:</label>
+            <input type="text" id="searchTerm" placeholder="Search by name, email, phone...">
+        </div>
+        <button onclick="testSearchCustomers()">Search Customers</button>
+        <div id="searchResult"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5130/api';
+        let authToken = null;
+
+        // Helper function to make API calls
+        async function apiCall(endpoint, options = {}) {
+            const headers = {
+                'Content-Type': 'application/json',
+                ...options.headers
+            };
+
+            if (authToken) {
+                headers['Authorization'] = `Bearer ${authToken}`;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}${endpoint}`, {
+                    ...options,
+                    headers
+                });
+
+                const data = await response.text();
+                let jsonData;
+                try {
+                    jsonData = JSON.parse(data);
+                } catch {
+                    jsonData = data;
+                }
+
+                return {
+                    ok: response.ok,
+                    status: response.status,
+                    data: jsonData
+                };
+            } catch (error) {
+                return {
+                    ok: false,
+                    status: 0,
+                    data: { error: error.message }
+                };
+            }
+        }
+
+        // Test 1: Login
+        async function testLogin() {
+            const result = await apiCall('/auth/login', {
+                method: 'POST',
+                body: JSON.stringify({
+                    email: 'admin@resort.test',
+                    password: 'P@ssw0rd123',
+                    role: 'Admin'
+                })
+            });
+
+            const resultDiv = document.getElementById('loginResult');
+            
+            if (result.ok && result.data.token) {
+                authToken = result.data.token;
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        <h4>✅ Login Success!</h4>
+                        <p><strong>Token:</strong> ${result.data.token.substring(0, 50)}...</p>
+                        <p><strong>User:</strong> ${result.data.user.fullName}</p>
+                        <p><strong>Role:</strong> ${result.data.user.role}</p>
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Login Failed!</h4>
+                        <pre>${JSON.stringify(result.data, null, 2)}</pre>
+                    </div>
+                `;
+            }
+        }
+
+        // Test 2: Get All Customers
+        async function testGetAllCustomers() {
+            const result = await apiCall('/customermanagement');
+            const resultDiv = document.getElementById('getAllResult');
+            
+            if (result.ok) {
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        <h4>✅ Get All Customers Success!</h4>
+                        <p><strong>Total Customers:</strong> ${result.data.length}</p>
+                        <pre>${JSON.stringify(result.data.slice(0, 3), null, 2)}${result.data.length > 3 ? '\n...' : ''}</pre>
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Get All Customers Failed!</h4>
+                        <pre>${JSON.stringify(result.data, null, 2)}</pre>
+                    </div>
+                `;
+            }
+        }
+
+        // Test 3: Create Customer
+        async function testCreateCustomer() {
+            // Generate unique email if not provided
+            let email = document.getElementById('createEmail').value;
+            if (!email || email === 'test@example.com') {
+                const timestamp = Date.now();
+                email = `test${timestamp}@example.com`;
+                document.getElementById('createEmail').value = email;
+            }
+
+            const customerData = {
+                fullName: document.getElementById('createFullName').value,
+                email: email,
+                phoneNumber: document.getElementById('createPhone').value,
+                customerType: document.getElementById('createType').value,
+                nationality: document.getElementById('createNationality').value,
+                loyaltyPoints: 0,
+                vipLevel: 'Bronze'
+            };
+
+            const result = await apiCall('/customermanagement', {
+                method: 'POST',
+                body: JSON.stringify(customerData)
+            });
+
+            const resultDiv = document.getElementById('createResult');
+            
+            if (result.ok) {
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        <h4>✅ Create Customer Success!</h4>
+                        <p><strong>Customer ID:</strong> ${result.data.customerId}</p>
+                        <p><strong>Name:</strong> ${result.data.fullName}</p>
+                        <p><strong>Email:</strong> ${result.data.email}</p>
+                        <pre>${JSON.stringify(result.data, null, 2)}</pre>
+                    </div>
+                `;
+                // Auto-fill update form with new customer ID
+                document.getElementById('updateId').value = result.data.customerId;
+                document.getElementById('deleteId').value = result.data.customerId;
+            } else {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Create Customer Failed!</h4>
+                        <pre>${JSON.stringify(result.data, null, 2)}</pre>
+                    </div>
+                `;
+            }
+        }
+
+        // Test 4: Update Customer
+        async function testUpdateCustomer() {
+            const customerId = document.getElementById('updateId').value;
+            if (!customerId) {
+                document.getElementById('updateResult').innerHTML = `
+                    <div class="error">
+                        <h4>❌ Please enter Customer ID!</h4>
+                    </div>
+                `;
+                return;
+            }
+
+            const updateData = {
+                fullName: document.getElementById('updateFullName').value,
+                phoneNumber: document.getElementById('updatePhone').value,
+                email: document.getElementById('createEmail').value, // Use the same email from create
+                customerType: 'Individual',
+                nationality: 'Vietnam'
+            };
+
+            const result = await apiCall(`/customermanagement/${customerId}`, {
+                method: 'PUT',
+                body: JSON.stringify(updateData)
+            });
+
+            const resultDiv = document.getElementById('updateResult');
+            
+            if (result.ok) {
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        <h4>✅ Update Customer Success!</h4>
+                        <p><strong>Customer ID:</strong> ${customerId}</p>
+                        <p><strong>Updated Name:</strong> ${result.data.fullName}</p>
+                        <pre>${JSON.stringify(result.data, null, 2)}</pre>
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Update Customer Failed!</h4>
+                        <pre>${JSON.stringify(result.data, null, 2)}</pre>
+                    </div>
+                `;
+            }
+        }
+
+        // Test 5: Delete Customer
+        async function testDeleteCustomer() {
+            const customerId = document.getElementById('deleteId').value;
+            if (!customerId) {
+                document.getElementById('deleteResult').innerHTML = `
+                    <div class="error">
+                        <h4>❌ Please enter Customer ID!</h4>
+                    </div>
+                `;
+                return;
+            }
+
+            if (!confirm(`Are you sure you want to delete customer ID: ${customerId}?`)) {
+                return;
+            }
+
+            const result = await apiCall(`/customermanagement/${customerId}`, {
+                method: 'DELETE'
+            });
+
+            const resultDiv = document.getElementById('deleteResult');
+            
+            if (result.ok) {
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        <h4>✅ Delete Customer Success!</h4>
+                        <p><strong>Customer ID:</strong> ${customerId}</p>
+                        <pre>${JSON.stringify(result.data, null, 2)}</pre>
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Delete Customer Failed!</h4>
+                        <pre>${JSON.stringify(result.data, null, 2)}</pre>
+                    </div>
+                `;
+            }
+        }
+
+        // Test 6: Get Statistics
+        async function testGetStatistics() {
+            const result = await apiCall('/customermanagement/statistics');
+            const resultDiv = document.getElementById('statisticsResult');
+            
+            if (result.ok) {
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        <h4>✅ Get Statistics Success!</h4>
+                        <pre>${JSON.stringify(result.data, null, 2)}</pre>
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Get Statistics Failed!</h4>
+                        <pre>${JSON.stringify(result.data, null, 2)}</pre>
+                    </div>
+                `;
+            }
+        }
+
+        // Test 7: Search Customers
+        async function testSearchCustomers() {
+            const searchTerm = document.getElementById('searchTerm').value;
+            if (!searchTerm) {
+                document.getElementById('searchResult').innerHTML = `
+                    <div class="error">
+                        <h4>❌ Please enter search term!</h4>
+                    </div>
+                `;
+                return;
+            }
+
+            const result = await apiCall(`/customermanagement?search=${encodeURIComponent(searchTerm)}`);
+            const resultDiv = document.getElementById('searchResult');
+            
+            if (result.ok) {
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        <h4>✅ Search Customers Success!</h4>
+                        <p><strong>Search Term:</strong> "${searchTerm}"</p>
+                        <p><strong>Results Found:</strong> ${result.data.length}</p>
+                        <pre>${JSON.stringify(result.data, null, 2)}</pre>
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Search Customers Failed!</h4>
+                        <pre>${JSON.stringify(result.data, null, 2)}</pre>
+                    </div>
+                `;
+            }
+        }
+
+        // Auto-run login test on page load
+        window.onload = function() {
+            console.log('🧪 Test page loaded. Click "Test Login Admin" to start testing.');
+            
+            // Auto-fill form with sample data
+            const timestamp = Date.now();
+            document.getElementById('createFullName').value = `Nguyễn Văn Test ${timestamp}`;
+            document.getElementById('createEmail').value = `test${timestamp}@example.com`;
+            document.getElementById('createPhone').value = `0123${timestamp.toString().slice(-6)}`;
+            document.getElementById('updateFullName').value = `Nguyễn Văn Updated ${timestamp}`;
+            document.getElementById('updatePhone').value = `0987${timestamp.toString().slice(-6)}`;
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,1887 @@
+<!DOCTYPE html>
+<html lang="vi" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default" data-assets-path="../assets/" data-template="vertical-menu-template-free">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+  
+  <!-- NO CACHE - Always fetch fresh -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  
+  <title>Dashboard - Hệ Thống Quản Lý Resort</title>
+  
+  <meta name="description" content="Admin Dashboard" />
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="../assets/img/favicon/favicon.ico" />
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet" />
+  
+  <!-- Icons -->
+  <link rel="stylesheet" href="../assets/vendor/fonts/boxicons.css" />
+  
+  <!-- Core CSS -->
+  <link rel="stylesheet" href="../assets/vendor/css/core.css" class="template-customizer-core-css" />
+  <link rel="stylesheet" href="../assets/vendor/css/theme-default.css" class="template-customizer-theme-css" />
+  <link rel="stylesheet" href="../assets/css/demo.css" />
+  <link rel="stylesheet" href="../assets/css/fix-scrollbar.css" />
+  <link rel="stylesheet" href="../assets/css/admin-custom-theme.css" />
+  <link rel="stylesheet" href="../assets/css/nalika-style.css?v=20250127" />
+  
+  <!-- Vendors CSS -->
+  <link rel="stylesheet" href="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css" />
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Page CSS -->
+  <style>
+    /* Modern Chart Container */
+    .chart-container {
+      background: rgba(255, 255, 255, 0.98);
+      border-radius: 20px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      height: 400px;
+      position: relative;
+      border: 1px solid rgba(200, 169, 126, 0.15);
+      transition: all 0.3s ease;
+    }
+    
+    .chart-container:hover {
+      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+      transform: translateY(-2px);
+    }
+    
+    .chart-container h6 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid #f3f4f6;
+    }
+    
+    .chart-container canvas {
+      max-height: 350px !important;
+    }
+    
+    /* Modern Activity Item */
+    .activity-item {
+      border-left: 4px solid #667eea;
+      background: linear-gradient(90deg, rgba(102, 126, 234, 0.05) 0%, rgba(255, 255, 255, 0.95) 100%);
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+      border-radius: 0 12px 12px 0;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .activity-item::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+      transition: width 0.3s ease;
+    }
+    
+    .activity-item:hover {
+      background: linear-gradient(90deg, rgba(102, 126, 234, 0.1) 0%, rgba(255, 255, 255, 1) 100%);
+      transform: translateX(8px);
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.15);
+    }
+    
+    .activity-item:hover::before {
+      width: 6px;
+    }
+    
+    /* Modern Customer Item */
+    .customer-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.25rem;
+      border: 1px solid rgba(200, 169, 126, 0.2);
+      border-radius: 12px;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(250, 248, 245, 0.95) 100%);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .customer-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      transform: scaleX(0);
+      transition: transform 0.3s ease;
+    }
+    
+    .customer-item:hover {
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      transform: translateY(-4px);
+      border-color: rgba(102, 126, 234, 0.4);
+    }
+    
+    .customer-item:hover::before {
+      transform: scaleX(1);
+    }
+    
+    /* Growth Indicators */
+    .growth-positive {
+      color: #10b981;
+      font-weight: 700;
+      font-size: 2.5rem;
+    }
+    
+    .growth-negative {
+      color: #ef4444;
+      font-weight: 700;
+      font-size: 2.5rem;
+    }
+    
+    /* Modern Refresh Button */
+    .refresh-btn {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      z-index: 1000;
+      border-radius: 50%;
+      width: 65px;
+      height: 65px;
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border: none;
+      color: white;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .refresh-btn:hover {
+      transform: scale(1.1) rotate(180deg);
+      box-shadow: 0 12px 35px rgba(102, 126, 234, 0.5);
+    }
+    
+    /* Modern Card Styles */
+    .card {
+      border-radius: 20px;
+      border: 1px solid rgba(200, 169, 126, 0.15);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+    
+    .card:hover {
+      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+      transform: translateY(-2px);
+    }
+    
+    .card-header {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(250, 248, 245, 0.95) 100%);
+      border-bottom: 2px solid rgba(200, 169, 126, 0.2);
+      padding: 1.5rem;
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+    
+    .card-body {
+      padding: 1.5rem;
+    }
+    
+    /* Better Typography */
+    h4, h5, h6 {
+      font-weight: 600;
+      color: #1f2937;
+    }
+    
+    /* Modern Section Headers */
+    .section-header {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 3px solid #667eea;
+      display: inline-block;
+    }
+    
+    /* Order Statistics - Nalika Style */
+    .stat-box {
+      padding: 1.5rem;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(250, 248, 245, 0.95) 100%);
+      border-radius: 15px;
+      text-align: center;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(200, 169, 126, 0.15);
+    }
+    
+    .stat-box:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+    
+    .stat-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    
+    .stat-icon i {
+      font-size: 1.8rem;
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #1f2937;
+      margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+      color: #6b7280;
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .stat-percentage {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      background: rgba(16, 185, 129, 0.1);
+      color: #10b981;
+    }
+    
+    .progress-container {
+      padding: 1rem;
+      background: rgba(243, 244, 246, 0.5);
+      border-radius: 12px;
+    }
+    
+    .progress-item {
+      margin-bottom: 0.5rem;
+    }
+    
+    .progress {
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    
+    .progress-bar {
+      transition: width 1s ease;
+    }
+    
+    /* Growth Items */
+    .growth-item {
+      padding: 1rem;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(250, 248, 245, 0.95) 100%);
+      border-radius: 12px;
+      border-left: 4px solid #667eea;
+      transition: all 0.3s ease;
+    }
+    
+    .growth-item:hover {
+      transform: translateX(5px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    
+    .growth-label {
+      font-weight: 600;
+      color: #374151;
+    }
+    
+    .growth-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+    
+    /* Quick Stats */
+    .quick-stat {
+      padding: 1rem;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(250, 248, 245, 0.95) 100%);
+      border-radius: 10px;
+      border-left: 3px solid #667eea;
+      transition: all 0.3s ease;
+    }
+    
+    .quick-stat:hover {
+      transform: translateX(5px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    
+    .quick-stat i {
+      font-size: 1.2rem;
+    }
+    
+    /* Activities Count */
+    #activitiesCount {
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+    
+    /* Chart Controls */
+    .chart-controls {
+      display: flex;
+      gap: 0.5rem;
+    }
+  </style>
+  
+  <!-- Helpers -->
+  <script src="../assets/vendor/js/helpers.js"></script>
+  <script src="../assets/js/config.js"></script>
+</head>
+
+<body>
+  <!-- Layout wrapper -->
+  <div class="layout-wrapper layout-content-navbar">
+    <div class="layout-container">
+      <!-- Menu - Load from common component -->
+      <div id="common-menu"></div>
+      <!-- standardized menu loader -->
+      <script src="../js/load-menu.js"></script>
+      <script>
+        // Define setupLogoutButton and dashboardLogout before menu loads
+        function dashboardLogout() {
+          console.log('🚪 Logging out from dashboard...');
+          
+          // Clear all tokens
+          localStorage.removeItem('adminToken');
+          localStorage.removeItem('token');
+          localStorage.removeItem('authToken');
+          
+          // Clear user data
+          localStorage.removeItem('user');
+          localStorage.removeItem('userRole');
+          
+          console.log('✅ Tokens and user data cleared');
+          
+          // Redirect to login
+          window.location.href = 'login.html';
+        }
+
+        function setupLogoutButton() {
+          const logoutBtn = document.getElementById('logoutBtn');
+          
+          if (logoutBtn) {
+            console.log('✅ Dashboard logout button found and configured');
+            
+            // Remove any existing listeners first
+            const newBtn = logoutBtn.cloneNode(true);
+            logoutBtn.parentNode.replaceChild(newBtn, logoutBtn);
+            
+            // Add click listener
+            newBtn.addEventListener('click', function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              dashboardLogout();
+            });
+            
+            return true;
+          } else {
+            console.log('❌ Dashboard logout button not found');
+            return false;
+          }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+          // load menu; helper will try sensible relative paths
+          window.loadCommonMenu('common-menu').then(() => {
+            console.log('🔄 Menu loaded, setting up logout button...');
+            
+            // Try multiple times to ensure button is found
+            let attempts = 0;
+            const maxAttempts = 5;
+            
+            function trySetupLogout() {
+              attempts++;
+              console.log(`🔄 Logout setup attempt ${attempts}/${maxAttempts}`);
+              
+              if (setupLogoutButton()) {
+                console.log('✅ Logout button setup successful!');
+                return;
+              }
+              
+              if (attempts < maxAttempts) {
+                setTimeout(trySetupLogout, 200);
+              } else {
+                console.error('❌ Failed to setup logout button after', maxAttempts, 'attempts');
+                // Try to find any logout button and setup manually
+                const anyLogoutBtn = document.querySelector('[id*="logout"], [onclick*="logout"], .dropdown-item[href*="logout"]');
+                if (anyLogoutBtn) {
+                  console.log('🔧 Found alternative logout button, setting up manually');
+                  anyLogoutBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    dashboardLogout();
+                  });
+                }
+              }
+            }
+            
+            trySetupLogout();
+          }).catch(error => {
+            console.error('❌ Menu loading failed:', error);
+          });
+        });
+      </script>
+      <!-- / Menu -->
+
+      <!-- Layout container -->
+      <div class="layout-page">
+        <!-- Navbar -->
+        <nav class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme" id="layout-navbar">
+          <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
+            <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
+              <i class="bx bx-menu bx-sm"></i>
+            </a>
+          </div>
+
+          <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+            <!-- Search -->
+            <div class="navbar-nav align-items-center">
+              <div class="nav-item d-flex align-items-center">
+                <h4 class="mb-0">Dashboard</h4>
+              </div>
+            </div>
+            <!-- /Search -->
+
+            <ul class="navbar-nav flex-row align-items-center ms-auto">
+              <!-- User -->
+              <li class="nav-item navbar-dropdown dropdown-user dropdown">
+                <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
+                  <div class="avatar avatar-online">
+                    <img src="../assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                  </div>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li>
+                    <a class="dropdown-item" href="#">
+                      <div class="d-flex">
+                        <div class="flex-shrink-0 me-3">
+                          <div class="avatar avatar-online">
+                            <img src="../assets/img/avatars/1.png" alt class="w-px-40 h-auto rounded-circle" />
+                          </div>
+                        </div>
+                        <div class="flex-grow-1">
+                          <span class="fw-semibold d-block" id="userDisplayName">Admin</span>
+                          <small class="text-muted" id="userRole">Quản trị viên</small>
+                        </div>
+                      </div>
+                    </a>
+                  </li>
+                  <li>
+                    <div class="dropdown-divider"></div>
+                  </li>
+                  <li>
+                    <a class="dropdown-item" href="profile.html">
+                      <i class="bx bx-user me-2"></i>
+                      <span class="align-middle">Hồ sơ của tôi</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a class="dropdown-item" href="settings.html">
+                      <i class="bx bx-cog me-2"></i>
+                      <span class="align-middle">Cài đặt</span>
+                    </a>
+                  </li>
+                  <li>
+                    <div class="dropdown-divider"></div>
+                  </li>
+                  <li>
+                    <a class="dropdown-item" href="javascript:void(0);" id="logoutBtn" onclick="commonLogout(); return false;" style="pointer-events: auto !important; cursor: pointer !important; z-index: 10003 !important; position: relative;">
+                      <i class="bx bx-power-off me-2"></i>
+                      <span class="align-middle">Đăng xuất</span>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+              <!--/ User -->
+            </ul>
+          </div>
+        </nav>
+        <!-- / Navbar -->
+
+        <!-- Content wrapper -->
+        <div class="content-wrapper">
+          <!-- Content -->
+          <div class="container-xxl flex-grow-1 container-p-y" style="padding-bottom: 3rem;">
+            <h4 class="fw-bold py-3 mb-4">
+              <span class="text-muted fw-light">Resort /</span> Dashboard
+            </h4>
+
+            <!-- Stats Cards Row -->
+            <div class="row mb-4">
+              <div class="col-lg-3 col-md-6 col-12 mb-4">
+                <a href="bookings.html" style="text-decoration: none; color: inherit;">
+                  <div class="nalika-stats-card" style="cursor: pointer;">
+                    <div class="percentage" id="bookingPercentage">+0%</div>
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                        <h3 class="card-title mb-2" id="todayBookings">0</h3>
+                        <small class="text-white">Đặt phòng hôm nay</small>
+                      </div>
+                      <div class="avatar flex-shrink-0">
+                        <i class="bx bx-calendar text-white" style="font-size: 2.5rem;"></i>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              </div>
+              <div class="col-lg-3 col-md-6 col-12 mb-4">
+                <a href="reports.html" style="text-decoration: none; color: inherit;">
+                  <div class="nalika-stats-card success" style="cursor: pointer;">
+                    <div class="percentage" id="revenuePercentage">+0%</div>
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                        <h3 class="card-title mb-2" id="todayRevenue">0₫</h3>
+                        <small class="text-white">Doanh thu hôm nay</small>
+                      </div>
+                      <div class="avatar flex-shrink-0">
+                        <i class="bx bx-dollar text-white" style="font-size: 2.5rem;"></i>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              </div>
+              <div class="col-lg-3 col-md-6 col-12 mb-4">
+                <a href="rooms.html" style="text-decoration: none; color: inherit;">
+                  <div class="nalika-stats-card warning" style="cursor: pointer;">
+                    <div class="percentage" id="occupancyPercentage">0%</div>
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                        <h3 class="card-title mb-2" id="occupancyRate">0%</h3>
+                        <small class="text-white">Tỷ lệ lấp đầy</small>
+                      </div>
+                      <div class="avatar flex-shrink-0">
+                        <i class="bx bx-home text-white" style="font-size: 2.5rem;"></i>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              </div>
+              <div class="col-lg-3 col-md-6 col-12 mb-4">
+                <a href="bookings.html?filter=checkin" style="text-decoration: none; color: inherit;">
+                  <div class="nalika-stats-card info" style="cursor: pointer;">
+                    <div class="percentage" id="checkinPercentage">+0%</div>
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                        <h3 class="card-title mb-2" id="todayCheckIns">0</h3>
+                        <small class="text-white">Check-in hôm nay</small>
+                      </div>
+                      <div class="avatar flex-shrink-0">
+                        <i class="bx bx-log-in text-white" style="font-size: 2.5rem;"></i>
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              </div>
+            </div>
+
+            <!-- Order Statistics - Nalika Style -->
+            <div class="row mb-4">
+              <div class="col-lg-8 mb-4">
+                <div class="card">
+                  <div class="card-header">
+                    <h5 class="mb-0">📊 Thống kê đặt phòng</h5>
+                  </div>
+                  <div class="card-body">
+                    <div class="row text-center">
+                      <div class="col-md-3 mb-3">
+                        <div class="stat-box">
+                          <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <i class="bx bx-calendar-check text-white"></i>
+                          </div>
+                          <h3 class="stat-value" id="totalBookings">0</h3>
+                          <p class="stat-label">Tổng đặt phòng</p>
+                          <span class="stat-percentage" id="totalBookingsPct">+0%</span>
+                        </div>
+                      </div>
+                      <div class="col-md-3 mb-3">
+                        <div class="stat-box">
+                          <div class="stat-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                            <i class="bx bx-check-circle text-white"></i>
+                          </div>
+                          <h3 class="stat-value" id="confirmedBookings">0</h3>
+                          <p class="stat-label">Đã xác nhận</p>
+                          <span class="stat-percentage text-success" id="confirmedPct">0%</span>
+                        </div>
+                      </div>
+                      <div class="col-md-3 mb-3">
+                        <div class="stat-box">
+                          <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                            <i class="bx bx-time text-white"></i>
+                          </div>
+                          <h3 class="stat-value" id="pendingBookings">0</h3>
+                          <p class="stat-label">Đang chờ</p>
+                          <span class="stat-percentage text-warning" id="pendingPct">0%</span>
+                        </div>
+                      </div>
+                      <div class="col-md-3 mb-3">
+                        <div class="stat-box">
+                          <div class="stat-icon" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                            <i class="bx bx-x-circle text-white"></i>
+                          </div>
+                          <h3 class="stat-value" id="cancelledBookings">0</h3>
+                          <p class="stat-label">Đã hủy</p>
+                          <span class="stat-percentage text-danger" id="cancelledPct">0%</span>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- Percentage Distribution -->
+                    <div class="mt-4">
+                      <h6 class="mb-3">Phân bổ tỷ lệ</h6>
+                      <div class="progress-container">
+                        <div class="progress-item">
+                          <div class="d-flex justify-content-between mb-1">
+                            <span>Đã xác nhận</span>
+                            <span id="confirmedPercent">0%</span>
+                          </div>
+                          <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-success" id="confirmedProgress" style="width: 0%"></div>
+                          </div>
+                        </div>
+                        <div class="progress-item mt-3">
+                          <div class="d-flex justify-content-between mb-1">
+                            <span>Đang chờ</span>
+                            <span id="pendingPercent">0%</span>
+                          </div>
+                          <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-warning" id="pendingProgress" style="width: 0%"></div>
+                          </div>
+                        </div>
+                        <div class="progress-item mt-3">
+                          <div class="d-flex justify-content-between mb-1">
+                            <span>Đã hủy</span>
+                            <span id="cancelledPercent">0%</span>
+                          </div>
+                          <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-danger" id="cancelledProgress" style="width: 0%"></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-4 mb-4">
+                <div class="card h-100">
+                  <div class="card-header">
+                    <h5 class="mb-0">📈 Tăng trưởng</h5>
+                  </div>
+                  <div class="card-body">
+                    <div class="growth-item mb-4">
+                      <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="growth-label">Doanh thu</span>
+                        <span id="revenueGrowth" class="growth-value growth-positive">+0%</span>
+                      </div>
+                      <small class="text-muted">So với tháng trước</small>
+                    </div>
+                    <div class="growth-item mb-4">
+                      <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="growth-label">Đặt phòng</span>
+                        <span id="bookingGrowth" class="growth-value growth-positive">+0%</span>
+                      </div>
+                      <small class="text-muted">So với tháng trước</small>
+                    </div>
+                    <div class="growth-item">
+                      <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="growth-label">Khách hàng</span>
+                        <span id="customerGrowth" class="growth-value growth-positive">+0%</span>
+                      </div>
+                      <small class="text-muted">So với tháng trước</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="row">
+              <div class="col-lg-8 mb-4">
+                <div class="chart-container">
+                  <h5 class="mb-3">📈 Xu hướng doanh thu (30 ngày)</h5>
+                  <canvas id="revenueChart"></canvas>
+                </div>
+              </div>
+              <div class="col-lg-4 mb-4">
+                <div class="chart-container">
+                  <h5 class="mb-3">🏠 Tỷ lệ lấp đầy</h5>
+                  <canvas id="occupancyChart"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <!-- Second Charts Row -->
+            <div class="row">
+              <div class="col-lg-6 mb-4">
+                <div class="chart-container">
+                  <h5 class="mb-3">💰 Doanh thu dịch vụ</h5>
+                  <canvas id="serviceChart"></canvas>
+                </div>
+              </div>
+              <div class="col-lg-6 mb-4">
+                <div class="card h-100">
+                  <div class="card-header d-flex justify-content-between">
+                    <h5 class="mb-0">🏆 Top khách hàng tháng này</h5>
+                    <button class="btn btn-sm btn-outline-primary" onclick="loadTopCustomers()">
+                      <i class="bx bx-refresh"></i>
+                    </button>
+                  </div>
+                  <div class="card-body" style="max-height: 350px; overflow-y: auto;">
+                    <div id="topCustomersContainer">
+                      <!-- Top customers will be loaded here -->
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Activities Feed - Nalika Style -->
+            <div class="row">
+              <div class="col-lg-8 mb-4">
+                <div class="card">
+                  <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                      <h5 class="mb-0">🔔 Hoạt động gần đây</h5>
+                      <small class="text-muted" id="activitiesCount">Bạn có 0 hoạt động mới</small>
+                    </div>
+                    <button class="btn btn-sm btn-outline-primary" onclick="loadRecentActivities()">
+                      <i class="bx bx-refresh"></i>
+                    </button>
+                  </div>
+                  <div class="card-body" style="max-height: 500px; overflow-y: auto; min-height: 200px;">
+                    <div id="activitiesContainer">
+                      <!-- Recent activities will be loaded here -->
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-4 mb-4">
+                <div class="card h-100">
+                  <div class="card-header">
+                    <h5 class="mb-0">📊 Tổng quan nhanh</h5>
+                  </div>
+                  <div class="card-body">
+                    <div class="quick-stat mb-3">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                          <i class="bx bx-user text-primary me-2"></i>
+                          <span>Tổng khách hàng</span>
+                        </div>
+                        <strong id="totalCustomers">0</strong>
+                      </div>
+                    </div>
+                    <div class="quick-stat mb-3">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                          <i class="bx bx-home text-success me-2"></i>
+                          <span>Phòng sẵn sàng</span>
+                        </div>
+                        <strong id="availableRooms">0</strong>
+                      </div>
+                    </div>
+                    <div class="quick-stat mb-3">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                          <i class="bx bx-food-menu text-warning me-2"></i>
+                          <span>Dịch vụ đang dùng</span>
+                        </div>
+                        <strong id="activeServices">0</strong>
+                      </div>
+                    </div>
+                    <div class="quick-stat">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                          <i class="bx bx-receipt text-info me-2"></i>
+                          <span>Hóa đơn tháng này</span>
+                        </div>
+                        <strong id="monthlyInvoices">0</strong>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- / Content -->
+
+          <!-- Floating Refresh Button -->
+          <button class="btn btn-primary refresh-btn" onclick="refreshAllData()" title="Làm mới dữ liệu">
+            <i class="bx bx-refresh" style="font-size: 1.5rem;"></i>
+          </button>
+
+          <!-- Footer -->
+          <footer class="content-footer footer bg-footer-theme">
+            <div class="container-xxl d-flex flex-wrap justify-content-between py-2 flex-md-row flex-column">
+              <div class="mb-2 mb-md-0">
+                © 2025 Resort Management System
+              </div>
+            </div>
+          </footer>
+          <!-- / Footer -->
+
+          <div class="content-backdrop fade"></div>
+        </div>
+        <!-- Content wrapper -->
+      </div>
+      <!-- / Layout page -->
+    </div>
+
+    <!-- Overlay -->
+    <div class="layout-overlay layout-menu-toggle"></div>
+  </div>
+  <!-- / Layout wrapper -->
+
+  <!-- Core JS -->
+  <script src="../assets/vendor/libs/jquery/jquery.js"></script>
+  <!-- Use bootstrap bundle (includes Popper) to ensure dropdowns/tooltips initialize reliably -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+  <script src="../assets/vendor/js/menu.js"></script>
+  
+  <!-- Fix Overlay Blocking -->
+  <script src="../js/fix-overlay-blocking.js"></script>
+  
+  <!-- Main JS -->
+  <script src="../assets/js/main.js"></script>
+
+  <!-- API Helper -->
+  <script src="../js/api.js"></script>
+
+  <!-- Common Navbar -->
+  <script src="../js/common-navbar.js"></script>
+  <script>
+    // Ensure any .dropdown-toggle elements are initialized with Bootstrap's Dropdown
+    // This is defensive: if bootstrap isn't present immediately, poll briefly.
+    (function() {
+      function initDropdowns() {
+        if (window.bootstrap && typeof bootstrap.Dropdown === 'function') {
+          Array.from(document.querySelectorAll('.dropdown-toggle')).forEach(function(el){
+            try { new bootstrap.Dropdown(el); } catch (e) { console.warn('dropdown init error', e); }
+          });
+          return true;
+        }
+        return false;
+      }
+
+      document.addEventListener('DOMContentLoaded', function() {
+        if (!initDropdowns()) {
+          var waited = 0;
+          var iv = setInterval(function() {
+            waited += 100;
+            if (initDropdowns() || waited > 3000) clearInterval(iv);
+          }, 100);
+        }
+      });
+    })();
+  </script>
+  <script>
+    // Use Reports API for accurate data including payments
+    const API_BASE = `${window.location.origin}/api/reports`;
+    const DASHBOARD_API = `${window.location.origin}/api/dashboard`;
+    
+    // Ensure stats cards are clickable
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add click handlers to stats cards if not already wrapped in <a>
+      const statsCards = document.querySelectorAll('.nalika-stats-card');
+      statsCards.forEach(card => {
+        if (!card.closest('a')) {
+          card.style.cursor = 'pointer';
+        }
+      });
+    });
+    let revenueChart, occupancyChart, serviceChart;
+    let refreshInterval;
+
+    // Initialize dashboard
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('🔵 Dashboard loaded');
+      
+      // Wait a bit for DOM to be fully ready
+      setTimeout(() => {
+        console.log('🚀 Starting dashboard initialization...');
+        
+        // Try to load real data first
+        refreshAllData();
+        
+        // Create charts with delay - đảm bảo Chart.js đã load
+        setTimeout(() => {
+          console.log('📊 Creating charts...');
+          console.log('🔍 Chart.js available:', typeof Chart !== 'undefined');
+          
+          if (typeof Chart === 'undefined') {
+            console.error('❌ Chart.js not loaded yet, retrying...');
+            let retryCount = 0;
+            const maxRetries = 10;
+            const checkChart = setInterval(() => {
+              retryCount++;
+              if (typeof Chart !== 'undefined') {
+                console.log('✅ Chart.js loaded, creating charts...');
+                clearInterval(checkChart);
+                loadRevenueTrends();
+                loadOccupancyTrends();
+                loadServiceRevenue();
+              } else if (retryCount >= maxRetries) {
+                console.error('❌ Chart.js failed to load after', maxRetries, 'retries');
+                clearInterval(checkChart);
+              }
+            }, 200);
+          } else {
+            // Chart.js đã sẵn sàng, load data ngay
+            loadRevenueTrends();
+            loadOccupancyTrends();
+            loadServiceRevenue();
+          }
+        }, 300);
+        
+        // Start auto refresh
+        startAutoRefresh();
+      }, 100);
+    });
+
+    // Load dashboard statistics from Reports API (includes payments)
+    async function loadDashboardStats() {
+      const token = localStorage.getItem('token') || localStorage.getItem('adminToken');
+      console.log('📊 Loading dashboard stats with token:', !!token);
+
+      if (!token) {
+        console.warn('⚠️ No token found, showing zero values');
+        updateStatsCards({
+          todayRevenue: 0,
+          todayOccupancy: 0,
+          thisMonthRevenue: 0,
+          revenueGrowth: 0,
+          totalBookings: 0,
+          activeBookings: 0,
+          pendingBookings: 0
+        });
+        return;
+      }
+
+      try {
+        // Use Reports API for accurate payment data
+        const response = await fetch(`${API_BASE}/dashboard-stats`, {
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        console.log('📡 Dashboard API response status:', response.status);
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('✅ Dashboard data loaded:', data);
+          updateStatsCards(data);
+        } else {
+          const errorText = await response.text();
+          console.error('❌ Dashboard API error:', response.status, errorText);
+          // Try fallback to dashboard API
+          try {
+            const fallbackResponse = await fetch(`${DASHBOARD_API}/stats`, {
+              headers: { 
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }
+            });
+            if (fallbackResponse.ok) {
+              const fallbackData = await fallbackResponse.json();
+              console.log('✅ Using fallback dashboard data');
+              updateStatsCards(fallbackData);
+              return;
+            }
+          } catch (e) {
+            console.error('❌ Fallback API also failed:', e);
+          }
+          console.log('📊 Showing zero values');
+          updateStatsCards({
+            todayRevenue: 0,
+            todayOccupancy: 0,
+            thisMonthRevenue: 0,
+            revenueGrowth: 0,
+            totalBookings: 0,
+            activeBookings: 0,
+            pendingBookings: 0
+          });
+        }
+      } catch (error) {
+        console.error('❌ Error loading dashboard stats:', error);
+        updateStatsCards({
+          todayRevenue: 0,
+          todayOccupancy: 0,
+          thisMonthRevenue: 0,
+          revenueGrowth: 0,
+          totalBookings: 0,
+          activeBookings: 0,
+          pendingBookings: 0
+        });
+      }
+    }
+
+    function updateStatsCards(data) {
+      const formatCurrencyFn = window.formatCurrency || formatCurrency;
+      
+      // Handle both API response formats
+      const todayRevenue = data.todayRevenue || (data.today?.revenue || 0);
+      const todayOccupancy = data.todayOccupancy || (data.occupancy?.rate || 0);
+      const revenueGrowth = data.revenueGrowth || (data.growth?.revenue || 0);
+      const totalBookings = data.totalBookings || 0;
+      const activeBookings = data.activeBookings || 0;
+      const pendingBookings = data.pendingBookings || 0;
+      const todayBookings = data.today?.bookings || 0;
+      const todayCheckIns = data.today?.checkIns || 0;
+      
+      // Update main stats cards
+      if (document.getElementById('todayBookings')) {
+        document.getElementById('todayBookings').textContent = todayBookings;
+      }
+      if (document.getElementById('todayRevenue')) {
+        document.getElementById('todayRevenue').textContent = formatCurrencyFn(todayRevenue);
+      }
+      if (document.getElementById('occupancyRate')) {
+        document.getElementById('occupancyRate').textContent = Math.round(todayOccupancy) + '%';
+      }
+      if (document.getElementById('todayCheckIns')) {
+        document.getElementById('todayCheckIns').textContent = todayCheckIns;
+      }
+      
+      // Update percentage indicators on stats cards
+      const bookingPercentage = document.getElementById('bookingPercentage');
+      const revenuePercentage = document.getElementById('revenuePercentage');
+      const occupancyPercentage = document.getElementById('occupancyPercentage');
+      const checkinPercentage = document.getElementById('checkinPercentage');
+      
+      if (bookingPercentage) {
+        const bookingGrowth = data.growth?.bookings || 0;
+        bookingPercentage.textContent = (bookingGrowth >= 0 ? '+' : '') + Math.round(bookingGrowth) + '%';
+      }
+      
+      if (revenuePercentage) {
+        revenuePercentage.textContent = (revenueGrowth >= 0 ? '+' : '') + Math.round(revenueGrowth) + '%';
+      }
+      
+      if (occupancyPercentage) {
+        occupancyPercentage.textContent = Math.round(todayOccupancy) + '%';
+      }
+      
+      if (checkinPercentage) {
+        const checkinGrowth = data.growth?.checkIns || 0;
+        checkinPercentage.textContent = (checkinGrowth >= 0 ? '+' : '') + Math.round(checkinGrowth) + '%';
+      }
+      
+      // Update growth indicators
+      const revenueGrowthEl = document.getElementById('revenueGrowth');
+      const bookingGrowthEl = document.getElementById('bookingGrowth');
+      
+      if (revenueGrowthEl) {
+        revenueGrowthEl.textContent = (revenueGrowth >= 0 ? '+' : '') + Math.round(revenueGrowth) + '%';
+        revenueGrowthEl.className = revenueGrowth >= 0 ? 'growth-positive' : 'growth-negative';
+      }
+      
+      if (bookingGrowthEl) {
+        const bookingGrowth = data.growth?.bookings || 0;
+        bookingGrowthEl.textContent = (bookingGrowth >= 0 ? '+' : '') + Math.round(bookingGrowth) + '%';
+        bookingGrowthEl.className = bookingGrowth >= 0 ? 'growth-positive' : 'growth-negative';
+      }
+      
+      // Update order statistics
+      updateOrderStatistics({
+        total: totalBookings,
+        active: activeBookings,
+        pending: pendingBookings
+      });
+      
+      // Load quick stats
+      loadQuickStats();
+    }
+    
+    // Load quick stats (customers, rooms, services, invoices)
+    async function loadQuickStats() {
+      const token = localStorage.getItem('token') || localStorage.getItem('adminToken');
+      if (!token) return;
+      
+      try {
+        // Load customers count
+        const customersResponse = await fetch(`${window.location.origin}/api/customermanagement`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (customersResponse.ok) {
+          const customers = await customersResponse.json();
+          if (document.getElementById('totalCustomers')) {
+            document.getElementById('totalCustomers').textContent = customers.length || 0;
+          }
+        }
+        
+        // Load rooms count
+        const roomsResponse = await fetch(`${window.location.origin}/api/rooms/statistics`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (roomsResponse.ok) {
+          const roomsData = await roomsResponse.json();
+          const availableRooms = roomsData.availableRooms || roomsData.totalRooms - (roomsData.occupiedRooms || 0);
+          if (document.getElementById('availableRooms')) {
+            document.getElementById('availableRooms').textContent = availableRooms || 0;
+          }
+        }
+        
+        // Load services count (from charges and restaurant orders)
+        const servicesResponse = await fetch(`${API_BASE}/service-usage?days=30`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (servicesResponse.ok) {
+          const servicesData = await servicesResponse.json();
+          const activeServices = servicesData.services?.length || 0;
+          if (document.getElementById('activeServices')) {
+            document.getElementById('activeServices').textContent = activeServices;
+          }
+        }
+        
+        // Load monthly invoices count
+        const thisMonth = new Date();
+        thisMonth.setDate(1);
+        thisMonth.setHours(0, 0, 0, 0);
+        const invoicesResponse = await fetch(`${window.location.origin}/api/invoices`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (invoicesResponse.ok) {
+          const invoices = await invoicesResponse.json();
+          const monthlyInvoices = invoices.filter(inv => {
+            if (!inv.paidDate) return false;
+            const paidDate = new Date(inv.paidDate);
+            return paidDate >= thisMonth && inv.status === 'Paid';
+          }).length;
+          if (document.getElementById('monthlyInvoices')) {
+            document.getElementById('monthlyInvoices').textContent = monthlyInvoices;
+          }
+        }
+      } catch (error) {
+        console.error('❌ Error loading quick stats:', error);
+      }
+    }
+    
+    function updateOrderStatistics(data) {
+      const total = data.total || 0;
+      const active = data.active || 0;
+      const pending = data.pending || 0;
+      const cancelled = total - active - pending;
+      
+      // Update stat boxes
+      if (document.getElementById('totalBookings')) {
+        document.getElementById('totalBookings').textContent = total;
+      }
+      if (document.getElementById('confirmedBookings')) {
+        document.getElementById('confirmedBookings').textContent = active;
+      }
+      if (document.getElementById('pendingBookings')) {
+        document.getElementById('pendingBookings').textContent = pending;
+      }
+      if (document.getElementById('cancelledBookings')) {
+        document.getElementById('cancelledBookings').textContent = cancelled;
+      }
+      
+      // Calculate percentages
+      const confirmedPct = total > 0 ? Math.round((active / total) * 100) : 0;
+      const pendingPct = total > 0 ? Math.round((pending / total) * 100) : 0;
+      const cancelledPct = total > 0 ? Math.round((cancelled / total) * 100) : 0;
+      
+      // Update percentage displays
+      if (document.getElementById('confirmedPct')) {
+        document.getElementById('confirmedPct').textContent = confirmedPct + '%';
+      }
+      if (document.getElementById('pendingPct')) {
+        document.getElementById('pendingPct').textContent = pendingPct + '%';
+      }
+      if (document.getElementById('cancelledPct')) {
+        document.getElementById('cancelledPct').textContent = cancelledPct + '%';
+      }
+      
+      // Update progress bars
+      if (document.getElementById('confirmedProgress')) {
+        document.getElementById('confirmedProgress').style.width = confirmedPct + '%';
+      }
+      if (document.getElementById('pendingProgress')) {
+        document.getElementById('pendingProgress').style.width = pendingPct + '%';
+      }
+      if (document.getElementById('cancelledProgress')) {
+        document.getElementById('cancelledProgress').style.width = cancelledPct + '%';
+      }
+      
+      // Update percentage labels
+      if (document.getElementById('confirmedPercent')) {
+        document.getElementById('confirmedPercent').textContent = confirmedPct + '%';
+      }
+      if (document.getElementById('pendingPercent')) {
+        document.getElementById('pendingPercent').textContent = pendingPct + '%';
+      }
+      if (document.getElementById('cancelledPercent')) {
+        document.getElementById('cancelledPercent').textContent = cancelledPct + '%';
+      }
+    }
+
+    async function loadRevenueTrends() {
+      try {
+        const token = localStorage.getItem('token') || localStorage.getItem('adminToken');
+        if (!token) {
+          console.warn('⚠️ No token for revenue trends, showing empty chart');
+          createRevenueChart([]);
+          return;
+        }
+        
+        // Try Reports API first (includes restaurant orders)
+        let response = await fetch(`${API_BASE}/revenue-summary?days=30`, {
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        console.log('📡 Revenue trends API response status:', response.status);
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('✅ Revenue trends data loaded:', data);
+          // Convert to chart format
+          const chartData = (data.dailyRevenue || []).map(item => ({
+            date: item.date,
+            amount: item.amount
+          }));
+          createRevenueChart(chartData);
+        } else {
+          // Fallback to dashboard API
+          response = await fetch(`${DASHBOARD_API}/revenue-trends?days=30`, {
+            headers: { 
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            createRevenueChart(data || []);
+          } else {
+            const errorText = await response.text();
+            console.error('❌ Revenue trends API error:', response.status, errorText);
+            console.log('📊 Showing empty chart');
+            createRevenueChart([]);
+          }
+        }
+      } catch (error) {
+        console.error('❌ Error loading revenue trends:', error);
+        createRevenueChart([]);
+      }
+    }
+
+    function createRevenueChart(data) {
+      console.log('📊 Creating revenue chart with data:', data);
+      
+      const canvas = document.getElementById('revenueChart');
+      if (!canvas) {
+        console.error('❌ Revenue chart canvas not found!');
+        return;
+      }
+      
+      const ctx = canvas.getContext('2d');
+      console.log('🖼️ Canvas context:', ctx);
+      
+      if (revenueChart) {
+        console.log('🗑️ Destroying existing revenue chart');
+        revenueChart.destroy();
+      }
+
+      // Hiển thị chart ngay cả khi không có dữ liệu
+      if (!data || data.length === 0) {
+        console.warn('⚠️ No revenue data to display, showing empty chart');
+        // Tạo chart với dữ liệu mặc định (30 ngày với giá trị 0)
+        const defaultLabels = [];
+        const defaultData = [];
+        const today = new Date();
+        for (let i = 29; i >= 0; i--) {
+          const date = new Date(today);
+          date.setDate(date.getDate() - i);
+          defaultLabels.push(date.toLocaleDateString('vi-VN'));
+          defaultData.push(0);
+        }
+        
+        revenueChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: defaultLabels,
+            datasets: [{
+              label: 'Doanh thu (₫)',
+              data: defaultData,
+              borderColor: '#667eea',
+              backgroundColor: 'rgba(102, 126, 234, 0.1)',
+              tension: 0.4,
+              fill: true
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    const fmt = window.formatCurrency || formatCurrency;
+                    return 'Doanh thu: ' + fmt(context.parsed.y);
+                  }
+                }
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  callback: function(value) {
+                    const fmt = window.formatCurrency || formatCurrency;
+                    return fmt(value);
+                  }
+                }
+              }
+            }
+          }
+        });
+        return;
+      }
+
+      console.log('🏗️ Building revenue chart...');
+      revenueChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: data.map(d => new Date(d.date).toLocaleDateString('vi-VN')),
+          datasets: [{
+            label: 'Doanh thu (₫)',
+            data: data.map(d => d.revenue),
+            borderColor: '#667eea',
+            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+            tension: 0.4,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const fmt = window.formatCurrency || formatCurrency;
+                  return 'Doanh thu: ' + fmt(context.parsed.y);
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: function(value) {
+                  const fmt = window.formatCurrency || formatCurrency;
+                  return fmt(value);
+                }
+              }
+            }
+          }
+        }
+      });
+      
+      console.log('✅ Revenue chart created successfully');
+    }
+
+    // Removed createSampleRevenueChart - using empty chart instead
+
+    async function loadOccupancyTrends() {
+      try {
+        const token = localStorage.getItem('token') || localStorage.getItem('adminToken');
+        if (!token) {
+          console.warn('⚠️ No token for occupancy trends, showing empty chart');
+          createOccupancyChart([]);
+          return;
+        }
+        
+        // Try Reports API first
+        let response = await fetch(`${API_BASE}/occupancy-report?days=7`, {
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          // Convert to chart format if needed
+          const chartData = data.dailyOccupancy || data || [];
+          createOccupancyChart(chartData);
+        } else {
+          // Fallback to dashboard API
+          response = await fetch(`${DASHBOARD_API}/occupancy-trends?days=7`, {
+            headers: { 
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            createOccupancyChart(data || []);
+          } else {
+            console.warn('⚠️ Cannot load occupancy trends, showing empty chart');
+            createOccupancyChart([]);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading occupancy trends:', error);
+        createOccupancyChart([]);
+      }
+    }
+
+    function createOccupancyChart(data) {
+      console.log('🏠 Creating occupancy chart with data:', data);
+      
+      const canvas = document.getElementById('occupancyChart');
+      if (!canvas) {
+        console.error('❌ Occupancy chart canvas not found!');
+        return;
+      }
+      
+      const ctx = canvas.getContext('2d');
+      console.log('🖼️ Occupancy canvas context:', ctx);
+      
+      if (occupancyChart) {
+        console.log('🗑️ Destroying existing occupancy chart');
+        occupancyChart.destroy();
+      }
+
+      // Lấy occupancy rate từ dữ liệu hoặc mặc định là 0
+      const occupancyRate = (data && data.length > 0 && data[data.length - 1]?.occupancyRate) ? data[data.length - 1].occupancyRate : 0;
+      const availableRate = 100 - occupancyRate;
+
+      console.log('🏗️ Building occupancy chart...');
+      occupancyChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Đã đặt', 'Còn trống'],
+          datasets: [{
+            data: [occupancyRate, availableRate],
+            backgroundColor: ['#4ecdc4', '#f8f9fa'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return context.label + ': ' + context.parsed + '%';
+                }
+              }
+            }
+          }
+        }
+      });
+      
+      console.log('✅ Occupancy chart created successfully');
+    }
+
+    // Removed createSampleOccupancyChart - using empty chart instead
+
+    async function loadServiceRevenue() {
+      try {
+        const token = localStorage.getItem('token') || localStorage.getItem('adminToken');
+        if (!token) {
+          console.warn('⚠️ No token for service revenue, showing empty chart');
+          createServiceChart([]);
+          return;
+        }
+        
+        // Use Reports API (includes restaurant orders)
+        let response = await fetch(`${API_BASE}/service-usage?days=30`, {
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          // Convert to chart format
+          const chartData = (data.services || []).map(service => ({
+            serviceName: service.serviceName,
+            revenue: service.totalRevenue,
+            usage: service.totalUsage
+          }));
+          createServiceChart(chartData);
+        } else {
+          // Fallback to dashboard API
+          response = await fetch(`${DASHBOARD_API}/service-revenue?days=30`, {
+            headers: { 
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            createServiceChart(data || []);
+          } else {
+            console.warn('⚠️ Cannot load service revenue, showing empty chart');
+            createServiceChart([]);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading service revenue:', error);
+        createServiceChart([]);
+      }
+    }
+
+    function createServiceChart(data) {
+      console.log('💰 Creating service chart with data:', data);
+      
+      const canvas = document.getElementById('serviceChart');
+      if (!canvas) {
+        console.error('❌ Service chart canvas not found!');
+        return;
+      }
+      
+      const ctx = canvas.getContext('2d');
+      console.log('🖼️ Service canvas context:', ctx);
+      
+      if (serviceChart) {
+        console.log('🗑️ Destroying existing service chart');
+        serviceChart.destroy();
+      }
+
+      // Hiển thị chart ngay cả khi không có dữ liệu
+      if (!data || data.length === 0) {
+        console.warn('⚠️ No service data to display, showing empty chart');
+        serviceChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: ['Chưa có dữ liệu'],
+            datasets: [{
+              label: 'Doanh thu (₫)',
+              data: [0],
+              backgroundColor: ['#e0e0e0']
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    const fmt = window.formatCurrency || formatCurrency;
+                    return 'Doanh thu: ' + fmt(context.parsed.y);
+                  }
+                }
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  callback: function(value) {
+                    const fmt = window.formatCurrency || formatCurrency;
+                    return fmt(value);
+                  }
+                }
+              }
+            }
+          }
+        });
+        return;
+      }
+
+      console.log('🏗️ Building service chart...');
+      serviceChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: data.map(d => d.serviceName),
+          datasets: [{
+            label: 'Doanh thu (₫)',
+            data: data.map(d => d.totalRevenue),
+            backgroundColor: [
+              '#667eea', '#4ecdc4', '#feca57', '#ff6b6b', '#74b9ff'
+            ]
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const fmt = window.formatCurrency || formatCurrency;
+                  return 'Doanh thu: ' + fmt(context.parsed.y);
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: function(value) {
+                  const fmt = window.formatCurrency || formatCurrency;
+                  return fmt(value);
+                }
+              }
+            }
+          }
+        }
+      });
+      
+      console.log('✅ Service chart created successfully');
+    }
+
+    // Removed createSampleServiceChart - using empty chart instead
+
+    async function loadTopCustomers() {
+      try {
+        const token = localStorage.getItem('token') || localStorage.getItem('adminToken');
+        if (!token) {
+          console.warn('⚠️ No token for top customers, showing empty list');
+          updateTopCustomers([]);
+          return;
+        }
+        
+        const headers = {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        };
+
+        // Try to get top customers this month first
+        let response = await fetch(`${DASHBOARD_API}/top-customers?limit=10&thisMonth=true`, { headers });
+        let data = null;
+
+        if (response.ok) {
+          data = await response.json();
+          console.log('📊 Top customers this month:', data?.length || 0);
+        }
+
+        // If no data this month, fallback to all-time top customers
+        if (!data || data.length === 0) {
+          console.log('📊 No customers this month, loading all-time top customers...');
+          response = await fetch(`${DASHBOARD_API}/top-customers?limit=10`, { headers });
+          if (response.ok) {
+            data = await response.json();
+            console.log('📊 All-time top customers:', data?.length || 0);
+          } else {
+            const errorText = await response.text().catch(() => '');
+            console.error('❌ Top customers API error:', response.status, errorText);
+          }
+        }
+
+        updateTopCustomers(data || []);
+      } catch (error) {
+        console.error('❌ Error loading top customers:', error);
+        updateTopCustomers([]);
+      }
+    }
+
+    function updateTopCustomers(customers) {
+      const container = document.getElementById('topCustomersContainer');
+      if (!container) {
+        console.error('❌ Top customers container not found');
+        return;
+      }
+      
+      container.innerHTML = '';
+
+      if (!customers || customers.length === 0) {
+        container.innerHTML = '<div class="text-center text-muted py-4"><i class="bx bx-info-circle"></i><br>Chưa có dữ liệu khách hàng</div>';
+        return;
+      }
+
+      const formatCurrencySafe = window.formatCurrency || formatCurrency || ((amount) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount));
+      const formatDate = (dateStr) => {
+        if (!dateStr) return '';
+        try {
+          const date = new Date(dateStr);
+          return date.toLocaleDateString('vi-VN');
+        } catch {
+          return dateStr;
+        }
+      };
+
+      customers.forEach((customer, index) => {
+        const customerDiv = document.createElement('div');
+        customerDiv.className = 'customer-item d-flex justify-content-between align-items-center mb-3 p-3 border rounded';
+        customerDiv.style.cssText = 'background: #f8f9fa; transition: all 0.3s;';
+        customerDiv.onmouseenter = function() { this.style.background = '#e9ecef'; this.style.transform = 'translateX(5px)'; };
+        customerDiv.onmouseleave = function() { this.style.background = '#f8f9fa'; this.style.transform = 'translateX(0)'; };
+        
+        const customerName = escapeHtml(customer.customerName || customer.fullName || 'Khách hàng');
+        const totalSpent = Number(customer.totalSpent || 0);
+        const bookingCount = Number(customer.bookingCount || 0);
+        const lastBookingDate = customer.lastBookingDate ? formatDate(customer.lastBookingDate) : '';
+        
+        customerDiv.innerHTML = `
+          <div class="flex-grow-1">
+            <div class="d-flex align-items-center mb-1">
+              <span class="badge bg-primary me-2">#${index + 1}</span>
+              <strong>${customerName}</strong>
+            </div>
+            <div class="text-muted small">
+              <i class="bx bx-calendar-check"></i> ${bookingCount} đặt phòng
+              ${lastBookingDate ? ` • Lần cuối: ${lastBookingDate}` : ''}
+            </div>
+          </div>
+          <div class="text-end ms-3">
+            <div class="text-success fw-bold">${formatCurrencySafe(totalSpent)}</div>
+            ${customer.loyaltyPoints ? `<small class="text-muted">${customer.loyaltyPoints} điểm</small>` : ''}
+          </div>
+        `;
+        container.appendChild(customerDiv);
+      });
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    async function loadRecentActivities() {
+      try {
+        const token = localStorage.getItem('token') || localStorage.getItem('adminToken');
+        if (!token) {
+          console.warn('⚠️ No token for recent activities, showing empty list');
+          updateRecentActivities([]);
+          return;
+        }
+        
+        // Use Dashboard API for recent activities
+        const response = await fetch(`${DASHBOARD_API}/recent-activities?limit=15`, {
+          headers: { 
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          updateRecentActivities(data || []);
+        } else {
+          console.warn('⚠️ Cannot load recent activities, showing empty list');
+          updateRecentActivities([]);
+        }
+      } catch (error) {
+        console.error('Error loading recent activities:', error);
+        updateRecentActivities([]);
+      }
+    }
+
+    function updateRecentActivities(activities) {
+      const container = document.getElementById('activitiesContainer');
+      const activitiesCountEl = document.getElementById('activitiesCount');
+      container.innerHTML = '';
+
+      if (!activities || activities.length === 0) {
+        container.innerHTML = '<div class="text-center text-muted py-4"><i class="bx bx-info-circle"></i> Chưa có hoạt động nào gần đây</div>';
+        if (activitiesCountEl) {
+          activitiesCountEl.textContent = 'Bạn có 0 hoạt động mới';
+        }
+        return;
+      }
+
+      // Update activities count
+      if (activitiesCountEl) {
+        activitiesCountEl.textContent = `Bạn có ${activities.length} hoạt động mới`;
+      }
+
+      activities.forEach(activity => {
+        const activityDiv = document.createElement('div');
+        activityDiv.className = 'activity-item';
+        activityDiv.innerHTML = `
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <strong>${activity.description || 'Hoạt động không có mô tả'}</strong>
+              <br>
+              <small class="text-muted">Bởi: ${activity.performedBy || 'Hệ thống'}</small>
+            </div>
+            <div>
+              <small class="text-muted">${formatDateTime(activity.timestamp || new Date())}</small>
+            </div>
+          </div>
+        `;
+        container.appendChild(activityDiv);
+      });
+    }
+
+    function refreshAllData() {
+      console.log('🔄 Refreshing all dashboard data...');
+      loadDashboardStats();
+      
+      // Đảm bảo Chart.js đã load trước khi tạo charts
+      if (typeof Chart !== 'undefined') {
+        loadRevenueTrends();
+        loadOccupancyTrends();
+        loadServiceRevenue();
+      } else {
+        console.warn('⚠️ Chart.js not loaded yet, waiting...');
+        setTimeout(() => {
+          if (typeof Chart !== 'undefined') {
+            loadRevenueTrends();
+            loadOccupancyTrends();
+            loadServiceRevenue();
+          } else {
+            console.error('❌ Chart.js still not loaded after timeout');
+          }
+        }, 500);
+      }
+      
+      loadTopCustomers();
+      loadRecentActivities();
+    }
+
+    // formatCurrency is already defined in api.js, so we don't need to redefine it
+    // If api.js is not loaded, use window.formatCurrency as fallback
+    if (typeof window.formatCurrency === 'undefined') {
+      window.formatCurrency = function(amount) {
+        return new Intl.NumberFormat('vi-VN', {
+          style: 'currency',
+          currency: 'VND'
+        }).format(amount);
+      };
+    }
+
+    // Auto refresh every 5 minutes
+    function startAutoRefresh() {
+      refreshInterval = setInterval(refreshAllData, 300000); // 5 minutes
+    }
+
+    function stopAutoRefresh() {
+      if (refreshInterval) {
+        clearInterval(refreshInterval);
+      }
+    }
+
+    // dashboardLogout and setupLogoutButton are already defined earlier in the file
+  </script>
+</body>
+
+</html>

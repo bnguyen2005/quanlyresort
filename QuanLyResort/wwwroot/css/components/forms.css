@@ -1,0 +1,7 @@
+@import url('../tokens.css');
+
+.form-control, .form-select { width:100%; height:48px; padding:12px 14px; border-radius: var(--radius-md); border:2px solid var(--color-line); background: var(--color-surface); transition: all .15s ease; }
+.form-control:focus, .form-select:focus { outline:none; border-color: var(--color-primary-600); box-shadow: 0 0 0 4px rgba(200,169,126,0.25); }
+label { font-size:14px; color: var(--color-muted); margin-bottom:8px; display:inline-block; }
+.help { font-size: var(--fs-small); color: var(--color-muted); }
+

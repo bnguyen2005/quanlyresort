@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Authentication</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+    </style>
+</head>
+<body>
+    <h1>🔐 Test Authentication</h1>
+    
+    <div class="section">
+        <h3>1. Kiểm tra Token hiện tại</h3>
+        <button onclick="checkToken()">Check Token</button>
+        <div id="tokenInfo"></div>
+    </div>
+    
+    <div class="section">
+        <h3>2. Đăng nhập Admin</h3>
+        <button onclick="loginAdmin()">Login Admin</button>
+        <div id="loginResult"></div>
+    </div>
+    
+    <div class="section">
+        <h3>3. Test API Call</h3>
+        <button onclick="testApiCall()">Test Customer API</button>
+        <div id="apiResult"></div>
+    </div>
+    
+    <div class="section">
+        <h3>4. Clear Token</h3>
+        <button onclick="clearToken()">Clear Token</button>
+        <div id="clearResult"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5130/api';
+        
+        function checkToken() {
+            const token = localStorage.getItem('adminToken');
+            const info = document.getElementById('tokenInfo');
+            
+            if (token) {
+                info.innerHTML = `
+                    <div class="success">✅ Token tồn tại</div>
+                    <div class="info">Length: ${token.length}</div>
+                    <div class="info">Preview: ${token.substring(0, 50)}...</div>
+                `;
+            } else {
+                info.innerHTML = '<div class="error">❌ Không có token</div>';
+            }
+        }
+        
+        async function loginAdmin() {
+            const result = document.getElementById('loginResult');
+            result.innerHTML = '<div class="info">🔄 Đang đăng nhập...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: 'admin@resort.test',
+                        password: 'P@ssw0rd123'
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    localStorage.setItem('adminToken', data.token);
+                    result.innerHTML = `
+                        <div class="success">✅ Đăng nhập thành công!</div>
+                        <div class="info">Token: ${data.token.substring(0, 50)}...</div>
+                    `;
+                } else {
+                    const error = await response.text();
+                    result.innerHTML = `<div class="error">❌ Login Failed: ${error}</div>`;
+                }
+            } catch (error) {
+                result.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+            }
+        }
+        
+        async function testApiCall() {
+            const result = document.getElementById('apiResult');
+            result.innerHTML = '<div class="info">🔄 Testing API call...</div>';
+            
+            const token = localStorage.getItem('adminToken');
+            if (!token) {
+                result.innerHTML = '<div class="error">❌ Không có token, hãy đăng nhập trước</div>';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/customermanagement/statistics`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    result.innerHTML = `
+                        <div class="success">✅ API call thành công!</div>
+                        <div class="info">Response: ${JSON.stringify(data, null, 2)}</div>
+                    `;
+                } else {
+                    const error = await response.text();
+                    result.innerHTML = `<div class="error">❌ API Failed (${response.status}): ${error}</div>`;
+                }
+            } catch (error) {
+                result.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+            }
+        }
+        
+        function clearToken() {
+            localStorage.removeItem('adminToken');
+            document.getElementById('clearResult').innerHTML = '<div class="success">✅ Token đã được xóa</div>';
+        }
+        
+        // Auto check token on load
+        window.onload = function() {
+            checkToken();
+        };
+    </script>
+</body>
+</html>

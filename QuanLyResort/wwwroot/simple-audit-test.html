@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Audit Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .result { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+        .error { background: #ffe6e6; }
+        .success { background: #e6ffe6; }
+    </style>
+</head>
+<body>
+    <h1>Simple Audit Test</h1>
+    
+    <button onclick="testLogin()">Test Login</button>
+    <button onclick="testAudit()">Test Audit API</button>
+    <button onclick="checkServer()">Check Server</button>
+    
+    <div id="results"></div>
+
+    <script>
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `result ${type}`;
+            div.innerHTML = `<strong>${new Date().toLocaleTimeString()}:</strong> ${message}`;
+            document.getElementById('results').appendChild(div);
+            console.log(message);
+        }
+
+        async function checkServer() {
+            try {
+                log('🔍 Checking server...', 'info');
+                const response = await fetch('http://localhost:5130/', {
+                    method: 'GET'
+                });
+                log(`✅ Server responds: ${response.status} ${response.statusText}`, 'success');
+                
+                const text = await response.text();
+                log(`📄 Response length: ${text.length} chars`, 'info');
+            } catch (error) {
+                log(`❌ Server check failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testLogin() {
+            try {
+                log('🔑 Testing login...', 'info');
+                
+                const response = await fetch('http://localhost:5130/api/auth/login', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        emailOrUsername: 'admin',
+                        password: 'P@ssw0rd123'
+                    })
+                });
+
+                log(`📡 Login response: ${response.status} ${response.statusText}`, 'info');
+                log(`📋 Headers: ${JSON.stringify([...response.headers.entries()])}`, 'info');
+                
+                const text = await response.text();
+                log(`📄 Response text (${text.length} chars): ${text.substring(0, 200)}...`, 'info');
+                
+                if (response.ok && text.trim()) {
+                    try {
+                        const data = JSON.parse(text);
+                        localStorage.setItem('adminToken', data.token);
+                        log('✅ Login successful! Token saved.', 'success');
+                    } catch (e) {
+                        log(`❌ JSON parse error: ${e.message}`, 'error');
+                    }
+                } else {
+                    log(`❌ Login failed: ${response.status}`, 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ Login error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAudit() {
+            const token = localStorage.getItem('adminToken');
+            if (!token) {
+                log('❌ No token! Login first.', 'error');
+                return;
+            }
+
+            try {
+                log('📊 Testing audit API...', 'info');
+                
+                const response = await fetch('http://localhost:5130/api/audit-log?pageSize=5', {
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                log(`📡 Audit response: ${response.status} ${response.statusText}`, 'info');
+                
+                const text = await response.text();
+                log(`📄 Response text (${text.length} chars): ${text.substring(0, 200)}...`, 'info');
+                
+                if (response.ok && text.trim()) {
+                    try {
+                        const data = JSON.parse(text);
+                        log(`✅ Audit API works! Found ${data.logs?.length || 0} logs`, 'success');
+                    } catch (e) {
+                        log(`❌ JSON parse error: ${e.message}`, 'error');
+                    }
+                } else {
+                    log(`❌ Audit API failed: ${response.status}`, 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ Audit error: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto check server on load
+        window.onload = () => {
+            log('🚀 Page loaded', 'info');
+            checkServer();
+        };
+    </script>
+</body>
+</html>

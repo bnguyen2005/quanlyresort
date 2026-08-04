@@ -1,0 +1,115 @@
+==========================================
+   THÔNG TIN ĐĂNG NHẬP HỆ THỐNG RESORT
+==========================================
+
+📱 URL TRUY CẬP:
+-----------------
+Server đang chạy tại: http://localhost:5130
+
+🔗 CÁC TRANG CHÍNH:
+-----------------
+• Portal (Chọn):    http://localhost:5130/portal.html ⭐ BẮT ĐẦU TỪ ĐÂY
+• Welcome:          http://localhost:5130/welcome.html
+• Trang đăng nhập:  http://localhost:5130/customer/login.html
+• API Swagger:      http://localhost:5130/swagger
+• Trang khách:      http://localhost:5130/customer/index.html
+• Trang admin:      http://localhost:5130/admin/html/index.html
+
+👨‍💼 TÀI KHOẢN QUẢN TRỊ (ADMIN):
+---------------------------------
+Email:    admin@resort.test
+Username: admin
+Password: P@ssw0rd123
+Role:     Admin
+
+👤 TÀI KHOẢN KHÁCH HÀNG (CUSTOMER):
+----------------------------------
+Email:    customer1@guest.test
+Username: customer1
+Password: Guest@123
+Role:     Customer
+
+📋 TÀI KHOẢN NHÂN VIÊN KHÁC:
+----------------------------
+1. Business Manager:
+   Email:    business@resort.test
+   Username: business
+   Password: P@ssw0rd123
+   Role:     Business
+
+2. Front Desk:
+   Email:    frontdesk@resort.test
+   Username: frontdesk
+   Password: P@ssw0rd123
+   Role:     FrontDesk
+
+3. Cashier:
+   Email:    cashier@resort.test
+   Username: cashier
+   Password: P@ssw0rd123
+   Role:     Cashier
+
+4. Accounting:
+   Email:    accounting@resort.test
+   Username: accounting
+   Password: P@ssw0rd123
+   Role:     Accounting
+
+5. Inventory:
+   Email:    inventory@resort.test
+   Username: inventory
+   Password: P@ssw0rd123
+   Role:     Inventory
+
+6. Manager:
+   Email:    manager@resort.test
+   Username: manager
+   Password: P@ssw0rd123
+   Role:     Manager
+
+⚙️ HƯỚNG DẪN SỬ DỤNG:
+---------------------
+1. Đảm bảo server đang chạy (netstat -ano | findstr :5130)
+2. Mở trình duyệt và truy cập: http://localhost:5130/portal.html
+3. Chọn portal (Admin hoặc Customer)
+4. Nhập email HOẶC username và mật khẩu
+5. Hệ thống tự động chuyển hướng:
+   - Admin/Staff → Trang quản trị
+   - Customer → Trang khách hàng
+
+💡 KHÔNG CẦN CTRL+SHIFT+R:
+• Trang login đã có cache control headers
+• Trình duyệt sẽ tự động load phiên bản mới nhất
+
+🔧 KHẮC PHỤC SỰ CỐ:
+-------------------
+• Nếu thiếu dữ liệu, truy cập: http://localhost:5130/api/admin/seed (POST)
+• Nếu server không chạy: dotnet run --urls "http://localhost:5130"
+• Nếu vẫn có vấn đề cache: Xóa cache trình duyệt hoặc dùng Incognito mode
+
+💾 DATABASE:
+-----------
+Connection String: Server=(localdb)\mssqllocaldb;Database=ResortManagementDb;Trusted_Connection=true
+Database Name: ResortManagementDb
+
+📝 GHI CHÚ:
+----------
+- Tất cả mật khẩu staff mặc định là: P@ssw0rd123
+- Mật khẩu customer mặc định là: Guest@123
+- Có thể đăng nhập bằng email HOẶC username
+- Token JWT có thời hạn 24 giờ
+- Trang login có cache control tự động
+- Portal page giúp phân loại rõ ràng admin/customer
+
+🆕 TÍNH NĂNG MỚI:
+----------------
+✅ Portal page đẹp mắt để chọn role
+✅ Tự động phát hiện portal từ URL
+✅ Không cần hard reload (Ctrl+Shift+R)
+✅ Cache control headers tự động
+✅ UI/UX mượt mà, chuyên nghiệp
+
+==========================================
+     Cập nhật lần cuối: 21/10/2025
+==========================================
+

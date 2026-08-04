@@ -1,0 +1,130 @@
+// Service Worker for Resort Management System
+const CACHE_NAME = 'resort-cache-v5'; // room-types API fix - bỏ includeInactive parameter
+const urlsToCache = [
+  '/customer/index.html',
+  // REMOVED: '/customer/login.html' - KHÔNG cache trang login!
+  '/customer/register.html',
+  '/customer/rooms.html',
+  '/customer/css/style.css',
+  '/customer/js/main.js'
+  // REMOVED: customer-api.js, customer-login.js - để chúng luôn fresh
+];
+
+// URLs that should NEVER be cached (always fetch fresh)
+const NEVER_CACHE_URLS = [
+  '/customer/login.html',
+  '/portal.html',
+  '/test-cache.html',
+  '/customer/js/customer-api.js',
+  '/customer/js/navbar-auth.js',
+  '/admin/',  // KHÔNG cache TẤT CẢ admin pages
+  'layout-menu.html'  // KHÔNG cache menu component
+];
+
+// Install event - cache resources
+self.addEventListener('install', (event) => {
+  console.log('[Service Worker] Installing...');
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then((cache) => {
+        console.log('[Service Worker] Caching app shell');
+        return cache.addAll(urlsToCache);
+      })
+      .catch((error) => {
+        console.error('[Service Worker] Cache failed:', error);
+      })
+  );
+  self.skipWaiting();
+});
+
+// Activate event - clean up old caches
+self.addEventListener('activate', (event) => {
+  console.log('[Service Worker] Activating...');
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          if (cacheName !== CACHE_NAME) {
+            console.log('[Service Worker] Deleting old cache:', cacheName);
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
+  );
+  self.clients.claim();
+});
+
+// Fetch event - serve from cache, fallback to network
+self.addEventListener('fetch', (event) => {
+  // Skip non-GET requests
+  if (event.request.method !== 'GET') {
+    return;
+  }
+
+  // Skip API calls - always fetch from network
+  if (event.request.url.includes('/api/')) {
+    return;
+  }
+
+  // Skip ALL admin pages - always fetch fresh
+  if (event.request.url.includes('/admin/')) {
+    console.log('[Service Worker] ADMIN PAGE - fetching fresh:', event.request.url);
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
+  // Check if URL should NEVER be cached
+  const url = new URL(event.request.url);
+  const shouldNeverCache = NEVER_CACHE_URLS.some(path => url.pathname.includes(path));
+  
+  if (shouldNeverCache) {
+    console.log('[Service Worker] NEVER CACHE - fetching fresh:', url.pathname);
+    event.respondWith(
+      fetch(event.request)
+        .catch((error) => {
+          console.error('[Service Worker] Fetch failed for never-cache URL:', error);
+          throw error;
+        })
+    );
+    return;
+  }
+
+  event.respondWith(
+    caches.match(event.request)
+      .then((response) => {
+        // Return cached version or fetch from network
+        return response || fetch(event.request)
+          .then((fetchResponse) => {
+            // Don't cache if not a valid response
+            if (!fetchResponse || fetchResponse.status !== 200 || fetchResponse.type !== 'basic') {
+              return fetchResponse;
+            }
+
+            // Clone the response
+            const responseToCache = fetchResponse.clone();
+
+            // Cache the new response
+            caches.open(CACHE_NAME)
+              .then((cache) => {
+                cache.put(event.request, responseToCache);
+              });
+
+            return fetchResponse;
+          })
+          .catch((error) => {
+            console.error('[Service Worker] Fetch failed:', error);
+            // You can return a custom offline page here
+            return caches.match('/customer/index.html');
+          });
+      })
+  );
+});
+
+// Listen for messages from clients
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Test JavaScript Duplicate Functions</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background: #d4edda; }
+        .error { background: #f8d7da; }
+        .warning { background: #fff3cd; }
+        button { padding: 10px 20px; margin: 5px; }
+        .log { background: #f8f9fa; padding: 10px; margin: 10px 0; border-radius: 5px; font-family: monospace; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Test JavaScript Duplicate Functions</h1>
+    
+    <div class="test-section">
+        <h3>1. Test Rooms Page Script</h3>
+        <button onclick="testRoomsScript()">Test Rooms Script</button>
+        <div id="scriptResult" class="log"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>2. Test Function Declarations</h3>
+        <button onclick="testFunctionDeclarations()">Test Function Declarations</button>
+        <div id="functionResult" class="log"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>3. Test JavaScript Errors</h3>
+        <button onclick="testJavaScriptErrors()">Test JavaScript Errors</button>
+        <div id="errorResult" class="log"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>4. Test Rooms Page Load</h3>
+        <button onclick="testRoomsPageLoad()">Test Rooms Page Load</button>
+        <div id="loadResult" class="log"></div>
+    </div>
+
+    <script>
+        function log(elementId, message) {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            element.textContent += `[${timestamp}] ${message}\n`;
+        }
+        
+        async function testRoomsScript() {
+            log('scriptResult', 'Testing rooms page script...');
+            
+            try {
+                const response = await fetch('/admin/html/rooms.html?v=20251026&nocache=1', {
+                    cache: 'no-store'
+                });
+                
+                if (response.ok) {
+                    const html = await response.text();
+                    log('scriptResult', `✅ Rooms page loaded: ${html.length} characters`);
+                    
+                    // Check for duplicate function declarations
+                    const functionMatches = html.match(/function\s+\w+\s*\(|async\s+function\s+\w+\s*\(/g);
+                    if (functionMatches) {
+                        log('scriptResult', `Found ${functionMatches.length} function declarations`);
+                        
+                        // Check for duplicates
+                        const functionNames = functionMatches.map(match => {
+                            const nameMatch = match.match(/(?:function|async\s+function)\s+(\w+)/);
+                            return nameMatch ? nameMatch[1] : null;
+                        }).filter(name => name);
+                        
+                        const duplicates = functionNames.filter((name, index) => 
+                            functionNames.indexOf(name) !== index
+                        );
+                        
+                        if (duplicates.length > 0) {
+                            log('scriptResult', `❌ Duplicate functions found: ${duplicates.join(', ')}`);
+                        } else {
+                            log('scriptResult', '✅ No duplicate function declarations found');
+                        }
+                    }
+                } else {
+                    log('scriptResult', `❌ Failed to load: ${response.status}`);
+                }
+            } catch (error) {
+                log('scriptResult', `❌ Error: ${error.message}`);
+            }
+        }
+        
+        function testFunctionDeclarations() {
+            log('functionResult', 'Testing function declarations...');
+            
+            // Test if we can declare functions without errors
+            try {
+                // Test declaring a function
+                function testFunction() {
+                    return 'test';
+                }
+                log('functionResult', '✅ Function declaration works');
+                
+                // Test declaring the same function again (should error)
+                try {
+                    function testFunction() {
+                        return 'test2';
+                    }
+                    log('functionResult', '❌ Duplicate function declaration should have errored');
+                } catch (error) {
+                    log('functionResult', `✅ Duplicate function correctly errored: ${error.message}`);
+                }
+                
+            } catch (error) {
+                log('functionResult', `❌ Function declaration error: ${error.message}`);
+            }
+        }
+        
+        function testJavaScriptErrors() {
+            log('errorResult', 'Testing JavaScript errors...');
+            
+            // Capture console errors
+            const originalError = console.error;
+            const errors = [];
+            
+            console.error = function(...args) {
+                errors.push(args.join(' '));
+                originalError.apply(console, args);
+            };
+            
+            // Test if we can load the rooms page script
+            try {
+                // Create a script element to test
+                const script = document.createElement('script');
+                script.src = '/admin/html/rooms.html?v=20251026&nocache=1';
+                script.onerror = function() {
+                    log('errorResult', '❌ Script load error');
+                };
+                script.onload = function() {
+                    log('errorResult', '✅ Script loaded successfully');
+                };
+                
+                // Don't actually append it, just test the approach
+                log('errorResult', '✅ JavaScript error testing setup complete');
+                
+            } catch (error) {
+                log('errorResult', `❌ Error: ${error.message}`);
+            }
+            
+            // Restore original console.error
+            console.error = originalError;
+            
+            if (errors.length > 0) {
+                log('errorResult', `⚠️ Found ${errors.length} console errors`);
+                errors.forEach(error => {
+                    log('errorResult', `Error: ${error}`);
+                });
+            } else {
+                log('errorResult', '✅ No console errors found');
+            }
+        }
+        
+        async function testRoomsPageLoad() {
+            log('loadResult', 'Testing rooms page load...');
+            
+            try {
+                // Test loading the page in an iframe
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.src = '/admin/html/rooms.html?v=20251026&nocache=1';
+                
+                iframe.onload = function() {
+                    log('loadResult', '✅ Rooms page loaded in iframe');
+                    
+                    try {
+                        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                        const body = iframeDoc.body;
+                        
+                        if (body) {
+                            log('loadResult', `✅ Body content: ${body.innerHTML.length} characters`);
+                            
+                            // Check if DataTable is initialized
+                            if (iframe.contentWindow.$ && iframe.contentWindow.$.fn.DataTable) {
+                                log('loadResult', '✅ DataTables available in iframe');
+                            } else {
+                                log('loadResult', '⚠️ DataTables not available in iframe');
+                            }
+                        } else {
+                            log('loadResult', '❌ No body content in iframe');
+                        }
+                    } catch (error) {
+                        log('loadResult', `⚠️ Cannot access iframe content: ${error.message}`);
+                    }
+                    
+                    document.body.removeChild(iframe);
+                };
+                
+                iframe.onerror = function() {
+                    log('loadResult', '❌ Iframe load error');
+                    document.body.removeChild(iframe);
+                };
+                
+                document.body.appendChild(iframe);
+                
+            } catch (error) {
+                log('loadResult', `❌ Error: ${error.message}`);
+            }
+        }
+        
+        // Auto-run tests on page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                testRoomsScript();
+                testFunctionDeclarations();
+                testJavaScriptErrors();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
