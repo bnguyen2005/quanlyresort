@@ -1,544 +1,251 @@
-# Resort Management API - Complete System
+# 🏨 Resort Management System — QuanLyResort
 
-## Tổng quan
-**ResortManagementAPI** là hệ thống quản lý resort hoàn chỉnh bao gồm:
-- Backend: ASP.NET Core Web API (.NET 8) + EF Core + SQL Server LocalDB
-- Frontend Customer: Deluxe theme (responsive)
-- Frontend Admin: Sneat Admin Dashboard
-- Authentication: JWT (phân quyền Admin vs Customer)
-- PWA Support với Service Worker
-- Mobile & Desktop responsive
-- Audit logs, Reports, Notifications
+Hệ thống quản lý resort toàn diện: đặt phòng, thanh toán trực tuyến thật, chat hỗ trợ bằng AI, dashboard quản trị, real-time cập nhật trạng thái.
 
 ---
 
-## Cấu trúc Project
+## 📋 Tổng quan
+
+**QuanLyResort** là hệ thống quản lý resort full-stack, gồm:
+
+- **Backend:** ASP.NET Core Web API (.NET 8) + Entity Framework Core + SQL Server LocalDB
+- **Frontend Customer:** Deluxe theme (responsive, PWA)
+- **Frontend Admin:** Sneat Admin Dashboard
+- **Authentication:** JWT (phân quyền Admin / Staff / Customer)
+- **Thanh toán trực tuyến thật:** PayOS (chính), VietQR, MB Bank (webhook dự phòng)
+- **Chat hỗ trợ AI:** đa nhà cung cấp (OpenAI / Groq / HuggingFace / Cohere) + fallback trả lời bằng dữ liệu thật từ database
+- **Real-time:** SignalR — cập nhật trạng thái thanh toán/booking tức thì, không cần polling
+- **PWA:** cài đặt như native app, hỗ trợ offline qua Service Worker
+- **Responsive:** tự động chuyển giao diện mobile/desktop
+- **Audit logs, Reports, Notifications**
+- **Deploy:** Render.com (production), hỗ trợ Docker
+
+---
+
+## 🏗️ Cấu trúc Project
 
 ```
 QuanLyResort/
-├── Models/                 # Entities (Room, Booking, Customer, Invoice, etc.)
-├── Data/                   # DbContext, DataSeeder
-├── Repositories/           # Repository pattern + Unit of Work
-├── Services/               # Business logic (BookingService, RoomService, etc.)
-├── Controllers/            # API Controllers
+├── Models/                     # Entities (Room, Booking, Customer, Invoice, RestaurantOrder, ...)
+├── Data/                       # DbContext, DataSeeder
+├── Repositories/                # Repository pattern + Unit of Work
+├── Services/                    # Business logic
+│   ├── BookingService.cs
+│   ├── RoomService.cs
+│   ├── PayOsService.cs          # Tạo payment link qua PayOS
+│   ├── PayOsWebhookService.cs   # Xử lý webhook PayOS (có verify signature)
+│   ├── SePayService.cs / VietQRService.cs
+│   └── AIChatService.cs         # Chat AI đa nhà cung cấp + fallback
+├── Controllers/
+│   ├── PaymentController.cs         # Session-based payment, các webhook phụ (VietQR, MB Bank)
+│   ├── SimplePaymentController.cs   # Webhook chính đang dùng thật trên production
+│   └── AIChatController.cs
+├── Hubs/
+│   └── PaymentHub.cs             # SignalR — broadcast trạng thái thanh toán real-time
 ├── wwwroot/
-│   ├── customer/          # Deluxe theme - Customer frontend
-│   ├── admin/             # Sneat theme - Admin dashboard
-│   ├── js/                # API helpers, auth, booking integration
-│   ├── manifest.json      # PWA manifest
-│   └── service-worker.js  # PWA service worker
-└── postman_resort_frontend.json  # Postman collection
+│   ├── customer/                # Deluxe theme - Customer frontend
+│   ├── admin/                   # Sneat theme - Admin dashboard
+│   ├── js/                      # API helpers, auth, booking integration
+│   ├── manifest.json            # PWA manifest
+│   └── service-worker.js        # PWA service worker
+├── config-payos-after-deploy.sh # Script đăng ký webhook PayOS sau khi deploy
+├── test-webhook-ngrok.sh        # Script test webhook qua ngrok khi dev local
+└── postman_resort_frontend.json # Postman collection
 ```
 
 ---
 
-## Yêu cầu hệ thống
+## 💳 Kiến trúc thanh toán
 
-### Phần mềm cần thiết
+Hệ thống hỗ trợ **thanh toán thật** qua nhiều kênh:
 
-| Phần mềm | Version | Link Download | Ghi chú |
-|----------|---------|---------------|---------|
-| **.NET 8 SDK** | 8.0+ | [Download](https://dotnet.microsoft.com/download/dotnet/8.0) | ⚠️ **BẮT BUỘC** |
-| **SQL Server LocalDB** | 2019+ | Đi kèm Visual Studio hoặc [SQL Server Express](https://www.microsoft.com/sql-server/sql-server-downloads) | ⚠️ **BẮT BUỘC** |
-| **Visual Studio 2022** | Community+ | [Download](https://visualstudio.microsoft.com/) | Khuyên dùng (có LocalDB) |
-| **VS Code** | Latest | [Download](https://code.visualstudio.com/) | Alternative (cần cài LocalDB riêng) |
-| **Postman** | Latest | [Download](https://www.postman.com/) | Optional (test API) |
+| Kênh | Vai trò | Endpoint webhook |
+|---|---|---|
+| **PayOS** | Cổng chính (MB Bank Payment Gateway) | `POST /api/simplepayment/webhook` |
+| VietQR | Dự phòng | `POST /api/payment/vietqr-webhook` |
+| MB Bank | Dự phòng | `POST /api/payment/mbbank-webhook` |
+| Generic Bank | Webhook chung, có verify chữ ký | `POST /api/payment/bank-webhook` |
+
+**Luồng thanh toán:**
+1. Khách tạo booking → gọi `POST /api/simplepayment/create-link` để tạo QR PayOS đúng số tiền
+2. Khách quét QR, chuyển khoản
+3. PayOS phát hiện giao dịch → gọi webhook về server
+4. Server xác nhận, cập nhật booking → broadcast qua SignalR (`PaymentHub`) → frontend tự động ẩn QR, hiển thị "Đã thanh toán"
+
+**Payment Session:** mỗi lần tạo QR sẽ sinh một session tạm có thời hạn (`ExpiryMinutes`), tách biệt khỏi trạng thái booking chính — cho phép hủy/hết hạn linh hoạt mà không ảnh hưởng dữ liệu booking gốc.
+
+> ⚠️ **Lưu ý bảo mật (đang xử lý):** Endpoint webhook chính (`/api/simplepayment/webhook`) hiện là `[AllowAnonymous]` và **chưa verify chữ ký** từ PayOS/SePay. Đây là hạng mục ưu tiên cần vá trước khi đưa vào môi trường có giao dịch thật quy mô lớn — xem mục [Bảo mật](#-bảo-mật--known-issues) bên dưới.
+
+---
+
+## 🤖 Chat hỗ trợ AI
+
+- Endpoint: `POST /api/aichat/send` (public, không cần đăng nhập)
+- Hỗ trợ nhiều nhà cung cấp AI, cấu hình qua `appsettings.json` (`AIChat:Provider`): `openai`, `groq`, `huggingface`, `cohere`, hoặc `sample` (không cần API key)
+- **RAG đơn giản:** trước khi gửi câu hỏi cho AI, hệ thống tự động nhận diện ý định (phòng, booking, nhà hàng, đánh giá...) và truy vấn dữ liệu thật từ database, đưa vào system prompt — giúp AI trả lời chính xác theo dữ liệu thật thay vì bịa
+- Nếu khách đã đăng nhập, `customerId` được lấy từ JWT token (không tin dữ liệu client tự gửi) → chatbot có thể tra cứu đúng booking của khách đang chat
+- Chế độ **fallback không cần AI thật:** nếu chưa cấu hình API key, hệ thống vẫn trả lời bằng logic keyword-matching + dữ liệu DB thật
+
+---
+
+## 🚀 Cài đặt (Local Development)
+
+### Yêu cầu hệ thống
+
+| Phần mềm | Version | Ghi chú |
+|---|---|---|
+| .NET 8 SDK | 8.0+ | ⚠️ Bắt buộc |
+| SQL Server LocalDB | 2019+ | ⚠️ Bắt buộc (đi kèm Visual Studio) |
+| Visual Studio 2022 | Community+ | Khuyên dùng |
+| ngrok | Latest | Dùng để test webhook thanh toán khi chạy local |
+| Postman | Latest | Optional — test API |
 
 ### Kiểm tra hệ thống
 
-Trước khi cài đặt, kiểm tra các tools đã có chưa:
-
-```powershell
-# Kiểm tra .NET SDK
-dotnet --version
-# Expected: 8.0.x hoặc cao hơn
-
-# Kiểm tra SQL Server LocalDB
-sqllocaldb info
-# Expected: Hiển thị danh sách instances (ví dụ: MSSQLLocalDB)
-
-# Kiểm tra EF Core Tools
-dotnet ef --version
-# Expected: 8.0.x hoặc cao hơn
+```bash
+dotnet --version        # Expected: 8.0.x+
+sqllocaldb info          # Expected: danh sách instances
+dotnet ef --version      # Expected: 8.0.x+
 ```
 
----
+### Các bước cài đặt
 
-## 🚀 Hướng dẫn cài đặt chi tiết (Máy mới)
-
-### ✅ Bước 1: Cài đặt Prerequisites
-
-#### 1.1. Cài đặt .NET 8 SDK
-
-1. Truy cập: https://dotnet.microsoft.com/download/dotnet/8.0
-2. Download **".NET 8.0 SDK"** (Windows x64)
-3. Chạy file installer → Next → Install
-4. Xác nhận cài đặt thành công:
-   ```powershell
-   dotnet --version
-   # Output: 8.0.x
-   ```
-
-#### 1.2. Cài đặt Visual Studio 2022 (Khuyên dùng)
-
-**Cách 1: Visual Studio 2022 (Có SQL Server LocalDB tích hợp)**
-
-1. Download: https://visualstudio.microsoft.com/downloads/
-2. Chạy installer
-3. Chọn workload: **"ASP.NET and web development"**
-4. Trong tab "Individual components", đảm bảo chọn:
-   - ✅ SQL Server Express LocalDB
-   - ✅ .NET 8.0 Runtime
-5. Click Install (khoảng 5-10GB)
-
-**Cách 2: SQL Server LocalDB riêng (Nếu dùng VS Code)**
-
-1. Download SQL Server Express: https://www.microsoft.com/sql-server/sql-server-downloads
-2. Chọn "Download now" → Custom installation
-3. Chọn "LocalDB" trong Features
-4. Cài đặt xong, kiểm tra:
-   ```powershell
-   sqllocaldb create MSSQLLocalDB
-   sqllocaldb start MSSQLLocalDB
-   sqllocaldb info
-   ```
-
-#### 1.3. Cài đặt EF Core Tools
-
-```powershell
-dotnet tool install --global dotnet-ef
-```
-
-Xác nhận:
-```powershell
-dotnet ef --version
-# Output: Entity Framework Core .NET Command-line Tools 8.0.x
-```
-
----
-
-### ✅ Bước 2: Clone/Download Project
-
-**Cách 1: Clone từ Git (nếu có)**
-```powershell
+```bash
+# 1. Clone project
 git clone <repository-url>
 cd QuanLyResort/QuanLyResort
-```
 
-**Cách 2: Extract từ ZIP**
-1. Extract file ZIP vào thư mục (ví dụ: `D:\CNPM_NC_TH_2025\QuanLyResort`)
-2. Mở PowerShell/CMD tại thư mục project:
-   ```powershell
-   cd D:\CNPM_NC_TH_2025\QuanLyResort\QuanLyResort
-   ```
-
----
-
-### ✅ Bước 3: Restore Dependencies
-
-```powershell
-dotnet restore
-```
-
-**Output mong đợi:**
-```
-Restore completed in X.XX sec for ...
-```
-
-**❌ Nếu lỗi:** Kiểm tra kết nối internet và .NET SDK version
-
----
-
-### ✅ Bước 4: Kiểm tra Connection String
-
-Mở file `appsettings.json` và kiểm tra:
-
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=ResortManagementDb;Trusted_Connection=true;MultipleActiveResultSets=true"
-  }
-}
-```
-
-**✏️ Tùy chỉnh (nếu cần):**
-- Nếu dùng SQL Server thật, thay đổi:
-  ```
-  Server=YOUR_SERVER_NAME;Database=ResortManagementDb;User Id=sa;Password=YOUR_PASSWORD;TrustServerCertificate=true
-  ```
-
----
-
-### ✅ Bước 5: Tạo Database
-
-#### 5.1. Kiểm tra Migration đã có chưa
-
-```powershell
-ls Migrations/
-```
-
-**Nếu thấy file `*.cs`** trong thư mục `Migrations/` → **Bỏ qua 5.2**, chuyển sang 5.3
-
-#### 5.2. Tạo Migration (nếu chưa có)
-
-```powershell
-dotnet ef migrations add InitialCreate
-```
-
-**Output mong đợi:**
-```
-Build started...
-Build succeeded.
-Done. To undo this action, use 'dotnet ef migrations remove'
-```
-
-#### 5.3. Apply Migration (Tạo Database)
-
-```powershell
-dotnet ef database update
-```
-
-**Output mong đợi:**
-```
-Build started...
-Build succeeded.
-Applying migration '20241018145811_InitialCreate'.
-Done.
-```
-
-**✅ Xác nhận database đã tạo:**
-
-**Cách 1: Visual Studio**
-- View → SQL Server Object Explorer
-- Expand: (localdb)\MSSQLLocalDB → Databases
-- Tìm `ResortManagementDb`
-
-**Cách 2: Command Line**
-```powershell
-sqllocaldb info MSSQLLocalDB
-```
-
-**❌ Troubleshooting:**
-
-| Lỗi | Giải pháp |
-|-----|-----------|
-| `Cannot open database` | Chạy: `sqllocaldb start MSSQLLocalDB` |
-| `dotnet ef không được nhận dạng` | Chạy: `dotnet tool install --global dotnet-ef` |
-| `Build failed` | Chạy: `dotnet build` để xem lỗi chi tiết |
-
----
-
-### ✅ Bước 6: Chạy Project
-
-```powershell
-dotnet run
-```
-
-**Output mong đợi:**
-```
-info: Microsoft.Hosting.Lifetime[14]
-      Now listening on: https://localhost:7000
-info: Microsoft.Hosting.Lifetime[14]
-      Now listening on: http://localhost:5000
-```
-
-**⚠️ Lưu ý PORT:**
-- Port có thể khác (7001, 7002, etc.)
-- Kiểm tra trong output hoặc file `Properties/launchSettings.json`
-
-**✅ Xác nhận API hoạt động:**
-
-Mở trình duyệt, truy cập:
-```
-https://localhost:7000/swagger
-```
-
-Bạn sẽ thấy Swagger UI với danh sách API endpoints.
-
----
-
-### ✅ Bước 7: Seed Data (Dữ liệu mẫu)
-
-**QUAN TRỌNG:** Database mới tạo sẽ **rỗng**, cần seed dữ liệu mẫu.
-
-#### 7.1. Mở Swagger
-
-```
-https://localhost:7000/swagger
-```
-
-#### 7.2. Login Admin để lấy Token
-
-1. Tìm endpoint: `POST /api/auth/login`
-2. Click "Try it out"
-3. Nhập:
-   ```json
-   {
-     "email": "admin@resort.test",
-     "password": "P@ssw0rd123"
-   }
-   ```
-   **⚠️ CHÚ Ý:** Tài khoản admin này được tạo tự động trong `DataSeeder.cs`, ngay cả khi database rỗng, bạn có thể login ngay.
-   
-4. Click "Execute"
-5. Copy `token` từ Response
-
-#### 7.3. Authorize với Token
-
-1. Click nút **"Authorize"** (icon ổ khóa) ở góc phải trên
-2. Nhập: `Bearer YOUR_TOKEN_HERE`
-   - Ví dụ: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`
-3. Click "Authorize" → Close
-
-#### 7.4. Gọi API Seed
-
-1. Tìm endpoint: `POST /api/admin/seed`
-2. Click "Try it out" → "Execute"
-3. Đợi 5-10 giây
-4. Response `200 OK`:
-   ```json
-   {
-     "message": "Database seeded successfully",
-     "data": { ... }
-   }
-   ```
-
-**✅ Kết quả:** Database giờ có:
-- 6 Staff accounts (Admin, FrontDesk, Cashier, Manager, Accounting, Inventory)
-- 10 Rooms (các loại phòng khác nhau)
-- 5 Customers mẫu
-- 3 Bookings mẫu
-- 2 Invoices mẫu
-
----
-
-### ✅ Bước 8: Truy cập Frontend
-
-Mở trình duyệt, truy cập:
-
-#### 📱 Customer Frontend (Khách hàng)
-```
-https://localhost:7000/customer/index.html
-```
-
-**Test login:**
-- Email: `customer1@guest.test`
-- Password: `Guest@123`
-
-#### 🖥️ Admin Dashboard (Nhân viên)
-```
-https://localhost:7000/admin/index.html
-```
-
-**Test login:**
-- Email: `admin@resort.test`
-- Password: `P@ssw0rd123`
-
----
-
-## 🎯 Tóm tắt Commands (Cheat Sheet)
-
-```powershell
-# 1. Check prerequisites
-dotnet --version
-sqllocaldb info
-
-# 2. Navigate to project
-cd D:\CNPM_NC_TH_2025\QuanLyResort\QuanLyResort
-
-# 3. Restore packages
+# 2. Restore dependencies
 dotnet restore
 
-# 4. Create database
+# 3. Cấu hình appsettings.json (KHÔNG commit key thật — xem mục Bảo mật)
+#    - ConnectionStrings:DefaultConnection
+#    - AIChat:ApiKey (nếu dùng AI thật)
+#    - BankWebhook:PayOs:ChecksumKey / SecretKey
+
+# 4. Tạo database
 dotnet ef database update
 
-# 5. Run project
+# 5. Chạy project
 dotnet run
-
-# 6. Open browser
-# https://localhost:7000/swagger
-# https://localhost:7000/customer/index.html
-# https://localhost:7000/admin/index.html
+# → https://localhost:7000/swagger
 ```
 
----
+### Seed dữ liệu mẫu
 
-## 🔍 URLs Quan trọng
+```
+POST /api/auth/login          # Đăng nhập admin lấy token
+POST /api/admin/seed          # Seed data mẫu (rooms, customers, bookings...)
+```
 
-| Mô tả | URL |
-|-------|-----|
-| **API Swagger** | `https://localhost:7000/swagger` |
-| **Customer Frontend** | `https://localhost:7000/customer/index.html` |
-| **Admin Dashboard** | `https://localhost:7000/admin/index.html` |
-| **API Base** | `https://localhost:7000/api` |
-
----
-
-## Tài khoản mặc định (sau khi seed)
-
-### Staff/Admin Accounts
+**Tài khoản mặc định (sau khi seed):**
 
 | Email | Password | Role |
-|-------|----------|------|
+|---|---|---|
 | admin@resort.test | P@ssw0rd123 | Admin |
 | frontdesk@resort.test | P@ssw0rd123 | FrontDesk |
 | cashier@resort.test | P@ssw0rd123 | Cashier |
 | manager@resort.test | P@ssw0rd123 | Manager |
-| accounting@resort.test | P@ssw0rd123 | Accounting |
-| inventory@resort.test | P@ssw0rd123 | Inventory |
-
-### Customer Accounts
-
-| Email | Password | Role |
-|-------|----------|------|
 | customer1@guest.test | Guest@123 | Customer |
 
+> Đổi các mật khẩu mẫu này trước khi dùng trên môi trường thật.
+
+### Test webhook thanh toán khi dev local
+
+```bash
+# Terminal 1: chạy backend
+dotnet run
+
+# Terminal 2: chạy ngrok để lộ localhost ra internet
+ngrok http 5130
+
+# Terminal 3: test webhook giả lập
+./test-webhook-ngrok.sh https://<your-ngrok-url>.ngrok.io 6 5000
+```
+
 ---
 
-## 📚 API Endpoints & Luồng nghiệp vụ
+## 🌐 Deployment (Render.com)
 
-### Nhóm API chính
+```bash
+# Sau khi deploy, đăng ký webhook URL với PayOS
+./config-payos-after-deploy.sh https://<your-app>.onrender.com
+```
+
+> ⚠️ Script này đọc `ClientId`/`ApiKey` từ `appsettings.json`. **Không để giá trị mặc định/fallback là key thật trong source code** — dùng biến môi trường hoặc secret manager của Render.
+
+**Production URLs:**
+
+| Mô tả | URL |
+|---|---|
+| API Swagger | `/swagger` |
+| Customer Frontend | `/customer/index.html` |
+| Admin Dashboard | `/admin/index.html` |
+| Webhook thanh toán (đăng ký với PayOS) | `/api/simplepayment/webhook` |
+
+---
+
+## 📚 API chính
 
 | Nhóm | Endpoints | Mô tả |
-|------|-----------|-------|
-| **Authentication** | `/api/auth/*` | Login, Register (Admin/Customer) |
-| **Rooms** | `/api/rooms/*` | Quản lý phòng, kiểm tra availability |
-| **Bookings** | `/api/bookings/*` | Tạo booking, check-in, check-out |
-| **Invoices** | `/api/invoices/*` | Quản lý hóa đơn, thanh toán |
-| **Reports** | `/api/reports/*` | Báo cáo doanh thu, công suất |
-| **Audit** | `/api/audit/*` | Audit logs, reconciliation |
-| **Admin** | `/api/admin/*` | Seed data, statistics |
-| **Alerts** | `/api/alerts/*` | Thông báo hệ thống |
+|---|---|---|
+| Authentication | `/api/auth/*` | Login, Register |
+| Rooms | `/api/rooms/*` | Quản lý phòng, availability |
+| Bookings | `/api/bookings/*` | Đặt phòng, check-in/out |
+| Payment | `/api/simplepayment/*`, `/api/payment/*` | Tạo QR, webhook, session |
+| Invoices | `/api/invoices/*` | Hóa đơn |
+| Reports | `/api/reports/*` | Doanh thu, công suất |
+| Audit | `/api/audit/*` | Audit logs |
+| AI Chat | `/api/aichat/*` | Chat hỗ trợ AI |
+| Admin | `/api/admin/*` | Seed data, stats |
 
-### Luồng nghiệp vụ cơ bản
-
-```
-1. Customer → Login → Create Booking → Transfer to Front Desk
-2. FrontDesk → Assign Room → Check-in → Add Charges → Checkout
-3. Cashier → View Invoice → Process Payment
-4. Manager → View Reports & Audit Logs
-```
-
-**📄 Chi tiết:** Xem file `CLIENT_API_MAP.md` để biết đầy đủ endpoints và parameters.
+Chi tiết đầy đủ: xem `CLIENT_API_MAP.md`.
 
 ---
 
-## 🧪 Testing
+## 🔒 Bảo mật / Known Issues (Điểm yếu của dự án)
 
-### Postman Collection
-1. Import file `postman_resort_frontend.json`
-2. Set biến `base_url` = `https://localhost:7000`
-3. Test các flows: Authentication → Bookings → Invoices → Reports
+- [ ] **Webhook thanh toán chính không xác thực chữ ký** — `/api/simplepayment/webhook` là `[AllowAnonymous]`, không verify signature từ PayOS/SePay. Bất kỳ ai biết booking ID (số nguyên tăng dần, dễ đoán) đều có thể tự POST request giả để đánh dấu booking "đã thanh toán" mà không cần trả tiền thật.
+- [ ] **API Key/ClientId PayOS thật bị hardcode và lộ trong repo public** — file `config-payos-after-deploy.sh` có giá trị fallback là credentials thật, cần **revoke và tạo key mới ngay**, đồng thời xóa khỏi Git history.
+- [ ] **Endpoint test có thể giả lập thanh toán thành công** — `PaymentController.TestPayment()` cho phép tự đánh dấu booking của mình là "Paid"; nếu còn tồn tại trên production đây là backdoor.
+- [ ] **Signature verification (ở `PayOsWebhookService.cs`) dùng công thức tự chế, không đúng chuẩn PayOS chính thức** — có nguy cơ luôn reject webhook thật, dẫn đến việc phải tắt xác thực để "chạy được" (mất luôn lớp bảo vệ đó).
 
-### Manual Testing
-- **Swagger UI:** `https://localhost:7000/swagger`
-- **Customer Frontend:** Login với `customer1@guest.test`
-- **Admin Dashboard:** Login với `admin@resort.test`
+- [ ] **Chưa đối soát ngược lại với PayOS** — hệ thống tin `amount` do webhook payload tự khai báo, chưa gọi API PayOS xác nhận lại giao dịch thật trước khi cập nhật booking.
+- [ ] **Chat AI endpoint public không rate-limit** — `/api/aichat/send` không giới hạn số lần gọi, có thể bị lợi dụng để tốn tiền/quota API AI trả phí.
+- [ ] **Lộ chi tiết lỗi nội bộ ra client** — `AIChatController` trả `ex.Message` thẳng cho người dùng ở response lỗi, có thể hé lộ thông tin cấu trúc hệ thống.
+- [ ] **Log quá chi tiết, có thể lộ dữ liệu nhạy cảm** — log in ra prefix API key, toàn bộ request/response body (bao gồm dữ liệu booking khách hàng); rủi ro nếu log bị truy cập trái phép.
 
----
+- [ ] **Tài liệu không đồng bộ với code thật** — README/CLIENT_API_MAP.md từng ghi "chưa có payment gateway" trong khi thực tế đã tích hợp PayOS/VietQR/MB Bank hoàn chỉnh (đã cập nhật trong bản này).
+- [ ] **File rác bị commit vào git** — `.DS_Store`, `.vs/` không nằm trong `.gitignore`.
+- [ ] **Chưa có CI/CD** — dù GitHub Actions có sẵn trong repo, chưa thấy pipeline tự động build/test.
+- [ ] **Nhiều route `/test/*` còn tồn tại song song với code production** — nên tách riêng môi trường Dev/Staging hoặc dùng feature flag để ẩn hoàn toàn khỏi production.
 
-## 📱 Tính năng bổ sung
-
-### PWA (Progressive Web App)
-- ✅ Có thể install như native app trên mobile
-- ✅ Offline support với Service Worker
-- ⚙️ Config: `wwwroot/service-worker.js` → `ENABLE_PWA = true/false`
-
-### Mobile Responsive
-- ✅ Auto detect và redirect mobile
-- ✅ Responsive design cho tất cả màn hình
-- ⚙️ Tắt auto-redirect: `localStorage.setItem('force_desktop_view', 'true')`
-
-### Business Rules
-- ✅ Double-booking prevention
-- ✅ Room status validation
-- ✅ Audit logging tự động
-- ✅ Notifications real-time
-
----
-
-## 🔧 Troubleshooting thường gặp
-
-| Lỗi | Giải pháp |
-|-----|-----------|
-| **Database connection error** | `sqllocaldb start MSSQLLocalDB` |
-| **Migration failed** | `dotnet build` → `dotnet ef migrations add InitialCreate --force` |
-| **Port already in use** | Đổi port trong `Properties/launchSettings.json` |
-| **JWT Invalid Token** | Token hết hạn (24h) → Login lại |
-| **CORS Error** | Frontend và API phải cùng origin hoặc config CORS trong `Program.cs` |
-| **Swagger 404** | Kiểm tra port trong terminal output |
-| **Frontend không load** | Kiểm tra `wwwroot/` folder có đầy đủ files |
-
-**💡 Tip:** Xem terminal output khi chạy `dotnet run` để biết port chính xác!
-
----
-
-## 🚀 Deployment
-
-### Production (SQL Server)
-```json
-// appsettings.Production.json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=YOUR_SERVER;Database=ResortManagementDb;User Id=sa;Password=YOUR_PASS;TrustServerCertificate=true"
-  }
-}
-```
-
-```powershell
-dotnet ef database update --environment Production
-# Deploy: IIS / Azure / Docker
-```
+> **Tóm gọn:** phần kiến trúc, phạm vi tính năng và tư duy hệ thống (session pattern, real-time SignalR, RAG-lite cho chatbot) đều ở mức tốt — điểm yếu gần như tập trung hết vào **lớp bảo mật xác thực của webhook thanh toán**, đây cũng là hạng mục duy nhất mang tính "phải sửa" thay vì "nên sửa".
 
 ---
 
 ## 📋 TODO & Future Enhancements
 
-- [ ] Payment gateway (Momo, ZaloPay, VNPay)
+- [ ] Đối soát giao dịch tự động (reconciliation) — xác nhận lại với API PayOS trước khi tin webhook
 - [ ] Email/SMS notifications
 - [ ] Multi-language support
-- [ ] Advanced reporting (charts, Excel export)
-- [ ] Real-time updates (SignalR)
+- [ ] Advanced reporting (export Excel)
+- [ ] Rate limiting toàn hệ thống
+
+---
+
+## 🧪 Testing
+
+- Project test riêng: `ResortManagementAPI.Tests`
+- Postman collection: `postman_resort_frontend.json`
+- Test webhook local: `test-webhook-ngrok.sh` (xem mục cài đặt)
 
 ---
 
 ## 👥 Team & Contact
 
 - **Developers:** Nhựt, Nguyên, Lam, Ninh
-- **Email:** mhnhwt205@gmail.com
-- **Docs:** `CLIENT_API_MAP.md`, `README_CLIENT.md`
+- **Email:** phamthahlam@gmail.com
+- **Docs:** `CLIENT_API_MAP.md`
 
 ---
-
-## 📝 Ghi chú quan trọng
-
-### ✅ Đã hoàn thành
-- ✅ Backend API hoàn chỉnh (.NET 8 + EF Core)
-- ✅ JWT Authentication với phân quyền
-- ✅ Frontend Customer (Deluxe theme)
-- ✅ Frontend Admin (Sneat dashboard)
-- ✅ PWA support
-- ✅ Mobile responsive
-- ✅ Audit logs & Reports
-- ✅ **Navbar alignment fix** (User email ngang hàng hoàn hảo)
-
-### 🔗 Files quan trọng
-- `README.md` (file này) - Hướng dẫn cài đặt chi tiết
-- `CLIENT_API_MAP.md` - Mapping Frontend ↔ API endpoints
-- `postman_resort_frontend.json` - Postman collection
-- `wwwroot/customer/` - Customer frontend
-- `wwwroot/admin/` - Admin dashboard
-
-### 🎓 Best Practices
-- ✅ Clean code, DRY principle
-- ✅ Repository pattern + Unit of Work
-- ✅ Dependency Injection
-- ✅ Async/await cho tất cả DB operations
-- ✅ Validation & Error handling
-- ✅ Audit logging cho security
-
----
-
-**🎉 Chúc bạn thành công với Resort Management System!**
-
-_Last updated: October 20, 2025_
