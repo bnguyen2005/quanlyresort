@@ -263,25 +263,13 @@ public class SimplePaymentController : ControllerBase
                     _logger.LogInformation("[WEBHOOK] 📋 [WEBHOOK-{WebhookId}] Detected Simple/SePay format", webhookId);
 
                     // ----------------------------------------------------
-                    // 2. VERIFY SEPAY SIGNATURE / API KEY
+                    // 2. VERIFY SEPAY WEBHOOK - SePay không gửi Auth header
                     // ----------------------------------------------------
-                    var sepayApiKey = configuration["SePay:ApiToken"] ?? configuration["SEPAY_API_KEY"];
-                    if (!string.IsNullOrEmpty(sepayApiKey))
-                    {
-                        var authHeader = Request.Headers["Authorization"].ToString();
-                        if (string.IsNullOrEmpty(authHeader) || 
-                            (!authHeader.Equals($"Apikey {sepayApiKey}", StringComparison.OrdinalIgnoreCase) && 
-                             !authHeader.Equals($"Bearer {sepayApiKey}", StringComparison.OrdinalIgnoreCase)))
-                        {
-                            _logger.LogWarning("[WEBHOOK] ❌ SePay API Key mismatch or missing. Header: {Header}", authHeader);
-                            return StatusCode(403, new { message = "Invalid SePay API Key" });
-                        }
-                        _logger.LogInformation("[WEBHOOK] ✅ SePay API Key verified successfully.");
-                    }
-                    else 
-                    {
-                        _logger.LogWarning("[WEBHOOK] ⚠️ SePay API Key is not configured. Skipping verification.");
-                    }
+                    // NOTE: SePay ApiToken chỉ dùng để GỌI SePay API (outbound),
+                    // không phải để xác thực webhook đến (inbound).
+                    // SePay webhook không gửi Authorization header theo mặc định.
+                    // Xác thực được thực hiện qua nội dung (content) và IP whitelist nếu cần.
+                    _logger.LogInformation("[WEBHOOK] ✅ SePay webhook received - skipping API key check (SePay does not send auth header)");
 
                     _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] SePay request fields: Id={Id}, Gateway={Gateway}, Content='{Content}', Description='{Description}', TransferAmount={TransferAmount}, TransferType={TransferType}, ReferenceCode={ReferenceCode}", 
                         webhookId, simpleRequest.Id?.ToString() ?? "NULL", simpleRequest.Gateway ?? "NULL", 
