@@ -40,7 +40,7 @@
       border:2px solid rgba(200,169,126,0.12);
     }
     .room-header{position:relative;margin-bottom:40px}
-    .price-badge{background:linear-gradient(135deg,#c8a97e 0%,#b89968 100%);color:#fff;padding:20px 40px;border-radius:20px;display:inline-block;box-shadow:0 8px 30px rgba(200,169,126,0.4);animation:pulse 2s infinite;font-size:28px;font-weight:700}
+    .price-badge{background:linear-gradient(135deg,#c8a97e 0%,#b89968 100%);color:#fff;padding:20px 40px;border-radius:20px;display:inline-block;box-shadow:0 8px 30px rgba(200,169,126,0.4);font-size:28px;font-weight:700;transform:translateZ(0)}
     .price-badge small{display:block;font-size:14px;opacity:0.9;margin-top:5px}
     .room-title{font-size:48px;font-weight:700;color:#1a1a1a;margin-bottom:20px;animation:slideInLeft 1s ease;background:linear-gradient(135deg,#1a1a1a 0%,#c8a97e 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
     .room-subtitle{font-size:20px;color:#666;margin-bottom:30px;animation:slideInRight 1s ease}
@@ -143,6 +143,13 @@
     /* Loading skeleton */
     .loading-skeleton{background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%);background-size:200% 100%;animation:loading 1.5s infinite;border-radius:10px;height:200px}
     
+    /* Gallery Thumbs */
+    .gallery-thumbs { display: flex; gap: 15px; margin-top: -40px; position: relative; z-index: 10; padding: 0 20px; overflow-x: auto; padding-bottom: 15px; }
+    .gallery-thumb { width: 120px; height: 80px; border-radius: 10px; background-size: cover; background-position: center; cursor: pointer; border: 3px solid #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.2); transition: all 0.3s; opacity: 0.7; flex-shrink: 0; }
+    .gallery-thumb:hover { opacity: 1; transform: translateY(-5px); }
+    .gallery-thumb.active { opacity: 1; border-color: #c8a97e; transform: translateY(-5px); }
+
+    
     /* Animations */
     @keyframes fadeIn{from{opacity:0}to{opacity:1}}
     @keyframes fadeInUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
@@ -173,6 +180,9 @@
       .stats-grid{grid-template-columns:repeat(2,1fr)}
     }
   </style>
+  
+  <!-- Flatpickr CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </head>
 <body>
   <!-- Header placeholder - will be loaded by load-header.js -->
@@ -242,18 +252,11 @@
           <form id="quickBookingForm" data-validate="on">
               <div class="mb-3">
             <label class="form-label fw-semibold d-flex align-items-center gap-2">
-              <span>📅</span> Ngày nhận phòng <span style="color:#dc3545">*</span>
+              <span>📅</span> Lịch trình (Nhận - Trả) <span style="color:#dc3545">*</span>
             </label>
-            <input type="date" class="form-control" id="checkinDate" name="checkinDate" required data-label="Ngày nhận phòng" />
-            <small class="text-muted">Thời gian nhận phòng: 14:00</small>
-              </div>
-          
-              <div class="mb-3">
-            <label class="form-label fw-semibold d-flex align-items-center gap-2">
-              <span>📅</span> Ngày trả phòng <span style="color:#dc3545">*</span>
-            </label>
-            <input type="date" class="form-control" id="checkoutDate" name="checkoutDate" required data-label="Ngày trả phòng" />
-            <small class="text-muted">Thời gian trả phòng: 12:00</small>
+            <input type="text" class="form-control" id="checkinDate" name="checkinDate" required data-label="Ngày nhận và trả phòng" placeholder="Chọn khoảng thời gian..." style="background-color: #fff; cursor: pointer;" />
+            <small class="text-muted">Nhận phòng: 14:00 - Trả phòng: 12:00</small>
+            <input type="hidden" id="checkoutDate" name="checkoutDate" />
               </div>
           
               <div class="mb-3">
@@ -404,6 +407,14 @@
     </div>
   </div>
 
+  <!-- Similar Rooms -->
+  <div class="container mt-5 mb-5" id="similarRoomsSection" style="display: none;">
+    <h3 class="section-title text-center mx-auto" style="display:block;width:max-content;font-size:32px;">Phòng Tương Tự</h3>
+    <div class="row mt-4" id="similarRoomsContainer" style="display:flex;gap:20px;justify-content:center;">
+      <!-- Similar rooms will be loaded here -->
+    </div>
+  </div>
+
   <!-- Modal: Thông tin khách hàng & xác nhận đặt phòng -->
   <div class="modal fade" id="bookingInfoModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -487,13 +498,29 @@
     </div>
   </div>
 
+  <!-- Scripts -->
   <script src="js/jquery.min.js"></script>
-  <script src="js/bootstrap.min.js"></script>
+  <script src="js/jquery-migrate-3.0.1.min.js"></script>
   <script src="js/popper.min.js"></script>
-  <script src="../js/api.js"></script>
-  <script src="js/navbar-auth.js"></script>
-  <script src="js/coupons.js"></script>
-  <script src="js/form-validation.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js/jquery.easing.1.3.js"></script>
+  <script src="js/jquery.waypoints.min.js"></script>
+  <script src="js/jquery.stellar.min.js"></script>
+  <script src="js/owl.carousel.min.js"></script>
+  <script src="js/jquery.magnific-popup.min.js"></script>
+  <script src="js/aos.js"></script>
+  <script src="js/jquery.animateNumber.min.js"></script>
+  <script src="js/bootstrap-datepicker.js"></script>
+  <script src="js/scrollax.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://npmcdn.com/flatpickr/dist/l10n/vn.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/customer-api.js"></script>
+  
+  <!-- Flatpickr JS -->
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://npmcdn.com/flatpickr/dist/l10n/vn.js"></script>
+
   <script>
     const urlParams = new URLSearchParams(window.location.search);
     const roomId = urlParams.get('id');
@@ -517,1255 +544,286 @@
       }
     }
 
-    function pickImage(room) {
-      console.log('🖼️ [pickImage] Room data:', room);
-      console.log('🖼️ [pickImage] Room keys:', Object.keys(room));
-      
-      // Priority 1: Room.ImageUrl (hình ảnh riêng của phòng này, do admin upload)
-      // Handle both camelCase and PascalCase
-      const roomImageUrl = room.imageUrl || room.ImageUrl;
-      if (roomImageUrl && typeof roomImageUrl === 'string' && roomImageUrl.trim().length > 0) {
-        console.log('✅ [pickImage] Found Room.ImageUrl:', roomImageUrl);
-        return formatImageUrl(roomImageUrl);
-      }
-      
-      // Priority 2: RoomTypeImageUrl from API (from RoomTypeNavigation.MainImageUrl)
-      // Handle both camelCase and PascalCase
-      const roomTypeImageUrl = room.roomTypeImageUrl || room.RoomTypeImageUrl;
-      if (roomTypeImageUrl && typeof roomTypeImageUrl === 'string' && roomTypeImageUrl.trim().length > 0) {
-        console.log('✅ [pickImage] Found RoomTypeImageUrl:', roomTypeImageUrl);
-        return formatImageUrl(roomTypeImageUrl);
-      }
-      
-      // Priority 3: Try other image fields from API
-      const fields = [room.image, room.thumbnailUrl, room.thumbnail, room.photoUrl, room.roomImageUrl, room.roomImage];
-      const found = fields.find(u => typeof u === 'string' && u.trim().length > 0);
-      if (found) {
-        console.log('✅ [pickImage] Found in other fields:', found);
-        return formatImageUrl(found);
-      }
-      
-      // Priority 4: Try to parse ImageGallery JSON
-      const imageGallery = room.roomTypeImageGallery || room.RoomTypeImageGallery;
-      if (imageGallery && typeof imageGallery === 'string') {
-        try {
-          const gallery = JSON.parse(imageGallery);
-          if (Array.isArray(gallery) && gallery.length > 0 && gallery[0]) {
-            console.log('✅ [pickImage] Found in ImageGallery:', gallery[0]);
-            return formatImageUrl(gallery[0]);
-          }
-        } catch (e) {
-          console.warn('⚠️ [pickImage] Error parsing ImageGallery:', e);
-        }
-      }
-      
-      // Fallback to default image based on roomId
-      const idx = Math.max(1, (room.roomId || 1) % 6);
-      const fallbackUrl = `images/room-${idx}.jpg`;
-      console.log('⚠️ [pickImage] Using fallback:', fallbackUrl);
-      return fallbackUrl;
-    }
-    
-    function formatImageUrl(url) {
-      if (!url || typeof url !== 'string') return null;
-      url = url.trim();
-      if (url.length === 0) return null;
-      
-      // If it's already a full URL, return as is
-      if (url.startsWith('http://') || url.startsWith('https://')) {
-        return url;
-      }
-      
-      // If it starts with /, it's an absolute path from root
-      if (url.startsWith('/')) {
-        return url;
-      }
-      
-      // Otherwise, treat as relative to images/ folder
-      return url.startsWith('images/') ? url : `images/${url}`;
-    }
-
-    async function loadRoomReviews() {
+    // Initialize Flatpickr for booking dates
+    async function initFlatpickr(roomId) {
+      let bookedDates = [];
       try {
-        const url = `${location.origin}/api/reviews?roomId=${roomId}&_=${Date.now()}`;
-        const resp = await fetch(url, { cache: 'no-store' });
-        
-        if (!resp.ok) {
-          console.error('Error loading reviews:', resp.status);
-          return;
+        const resp = await fetch(`${location.origin}/api/bookings/room/${roomId}/booked-dates`);
+        if (resp.ok) {
+          const data = await resp.json();
+          if (Array.isArray(data)) {
+            bookedDates = data;
+          }
         }
-        
-        const data = await resp.json();
-        const reviews = data.reviews || [];
-        const stats = data.statistics || {};
-        
-        // Display statistics
-        const avgRating = stats.averageRating || 0;
-        const totalReviews = stats.totalReviews || 0;
-        
-        document.getElementById('averageRatingDisplay').textContent = avgRating.toFixed(1);
-        document.getElementById('totalReviewsDisplay').textContent = totalReviews;
-        
-        // Display stars
-        const avgRounded = Math.round(avgRating);
-        const starsContainer = document.getElementById('averageRatingStarsDisplay');
-        starsContainer.innerHTML = '';
-        for (let i = 1; i <= 5; i++) {
-          const star = document.createElement('span');
-          star.className = 'star';
-          star.textContent = '⭐';
-          star.style.color = i <= avgRounded ? '#fbbf24' : '#e5e7eb';
-          starsContainer.appendChild(star);
-        }
-        
-        // Render reviews list
-        renderReviewsList(reviews);
-        
-        // Check if user can review (is logged in)
-        checkCanReviewRoom();
       } catch (e) {
-        console.error('Error loading room reviews:', e);
+        console.error('Error fetching booked dates', e);
       }
-    }
 
-    function renderReviewsList(reviews) {
-      const container = document.getElementById('reviewsListContainer');
-      if (!container) return;
-      
-      container.innerHTML = '';
-      
-      if (!Array.isArray(reviews) || reviews.length === 0) {
-        container.innerHTML = `
-          <div style="background:#fff;padding:40px;border-radius:20px;text-align:center;box-shadow:0 2px 10px rgba(0,0,0,0.05)">
-            <div style="font-size:48px;margin-bottom:16px">📝</div>
-            <h5 style="color:#6b7280;font-weight:600">Chưa có đánh giá nào</h5>
-            <p style="color:#9ca3af;margin:0">Hãy là người đầu tiên chia sẻ trải nghiệm!</p>
-          </div>
-        `;
-        return;
-      }
-      
-      reviews.forEach(review => {
-        const reviewCard = document.createElement('div');
-        reviewCard.style.cssText = 'background:#fff;padding:24px;border-radius:16px;box-shadow:0 2px 10px rgba(0,0,0,0.05);border-left:4px solid #c8a97e';
-        reviewCard.innerHTML = `
-          <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:16px">
-            <div style="display:flex;align-items:center;gap:12px">
-              <div style="width:45px;height:45px;border-radius:50%;background:linear-gradient(135deg,#c8a97e 0%,#b89968 100%);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px">
-                ${review.customerInitials || 'K'}
-              </div>
-              <div>
-                <div style="font-weight:600;color:#1a1a1a;font-size:15px">${review.customerName || 'Khách hàng'}</div>
-                <div style="font-size:12px;color:#9ca3af">${formatDate(review.createdAt)}</div>
-              </div>
-            </div>
-            <div style="display:flex;gap:4px">
-              ${Array.from({length: 5}, (_, i) => 
-                `<span style="font-size:18px;color:${i < review.rating ? '#fbbf24' : '#e5e7eb'}">⭐</span>`
-              ).join('')}
-            </div>
-          </div>
-          <div style="color:#374151;line-height:1.6;margin-bottom:16px;font-size:15px">
-            ${escapeHtml(review.comment)}
-          </div>
-          ${review.response ? `
-            <div style="margin-top:16px;padding:16px;background:#f9fafb;border-radius:12px;border-left:3px solid #c8a97e">
-              <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-                <strong style="color:#c8a97e;font-size:14px">📢 Phản hồi từ Resort Deluxe:</strong>
-              </div>
-              <div style="font-size:14px;color:#6b7280;margin:0">${escapeHtml(review.response)}</div>
-            </div>
-          ` : ''}
-        `;
-        container.appendChild(reviewCard);
-      });
-    }
-
-    function formatDate(dateString) {
-      if (!dateString) return '';
-      const date = new Date(dateString);
-      return new Intl.DateTimeFormat('vi-VN', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      }).format(date);
-    }
-
-    function escapeHtml(str) {
-      if (!str) return '';
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-    }
-
-    async function checkCanReviewRoom() {
-      const token = localStorage.getItem('token');
-      const user = localStorage.getItem('user');
-      const formSection = document.getElementById('reviewFormSection');
-      
-      // Always show form, but check if user can review
-      if (token && user) {
-        try {
-          const userObj = JSON.parse(user);
-          if (userObj.role === 'Customer') {
-            // Enable form elements for logged in users
-            const form = document.getElementById('roomReviewForm');
-            if (form) {
-              // Remove login message if exists
-              const loginMsg = form.querySelector('.login-prompt-message');
-              if (loginMsg) {
-                loginMsg.remove();
-              }
-              
-              // Enable all inputs
-              form.querySelectorAll('textarea, button[type="submit"]').forEach(el => {
-                el.style.pointerEvents = 'auto';
-                el.style.opacity = '1';
-                el.style.cursor = 'pointer';
-              });
-              
-              const submitBtn = form.querySelector('button[type="submit"]');
-              if (submitBtn) {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Gửi đánh giá';
-              }
-              
-              // Setup stars after enabling (with delay to ensure DOM is ready)
-              setTimeout(() => {
-                setupRoomReviewStars();
-              }, 150);
-            }
-            
-            // Check if already reviewed
-            try {
-              const resp = await fetch(`${location.origin}/api/reviews/can-review/${roomId}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-              });
-              
-              if (resp.ok) {
-                const data = await resp.json();
-                if (!data.canReview && data.existingReview) {
-                  // Already reviewed - disable form
-                  const form = document.getElementById('roomReviewForm');
-                  if (form) {
-                    const submitBtn = form.querySelector('button[type="submit"]');
-                    if (submitBtn) {
-                      submitBtn.disabled = true;
-                      submitBtn.textContent = '✏️ Bạn đã đánh giá phòng này';
-                    }
-                    // Disable all inputs except stars stay enabled (but won't submit if already reviewed)
-                    form.querySelectorAll('textarea, button[type="submit"]').forEach(el => {
-                      el.style.pointerEvents = 'none';
-                      el.style.opacity = '0.6';
-                    });
-                  }
-                }
-              }
-            } catch (e) {
-              console.error('Error checking review status:', e);
-            }
+      const commonConfig = {
+        locale: "vn",
+        minDate: "today",
+        disable: bookedDates,
+        mode: "range",
+        dateFormat: "Y-m-d",
+        onChange: function(selectedDates, dateStr, instance) {
+          if (selectedDates.length === 2) {
+            // Update the hidden checkoutDate field
+            const checkinVal = instance.formatDate(selectedDates[0], "Y-m-d");
+            const checkoutVal = instance.formatDate(selectedDates[1], "Y-m-d");
+            // Set the checkin input to only hold the first date so validation works on single date?
+            // Actually, we'll keep the full string in checkinDate for the UI.
+            document.getElementById('checkoutDate').value = checkoutVal;
+          } else {
+            document.getElementById('checkoutDate').value = "";
           }
-        } catch (e) {
-          console.error('Error parsing user:', e);
         }
-      } else {
-        // Not logged in - disable form and show login prompt
-        const form = document.getElementById('roomReviewForm');
-        if (form) {
-          // Disable submit button and textarea
-          form.querySelectorAll('textarea, button[type="submit"]').forEach(el => {
-            el.style.pointerEvents = 'none';
-            el.style.opacity = '0.5';
-          });
-          
-          // Disable star clicks (but keep visual) - do this after setup
-          setTimeout(() => {
-            form.querySelectorAll('.star-input').forEach(el => {
-              el.style.pointerEvents = 'none';
-              el.style.cursor = 'not-allowed';
-            });
-          }, 200);
-          
-          // Setup stars anyway (they will be disabled after)
-          setupRoomReviewStars();
-          
-          // Remove existing login message first
-          const existingMsg = form.querySelector('.login-prompt-message');
-          if (existingMsg) {
-            existingMsg.remove();
-          }
-          
-          // Add login message above form
-          const loginMsg = document.createElement('div');
-          loginMsg.className = 'login-prompt-message';
-          loginMsg.style.cssText = 'background:#fff3cd;border:1px solid #ffc107;border-radius:12px;padding:16px;margin-bottom:20px;text-align:center';
-          loginMsg.innerHTML = `
-            <p style="font-size:15px;color:#856404;margin-bottom:12px">
-              <strong>🔒 Vui lòng đăng nhập để viết đánh giá</strong>
-            </p>
-            <a href="login.html?redirect=${encodeURIComponent(window.location.href)}" class="btn btn-warning" style="color:#fff;padding:8px 24px;border-radius:8px;font-weight:600;text-decoration:none;display:inline-block">
-              Đăng nhập ngay
-            </a>
-          `;
-          form.insertBefore(loginMsg, form.firstChild);
-        }
-      }
-    }
+      };
 
-    function setupRoomReviewStars() {
-      // Wait a bit to ensure DOM is ready
-      setTimeout(() => {
-        const starsContainer = document.getElementById('roomStarRating');
-        if (!starsContainer) {
-          console.warn('⚠️ [setupRoomReviewStars] roomStarRating container not found, retrying...');
-          setTimeout(setupRoomReviewStars, 100);
-          return;
-        }
-        
-        const stars = starsContainer.querySelectorAll('.star-input');
-        if (stars.length === 0) {
-          console.warn('⚠️ [setupRoomReviewStars] No stars found, retrying...');
-          setTimeout(setupRoomReviewStars, 100);
-          return;
-        }
-        
-        console.log('✅ [setupRoomReviewStars] Setting up', stars.length, 'stars');
-        
-        // Remove old event listeners by cloning container
-        const containerParent = starsContainer.parentNode;
-        const newContainer = starsContainer.cloneNode(true);
-        containerParent.replaceChild(newContainer, starsContainer);
-        
-        // Get fresh references
-        const freshContainer = document.getElementById('roomStarRating');
-        const freshStars = freshContainer.querySelectorAll('.star-input');
-        
-        // Make sure stars are clickable
-        freshStars.forEach((star) => {
-          star.style.pointerEvents = 'auto';
-          star.style.cursor = 'pointer';
-          star.style.userSelect = 'none';
-        });
-        
-        freshStars.forEach((star, index) => {
-          const rating = index + 1;
-          
-          // Click handler
-          star.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log('⭐ [setupRoomReviewStars] Star clicked:', rating);
-            
-            const hiddenInput = document.getElementById('roomSelectedRating');
-            if (hiddenInput) {
-              hiddenInput.value = rating;
-              console.log('✅ [setupRoomReviewStars] Rating set to:', rating);
-            }
-            
-            // Update visual state
-            freshStars.forEach((s, i) => {
-              if (i < rating) {
-                s.style.color = '#fbbf24';
-                s.classList.add('active');
-              } else {
-                s.style.color = '#e5e7eb';
-                s.classList.remove('active');
-              }
-            });
-          });
-          
-          // Hover effect
-          star.addEventListener('mouseenter', function() {
-            freshStars.forEach((s, i) => {
-              s.style.color = i < rating ? '#fbbf24' : '#e5e7eb';
-            });
-          });
-        });
-        
-        // Mouse leave handler
-        freshContainer.addEventListener('mouseleave', function() {
-          const hiddenInput = document.getElementById('roomSelectedRating');
-          const selected = hiddenInput ? parseInt(hiddenInput.value) || 0 : 0;
-          freshStars.forEach((s, i) => {
-            s.style.color = i < selected ? '#fbbf24' : '#e5e7eb';
-          });
-        });
-        
-        console.log('✅ [setupRoomReviewStars] Stars setup complete, stars are clickable');
-      }, 50);
-    }
-
-    async function submitRoomReview(e) {
-      e.preventDefault();
-      
-      const rating = parseInt(document.getElementById('roomSelectedRating').value);
-      const comment = document.getElementById('roomReviewComment').value.trim();
-      
-      if (!rating || rating === 0) {
-        if (typeof showToast === 'function') {
-          showToast('Vui lòng chọn số sao đánh giá', 'warning');
-        } else {
-          alert('Vui lòng chọn số sao đánh giá');
-        }
-        return;
-      }
-      
-      if (!comment || comment.length < 10) {
-        if (typeof showToast === 'function') {
-          showToast('Vui lòng nhập nội dung đánh giá (ít nhất 10 ký tự)', 'warning');
-        } else {
-          alert('Vui lòng nhập nội dung đánh giá (ít nhất 10 ký tự)');
-        }
-        return;
-      }
-      
-      const token = localStorage.getItem('token');
-      if (!token) {
-        if (typeof showToast === 'function') {
-          showToast('Vui lòng đăng nhập để gửi đánh giá', 'warning');
-        } else {
-          alert('Vui lòng đăng nhập để gửi đánh giá');
-        }
-        return;
-      }
-      
-      try {
-        const btn = e.target.querySelector('button[type="submit"]') || e.target;
-        btn.disabled = true;
-        btn.textContent = 'Đang gửi...';
-        
-        const resp = await fetch(`${location.origin}/api/reviews`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            roomId: roomId,
-            rating: rating,
-            comment: comment
-          })
-        });
-        
-        if (!resp.ok) {
-          const error = await resp.json();
-          throw new Error(error.message || 'Lỗi gửi đánh giá');
-        }
-        
-        if (typeof showToast === 'function') {
-          showToast('Đánh giá của bạn đã được gửi thành công! Cảm ơn bạn đã chia sẻ.', 'success');
-        } else {
-          alert('Đánh giá của bạn đã được gửi thành công! Cảm ơn bạn đã chia sẻ.');
-        }
-        
-        document.getElementById('roomReviewForm').reset();
-        document.getElementById('roomSelectedRating').value = 0;
-        document.querySelectorAll('#roomStarRating .star-input').forEach(s => {
-          s.style.color = '#e5e7eb';
-          s.classList.remove('active');
-        });
-        
-        // Reload reviews to show new review
-        await loadRoomReviews();
-        
-        // Re-setup stars after reset
-        setupRoomReviewStars();
-        
-        // Update checkCanReviewRoom to disable form if already reviewed
-        await checkCanReviewRoom();
-      } catch (error) {
-        if (typeof showToast === 'function') {
-          showToast('Lỗi: ' + error.message, 'danger');
-        } else {
-          alert('Lỗi: ' + error.message);
-        }
-      } finally {
-        const btn = e.target.querySelector('button[type="submit"]') || e.target;
-        btn.disabled = false;
-        btn.textContent = 'Gửi đánh giá';
-      }
+      flatpickr("#checkinDate", commonConfig);
     }
 
     async function loadRoomDetail() {
       if (!roomId) {
         console.error('❌ [loadRoomDetail] No roomId provided');
-        showToast('Không tìm thấy phòng', 'danger');
-        setTimeout(() => window.location.href = 'rooms.html', 2000);
         return;
       }
 
       try {
-        console.log('🔵 [loadRoomDetail] Loading room ID:', roomId);
-        showPageLoading('Đang tải chi tiết phòng...');
-
-        const url = `${API_ROOMS}/${roomId}?_=${Date.now()}`;
-        console.log('🔵 [loadRoomDetail] Fetching:', url);
-
-        const resp = await fetch(url, {cache: 'no-store'});
-        console.log('🔵 [loadRoomDetail] Response status:', resp.status, resp.statusText);
-
-        if (!resp.ok) {
-          const errorText = await resp.text();
-          console.error('❌ [loadRoomDetail] API Error:', errorText);
-          throw new Error('HTTP ' + resp.status + ': ' + errorText);
-        }
+        const resp = await fetch(`${API_ROOMS}/${roomId}?_=${Date.now()}`);
+        if (!resp.ok) throw new Error('Không thể tải chi tiết phòng');
 
         const room = await resp.json();
-        console.log('✅ [loadRoomDetail] Room data received:', room);
-        
-        // ALWAYS clear coupon when loading a room (fresh booking for this room)
-        // This ensures coupon from previous room/session doesn't persist
-        if (lastLoadedRoomId !== roomId) {
-          console.log('🔄 [loadRoomDetail] Loading room, clearing any previous coupon');
-          window.coupons?.clearAppliedCoupon && window.coupons.clearAppliedCoupon();
-          const couponInput = document.getElementById('couponCode');
-          const couponMsg = document.getElementById('couponMessage');
-          const badge = document.getElementById('couponAppliedBadge');
-          if (couponInput) couponInput.value = '';
-          if (couponMsg) {
-            couponMsg.textContent = '';
-            couponMsg.style.color = '#6b7280';
-          }
-          if (badge) badge.style.display = 'none';
-        }
-        lastLoadedRoomId = roomId;
-        
-        // Store room data for QR calculation
         currentRoom = room;
-        
-        // Load reviews and statistics
-        await loadRoomReviews();
 
-        // HÌNH ẢNH ĐẠI DIỆN (Hero Gallery) - Riêng biệt với gallery
-        // Priority: Room.ImageUrl > RoomTypeImageUrl > Fallback
-        let heroImageUrl = null;
-        
-        // Priority 1: Room.ImageUrl (hình đại diện riêng của phòng này)
-        const roomImageUrl = room.imageUrl || room.ImageUrl;
-        if (roomImageUrl && typeof roomImageUrl === 'string' && roomImageUrl.trim().length > 0) {
-          heroImageUrl = formatImageUrl(roomImageUrl);
-          console.log('✅ [loadRoomDetail] Using Room.ImageUrl as hero:', heroImageUrl);
-        }
-        
-        // Priority 2: RoomTypeImageUrl (hình đại diện từ RoomType)
-        if (!heroImageUrl) {
-          const roomTypeImageUrl = room.roomTypeImageUrl || room.RoomTypeImageUrl;
-          if (roomTypeImageUrl && typeof roomTypeImageUrl === 'string' && roomTypeImageUrl.trim().length > 0) {
-            heroImageUrl = formatImageUrl(roomTypeImageUrl);
-            console.log('✅ [loadRoomDetail] Using RoomTypeImageUrl as hero:', heroImageUrl);
-          }
-        }
-        
-        // Priority 3: Fallback
-        if (!heroImageUrl) {
-          const idx = Math.max(1, (room.roomId || 1) % 6);
-          heroImageUrl = `images/room-${idx}.jpg`;
-          console.log('⚠️ [loadRoomDetail] Using fallback hero image:', heroImageUrl);
-        }
-        
-        // Set hero image
-        document.getElementById('heroGallery').innerHTML = `<img src="${heroImageUrl}" alt="${room.roomTypeName || 'Phòng'}" />`;
-        
-        // GALLERY 5 ẢNH (Thumbnails) - Riêng biệt với hình đại diện
-        const thumbsContainer = document.getElementById('galleryThumbs');
-        thumbsContainer.innerHTML = ''; // Clear existing thumbs
-        
-        let galleryImages = [];
-        
-        // Priority 1: Use Room.ImageGallery (gallery 5 ảnh riêng của phòng này)
-        const roomImageGallery = room.imageGallery || room.ImageGallery;
-        if (roomImageGallery && typeof roomImageGallery === 'string') {
-          try {
-            galleryImages = JSON.parse(roomImageGallery);
-            if (!Array.isArray(galleryImages)) galleryImages = [];
-            console.log('✅ [loadRoomDetail] Using Room.ImageGallery:', galleryImages.length, 'images');
-          } catch (e) {
-            console.warn('⚠️ [loadRoomDetail] Error parsing Room.ImageGallery:', e);
-          }
-        }
-        
-        // Priority 2: Use RoomTypeImageGallery if Room gallery is empty
-        if (galleryImages.length === 0) {
-          const roomTypeImageGallery = room.roomTypeImageGallery || room.RoomTypeImageGallery;
-          if (roomTypeImageGallery && typeof roomTypeImageGallery === 'string') {
-            try {
-              galleryImages = JSON.parse(roomTypeImageGallery);
-              if (!Array.isArray(galleryImages)) galleryImages = [];
-              console.log('✅ [loadRoomDetail] Using RoomTypeImageGallery:', galleryImages.length, 'images');
-            } catch (e) {
-              console.warn('⚠️ [loadRoomDetail] Error parsing RoomTypeImageGallery:', e);
-            }
-          }
-        }
-        
-        // Priority 3: If no gallery, use hero image for first thumb, then fallback images
-        if (galleryImages.length === 0) {
-          galleryImages = [heroImageUrl]; // Use hero as first thumb
-          // Add fallback images for remaining slots
-          for (let i = 1; i < 5; i++) {
-            const idx = Math.max(1, ((room.roomId || 1) + i) % 6);
-            galleryImages.push(`images/room-${idx}.jpg`);
-          }
-          console.log('⚠️ [loadRoomDetail] Using fallback gallery images');
-        }
-        
-        // Create thumbnails (max 5)
-        const maxThumbs = Math.min(5, Math.max(1, galleryImages.length));
-        for (let i = 0; i < maxThumbs; i++) {
-          const thumb = document.createElement('img');
-          thumb.src = formatImageUrl(galleryImages[i]) || imgUrl; // Fallback to main image
-          thumb.className = `thumb ${i === 0 ? 'active' : ''}`;
-          thumb.onclick = () => {
-            document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
-            thumb.classList.add('active');
-            document.querySelector('#heroGallery img').src = thumb.src;
-          };
-          thumbsContainer.appendChild(thumb);
-        }
-
-        // Update room info
+        // Populate basic UI elements (titles, prices, etc)
         document.getElementById('roomTitle').textContent = room.roomTypeName || room.roomType || 'Phòng';
-        document.getElementById('roomSubtitle').textContent = `${room.roomNumber || ''} - Sức chứa: ${room.maxOccupancy || '-'} khách`;
+        document.getElementById('roomSubtitle').textContent = 'Khu nghỉ dưỡng cao cấp Resort Deluxe';
         document.getElementById('roomPrice').textContent = vnd(room.pricePerNight || room.basePrice || 0);
         document.getElementById('nightPrice').textContent = vnd(room.pricePerNight || room.basePrice || 0);
-        
-        document.getElementById('roomDescription').innerHTML = `<p>${room.description || 'Phòng nghỉ sang trọng với đầy đủ tiện nghi hiện đại, không gian thoáng đãng và dịch vụ chuyên nghiệp.'}</p>`;
-        
-        // Update stats
         document.getElementById('maxOccupancy').textContent = room.maxOccupancy || '-';
-        document.getElementById('roomSize').textContent = room.roomSize || room.size || '25';
+        document.getElementById('roomSize').textContent = room.roomSize || '-';
 
-        const maxGuestsNote = document.getElementById('maxGuestsNote');
-        const maxOccupancy = room.maxOccupancy || 4;
-        if (maxGuestsNote) {
-          maxGuestsNote.textContent = `Tối đa ${maxOccupancy} khách`;
+        // Load image
+        let mainImg = room.imageUrl?.trim() || room.image?.trim() || `images/room-1.jpg`;
+        const heroGallery = document.getElementById('heroGallery');
+        if (heroGallery) {
+            heroGallery.style.backgroundImage = `url('${mainImg}')`;
+            heroGallery.style.backgroundSize = 'cover';
+            heroGallery.style.backgroundPosition = 'center';
+            const skel = heroGallery.querySelector('.loading-skeleton');
+            if (skel) skel.remove();
         }
-        
-        // Update guests dropdown - remove/disable options that exceed max occupancy
-        const numGuestsSelect = document.getElementById('numGuests');
-        if (numGuestsSelect) {
-          const options = numGuestsSelect.querySelectorAll('option');
-          let hasValidSelection = false;
-          
-          options.forEach(option => {
-            const value = parseInt(option.value);
-            const optionText = option.textContent.toLowerCase();
-            // "5+ khách" means 5 or more, so treat it as 5 for comparison
-            const actualValue = optionText.includes('+') ? value : value;
-            
-            if (actualValue > maxOccupancy) {
-              option.style.display = 'none';
-              option.disabled = true;
+
+        // Initialize Image Gallery thumbs
+        const galleryThumbs = document.getElementById('galleryThumbs');
+        if (galleryThumbs) {
+            let images = [];
+            if (room.imageGallery) {
+                try {
+                    images = JSON.parse(room.imageGallery);
+                } catch(e) { console.error('Error parsing ImageGallery', e); }
+            }
+            if (!images.length && mainImg) {
+                images.push(mainImg);
+            }
+
+            if (images.length > 1) {
+                galleryThumbs.innerHTML = '';
+                images.forEach((imgUrl, index) => {
+                    const thumb = document.createElement('div');
+                    thumb.className = 'gallery-thumb' + (index === 0 ? ' active' : '');
+                    thumb.style.backgroundImage = `url('${imgUrl}')`;
+                    thumb.onclick = () => {
+                        heroGallery.style.backgroundImage = `url('${imgUrl}')`;
+                        document.querySelectorAll('.gallery-thumb').forEach(t => t.classList.remove('active'));
+                        thumb.classList.add('active');
+                    };
+                    galleryThumbs.appendChild(thumb);
+                });
             } else {
-              option.style.display = '';
-              option.disabled = false;
-              if (option.selected) hasValidSelection = true;
+                galleryThumbs.style.display = 'none';
             }
-          });
-          
-          // If current selection exceeds max, reset to max or first valid option
-          const currentValue = parseInt(numGuestsSelect.value);
-          if (currentValue > maxOccupancy) {
-            // Find highest valid option
-            let bestOption = null;
-            options.forEach(option => {
-              const val = parseInt(option.value);
-              if (val <= maxOccupancy && (!bestOption || val > parseInt(bestOption.value))) {
-                bestOption = option;
-              }
-            });
-            if (bestOption) {
-              bestOption.selected = true;
-              hasValidSelection = true;
-            }
-          }
         }
 
-        // Update amenities (simulate)
-        const amenities = [
-          {icon: '🏖️', name: 'Ban công riêng'},
-          {icon: '🌊', name: 'View biển'},
-          {icon: '📺', name: 'TV màn hình phẳng'},
-          {icon: '❄️', name: 'Điều hòa'},
-          {icon: '🛁', name: 'Phòng tắm sang trọng'},
-          {icon: '☕', name: 'Minibar'},
-          {icon: '🔒', name: 'Két an toàn'},
-          {icon: '📶', name: 'Wifi miễn phí'}
-        ];
+        // Load description
+        document.getElementById('roomDescription').innerHTML = `<p style="line-height:1.8;color:var(--text-secondary,#666);">${room.description || 'Chưa có mô tả chi tiết cho phòng này.'}</p>`;
 
+        // Load amenities
         const amenitiesGrid = document.getElementById('amenitiesGrid');
-        amenities.forEach((amenity, idx) => {
-          const item = document.createElement('div');
-          item.className = 'amenity-item';
-          item.style.animationDelay = `${0.1 * idx}s`;
-          item.innerHTML = `<div style="font-size:40px">${amenity.icon}</div><h6>${amenity.name}</h6>`;
-          amenitiesGrid.appendChild(item);
-        });
+        if (amenitiesGrid) {
+            let ams = [];
+            if (room.amenities && Array.isArray(room.amenities)) { ams = room.amenities; }
+            else if (typeof room.amenities === 'string') { ams = room.amenities.split(',').map(s=>s.trim()).filter(Boolean); }
+            
+            if (ams.length > 0) {
+                amenitiesGrid.innerHTML = ams.map(a => `
+                  <div style="display:flex;align-items:center;gap:12px;padding:15px;background:var(--bg-card,#f8f9fa);border-radius:10px;border:1px solid var(--border,#eee);">
+                    <span style="color:var(--gold,#c8a97e);font-size:20px;">✓</span>
+                    <span style="font-weight:500;color:var(--text-primary,#333);">${a}</span>
+                  </div>
+                `).join('');
+            } else {
+                amenitiesGrid.innerHTML = `
+                  <div style="display:flex;align-items:center;gap:12px;padding:15px;background:var(--bg-card,#f8f9fa);border-radius:10px;border:1px solid var(--border,#eee);"><span style="color:var(--gold,#c8a97e);font-size:20px;">✓</span><span style="font-weight:500;color:var(--text-primary,#333);">Wifi tốc độ cao</span></div>
+                  <div style="display:flex;align-items:center;gap:12px;padding:15px;background:var(--bg-card,#f8f9fa);border-radius:10px;border:1px solid var(--border,#eee);"><span style="color:var(--gold,#c8a97e);font-size:20px;">✓</span><span style="font-weight:500;color:var(--text-primary,#333);">Bữa sáng tự chọn</span></div>
+                  <div style="display:flex;align-items:center;gap:12px;padding:15px;background:var(--bg-card,#f8f9fa);border-radius:10px;border:1px solid var(--border,#eee);"><span style="color:var(--gold,#c8a97e);font-size:20px;">✓</span><span style="font-weight:500;color:var(--text-primary,#333);">Hồ bơi vô cực</span></div>
+                  <div style="display:flex;align-items:center;gap:12px;padding:15px;background:var(--bg-card,#f8f9fa);border-radius:10px;border:1px solid var(--border,#eee);"><span style="color:var(--gold,#c8a97e);font-size:20px;">✓</span><span style="font-weight:500;color:var(--text-primary,#333);">Dịch vụ dọn phòng 24/7</span></div>
+                `;
+            }
+        }
 
-        // Setup booking form
+        // Initialize booking dates and logic
+        await initFlatpickr(roomId);
+        await loadRoomReviews();
+        await loadSimilarRooms(room);
         setupBookingForm(room);
-        
-      } catch(e) {
-        console.error('Error loading room:', e);
-        showToast('Lỗi tải thông tin phòng: ' + e.message, 'danger');
-      } finally {
-        hidePageLoading();
+      } catch (err) {
+        console.error('Lỗi tải chi tiết phòng:', err);
       }
     }
-    
-    function setupBookingForm(room) {
-      const price = room.pricePerNight || room.basePrice || 0;
-      const maxOccupancy = room.maxOccupancy || 4;
-      const checkin = document.getElementById('checkinDate');
-      const checkout = document.getElementById('checkoutDate');
-      const numGuests = document.getElementById('numGuests');
-      const btnBook = document.getElementById('btnBookNow');
-      const guestLimitWarning = document.getElementById('guestLimitWarning');
-      let isSubmitting = false;
-      
-      // Set min date to today
-      const today = new Date().toISOString().split('T')[0];
-      checkin.min = today;
-      checkout.min = today;
-      
-      // Validate guests selection
-      function validateGuests() {
-        const selectedValue = parseInt(numGuests.value) || 1;
-        const selectedOption = numGuests.options[numGuests.selectedIndex];
-        const optionText = selectedOption ? selectedOption.textContent.toLowerCase() : '';
-        // If option is "5+ khách", we need to check if it exceeds max
-        // Since "5+" means 5 or more, we treat it as potentially exceeding if max < 5
-        const actualGuestCount = selectedValue; // Use the numeric value
-        
-        if (guestLimitWarning) {
-          if (actualGuestCount > maxOccupancy) {
-            guestLimitWarning.style.display = 'block';
-            const guestText = optionText.includes('+') ? `${selectedValue}+ khách` : `${selectedValue} khách`;
-            guestLimitWarning.innerHTML = `
-              <div style="color:#856404;font-weight:600;margin-bottom:6px;">⚠️ Số khách vượt quá sức chứa phòng</div>
-              <div style="color:#856404;margin-bottom:8px;">Phòng này chỉ có thể chứa tối đa <strong>${maxOccupancy} khách</strong>. Bạn đã chọn <strong>${guestText}</strong>.</div>
-              <div style="color:#856404;">
-                <a href="rooms.html?maxOccupancy=${selectedValue}" style="color:#856404;text-decoration:underline;font-weight:600;display:inline-block;margin-top:4px;">👉 Xem các phòng phù hợp cho ${selectedValue} khách trở lên</a>
-              </div>
-            `;
-            numGuests.classList.add('is-invalid');
-            return false;
-          } else {
-            guestLimitWarning.style.display = 'none';
-            numGuests.classList.remove('is-invalid');
-            // Clear any inline error
-            if (window.formValidation?.clearInlineError) {
-              window.formValidation.clearInlineError(numGuests);
-            }
-            return true;
-          }
-        }
-        return true;
-      }
-      
-      // Initial validation
-      validateGuests();
-      
-      // Note: numGuests change listener is added later with coupon clearing logic
-      
-      // Coupon: apply with full validation
-      const couponInput = document.getElementById('couponCode');
-      const applyCouponBtn = document.getElementById('applyCouponBtn');
-      const couponMsg = document.getElementById('couponMessage');
-      
-      // Validate coupon code format
-      function validateCouponFormat(code) {
-        if (!code || !code.trim()) {
-          return { valid: false, message: 'Vui lòng nhập mã giảm giá' };
-        }
-        // Mã giảm giá: chỉ chữ cái, số, không có khoảng trắng, 3-50 ký tự
-        const codeRegex = /^[A-Z0-9]{3,50}$/i;
-        const cleanCode = code.trim().toUpperCase();
-        if (!codeRegex.test(cleanCode)) {
-          return { valid: false, message: 'Mã giảm giá không hợp lệ. Mã chỉ chứa chữ cái và số (3-50 ký tự)' };
-        }
-        return { valid: true, code: cleanCode };
-      }
-      
-      // Check prerequisites before applying coupon
-      function canApplyCoupon() {
-        const checkinVal = checkin.value;
-        const checkoutVal = checkout.value;
-        const guestsVal = parseInt(numGuests.value) || 0;
-        
-        if (!checkinVal || !checkoutVal) {
-          return { canApply: false, message: 'Vui lòng chọn ngày nhận phòng và ngày trả phòng trước khi áp dụng mã giảm giá' };
-        }
-        
-        const checkinDate = new Date(checkinVal);
-        const checkoutDate = new Date(checkoutVal);
-        
-        if (checkoutDate <= checkinDate) {
-          return { canApply: false, message: 'Ngày trả phòng phải sau ngày nhận phòng' };
-        }
-        
-        if (guestsVal <= 0) {
-          return { canApply: false, message: 'Vui lòng chọn số khách trước khi áp dụng mã giảm giá' };
-        }
-        
-        if (guestsVal > maxOccupancy) {
-          return { canApply: false, message: `Số khách (${guestsVal}) vượt quá sức chứa phòng (${maxOccupancy}). Vui lòng chọn phòng khác hoặc giảm số khách.` };
-        }
-        
-        return { canApply: true };
-      }
-      
-      if (applyCouponBtn && couponInput) {
-        // Format coupon code on input (uppercase, remove spaces)
-        couponInput.addEventListener('input', (e) => {
-          let value = e.target.value.toUpperCase().replace(/\s+/g, '');
-          // Only allow alphanumeric
-          value = value.replace(/[^A-Z0-9]/g, '');
-          if (value !== e.target.value) {
-            e.target.value = value;
-          }
-        });
-        
-        applyCouponBtn.addEventListener('click', async () => {
-          let code = (couponInput.value || '').trim();
-          
-          // 1. Validate format
-          const formatCheck = validateCouponFormat(code);
-          if (!formatCheck.valid) {
-            if (couponMsg) {
-              couponMsg.style.color = '#ef4444';
-              couponMsg.textContent = formatCheck.message;
-            }
-            couponInput.classList.add('is-invalid');
-            return;
-          }
-          code = formatCheck.code;
-          
-          // 2. Check prerequisites
-          const prereqCheck = canApplyCoupon();
-          if (!prereqCheck.canApply) {
-            if (couponMsg) {
-              couponMsg.style.color = '#ef4444';
-              couponMsg.textContent = prereqCheck.message;
-            }
-            // Highlight the missing fields
-            if (!checkin.value) checkin.classList.add('is-invalid');
-            if (!checkout.value) checkout.classList.add('is-invalid');
-            const guestsVal = parseInt(numGuests.value) || 0;
-            if (guestsVal <= 0 || guestsVal > maxOccupancy) numGuests.classList.add('is-invalid');
-            return;
-          }
-          
-          // Clear any previous errors
-          couponInput.classList.remove('is-invalid');
-          checkin.classList.remove('is-invalid');
-          checkout.classList.remove('is-invalid');
-          numGuests.classList.remove('is-invalid');
-          
-          // Check if another coupon is already applied
-          const existingCoupon = window.coupons?.getAppliedCoupon ? window.coupons.getAppliedCoupon() : null;
-          if (existingCoupon && existingCoupon.code && existingCoupon.code.toUpperCase() !== code) {
-            if (couponMsg) {
-              couponMsg.style.color = '#ef4444';
-              couponMsg.textContent = `Mã "${existingCoupon.code.toUpperCase()}" đã được áp dụng. Vui lòng xóa mã cũ trước khi áp dụng mã mới.`;
-            }
-            return;
-          }
-          
-          // If same coupon, no need to re-validate
-          if (existingCoupon && existingCoupon.code && existingCoupon.code.toUpperCase() === code && !existingCoupon.pending) {
-            if (couponMsg) {
-              couponMsg.style.color = '#10b981';
-              couponMsg.textContent = `✅ Mã "${code}" đã được áp dụng`;
-            }
-            return;
-          }
-          
-          applyCouponBtn.disabled = true;
-          applyCouponBtn.textContent = 'Đang kiểm tra...';
-          
-          try {
-            // 3. Validate with backend
-            const result = await (window.coupons?.validateCoupon ? window.coupons.validateCoupon(code) : Promise.reject(new Error('Không thể kiểm tra mã')));
-            
-            // 4. Save validated coupon with booking metadata
-            // Store metadata to ensure coupon only applies to current booking
-            const couponWithMetadata = {
-              ...result,
-              appliedForRoomId: roomId,
-              appliedForCheckin: checkin.value,
-              appliedForCheckout: checkout.value,
-              appliedForGuests: parseInt(numGuests.value) || 0,
-              appliedAt: Date.now()
-            };
-            window.coupons?.saveAppliedCoupon && window.coupons.saveAppliedCoupon(couponWithMetadata);
-            
-            if (couponMsg) {
-              couponMsg.style.color = '#10b981';
-              const discountText = result.type === 'percent' 
-                ? `${result.value}%` 
-                : vnd(result.value);
-              couponMsg.textContent = `✅ Mã "${code}" đã được áp dụng thành công (Giảm ${discountText})`;
-            }
-            
-            // Hide pending badge if successful
-            const badge = document.getElementById('couponAppliedBadge');
-            if (badge) badge.style.display = 'none';
-            
-            // 5. Update total with validated coupon
-            updateTotal();
-            
-          } catch (e) {
-            // If 403 Forbidden: save pending coupon code to send with booking, but don't change totals
-            if (e && e.status === 403) {
-              // Save pending coupon with metadata
-              const pendingCouponWithMetadata = {
-                code,
-                pending: true,
-                appliedForRoomId: roomId,
-                appliedForCheckin: checkin.value,
-                appliedForCheckout: checkout.value,
-                appliedForGuests: parseInt(numGuests.value) || 0,
-                appliedAt: Date.now()
-              };
-              window.coupons?.saveAppliedCoupon && window.coupons.saveAppliedCoupon(pendingCouponWithMetadata);
-              if (couponMsg) {
-                couponMsg.style.color = '#f59e0b';
-                couponMsg.textContent = `⚠️ Mã "${code}" sẽ được kiểm tra khi xác nhận đặt phòng. Tổng tiền hiện tại chưa áp dụng giảm.`;
-              }
-              // Show badge with applied coupon code
-              const badge = document.getElementById('couponAppliedBadge');
-              const codeDisplay = document.getElementById('appliedCouponCode');
-              if (badge && codeDisplay) {
-                codeDisplay.textContent = code;
-                badge.style.display = 'block';
-              }
-              // Don't update total for pending coupons
-              updateTotal(); // This will show base price
-            } else {
-              window.coupons?.clearAppliedCoupon && window.coupons.clearAppliedCoupon();
-              const badge = document.getElementById('couponAppliedBadge');
-              if (badge) badge.style.display = 'none';
-              if (couponMsg) {
-                couponMsg.style.color = '#ef4444';
-                couponMsg.textContent = (e && e.message) ? e.message : `Mã "${code}" không hợp lệ hoặc đã hết hạn`;
-              }
-              couponInput.classList.add('is-invalid');
-              updateTotal();
-            }
-          } finally {
-            applyCouponBtn.disabled = false;
-            applyCouponBtn.textContent = 'Áp dụng';
-          }
-        });
-        
-        // Clear coupon button removed - to save space for coupon input field
-        // Users can clear by entering a new coupon code or clearing the input field directly
-      }
 
-      // Track booking details to detect changes
-      let lastBookingDetails = {
-        checkin: null,
-        checkout: null,
-        guests: null,
-        roomId: null
-      };
+    async function loadSimilarRooms(room) {
+      const section = document.getElementById('similarRoomsSection');
+      const container = document.getElementById('similarRoomsContainer');
+      if (!section || !container) return;
       
-      // Clear applied coupon function
-      window.clearAppliedCoupon = function() {
-        try {
-          const couponInput = document.getElementById('couponCode');
-          const couponMsg = document.getElementById('couponMessage');
-          const badge = document.getElementById('couponAppliedBadge');
-          const codeDisplay = document.getElementById('appliedCouponCode');
-          
-          if (couponInput) couponInput.value = '';
-          if (couponMsg) {
-            couponMsg.textContent = '';
-            couponMsg.style.color = '#6b7280';
-          }
-          if (badge) badge.style.display = 'none';
-          if (codeDisplay) codeDisplay.textContent = '-';
-          
-          // Clear from localStorage if using coupons.js
-          if (window.coupons?.clearAppliedCoupon) {
-            window.coupons.clearAppliedCoupon();
-          }
-          
-          console.log('✅ [clearAppliedCoupon] Coupon cleared');
-        } catch (e) {
-          console.error('❌ [clearAppliedCoupon] Error:', e);
+      try {
+        const resp = await fetch(`${API_ROOMS}?limit=4`);
+        if (!resp.ok) return;
+        const allRooms = await resp.json();
+        
+        let similar = allRooms.filter(r => r.roomId != room.roomId && r.isAvailable);
+        // Try to match roomType if possible
+        const sameType = similar.filter(r => r.roomType === room.roomType);
+        if (sameType.length > 0) {
+            similar = sameType;
         }
-      };
+        
+        similar = similar.slice(0, 3); // take top 3
+        
+        if (similar.length === 0) {
+            section.style.display = 'none';
+            return;
+        }
+        
+        section.style.display = 'block';
+        container.innerHTML = similar.map(r => {
+            const img = r.imageUrl || r.image || 'images/room-1.jpg';
+            return `
+            <div class="col-md-4" style="min-width: 280px; max-width: 350px;">
+                <div style="background:#fff;border-radius:15px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,0.08);transition:all 0.3s;" onmouseover="this.style.transform='translateY(-10px)'" onmouseout="this.style.transform='translateY(0)'">
+                    <a href="room-detail.html?id=${r.roomId}" style="display:block;height:200px;background:url('${img}') center/cover;position:relative;text-decoration:none;">
+                        <div style="position:absolute;top:15px;right:15px;background:rgba(255,255,255,0.9);padding:5px 12px;border-radius:20px;font-weight:700;color:#c8a97e;">${vnd(r.pricePerNight)}</div>
+                    </a>
+                    <div style="padding:20px;">
+                        <a href="room-detail.html?id=${r.roomId}" style="text-decoration:none;"><h4 style="font-weight:700;color:#1a1a1a;margin-bottom:10px;font-size:20px;">${r.roomTypeName || r.roomType || 'Phòng'} ${r.roomNumber || ''}</h4></a>
+                        <div style="display:flex;gap:15px;color:#666;font-size:14px;margin-bottom:15px;">
+                            <span>👤 ${r.maxOccupancy} khách</span>
+                        </div>
+                        <a href="room-detail.html?id=${r.roomId}" style="display:inline-block;padding:8px 20px;border-radius:20px;border:1px solid #c8a97e;color:#c8a97e;text-decoration:none;font-weight:600;transition:all 0.3s;" onmouseover="this.style.background='#c8a97e';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='#c8a97e'">Xem chi tiết</a>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+        
+      } catch (e) {
+          console.error('Error loading similar rooms', e);
+      }
+    }
 
-      function clearCouponIfBookingChanged() {
-        const currentCheckin = checkin.value;
-        const currentCheckout = checkout.value;
-        const currentGuests = parseInt(numGuests.value) || 0;
+    async function loadRoomReviews() {
+      const container = document.getElementById('reviewsListContainer');
+      if (!container) return;
+      container.innerHTML = Array(3).fill(`
+        <div style="border:1px solid var(--border,#eee);padding:24px;border-radius:8px;background:var(--bg-card,#fff);margin-bottom:20px;">
+          <div style="display:flex;gap:15px;align-items:center;margin-bottom:15px;">
+            <div class="loading-skeleton" style="width:50px;height:50px;border-radius:50%;"></div>
+            <div style="flex:1;">
+              <div class="loading-skeleton" style="height:15px;width:120px;margin-bottom:8px;border-radius:4px;"></div>
+              <div class="loading-skeleton" style="height:12px;width:80px;border-radius:4px;"></div>
+            </div>
+          </div>
+          <div class="loading-skeleton" style="height:15px;width:100px;margin-bottom:15px;border-radius:4px;"></div>
+          <div class="loading-skeleton" style="height:15px;width:100%;margin-bottom:8px;border-radius:4px;"></div>
+          <div class="loading-skeleton" style="height:15px;width:80%;border-radius:4px;"></div>
+        </div>
+      `).join('');
+      
+      try {
+        const resp = await fetch(`${location.origin}/api/reviews?roomId=${roomId}&_=${Date.now()}`, {cache:'no-store'});
+        if (!resp.ok) throw new Error('HTTP error ' + resp.status);
+        const data = await resp.json();
+        const reviews = Array.isArray(data) ? data : (data?.reviews || data?.items || []);
         
-        // Only clear coupon if we have tracking data and something changed
-        // Skip on initial load (when all tracking values are null)
-        const hasTracking = lastBookingDetails.checkin !== null || 
-                           lastBookingDetails.checkout !== null || 
-                           lastBookingDetails.guests !== null;
-        
-        if (!hasTracking) {
-          // First time, just track - don't clear
-          lastBookingDetails.checkin = currentCheckin;
-          lastBookingDetails.checkout = currentCheckout;
-          lastBookingDetails.guests = currentGuests;
-          lastBookingDetails.roomId = roomId;
+        if (reviews.length === 0) {
+          container.innerHTML = '<div class="text-center py-5"><p class="text-muted">Chưa có đánh giá nào cho phòng này.</p></div>';
           return;
         }
-        
-        // If dates or guests changed, clear coupon
-        // (user is making a new booking, not just adjusting current booking)
-        const datesChanged = (
-          (lastBookingDetails.checkin && lastBookingDetails.checkin !== currentCheckin) ||
-          (lastBookingDetails.checkout && lastBookingDetails.checkout !== currentCheckout)
-        );
-        
-        const guestsChanged = (
-          lastBookingDetails.guests !== null &&
-          lastBookingDetails.guests !== currentGuests
-        );
-        
-        const roomChanged = (
-          lastBookingDetails.roomId !== null &&
-          lastBookingDetails.roomId !== roomId
-        );
-        
-        // Clear coupon if booking parameters changed
-        if (datesChanged || guestsChanged || roomChanged) {
-          const applied = window.coupons?.getAppliedCoupon ? window.coupons.getAppliedCoupon() : null;
-          if (applied) {
-            console.log('🔄 [updateTotal] Booking details changed, clearing coupon', {
-              datesChanged, guestsChanged, roomChanged,
-              old: lastBookingDetails,
-              new: { checkin: currentCheckin, checkout: currentCheckout, guests: currentGuests, roomId }
-            });
-            window.coupons?.clearAppliedCoupon && window.coupons.clearAppliedCoupon();
-            const couponInput = document.getElementById('couponCode');
-            const couponMsg = document.getElementById('couponMessage');
-            const badge = document.getElementById('couponAppliedBadge');
-            if (couponInput) couponInput.value = '';
-            if (couponMsg) {
-              couponMsg.textContent = '💡 Mã giảm giá đã được xóa do thay đổi thông tin đặt phòng';
-              couponMsg.style.color = '#6b7280';
-            }
-            if (badge) badge.style.display = 'none';
-          }
-        }
-        
-        // Update tracking
-        lastBookingDetails.checkin = currentCheckin;
-        lastBookingDetails.checkout = currentCheckout;
-        lastBookingDetails.guests = currentGuests;
-        lastBookingDetails.roomId = roomId;
-      }
-      
-      function updateTotal() {
-        const checkinVal = checkin.value ? new Date(checkin.value) : null;
-        const checkoutVal = checkout.value ? new Date(checkout.value) : null;
-        
-        // Clear coupon if booking details changed (new booking scenario)
-        if (checkin.value || checkout.value) {
-          clearCouponIfBookingChanged();
-        }
-        
-        if (checkin.value && checkout.value && checkoutVal > checkinVal) {
-          const nights = Math.ceil((checkoutVal - checkinVal) / (1000 * 60 * 60 * 24));
-          document.getElementById('numNights').textContent = nights;
-          const base = price * nights;
-          
-          // Get applied coupon
-          const applied = window.coupons?.getAppliedCoupon ? window.coupons.getAppliedCoupon() : null;
-          
-          // CRITICAL: Only apply discount if:
-          // 1. Coupon exists
-          // 2. Coupon is validated (not pending)
-          // 3. Coupon was applied for THIS specific booking (same room, dates, guests)
-          let result = { total: base, discount: 0 };
-          
-          if (applied && !applied.pending) {
-            // Check if coupon was applied for current booking
-            const isForCurrentBooking = (
-              applied.appliedForRoomId === roomId &&
-              applied.appliedForCheckin === checkin.value &&
-              applied.appliedForCheckout === checkout.value &&
-              applied.appliedForGuests === (parseInt(numGuests.value) || 0)
-            );
-            
-            if (isForCurrentBooking) {
-              // Only calculate discount for validated coupons that match current booking
-              result = window.coupons?.calculateDiscountedTotal ? window.coupons.calculateDiscountedTotal(base, applied) : { total: base, discount: 0 };
-            } else {
-              // Coupon doesn't match current booking - clear it
-              console.log('🔄 [updateTotal] Coupon was for different booking, clearing it');
-              window.coupons?.clearAppliedCoupon && window.coupons.clearAppliedCoupon();
-              const couponRow = document.getElementById('couponRow');
-              if (couponRow) couponRow.style.display = 'none';
-              const couponInput = document.getElementById('couponCode');
-              const couponMsg = document.getElementById('couponMessage');
-              const badge = document.getElementById('couponAppliedBadge');
-              if (couponInput) couponInput.value = '';
-              if (couponMsg) {
-                couponMsg.textContent = '';
-                couponMsg.style.color = '#6b7280';
-              }
-              if (badge) badge.style.display = 'none';
-            }
-          }
-          
-          const couponRow = document.getElementById('couponRow');
-          const couponDiscount = document.getElementById('couponDiscount');
-          
-          // Show discount row only if:
-          // 1. Coupon exists
-          // 2. Coupon is validated (not pending)
-          // 3. Discount > 0
-          if (applied && !applied.pending && result.discount > 0) {
-            couponRow.style.display = 'flex';
-            couponDiscount.textContent = '-' + vnd(result.discount);
-          } else {
-            couponRow.style.display = 'none';
-          }
-          
-          document.getElementById('totalPrice').textContent = vnd(result.total);
-        } else {
-          document.getElementById('numNights').textContent = '0';
-          document.getElementById('totalPrice').textContent = vnd(0);
-          const couponRow = document.getElementById('couponRow');
-          if (couponRow) couponRow.style.display = 'none';
-        }
-        
-        if (checkin.value) checkout.min = checkin.value;
-      }
 
-      checkin.addEventListener('change', () => {
-        // Clear coupon when dates change (new booking)
-        const applied = window.coupons?.getAppliedCoupon ? window.coupons.getAppliedCoupon() : null;
-        if (applied && lastBookingDetails.checkin !== checkin.value) {
-          console.log('🔄 [checkin change] Date changed, will clear coupon in updateTotal');
-        }
-        updateTotal();
-        // Clear error when user selects date
-        if (window.formValidation?.clearInlineError) {
-          window.formValidation.clearInlineError(checkin);
-        }
-      });
-      checkout.addEventListener('change', () => {
-        // Clear coupon when dates change (new booking)
-        const applied = window.coupons?.getAppliedCoupon ? window.coupons.getAppliedCoupon() : null;
-        if (applied && lastBookingDetails.checkout !== checkout.value) {
-          console.log('🔄 [checkout change] Date changed, will clear coupon in updateTotal');
-        }
-        updateTotal();
-        // Clear error when user selects date
-        if (window.formValidation?.clearInlineError) {
-          window.formValidation.clearInlineError(checkout);
-        }
-      });
-      
-      // Clear coupon when number of guests changes
-      numGuests.addEventListener('change', () => {
-        const applied = window.coupons?.getAppliedCoupon ? window.coupons.getAppliedCoupon() : null;
-        const currentGuests = parseInt(numGuests.value) || 0;
-        if (applied && lastBookingDetails.guests !== currentGuests) {
-          console.log('🔄 [guests change] Guest count changed, will clear coupon in updateTotal');
-        }
-        updateTotal();
-        validateGuests();
-      });
+        container.innerHTML = reviews.map(r => {
+          const avatarUrl = r.customerAvatarUrl || r.CustomerAvatarUrl;
+          const initials = (r.customerName || 'K').charAt(0).toUpperCase();
+          const avatarHtml = avatarUrl
+            ? `<img src="${avatarUrl}" alt="${r.customerName}" style="width:50px;height:50px;border-radius:50%;object-fit:cover;border:2px solid var(--border,#eee);">`
+            : `<div style="width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,var(--gold,#c8a97e),var(--gold-dark,#a08460));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;border:2px solid var(--border,#eee);">${initials}</div>`;
+          const stars = Array.from({length:5},(_,i)=>`<span style="color:${i<r.rating?'var(--gold,#c8a97e)':'#ddd'};font-size:18px;">★</span>`).join('');
+          const date = r.createdAt ? new Date(r.createdAt).toLocaleDateString('vi-VN',{year:'numeric',month:'long',day:'numeric'}) : '';
+          
+          return `
+            <div style="border:1px solid var(--border,#eee);padding:24px;border-radius:8px;background:var(--bg-card,#fff);margin-bottom:20px;">
+              <div style="display:flex;gap:15px;align-items:center;margin-bottom:15px;">
+                ${avatarHtml}
+                <div>
+                  <div style="font-weight:600;font-size:16px;color:var(--text-primary,#333);">${r.customerName || 'Khách hàng'}</div>
+                  <div style="font-size:13px;color:var(--text-muted,#888);">${date}</div>
+                </div>
+              </div>
+              <div style="margin-bottom:12px;">${stars}</div>
+              <div style="font-style:italic;color:var(--text-secondary,#666);line-height:1.7;">"${r.comment}"</div>
+            </div>`;
+        }).join('');
+      } catch (e) {
+        console.error('Error loading reviews:', e);
+        container.innerHTML = '<div class="text-center py-4 text-danger"><p>Lỗi khi tải đánh giá.</p></div>';
+      }
+    }
 
-      // Review form submit
-      document.getElementById('roomReviewForm')?.addEventListener('submit', submitRoomReview);
-      
-      // Cancel button
-      document.getElementById('btnCancelReview')?.addEventListener('click', () => {
-        document.getElementById('roomReviewForm').reset();
-        document.getElementById('roomSelectedRating').value = 0;
-        document.querySelectorAll('#roomStarRating .star-input').forEach(s => {
-          s.style.color = '#e5e7eb';
-          s.classList.remove('active');
-        });
-      });
-      
-      // Khi bấm "Đặt phòng ngay" -> validate và mở modal nhập thông tin
+    function setupBookingForm(room) {
+      const btnBook = document.getElementById('btnBookNow');
       const bookingModal = new bootstrap.Modal(document.getElementById('bookingInfoModal'));
-      document.getElementById('btnBookNow').addEventListener('click', async () => {
-        // Trigger form validation
-        const quickForm = document.getElementById('quickBookingForm');
-        if (quickForm) {
-          // Get validation functions from global scope
-          const validateInput = window.formValidation?.validateInput || function(input) {
-            const label = (input.getAttribute('data-label') || input.name || 'Trường này').trim();
-            const required = input.hasAttribute('required');
-            const value = (input.value || '').trim();
-            if (required && !value) return `${label} là bắt buộc`;
-            return '';
-          };
-          const createInlineError = window.formValidation?.createInlineError || function(input, message) {
-            let holder = input.closest('.mb-3') || input.parentElement;
-            if (!holder) holder = input;
-            let err = holder.querySelector('.fv-error');
-            if (!err) {
-              err = document.createElement('div');
-              err.className = 'fv-error';
-              err.style.cssText = 'color:#dc3545;font-size:12px;margin-top:4px;';
-              holder.appendChild(err);
-            }
-            err.textContent = message || '';
-            input.classList.add('is-invalid');
-          };
-          const clearInlineError = window.formValidation?.clearInlineError || function(input) {
-            input.classList.remove('is-invalid');
-            const holder = input.closest('.mb-3') || input.parentElement;
-            const err = holder && holder.querySelector('.fv-error');
-            if (err) err.textContent = '';
-          };
-          
-          // Check validation
-          const checkin = document.getElementById('checkinDate');
-          const checkout = document.getElementById('checkoutDate');
-          
-          let hasError = false;
-          
-          // Validate check-in
-          if (!checkin.value) {
-            const msg = validateInput(checkin);
-            if (msg) {
-              createInlineError(checkin, msg);
-              hasError = true;
-            }
+      let isSubmitting = false;
+
+      if (!btnBook) return;
+
+      btnBook.addEventListener('click', async (e) => {
+        e.preventDefault();
+        
+        const checkin = document.getElementById('checkinDate');
+        const checkout = document.getElementById('checkoutDate');
+        const numGuests = document.getElementById('numGuests');
+        let hasError = false;
+
+        const quickForm = document.getElementById('bookingQuickForm');
+        // Validate check-in
+        if (quickForm && quickForm.dataset.validate === 'on') {
+          const fp = checkin._flatpickr;
+          if (!fp || fp.selectedDates.length < 2) {
+            createInlineError(checkin, 'Vui lòng chọn đầy đủ ngày nhận và trả phòng');
+            hasError = true;
           } else {
-            clearInlineError(checkin);
-          }
-          
-          // Validate check-out
-          if (!checkout.value) {
-            const msg = validateInput(checkout);
-            if (msg) {
-              createInlineError(checkout, msg);
+            const checkinDate = fp.selectedDates[0];
+            const checkoutDate = fp.selectedDates[1];
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            
+            if (checkinDate < today) {
+              createInlineError(checkin, 'Ngày nhận phòng không thể là quá khứ');
               hasError = true;
-            }
-          } else {
-            clearInlineError(checkout);
-          }
-          
-          // Validate date logic
-          if (checkin.value && checkout.value) {
-            const checkinDate = new Date(checkin.value);
-            const checkoutDate = new Date(checkout.value);
-            if (checkoutDate <= checkinDate) {
-              createInlineError(checkout, 'Ngày trả phòng phải sau ngày nhận phòng');
+            } else if (checkoutDate <= checkinDate) {
+              createInlineError(checkin, 'Ngày trả phòng phải sau ngày nhận phòng');
               hasError = true;
             } else {
-              // Clear error if dates are valid
-              clearInlineError(checkout);
+              clearInlineError(checkin);
             }
           }
           
@@ -1807,12 +865,12 @@
           
           // Clear any previous errors if all valid
           clearInlineError(checkin);
-          clearInlineError(checkout);
         }
         
         // Hiển thị tóm tắt đặt phòng (ngày, số đêm, khách)
-        const checkinVal = document.getElementById('checkinDate').value;
-        const checkoutVal = document.getElementById('checkoutDate').value;
+        const fp = checkin._flatpickr;
+        const checkinVal = fp && fp.selectedDates.length > 0 ? fp.formatDate(fp.selectedDates[0], "Y-m-d") : null;
+        const checkoutVal = fp && fp.selectedDates.length > 1 ? fp.formatDate(fp.selectedDates[1], "Y-m-d") : null;
         const guestsVal = document.getElementById('numGuests').value;
 
         // Function to update summary in modal
@@ -1952,15 +1010,16 @@
       const checkout = document.getElementById('checkoutDate');
       const numGuests = document.getElementById('numGuests');
       
+      const fp = checkin._flatpickr;
       // Validation
-      if (!checkin.value || !checkout.value) {
-        showToast('Vui lòng chọn ngày nhận và trả phòng', 'warning');
+      if (!fp || fp.selectedDates.length < 2) {
+        showToast('Vui lòng chọn đầy đủ ngày nhận và trả phòng', 'warning');
         checkin.focus();
         return;
       }
       
-      const checkinDate = new Date(checkin.value);
-      const checkoutDate = new Date(checkout.value);
+      const checkinDate = fp.selectedDates[0];
+      const checkoutDate = fp.selectedDates[1];
       const today = new Date();
       today.setHours(0,0,0,0);
       
@@ -1972,7 +1031,7 @@
       
       if (checkoutDate <= checkinDate) {
         showToast('Ngày trả phòng phải sau ngày nhận phòng', 'warning');
-        checkout.focus();
+        checkin.focus();
         return;
       }
       
