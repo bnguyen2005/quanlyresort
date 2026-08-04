@@ -49,6 +49,7 @@ public class SimplePaymentController : ControllerBase
     [Microsoft.AspNetCore.Authorization.AllowAnonymous]
     public async Task<IActionResult> Webhook()
     {
+        var configuration = HttpContext.RequestServices.GetRequiredService<IConfiguration>();
         var webhookId = Guid.NewGuid().ToString("N")[..8];
         var startTime = DateTime.UtcNow;
         
@@ -164,7 +165,7 @@ public class SimplePaymentController : ControllerBase
                     // ----------------------------------------------------
                     // 1. VERIFY PAYOS SIGNATURE
                     // ----------------------------------------------------
-                    var payOsConfig = _configuration.GetSection("BankWebhook:PayOs");
+                    var payOsConfig = configuration.GetSection("BankWebhook:PayOs");
                     var checksumKey = payOsConfig["ChecksumKey"] ?? payOsConfig["SecretKey"];
                     
                     if (!string.IsNullOrEmpty(checksumKey))
@@ -264,7 +265,7 @@ public class SimplePaymentController : ControllerBase
                     // ----------------------------------------------------
                     // 2. VERIFY SEPAY SIGNATURE / API KEY
                     // ----------------------------------------------------
-                    var sepayApiKey = _configuration["SePay:ApiToken"] ?? _configuration["SEPAY_API_KEY"];
+                    var sepayApiKey = configuration["SePay:ApiToken"] ?? configuration["SEPAY_API_KEY"];
                     if (!string.IsNullOrEmpty(sepayApiKey))
                     {
                         var authHeader = Request.Headers["Authorization"].ToString();
