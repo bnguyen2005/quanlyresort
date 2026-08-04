@@ -146,10 +146,10 @@ public class PaymentController : ControllerBase
     }
 
     /// <summary>
-    /// Endpoint để test/simulate payment (chỉ dùng cho development/testing)
+    /// Endpoint để test/simulate payment - CHỈ ADMIN
     /// </summary>
     [HttpPost("test/{bookingId}")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> TestPayment(int bookingId)
     {
         try
@@ -446,10 +446,10 @@ public class PaymentController : ControllerBase
     }
 
     /// <summary>
-    /// Endpoint test để kiểm tra webhook có hoạt động không
+    /// Endpoint test để kiểm tra webhook có hoạt động không - CHỈ ADMIN
     /// </summary>
     [HttpPost("test/webhook")]
-    [AllowAnonymous]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> TestWebhook([FromQuery] int bookingId = 39)
     {
         try

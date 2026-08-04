@@ -89,6 +89,9 @@ builder.Services.AddScoped<INotificationManager, NotificationManager>();
 builder.Services.AddScoped<ILocalizationService, LocalizationService>();
 builder.Services.AddScoped<ITwoFactorAuthService, TwoFactorAuthService>();
 
+// Add MemoryCache for rate limiting
+builder.Services.AddMemoryCache();
+
 // Add SignalR
 builder.Services.AddSignalR();
 
