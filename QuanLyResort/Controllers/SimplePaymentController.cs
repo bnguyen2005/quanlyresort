@@ -160,6 +160,63 @@ public class SimplePaymentController : ControllerBase
                     }
                     
                     _logger.LogInformation("[WEBHOOK] ✅ [WEBHOOK-{WebhookId}] PayOs code is '00' (success), continuing processing...", webhookId);
+
+                    // ----------------------------------------------------
+                    // 1. VERIFY PAYOS SIGNATURE
+                    // ----------------------------------------------------
+                    var payOsConfig = _configuration.GetSection("BankWebhook:PayOs");
+                    var checksumKey = payOsConfig["ChecksumKey"] ?? payOsConfig["SecretKey"];
+                    
+                    if (!string.IsNullOrEmpty(checksumKey))
+                    {
+                        try
+                        {
+                            using var jsonDoc = System.Text.Json.JsonDocument.Parse(rawRequestJson);
+                            if (jsonDoc.RootElement.TryGetProperty("signature", out var signatureElement) && 
+                                jsonDoc.RootElement.TryGetProperty("data", out var dataElement))
+                            {
+                                var providedSignature = signatureElement.GetString();
+                                
+                                var sortedData = new SortedDictionary<string, string>();
+                                foreach (var prop in dataElement.EnumerateObject())
+                                {
+                                    if (prop.Value.ValueKind != System.Text.Json.JsonValueKind.Null && 
+                                        prop.Value.ValueKind != System.Text.Json.JsonValueKind.Object && 
+                                        prop.Value.ValueKind != System.Text.Json.JsonValueKind.Array)
+                                    {
+                                        sortedData.Add(prop.Name, prop.Value.ToString());
+                                    }
+                                }
+                                
+                                var signDataStr = string.Join("&", sortedData.Select(kv => $"{kv.Key}={kv.Value}"));
+                                
+                                using var hmac = new System.Security.Cryptography.HMACSHA256(System.Text.Encoding.UTF8.GetBytes(checksumKey));
+                                var hashBytes = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(signDataStr));
+                                var computedSignature = BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
+                                
+                                if (!string.Equals(computedSignature, providedSignature, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    _logger.LogWarning("[WEBHOOK] ❌ PayOS Signature mismatch. Expected: {Expected}, Received: {Received}", computedSignature, providedSignature);
+                                    return StatusCode(403, new { message = "Invalid PayOS signature" });
+                                }
+                                _logger.LogInformation("[WEBHOOK] ✅ PayOS Signature verified successfully.");
+                            }
+                            else
+                            {
+                                _logger.LogWarning("[WEBHOOK] ❌ PayOS Webhook missing signature or data field");
+                                return StatusCode(403, new { message = "Missing PayOS signature" });
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning("[WEBHOOK] ⚠️ Failed to verify PayOS signature: {Error}", ex.Message);
+                            return StatusCode(500, new { message = "Error verifying signature" });
+                        }
+                    }
+                    else 
+                    {
+                        _logger.LogWarning("[WEBHOOK] ⚠️ PayOS ChecksumKey is not configured. Skipping signature verification.");
+                    }
                 }
                 else
                 {
@@ -203,6 +260,28 @@ public class SimplePaymentController : ControllerBase
                 if (simpleRequest != null)
                 {
                     _logger.LogInformation("[WEBHOOK] 📋 [WEBHOOK-{WebhookId}] Detected Simple/SePay format", webhookId);
+
+                    // ----------------------------------------------------
+                    // 2. VERIFY SEPAY SIGNATURE / API KEY
+                    // ----------------------------------------------------
+                    var sepayApiKey = _configuration["SePay:ApiToken"] ?? _configuration["SEPAY_API_KEY"];
+                    if (!string.IsNullOrEmpty(sepayApiKey))
+                    {
+                        var authHeader = Request.Headers["Authorization"].ToString();
+                        if (string.IsNullOrEmpty(authHeader) || 
+                            (!authHeader.Equals($"Apikey {sepayApiKey}", StringComparison.OrdinalIgnoreCase) && 
+                             !authHeader.Equals($"Bearer {sepayApiKey}", StringComparison.OrdinalIgnoreCase)))
+                        {
+                            _logger.LogWarning("[WEBHOOK] ❌ SePay API Key mismatch or missing. Header: {Header}", authHeader);
+                            return StatusCode(403, new { message = "Invalid SePay API Key" });
+                        }
+                        _logger.LogInformation("[WEBHOOK] ✅ SePay API Key verified successfully.");
+                    }
+                    else 
+                    {
+                        _logger.LogWarning("[WEBHOOK] ⚠️ SePay API Key is not configured. Skipping verification.");
+                    }
+
                     _logger.LogInformation("[WEBHOOK] 🔍 [WEBHOOK-{WebhookId}] SePay request fields: Id={Id}, Gateway={Gateway}, Content='{Content}', Description='{Description}', TransferAmount={TransferAmount}, TransferType={TransferType}, ReferenceCode={ReferenceCode}", 
                         webhookId, simpleRequest.Id?.ToString() ?? "NULL", simpleRequest.Gateway ?? "NULL", 
                         simpleRequest.Content ?? "NULL", simpleRequest.Description ?? "NULL", 
