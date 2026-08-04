@@ -1067,15 +1067,17 @@ function hideModalDirectly(modalElement) {
 }
 
 /**
- * Format currency
+ * Format currency (only declare if not already defined)
  */
-function formatCurrency(amount) {
-  return new Intl.NumberFormat('vi-VN', {
-    style: 'currency',
-    currency: 'VND',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  }).format(amount);
+if (typeof formatCurrency === 'undefined') {
+  window.formatCurrency = function formatCurrency(amount) {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
+  };
 }
 
 /**

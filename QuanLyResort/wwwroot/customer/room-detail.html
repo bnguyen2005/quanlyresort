@@ -1030,6 +1030,14 @@
     }
 
         async function submitBooking(room) {
+      // Fallback helpers if not defined globally
+      if (typeof window.showPageLoading === 'undefined') {
+        window.showPageLoading = function() {};
+      }
+      if (typeof window.hidePageLoading === 'undefined') {
+        window.hidePageLoading = function() {};
+      }
+      
       const checkin = document.getElementById('checkinDate');
       const checkout = document.getElementById('checkoutDate');
       const numGuests = document.getElementById('numGuests');
