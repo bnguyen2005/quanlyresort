@@ -5,14 +5,17 @@
 
     html {
         overflow-y: scroll !important;
-        -ms-overflow-style: none;  /* IE and Edge */
-        scrollbar-width: none;  /* Firefox */
+        -ms-overflow-style: none;
+        /* IE and Edge */
+        scrollbar-width: none;
+        /* Firefox */
     }
-    
+
     html::-webkit-scrollbar {
-        display: none; /* Chrome, Safari and Opera */
+        display: none;
+        /* Chrome, Safari and Opera */
     }
-    
+
     html.pjax-loading {
         overflow: hidden !important;
     }
@@ -85,18 +88,18 @@
         -ms-overflow-style: none;
         scrollbar-width: none;
     }
-    
+
     html.layout-vertical::-webkit-scrollbar {
         display: none;
     }
-    
+
     html.layout-vertical.pjax-loading {
         overflow: hidden !important;
     }
 
     body.layout-vertical {
         overflow-x: hidden !important;
-        overflow-y: auto !important;
+        overflow-y: visible !important;
     }
 
     body.layout-vertical #page-content {
@@ -216,20 +219,25 @@
 
 .ts-split-logo {
     position: absolute;
-    top: -40px; /* Partially cut off at the top like the reference */
+    top: -40px;
+    /* Partially cut off at the top like the reference */
     right: 0;
-    transform: translateX(50%); /* Center perfectly on the split line */
-    width: 220px; /* Larger size to act as a watermark graphic */
+    transform: translateX(50%);
+    /* Center perfectly on the split line */
+    width: 220px;
+    /* Larger size to act as a watermark graphic */
     height: 220px;
     border-radius: 0;
-    background-color: transparent; /* Transparent overlay */
+    background-color: transparent;
+    /* Transparent overlay */
     padding: 0;
     object-fit: contain;
     z-index: 10;
     box-shadow: none;
     margin-bottom: 0;
     box-sizing: border-box;
-    filter: opacity(0.15); /* Make it a subtle dark watermark */
+    filter: opacity(0.15);
+    /* Make it a subtle dark watermark */
     pointer-events: none;
 }
 
@@ -409,7 +417,7 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 6vh;
+    gap: 4vh;
 }
 
 .ts-col-3-left .ts-img-container {
@@ -432,14 +440,14 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 12vh;
+    gap: 4vh;
     padding: 0;
     box-sizing: border-box;
 }
 
 .ts-col-3-mid .ts-thumbnail-container {
-    width: 120px;
-    height: 120px;
+    width: 100%;
+    height: 50vh;
     border-radius: 2px;
     overflow: hidden;
     position: relative;
@@ -450,7 +458,7 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 8vh;
+    gap: 4vh;
     padding: 0 2% 0 0;
     box-sizing: border-box;
 }
@@ -481,7 +489,7 @@
 }
 
 .ts-small-paragraph {
-    font-size: clamp(11px, min(1.2vw, 1.8vh), 14px) !important;
+    font-size: clamp(11px, min(1.2vw, 1.8vh), 30px) !important;
     line-height: 1.6 !important;
     color: var(--ts-muted, #555) !important;
     width: 60% !important;
@@ -590,20 +598,25 @@
 
 .ts-red-logo {
     position: absolute;
-    top: -40px; /* Partially cut off at the top like the reference */
+    top: -40px;
+    /* Partially cut off at the top like the reference */
     left: 0;
-    transform: translateX(-50%); /* Center perfectly on the split line */
-    width: 220px; /* Larger size to act as a watermark graphic */
+    transform: translateX(-50%);
+    /* Center perfectly on the split line */
+    width: 220px;
+    /* Larger size to act as a watermark graphic */
     height: 220px;
     border-radius: 0;
-    background-color: transparent; /* Transparent overlay */
+    background-color: transparent;
+    /* Transparent overlay */
     padding: 0;
     object-fit: contain;
     z-index: 10;
     box-shadow: none;
     margin-bottom: 0;
     box-sizing: border-box;
-    filter: invert(1) opacity(0.5); /* Make it white and semi-transparent */
+    filter: invert(1) opacity(0.5);
+    /* Make it white and semi-transparent */
     pointer-events: none;
 }
 
