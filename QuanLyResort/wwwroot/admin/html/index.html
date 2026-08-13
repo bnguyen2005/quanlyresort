@@ -39,315 +39,7 @@
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <!-- Page CSS -->
-  <style>
-    /* Modern Chart Container */
-    .chart-container {
-      background: rgba(255, 255, 255, 0.98);
-      border-radius: 20px;
-      padding: 2rem;
-      margin-bottom: 2rem;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-      height: 400px;
-      position: relative;
-      border: 1px solid rgba(200, 169, 126, 0.15);
-      transition: all 0.3s ease;
-    }
-    
-    .chart-container:hover {
-      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
-      transform: translateY(-2px);
-    }
-    
-    .chart-container h6 {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: #374151;
-      margin-bottom: 1.5rem;
-      padding-bottom: 1rem;
-      border-bottom: 2px solid #f3f4f6;
-    }
-    
-    .chart-container canvas {
-      max-height: 350px !important;
-    }
-    
-    /* Modern Activity Item */
-    .activity-item {
-      border-left: 4px solid #667eea;
-      background: linear-gradient(90deg, rgba(102, 126, 234, 0.05) 0%, rgba(255, 255, 255, 0.95) 100%);
-      padding: 1.25rem;
-      margin-bottom: 1rem;
-      border-radius: 0 12px 12px 0;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .activity-item::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 4px;
-      background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
-      transition: width 0.3s ease;
-    }
-    
-    .activity-item:hover {
-      background: linear-gradient(90deg, rgba(102, 126, 234, 0.1) 0%, rgba(255, 255, 255, 1) 100%);
-      transform: translateX(8px);
-      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.15);
-    }
-    
-    .activity-item:hover::before {
-      width: 6px;
-    }
-    
-    /* Modern Customer Item */
-    .customer-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1.25rem;
-      border: 1px solid rgba(200, 169, 126, 0.2);
-      border-radius: 12px;
-      margin-bottom: 1rem;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(250, 248, 245, 0.95) 100%);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .customer-item::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-      transform: scaleX(0);
-      transition: transform 0.3s ease;
-    }
-    
-    .customer-item:hover {
-      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-      transform: translateY(-4px);
-      border-color: rgba(102, 126, 234, 0.4);
-    }
-    
-    .customer-item:hover::before {
-      transform: scaleX(1);
-    }
-    
-    /* Growth Indicators */
-    .growth-positive {
-      color: #10b981;
-      font-weight: 700;
-      font-size: 2.5rem;
-    }
-    
-    .growth-negative {
-      color: #ef4444;
-      font-weight: 700;
-      font-size: 2.5rem;
-    }
-    
-    /* Modern Refresh Button */
-    .refresh-btn {
-      position: fixed;
-      bottom: 30px;
-      right: 30px;
-      z-index: 1000;
-      border-radius: 50%;
-      width: 65px;
-      height: 65px;
-      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border: none;
-      color: white;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .refresh-btn:hover {
-      transform: scale(1.1) rotate(180deg);
-      box-shadow: 0 12px 35px rgba(102, 126, 234, 0.5);
-    }
-    
-    /* Modern Card Styles */
-    .card {
-      border-radius: 20px;
-      border: 1px solid rgba(200, 169, 126, 0.15);
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-      transition: all 0.3s ease;
-      overflow: hidden;
-    }
-    
-    .card:hover {
-      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
-      transform: translateY(-2px);
-    }
-    
-    .card-header {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(250, 248, 245, 0.95) 100%);
-      border-bottom: 2px solid rgba(200, 169, 126, 0.2);
-      padding: 1.5rem;
-      font-weight: 600;
-      font-size: 1.1rem;
-    }
-    
-    .card-body {
-      padding: 1.5rem;
-    }
-    
-    /* Better Typography */
-    h4, h5, h6 {
-      font-weight: 600;
-      color: #1f2937;
-    }
-    
-    /* Modern Section Headers */
-    .section-header {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #1f2937;
-      margin-bottom: 1.5rem;
-      padding-bottom: 0.75rem;
-      border-bottom: 3px solid #667eea;
-      display: inline-block;
-    }
-    
-    /* Order Statistics - Nalika Style */
-    .stat-box {
-      padding: 1.5rem;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(250, 248, 245, 0.95) 100%);
-      border-radius: 15px;
-      text-align: center;
-      transition: all 0.3s ease;
-      border: 1px solid rgba(200, 169, 126, 0.15);
-    }
-    
-    .stat-box:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-    }
-    
-    .stat-icon {
-      width: 60px;
-      height: 60px;
-      border-radius: 15px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 1rem;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    }
-    
-    .stat-icon i {
-      font-size: 1.8rem;
-    }
-    
-    .stat-value {
-      font-size: 2rem;
-      font-weight: 700;
-      color: #1f2937;
-      margin-bottom: 0.5rem;
-    }
-    
-    .stat-label {
-      color: #6b7280;
-      font-size: 0.9rem;
-      margin-bottom: 0.5rem;
-    }
-    
-    .stat-percentage {
-      display: inline-block;
-      padding: 0.25rem 0.75rem;
-      border-radius: 20px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      background: rgba(16, 185, 129, 0.1);
-      color: #10b981;
-    }
-    
-    .progress-container {
-      padding: 1rem;
-      background: rgba(243, 244, 246, 0.5);
-      border-radius: 12px;
-    }
-    
-    .progress-item {
-      margin-bottom: 0.5rem;
-    }
-    
-    .progress {
-      border-radius: 10px;
-      overflow: hidden;
-    }
-    
-    .progress-bar {
-      transition: width 1s ease;
-    }
-    
-    /* Growth Items */
-    .growth-item {
-      padding: 1rem;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(250, 248, 245, 0.95) 100%);
-      border-radius: 12px;
-      border-left: 4px solid #667eea;
-      transition: all 0.3s ease;
-    }
-    
-    .growth-item:hover {
-      transform: translateX(5px);
-      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-    }
-    
-    .growth-label {
-      font-weight: 600;
-      color: #374151;
-    }
-    
-    .growth-value {
-      font-size: 1.5rem;
-      font-weight: 700;
-    }
-    
-    /* Quick Stats */
-    .quick-stat {
-      padding: 1rem;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(250, 248, 245, 0.95) 100%);
-      border-radius: 10px;
-      border-left: 3px solid #667eea;
-      transition: all 0.3s ease;
-    }
-    
-    .quick-stat:hover {
-      transform: translateX(5px);
-      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-    }
-    
-    .quick-stat i {
-      font-size: 1.2rem;
-    }
-    
-    /* Activities Count */
-    #activitiesCount {
-      font-size: 0.85rem;
-      font-weight: 500;
-    }
-    
-    /* Chart Controls */
-    .chart-controls {
-      display: flex;
-      gap: 0.5rem;
-    }
-  </style>
+  <!-- Removed inline styles, moved to admin-custom-theme.css -->
   
   <!-- Helpers -->
   <script src="../assets/vendor/js/helpers.js"></script>
@@ -535,150 +227,73 @@
             <div class="row mb-4">
               <div class="col-lg-3 col-md-6 col-12 mb-4">
                 <a href="bookings.html" style="text-decoration: none; color: inherit;">
-                  <div class="nalika-stats-card" style="cursor: pointer;">
-                    <div class="percentage" id="bookingPercentage">+0%</div>
-                    <div class="d-flex justify-content-between align-items-center">
-                      <div>
-                        <h3 class="card-title mb-2" id="todayBookings">0</h3>
-                        <small class="text-white">Đặt phòng hôm nay</small>
-                      </div>
-                      <div class="avatar flex-shrink-0">
-                        <i class="bx bx-calendar text-white" style="font-size: 2.5rem;"></i>
-                      </div>
-                    </div>
+                  <div class="ts-stat-widget">
+                    <span class="ts-stat-title">Đặt phòng hôm nay</span>
+                    <h3 class="ts-stat-value" id="todayBookings">0</h3>
+                    <div class="ts-stat-desc"><span id="bookingPercentage">+0%</span> vs tháng trước</div>
                   </div>
                 </a>
               </div>
               <div class="col-lg-3 col-md-6 col-12 mb-4">
                 <a href="reports.html" style="text-decoration: none; color: inherit;">
-                  <div class="nalika-stats-card success" style="cursor: pointer;">
-                    <div class="percentage" id="revenuePercentage">+0%</div>
-                    <div class="d-flex justify-content-between align-items-center">
-                      <div>
-                        <h3 class="card-title mb-2" id="todayRevenue">0₫</h3>
-                        <small class="text-white">Doanh thu hôm nay</small>
-                      </div>
-                      <div class="avatar flex-shrink-0">
-                        <i class="bx bx-dollar text-white" style="font-size: 2.5rem;"></i>
-                      </div>
-                    </div>
+                  <div class="ts-stat-widget">
+                    <span class="ts-stat-title">Doanh thu hôm nay</span>
+                    <h3 class="ts-stat-value" id="todayRevenue">0₫</h3>
+                    <div class="ts-stat-desc"><span id="revenuePercentage">+0%</span> vs tháng trước</div>
                   </div>
                 </a>
               </div>
               <div class="col-lg-3 col-md-6 col-12 mb-4">
                 <a href="rooms.html" style="text-decoration: none; color: inherit;">
-                  <div class="nalika-stats-card warning" style="cursor: pointer;">
-                    <div class="percentage" id="occupancyPercentage">0%</div>
-                    <div class="d-flex justify-content-between align-items-center">
-                      <div>
-                        <h3 class="card-title mb-2" id="occupancyRate">0%</h3>
-                        <small class="text-white">Tỷ lệ lấp đầy</small>
-                      </div>
-                      <div class="avatar flex-shrink-0">
-                        <i class="bx bx-home text-white" style="font-size: 2.5rem;"></i>
-                      </div>
-                    </div>
+                  <div class="ts-stat-widget">
+                    <span class="ts-stat-title">Tỷ lệ lấp đầy</span>
+                    <h3 class="ts-stat-value" id="occupancyRate">0%</h3>
+                    <div class="ts-stat-desc"><span id="occupancyPercentage">0%</span> hiện tại</div>
                   </div>
                 </a>
               </div>
               <div class="col-lg-3 col-md-6 col-12 mb-4">
                 <a href="bookings.html?filter=checkin" style="text-decoration: none; color: inherit;">
-                  <div class="nalika-stats-card info" style="cursor: pointer;">
-                    <div class="percentage" id="checkinPercentage">+0%</div>
-                    <div class="d-flex justify-content-between align-items-center">
-                      <div>
-                        <h3 class="card-title mb-2" id="todayCheckIns">0</h3>
-                        <small class="text-white">Check-in hôm nay</small>
-                      </div>
-                      <div class="avatar flex-shrink-0">
-                        <i class="bx bx-log-in text-white" style="font-size: 2.5rem;"></i>
-                      </div>
-                    </div>
+                  <div class="ts-stat-widget">
+                    <span class="ts-stat-title">Check-in hôm nay</span>
+                    <h3 class="ts-stat-value" id="todayCheckIns">0</h3>
+                    <div class="ts-stat-desc"><span id="checkinPercentage">+0%</span> dự kiến</div>
                   </div>
                 </a>
               </div>
             </div>
 
-            <!-- Order Statistics - Nalika Style -->
+            <!-- Order Statistics - Luxury Style -->
             <div class="row mb-4">
               <div class="col-lg-8 mb-4">
                 <div class="card">
-                  <div class="card-header">
-                    <h5 class="mb-0">📊 Thống kê đặt phòng</h5>
+                  <div class="card-header border-0">
+                    <h5 class="mb-0 card-title">Tổng Quan Đặt Phòng</h5>
                   </div>
                   <div class="card-body">
-                    <div class="row text-center">
+                    <div class="row">
                       <div class="col-md-3 mb-3">
-                        <div class="stat-box">
-                          <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                            <i class="bx bx-calendar-check text-white"></i>
-                          </div>
-                          <h3 class="stat-value" id="totalBookings">0</h3>
-                          <p class="stat-label">Tổng đặt phòng</p>
-                          <span class="stat-percentage" id="totalBookingsPct">+0%</span>
+                        <div class="ts-stat-widget text-center">
+                          <h3 class="ts-stat-value" id="totalBookings">0</h3>
+                          <p class="ts-stat-title mt-2">Tổng Đặt</p>
                         </div>
                       </div>
                       <div class="col-md-3 mb-3">
-                        <div class="stat-box">
-                          <div class="stat-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
-                            <i class="bx bx-check-circle text-white"></i>
-                          </div>
-                          <h3 class="stat-value" id="confirmedBookings">0</h3>
-                          <p class="stat-label">Đã xác nhận</p>
-                          <span class="stat-percentage text-success" id="confirmedPct">0%</span>
+                        <div class="ts-stat-widget text-center">
+                          <h3 class="ts-stat-value" id="confirmedBookings">0</h3>
+                          <p class="ts-stat-title mt-2 text-success">Đã Xác Nhận</p>
                         </div>
                       </div>
                       <div class="col-md-3 mb-3">
-                        <div class="stat-box">
-                          <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
-                            <i class="bx bx-time text-white"></i>
-                          </div>
-                          <h3 class="stat-value" id="pendingBookings">0</h3>
-                          <p class="stat-label">Đang chờ</p>
-                          <span class="stat-percentage text-warning" id="pendingPct">0%</span>
+                        <div class="ts-stat-widget text-center">
+                          <h3 class="ts-stat-value" id="pendingBookings">0</h3>
+                          <p class="ts-stat-title mt-2 text-warning">Đang Chờ</p>
                         </div>
                       </div>
                       <div class="col-md-3 mb-3">
-                        <div class="stat-box">
-                          <div class="stat-icon" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
-                            <i class="bx bx-x-circle text-white"></i>
-                          </div>
-                          <h3 class="stat-value" id="cancelledBookings">0</h3>
-                          <p class="stat-label">Đã hủy</p>
-                          <span class="stat-percentage text-danger" id="cancelledPct">0%</span>
-                        </div>
-                      </div>
-                    </div>
-                    <!-- Percentage Distribution -->
-                    <div class="mt-4">
-                      <h6 class="mb-3">Phân bổ tỷ lệ</h6>
-                      <div class="progress-container">
-                        <div class="progress-item">
-                          <div class="d-flex justify-content-between mb-1">
-                            <span>Đã xác nhận</span>
-                            <span id="confirmedPercent">0%</span>
-                          </div>
-                          <div class="progress" style="height: 8px;">
-                            <div class="progress-bar bg-success" id="confirmedProgress" style="width: 0%"></div>
-                          </div>
-                        </div>
-                        <div class="progress-item mt-3">
-                          <div class="d-flex justify-content-between mb-1">
-                            <span>Đang chờ</span>
-                            <span id="pendingPercent">0%</span>
-                          </div>
-                          <div class="progress" style="height: 8px;">
-                            <div class="progress-bar bg-warning" id="pendingProgress" style="width: 0%"></div>
-                          </div>
-                        </div>
-                        <div class="progress-item mt-3">
-                          <div class="d-flex justify-content-between mb-1">
-                            <span>Đã hủy</span>
-                            <span id="cancelledPercent">0%</span>
-                          </div>
-                          <div class="progress" style="height: 8px;">
-                            <div class="progress-bar bg-danger" id="cancelledProgress" style="width: 0%"></div>
-                          </div>
+                        <div class="ts-stat-widget text-center">
+                          <h3 class="ts-stat-value" id="cancelledBookings">0</h3>
+                          <p class="ts-stat-title mt-2 text-danger">Đã Hủy</p>
                         </div>
                       </div>
                     </div>
@@ -687,30 +302,21 @@
               </div>
               <div class="col-lg-4 mb-4">
                 <div class="card h-100">
-                  <div class="card-header">
-                    <h5 class="mb-0">📈 Tăng trưởng</h5>
+                  <div class="card-header border-0">
+                    <h5 class="mb-0 card-title">Tăng Trưởng</h5>
                   </div>
                   <div class="card-body">
-                    <div class="growth-item mb-4">
-                      <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="growth-label">Doanh thu</span>
-                        <span id="revenueGrowth" class="growth-value growth-positive">+0%</span>
-                      </div>
-                      <small class="text-muted">So với tháng trước</small>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                      <span class="ts-stat-title">Doanh thu</span>
+                      <span id="revenueGrowth" class="ts-stat-value fs-4">+0%</span>
                     </div>
-                    <div class="growth-item mb-4">
-                      <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="growth-label">Đặt phòng</span>
-                        <span id="bookingGrowth" class="growth-value growth-positive">+0%</span>
-                      </div>
-                      <small class="text-muted">So với tháng trước</small>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                      <span class="ts-stat-title">Đặt phòng</span>
+                      <span id="bookingGrowth" class="ts-stat-value fs-4">+0%</span>
                     </div>
-                    <div class="growth-item">
-                      <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="growth-label">Khách hàng</span>
-                        <span id="customerGrowth" class="growth-value growth-positive">+0%</span>
-                      </div>
-                      <small class="text-muted">So với tháng trước</small>
+                    <div class="d-flex justify-content-between align-items-center">
+                      <span class="ts-stat-title">Khách hàng</span>
+                      <span id="customerGrowth" class="ts-stat-value fs-4">+0%</span>
                     </div>
                   </div>
                 </div>
@@ -720,15 +326,23 @@
             <!-- Charts Row -->
             <div class="row">
               <div class="col-lg-8 mb-4">
-                <div class="chart-container">
-                  <h5 class="mb-3">📈 Xu hướng doanh thu (30 ngày)</h5>
-                  <canvas id="revenueChart"></canvas>
+                <div class="card">
+                  <div class="card-header border-0">
+                    <h5 class="mb-0 card-title">Xu Hướng Doanh Thu</h5>
+                  </div>
+                  <div class="card-body">
+                    <canvas id="revenueChart" style="max-height: 300px;"></canvas>
+                  </div>
                 </div>
               </div>
               <div class="col-lg-4 mb-4">
-                <div class="chart-container">
-                  <h5 class="mb-3">🏠 Tỷ lệ lấp đầy</h5>
-                  <canvas id="occupancyChart"></canvas>
+                <div class="card">
+                  <div class="card-header border-0">
+                    <h5 class="mb-0 card-title">Lấp Đầy</h5>
+                  </div>
+                  <div class="card-body">
+                    <canvas id="occupancyChart" style="max-height: 300px;"></canvas>
+                  </div>
                 </div>
               </div>
             </div>
@@ -736,15 +350,19 @@
             <!-- Second Charts Row -->
             <div class="row">
               <div class="col-lg-6 mb-4">
-                <div class="chart-container">
-                  <h5 class="mb-3">💰 Doanh thu dịch vụ</h5>
-                  <canvas id="serviceChart"></canvas>
+                <div class="card">
+                  <div class="card-header border-0">
+                    <h5 class="mb-0 card-title">Doanh Thu Dịch Vụ</h5>
+                  </div>
+                  <div class="card-body">
+                    <canvas id="serviceChart" style="max-height: 300px;"></canvas>
+                  </div>
                 </div>
               </div>
               <div class="col-lg-6 mb-4">
                 <div class="card h-100">
-                  <div class="card-header d-flex justify-content-between">
-                    <h5 class="mb-0">🏆 Top khách hàng tháng này</h5>
+                  <div class="card-header border-0 d-flex justify-content-between">
+                    <h5 class="mb-0 card-title">Khách Hàng Hàng Đầu</h5>
                     <button class="btn btn-sm btn-outline-primary" onclick="loadTopCustomers()">
                       <i class="bx bx-refresh"></i>
                     </button>
@@ -758,14 +376,14 @@
               </div>
             </div>
 
-            <!-- Activities Feed - Nalika Style -->
+            <!-- Activities & Overview -->
             <div class="row">
               <div class="col-lg-8 mb-4">
-                <div class="card">
-                  <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="card h-100">
+                  <div class="card-header border-0 d-flex justify-content-between align-items-center">
                     <div>
-                      <h5 class="mb-0">🔔 Hoạt động gần đây</h5>
-                      <small class="text-muted" id="activitiesCount">Bạn có 0 hoạt động mới</small>
+                      <h5 class="mb-0 card-title">Hoạt Động Gần Đây</h5>
+                      <small class="text-muted" id="activitiesCount" style="font-family: var(--font-sans);">0 hoạt động mới</small>
                     </div>
                     <button class="btn btn-sm btn-outline-primary" onclick="loadRecentActivities()">
                       <i class="bx bx-refresh"></i>
@@ -780,45 +398,25 @@
               </div>
               <div class="col-lg-4 mb-4">
                 <div class="card h-100">
-                  <div class="card-header">
-                    <h5 class="mb-0">📊 Tổng quan nhanh</h5>
+                  <div class="card-header border-0">
+                    <h5 class="mb-0 card-title">Tổng Quan</h5>
                   </div>
                   <div class="card-body">
-                    <div class="quick-stat mb-3">
-                      <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                          <i class="bx bx-user text-primary me-2"></i>
-                          <span>Tổng khách hàng</span>
-                        </div>
-                        <strong id="totalCustomers">0</strong>
-                      </div>
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+                      <span class="ts-stat-title m-0">Tổng khách hàng</span>
+                      <strong id="totalCustomers" class="ts-stat-value fs-3 m-0">0</strong>
                     </div>
-                    <div class="quick-stat mb-3">
-                      <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                          <i class="bx bx-home text-success me-2"></i>
-                          <span>Phòng sẵn sàng</span>
-                        </div>
-                        <strong id="availableRooms">0</strong>
-                      </div>
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+                      <span class="ts-stat-title m-0">Phòng trống</span>
+                      <strong id="availableRooms" class="ts-stat-value fs-3 m-0">0</strong>
                     </div>
-                    <div class="quick-stat mb-3">
-                      <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                          <i class="bx bx-food-menu text-warning me-2"></i>
-                          <span>Dịch vụ đang dùng</span>
-                        </div>
-                        <strong id="activeServices">0</strong>
-                      </div>
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+                      <span class="ts-stat-title m-0">Dịch vụ sử dụng</span>
+                      <strong id="activeServices" class="ts-stat-value fs-3 m-0">0</strong>
                     </div>
-                    <div class="quick-stat">
-                      <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                          <i class="bx bx-receipt text-info me-2"></i>
-                          <span>Hóa đơn tháng này</span>
-                        </div>
-                        <strong id="monthlyInvoices">0</strong>
-                      </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                      <span class="ts-stat-title m-0">Hóa đơn</span>
+                      <strong id="monthlyInvoices" class="ts-stat-value fs-3 m-0">0</strong>
                     </div>
                   </div>
                 </div>
@@ -828,7 +426,7 @@
           <!-- / Content -->
 
           <!-- Floating Refresh Button -->
-          <button class="btn btn-primary refresh-btn" onclick="refreshAllData()" title="Làm mới dữ liệu">
+          <button class="btn btn-primary refresh-btn" onclick="refreshAllData()" title="Làm mới dữ liệu" style="border-radius: 50%; padding: 0; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
             <i class="bx bx-refresh" style="font-size: 1.5rem;"></i>
           </button>
 

@@ -1,7 +1,7 @@
 // Service Worker for Resort Management System
-const CACHE_NAME = 'resort-cache-v37'; // Force update - Disable cache for reviews.html
+const CACHE_NAME = 'resort-cache-v38'; // Force update - Disable cache for index.html
 const urlsToCache = [
-  '/customer/index.html',
+  // REMOVED: '/customer/index.html' - KHÔNG cache trang index để thấy UI mới!
   // REMOVED: '/customer/login.html' - KHÔNG cache trang login!
   // REMOVED: '/customer/register.html' - có dữ liệu động
   // REMOVED: '/customer/rooms.html' - có dữ liệu động từ API
@@ -12,6 +12,7 @@ const urlsToCache = [
 
 // URLs that should NEVER be cached (always fetch fresh)
 const NEVER_CACHE_URLS = [
+  '/customer/index.html',      // KHÔNG cache để thấy giao diện mới
   '/api/restaurant-orders',
   '/customer/login.html',
   '/customer/register.html',

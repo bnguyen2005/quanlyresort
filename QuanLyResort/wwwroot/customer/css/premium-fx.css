@@ -1,0 +1,85 @@
+/* 
+    Premium FX Styles
+    Awwwards Level Interactions
+*/
+
+/* 1. Cinematic Film Grain */
+.ts-grain {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.04;
+    background-image: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');
+    animation: grain-animation 1s steps(2) infinite;
+}
+
+@keyframes grain-animation {
+    0%, 100% { transform: translate(0, 0); }
+    10% { transform: translate(-1%, -1%); }
+    20% { transform: translate(1%, 1%); }
+    30% { transform: translate(-2%, -2%); }
+    40% { transform: translate(2%, 2%); }
+    50% { transform: translate(-1%, 1%); }
+    60% { transform: translate(1%, -1%); }
+    70% { transform: translate(2%, -2%); }
+    80% { transform: translate(-2%, 2%); }
+    90% { transform: translate(0%, 0%); }
+}
+
+/* 2. Custom Magnetic Cursor - DISABLED for performance */
+
+.ts-cursor {
+    display: none !important;
+}
+
+.ts-cursor.hovering {
+    width: 60px;
+    height: 60px;
+    background-color: rgba(17, 17, 17, 0.1);
+    backdrop-filter: blur(2px);
+    border: 1px solid rgba(17, 17, 17, 0.2);
+}
+.ts-cursor.hovering-dark {
+    background-color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(2px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.ts-cursor.drag-mode {
+    width: 70px;
+    height: 70px;
+    background-color: var(--ts-dark, #111);
+}
+
+.ts-cursor.drag-mode::after {
+    content: 'Kéo';
+    color: var(--ts-light, #f5f0e6);
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 1px;
+}
+
+/* 3. Skew Effect on Images */
+.ts-skew-elem {
+    will-change: transform;
+    transition: transform 0.1s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* 4. Split Text Reveal */
+.ts-split-line {
+    overflow: hidden;
+    vertical-align: top;
+    padding-bottom: 5px; /* Prevent descender clipping */
+}
+.ts-split-word {
+    display: inline-block;
+    transform: translateY(100%);
+    transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.ts-split-active .ts-split-word {
+    transform: translateY(0%);
+}

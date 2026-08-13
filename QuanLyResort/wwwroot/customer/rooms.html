@@ -1,2510 +1,562 @@
 <!DOCTYPE html>
 <html lang="vi">
-  <head>
+
+<head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Phòng nghỉ | Resort Deluxe</title>
-  <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/bootstrap.min.css">
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="/css/tokens.css">
-  <link rel="stylesheet" href="/css/globals.css">
-  <link rel="stylesheet" href="/css/grid.css">
-  <link rel="stylesheet" href="/css/components/navbar.css">
-  <link rel="stylesheet" href="css/navbar-auth.css">
-  <link rel="stylesheet" href="css/open-iconic-bootstrap.min.css">
-  
+  <title>Phòng của chúng tôi</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&display=swap"
+    rel="stylesheet">
+
+  <!-- Theme CSS -->
+  <link rel="stylesheet" href="css/tandjung-theme.css?v=82">
+
   <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      padding-top: 0;
-      overflow-x: hidden;
-      background-image: url('images/room-1.jpg');
-      background-size: cover;
-      background-position: center;
-      background-attachment: fixed;
-      background-repeat: no-repeat;
-      min-height: 100vh;
-      position: relative;
+    /* ── Hero text fade on scroll ── */
+    #rooms-hero-text {
+      transition: opacity 0.1s linear;
+      will-change: opacity;
     }
-    body::before {
-      content: '';
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(255, 255, 255, 0.85);
-      z-index: -1;
+
+    /* ── Asym section images fade-up ── */
+    .ts-asym-left img,
+    .ts-asym-right img {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .ftco-navbar {
-      position: sticky !important;
-      top: 0 !important;
-      z-index: 1030 !important;
-      background-color: #1a1a1a !important;
-      transition: all 0.3s ease;
-      width: 100% !important;
-      margin: 0 !important;
-    }
-    .ftco-navbar.scrolled {
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    
-    /* Modern Hero Section */
-    .rooms-hero {
-      background-image: url('images/bg_1.jpg');
-      background-size: cover;
-      background-position: center;
-      background-attachment: fixed;
-      background-repeat: no-repeat;
-      padding: 140px 0 100px;
-      color: #fff;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-      margin-bottom: 60px;
-      min-height: 500px;
-      display: flex;
-      align-items: center;
-    }
-    @media (prefers-reduced-motion: no-preference) {
-      .rooms-hero {
-        background-attachment: fixed;
-      }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .rooms-hero {
-        background-attachment: scroll;
-      }
-    }
-    .rooms-hero::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: linear-gradient(135deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 100%);
-      z-index: 0;
-    }
-    .rooms-hero::after {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
-      opacity: 0.3;
-      z-index: 1;
-    }
-    .rooms-hero-content {
-      position: relative;
-      z-index: 2;
-      animation: slideUp 0.8s ease;
-      width: 100%;
-    }
-    .rooms-hero h1 {
-      font-size: 48px;
-      font-weight: 700;
-      margin-bottom: 20px;
-      color: #ffffff !important;
-      text-shadow: 0 2px 10px rgba(0,0,0,0.3);
-      animation: fadeInDown 1s ease;
-    }
-    .rooms-hero p {
-      font-size: 20px;
-      color: #ffffff !important;
-      opacity: 0.95;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.2);
-      animation: fadeInUp 1.2s ease;
-    }
-    
-    /* Main Content Layout - 2 Columns */
-    .rooms-main-content {
-      display: grid;
-      grid-template-columns: 1fr 320px;
-      gap: 30px;
-      margin-top: 60px;
-      padding: 0 20px;
-    }
-    
-    /* Results Header */
-    .results-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20px 0;
-      margin-bottom: 20px;
-      border-bottom: 2px solid rgba(200,169,126,0.2);
-    }
-    .results-info {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .results-count {
-      font-size: 16px;
-      font-weight: 600;
-      color: #1a1a1a;
-    }
-    .results-count::before {
-      content: '📊';
-      margin-right: 8px;
-    }
-    .sort-options {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .sort-options label {
-      font-weight: 600;
-      color: #374151;
-      font-size: 14px;
-      margin: 0;
-    }
-    .sort-select {
-      padding: 8px 12px;
-      border-radius: 8px;
-      border: 2px solid #e5e7eb;
-      font-size: 14px;
-      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-      cursor: pointer;
-      transition: all 0.3s ease;
-      min-width: 180px;
-    }
-    .sort-select:hover {
-      border-color: #c8a97e;
-    }
-    .sort-select:focus {
-      outline: none;
-      border-color: #c8a97e;
-      box-shadow: 0 0 0 3px rgba(200,169,126,0.1);
-    }
-    @media (max-width: 768px) {
-      .results-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 15px;
-      }
-      .sort-select {
-        width: 100%;
-      }
-    }
-    
-    /* Modern Filter Section - Vertical Sidebar */
-    .filter-section-modern {
-      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-      padding: 30px;
-      border-radius: 20px;
-      box-shadow: 0 4px 20px rgba(200,169,126,0.15);
-      position: sticky;
-      top: 100px;
-      height: fit-content;
-      max-height: calc(100vh - 120px);
-      overflow-y: auto;
-      border: 2px solid rgba(200,169,126,0.1);
-      animation: slideUp 0.8s ease;
-      transition: all 0.3s ease;
-    }
-    .filter-section-modern:hover {
-      box-shadow: 0 8px 30px rgba(200,169,126,0.2);
-      transform: translateY(-2px);
-    }
-    .filter-header {
-      margin-bottom: 24px;
-      padding-bottom: 20px;
-      border-bottom: 2px solid #f0f0f0;
-    }
-    .filter-header h3 {
-      font-size: 22px;
-      font-weight: 700;
-      color: #1a1a1a;
-      margin: 0;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .filter-header h3::before {
-      content: '🔍';
-      font-size: 24px;
-    }
-    .filter-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-    .filter-group {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .filter-group label {
-      font-weight: 600;
-      color: #374151;
-      font-size: 14px;
-      margin-bottom: 0;
-    }
-    .filter-group .form-control,
-    .filter-group .form-select {
-      height: 48px;
-      border-radius: 12px;
-      border: 2px solid #e5e7eb;
-      padding: 12px 16px;
-      font-size: 14px;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-      width: 100%;
-      position: relative;
-    }
-    .filter-group .form-control:hover,
-    .filter-group .form-select:hover {
-      border-color: rgba(200,169,126,0.4);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(200,169,126,0.1);
-    }
-    .filter-group .form-control:focus,
-    .filter-group .form-select:focus {
-      border-color: #c8a97e;
-      box-shadow: 0 0 0 4px rgba(200,169,126,0.15), 0 4px 12px rgba(200,169,126,0.2);
-      outline: none;
-      transform: translateY(-2px);
-    }
-    .filter-actions {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-top: 10px;
-    }
-    .btn-filter {
-      height: 48px;
-      padding: 12px 24px;
-      border-radius: 12px;
-      font-weight: 600;
-      font-size: 14px;
-      transition: all 0.3s ease;
-      border: none;
-      cursor: pointer;
-      position: relative;
-      overflow: hidden;
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-    .btn-filter-primary {
-      background: linear-gradient(135deg, #c8a97e 0%, #b89968 100%);
-      color: #fff;
-      box-shadow: 0 4px 15px rgba(200,169,126,0.3);
-    }
-    .btn-filter-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(200,169,126,0.4);
-    }
-    .btn-filter-primary:active {
+
+    .ts-asym-left img.revealed,
+    .ts-asym-right img.revealed {
+      opacity: 1;
       transform: translateY(0);
-      box-shadow: 0 2px 10px rgba(200,169,126,0.3);
     }
-    .btn-filter-primary::before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 0;
-      height: 0;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.3);
-      transform: translate(-50%, -50%);
-      transition: width 0.6s, height 0.6s;
+
+    .ts-asym-right img {
+      transition-delay: 0.2s;
     }
-    .btn-filter-primary:hover::before {
-      width: 300px;
-      height: 300px;
-    }
-    .btn-filter-secondary {
-      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-      color: #6b7280;
-      border: 2px solid #e5e7eb;
-    }
-    .btn-filter-secondary:hover {
-      background: #f9fafb;
-      border-color: #d1d5db;
-      transform: translateY(-2px);
-    }
-    
-    /* Rooms Content Area */
-    .rooms-content-area {
-      min-height: 400px;
-      background: transparent;
-      padding: 20px;
-      border-radius: 16px;
-    }
-    
-    /* Modern Room Cards */
-    .rooms-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 24px;
-    }
-    .room-card-modern {
-      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-      border-radius: 20px;
-      overflow: hidden;
-      box-shadow: 0 4px 20px rgba(200,169,126,0.15);
-      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      cursor: pointer;
+
+    /* ── Room card stagger ── */
+    .ts-room-card {
       opacity: 0;
-      transform: translateY(30px);
-      animation: fadeInUp 0.6s ease forwards;
-      border: 2px solid rgba(200,169,126,0.1);
+      transform: translateY(50px);
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .ts-room-card.revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ── DISCOVER MORE animated underline ── */
+    .ts-room-card-link {
       position: relative;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
+      border-bottom: none !important;
+      overflow: hidden;
     }
-    .room-card-modern:nth-child(1) { animation-delay: 0.1s; }
-    .room-card-modern:nth-child(2) { animation-delay: 0.2s; }
-    .room-card-modern:nth-child(3) { animation-delay: 0.3s; }
-    .room-card-modern:nth-child(4) { animation-delay: 0.4s; }
-    .room-card-modern:nth-child(5) { animation-delay: 0.5s; }
-    .room-card-modern:nth-child(6) { animation-delay: 0.6s; }
-    .room-card-modern:hover {
-      transform: translateY(-12px) scale(1.02);
-      box-shadow: 0 20px 50px rgba(200,169,126,0.25);
-      border-color: rgba(200,169,126,0.3);
-    }
-    .room-card-modern::before {
+
+    .ts-room-card-link::after {
       content: '';
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
       bottom: 0;
-      background: linear-gradient(135deg, rgba(200,169,126,0.05) 0%, transparent 50%);
-      opacity: 0;
-      transition: opacity 0.4s ease;
-      pointer-events: none;
-      z-index: 1;
-      border-radius: 20px;
-    }
-    .room-card-modern:hover::before {
-      opacity: 1;
-    }
-    .room-image-wrapper {
-      position: relative;
-      width: 100%;
-      height: 0;
-      padding-top: 70%; /* 16:9 aspect ratio */
-      overflow: hidden;
-      background: #eee;
-      background-image: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
-    }
-    .room-image-wrapper img {
-      position: absolute;
-      top: 0;
       left: 0;
       width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-      display: block;
+      height: 1px;
+      background: #222;
+      transform: scaleX(1);
+      transform-origin: left;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .room-image-wrapper img[src=""],
-    .room-image-wrapper img:not([src]) {
-      display: none;
+
+    .ts-room-card-link:hover::after {
+      transform: scaleX(0);
+      transform-origin: right;
     }
-    .room-card-modern:hover .room-image-wrapper img {
-      transform: scale(1.15);
-    }
-    .room-image-overlay {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.4) 100%);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      z-index: 1;
-    }
-    .room-card-modern:hover .room-image-overlay {
-      opacity: 1;
-    }
-    .room-image-wrapper::after {
-      content: '👁️ Xem ảnh';
-      position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%) translateY(20px);
-      background: rgba(200,169,126,0.9);
-      color: #fff;
-      padding: 10px 20px;
-      border-radius: 25px;
-      font-size: 13px;
-      font-weight: 600;
-      opacity: 0;
-      transition: all 0.3s ease;
-      z-index: 3;
-      pointer-events: none;
+
+    /* ── Marquee strip ── */
+    .ts-marquee-strip {
+      overflow: hidden;
+      background-color: var(--ts-dark, #111);
+      color: rgba(255, 255, 255, 0.15);
+      padding: 22px 0;
       white-space: nowrap;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    }
-    .room-card-modern:hover .room-image-wrapper::after {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-    .room-badge-top {
-      position: absolute;
-      top: 16px;
-      left: 16px;
-      background: rgba(26,26,26,0.85);
-      color: #fff;
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 600;
-      backdrop-filter: blur(10px);
+      position: relative;
       z-index: 2;
     }
-    .room-badge-status {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-      padding: 8px 14px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 700;
-      z-index: 2;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    }
-    .room-badge-available {
-      background: #16a34a;
-      color: #fff;
-    }
-    .room-badge-unavailable {
-      background: #dc2626;
-      color: #fff;
-    }
-    .room-card-body {
-      padding: 24px;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
-    .room-rating {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      margin-bottom: 12px;
-    }
-    .room-rating i {
-      color: #c8a97e;
-      font-size: 16px;
-      transition: transform 0.2s ease;
-    }
-    .room-card-modern:hover .room-rating i {
-      transform: scale(1.2);
-      color: #b89968;
-    }
-    .room-title {
-      font-size: 22px;
-      font-weight: 700;
-      color: #1a1a1a;
-      margin-bottom: 12px;
-      text-align: center;
-    }
-    .room-price {
-      text-align: center;
-      margin-bottom: 16px;
-    }
-    .room-price-amount {
-      font-size: 28px;
-      font-weight: 700;
-      color: #c8a97e;
-      display: block;
-    }
-    .room-price-unit {
-      font-size: 14px;
-      color: #6b7280;
-      margin-left: 4px;
-    }
-    .room-features {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      margin-bottom: 20px;
-      padding: 16px 0;
-      border-top: 1px solid #f0f0f0;
-      border-bottom: 1px solid #f0f0f0;
-    }
-    .room-feature {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 14px;
-      color: #6b7280;
-      transition: all 0.3s ease;
-      padding: 8px 12px;
-      border-radius: 8px;
-      background: rgba(200,169,126,0.05);
-    }
-    .room-feature:hover {
-      background: rgba(200,169,126,0.1);
-      transform: translateY(-2px);
-      box-shadow: 0 2px 8px rgba(200,169,126,0.15);
-    }
-    .room-feature i {
-      color: #c8a97e;
-      font-size: 16px;
-    }
-    .room-actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: auto;
-    }
-    .btn-room-action {
-      padding: 12px 20px;
-      border-radius: 12px;
-      font-weight: 600;
-      font-size: 14px;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      border: none;
-      cursor: pointer;
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      position: relative;
-      overflow: hidden;
-    }
-    .btn-room-action::before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 0;
-      height: 0;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.3);
-      transform: translate(-50%, -50%);
-      transition: width 0.5s, height 0.5s;
-    }
-    .btn-room-action:hover::before {
-      width: 200px;
-      height: 200px;
-    }
-    .btn-room-action:active {
-      transform: scale(0.95);
-    }
-    .btn-room-primary {
-      background: linear-gradient(135deg, #c8a97e 0%, #b89968 100%);
-      color: #fff;
-      box-shadow: 0 4px 12px rgba(200,169,126,0.3);
-    }
-    .btn-room-primary:hover {
-      transform: translateY(-2px) scale(1.02);
-      box-shadow: 0 6px 18px rgba(200,169,126,0.4);
-      color: #fff;
-    }
-    .btn-room-primary:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
-    }
-    .btn-room-secondary {
-      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-      color: #6b7280;
-      border: 2px solid #e5e7eb;
-    }
-    .btn-room-secondary:hover {
-      background: #f9fafb;
-      border-color: #c8a97e;
-      color: #c8a97e;
-      transform: translateY(-2px);
-    }
-    
-    /* Empty State */
-    .empty-state {
-      text-align: center;
-      padding: 80px 20px;
-      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-      border-radius: 20px;
-      box-shadow: 0 4px 20px rgba(200,169,126,0.15);
-      border: 2px solid rgba(200,169,126,0.1);
-    }
-    .empty-state-icon {
-      font-size: 80px;
-      margin-bottom: 24px;
-      opacity: 0.5;
-    }
-    .empty-state h3 {
-      font-size: 24px;
-      font-weight: 700;
-      color: #1a1a1a;
-      margin-bottom: 12px;
-    }
-    .empty-state p {
-      font-size: 16px;
-      color: #6b7280;
-      margin-bottom: 0;
-    }
-    
-    /* Loading State */
-    .loading-state {
-      text-align: center;
-      padding: 60px 20px;
-    }
-    .loading-spinner {
-      width: 50px;
-      height: 50px;
-      border: 4px solid #f3f3f3;
-      border-top-color: #c8a97e;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin: 0 auto 20px;
-    }
-    .loading-text {
-      font-size: 16px;
-      color: #6b7280;
-      font-weight: 500;
-    }
-    
-    /* Loading Skeleton for Room Cards */
-    .room-skeleton {
-      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-      border-radius: 20px;
-      overflow: hidden;
-      box-shadow: 0 4px 20px rgba(200,169,126,0.15);
-      border: 2px solid rgba(200,169,126,0.1);
-      animation: pulse 1.5s ease-in-out infinite;
-    }
-    .skeleton-image {
-      width: 100%;
-      height: 0;
-      padding-top: 70%;
-      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-      background-size: 200% 100%;
-      animation: shimmer 1.5s infinite;
-    }
-    .skeleton-content {
-      padding: 24px;
-    }
-    .skeleton-line {
-      height: 12px;
-      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-      background-size: 200% 100%;
-      animation: shimmer 1.5s infinite;
-      border-radius: 6px;
-      margin-bottom: 12px;
-    }
-    .skeleton-line.short { width: 60%; }
-    .skeleton-line.medium { width: 80%; }
-    .skeleton-line.long { width: 100%; }
-    @keyframes shimmer {
-      0% { background-position: -200% 0; }
-      100% { background-position: 200% 0; }
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.7; }
-    }
-    
-    /* Animations */
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    @keyframes fadeInDown {
-      from {
-        opacity: 0;
-        transform: translateY(-30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    @keyframes slideUp {
-      from {
-        opacity: 0;
-        transform: translateY(50px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    
-    /* Responsive */
-    @media (max-width: 768px) {
-      .rooms-hero {
-        padding: 100px 0 60px;
-        margin-bottom: 40px;
-        background-attachment: scroll;
-        min-height: 400px;
-      }
-      .rooms-hero h1 {
-        font-size: 36px;
-      }
-      .rooms-main-content {
-        grid-template-columns: 1fr;
-        gap: 24px;
-        margin-top: 40px;
-      }
-      .filter-section-modern {
-        position: static;
-        top: auto;
-        max-height: none;
-        padding: 24px;
-        margin-bottom: 0;
-      }
-      .filter-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 16px;
-      }
-      .filter-grid {
-        gap: 16px;
-      }
-      .filter-actions {
-        width: 100%;
-      }
-      .filter-actions .btn-filter {
-        width: 100%;
-      }
-      .rooms-grid {
-        grid-template-columns: 1fr;
-        gap: 24px;
-      }
-      .room-actions {
-        grid-template-columns: 1fr;
-      }
-    }
-    
-    /* Why Choose Us Box Hover Effect */
-    .col-md-6 > div[style*="background: linear-gradient(135deg, #ffffff"]:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 40px rgba(200,169,126,0.25) !important;
-      border-color: rgba(200,169,126,0.3) !important;
-    }
-    .col-md-6 > div[style*="background: linear-gradient(135deg, #ffffff"] li:hover {
-      background: rgba(200,169,126,0.1) !important;
-      transform: translateX(5px);
-    }
-    
-    /* Promotions Section */
-    .promotions-section {
-      padding: 40px 0;
-      background: linear-gradient(135deg, #f5ede0 0%, #fff8f0 50%, #ffffff 100%);
-      position: relative;
-      overflow: hidden;
-    }
-    .promotions-section::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      opacity: 0.05;
-      background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(200,169,126,0.1) 10px, rgba(200,169,126,0.1) 20px);
-      pointer-events: none;
-    }
-    .promotions-section .container {
-      position: relative;
-      z-index: 1;
-    }
-    .promotion-cards {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-      margin-top: 30px;
-      max-width: 1200px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    .promotion-card {
-      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 3px 15px rgba(200,169,126,0.15);
-      border: 2px solid rgba(200,169,126,0.1);
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: 16px;
-      min-height: 140px;
-    }
-    .promotion-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 6px 25px rgba(200,169,126,0.25);
-      border-color: rgba(200,169,126,0.3);
-    }
-    .promotion-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: linear-gradient(90deg, #c8a97e 0%, #f0d4a0 100%);
-    }
-    .promotion-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.12);
-      border-color: #c8a97e;
-    }
-    .promotion-card.featured {
-      background: linear-gradient(135deg, #c8a97e 0%, #d4b896 100%);
-      color: #fff;
-    }
-    .promotion-card.featured::before {
-      background: rgba(255,255,255,0.2);
-    }
-    .promotion-card-left {
-      flex-shrink: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-width: 100px;
-    }
-    .promotion-card-right {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .promotion-card .badge {
+
+    .ts-marquee-inner {
       display: inline-block;
-      background: #ff4757;
-      color: #fff;
-      padding: 3px 10px;
-      border-radius: 12px;
-      font-size: 10px;
-      font-weight: 600;
-      margin-bottom: 8px;
-      text-transform: uppercase;
-      align-self: flex-start;
-    }
-    .promotion-card.featured .badge {
-      background: rgba(255,255,255,0.3);
-    }
-    .promotion-card h3 {
-      font-size: 16px;
-      font-weight: 700;
-      margin-bottom: 6px;
-      color: #1a1a1a;
-      line-height: 1.3;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-    .promotion-card.featured h3 {
-      color: #fff;
-    }
-    .promotion-card .discount {
-      font-size: 32px;
-      font-weight: 700;
-      color: #c8a97e;
-      line-height: 1;
-      margin: 0;
-    }
-    .promotion-card.featured .discount {
-      color: #fff;
-    }
-    .promotion-card .code-box {
-      background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-      border: 2px dashed #c8a97e;
-      border-radius: 6px;
-      padding: 10px;
-      margin: 8px 0;
-      text-align: center;
-    }
-    .promotion-card.featured .code-box {
-      background: rgba(255,255,255,0.2);
-      border-color: rgba(255,255,255,0.5);
-    }
-    .promotion-card .code {
-      font-size: 16px;
-      font-weight: 700;
-      color: #c8a97e;
-      letter-spacing: 1px;
-      font-family: 'Courier New', monospace;
-    }
-    .promotion-card.featured .code {
-      color: #fff;
-    }
-    .promotion-card .btn-copy {
-      margin-top: 6px;
-      padding: 4px 12px;
-      background: #c8a97e;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 12px;
-      transition: all 0.3s ease;
-    }
-    .promotion-card.featured .btn-copy {
-      background: rgba(255,255,255,0.3);
-    }
-    .promotion-card .btn-copy:hover {
-      background: #b89870;
-    }
-    .promotion-card.featured .btn-copy:hover {
-      background: rgba(255,255,255,0.5);
-    }
-    .promotion-card p {
-      color: #6b7280;
-      font-size: 12px;
-      line-height: 1.4;
-      margin: 0;
-    }
-    .promotion-card.featured p {
-      color: rgba(255,255,255,0.9);
-    }
-    .promotion-card .date-range {
+      animation: marqueeScroll 22s linear infinite;
+      font-family: 'Inter', sans-serif;
       font-size: 11px;
-      color: #6b7280;
-      margin-top: 4px;
+      letter-spacing: 5px;
+      text-transform: uppercase;
     }
-    .promotion-card.featured .date-range {
-      color: rgba(255,255,255,0.8);
-    }
-    
-    /* FAQ Section */
-    .faq-section {
-      padding: 60px 0;
-      background: linear-gradient(135deg, #f5ede0 0%, #fff8f0 50%, #ffffff 100%);
-      position: relative;
-      overflow: hidden;
-    }
-    .faq-section::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      opacity: 0.05;
-      background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(200,169,126,0.1) 10px, rgba(200,169,126,0.1) 20px);
-      pointer-events: none;
-    }
-    .faq-section .container {
-      position: relative;
-      z-index: 1;
-    }
-    .faq-container {
-      max-width: 800px;
-      margin: 0 auto;
-      margin-top: 40px;
-    }
-    .faq-item {
-      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-      border: 1px solid rgba(200,169,126,0.2);
-      border-radius: 12px;
-      margin-bottom: 16px;
-      overflow: hidden;
-      transition: all 0.3s ease;
-    }
-    .faq-item:hover {
-      border-color: #c8a97e;
-      box-shadow: 0 4px 12px rgba(200,169,126,0.1);
-    }
-    .faq-item.active {
-      border-color: #c8a97e;
-    }
-    .faq-question {
-      padding: 20px 24px;
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-weight: 600;
-      font-size: 16px;
-      color: #1a1a1a;
-      transition: all 0.3s ease;
-    }
-    .faq-question:hover {
-      color: #c8a97e;
-    }
-    .faq-question::after {
-      content: '+';
-      font-size: 24px;
-      font-weight: 300;
-      color: #c8a97e;
-      transition: transform 0.3s ease;
-    }
-    .faq-item.active .faq-question::after {
-      transform: rotate(45deg);
-    }
-    .faq-answer {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.3s ease, padding 0.3s ease;
-      padding: 0 24px;
-    }
-    .faq-item.active .faq-answer {
-      max-height: 500px;
-      padding: 0 24px 20px 24px;
-    }
-    .faq-answer p {
-      color: #6b7280;
-      font-size: 15px;
-      line-height: 1.8;
-      margin: 0;
-    }
-    
-    /* Responsive for Promotions and FAQ */
-    @media (max-width: 992px) {
-      .promotion-cards {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-    @media (max-width: 768px) {
-      .promotion-cards {
-        grid-template-columns: 1fr;
-      }
-      .promotion-card {
-        flex-direction: column;
-        text-align: center;
-        min-height: auto;
-        padding: 20px;
-      }
-      .promotion-card-left {
-        min-width: auto;
-      }
-      .promotion-card .discount {
-        font-size: 28px;
-      }
-      .faq-question {
-        padding: 16px 20px;
-        font-size: 15px;
-      }
-      .faq-answer {
-      padding: 0 20px 16px 20px;
-    }
-    </style>
-    
-    <!-- Flatpickr CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-  </head>
-  <body>
 
-  <!-- Header placeholder - will be loaded by load-header.js -->
-  <div id="header-placeholder"></div>
-  
-  <!-- Load header component -->
-  <script src="js/load-header.js"></script>
+    @keyframes marqueeScroll {
+      from {
+        transform: translateX(0);
+      }
 
-  <!-- Hero Section -->
-  <section class="rooms-hero">
-    	<div class="container">
-      <div class="rooms-hero-content">
-        <h1 style="color: #ffffff !important;">Khám phá phòng nghỉ</h1>
-        <p style="color: #ffffff !important;">Trải nghiệm không gian nghỉ dưỡng đẳng cấp với đầy đủ tiện nghi hiện đại</p>
-		    </div>
-    	</div>
-    </section>
+      to {
+        transform: translateX(-50%);
+      }
+    }
 
-  <!-- Introduction Section -->
-  <section class="ftco-section bg-light" style="padding: 60px 0; background: linear-gradient(135deg, #f5ede0 0%, #fff8f0 50%, #ffffff 100%); position: relative; overflow: hidden;">
-    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; opacity: 0.05; background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(200,169,126,0.1) 10px, rgba(200,169,126,0.1) 20px);"></div>
-    <div class="container" style="position: relative; z-index: 1;">
-      <div class="row align-items-center">
-        <div class="col-md-6 mb-4 mb-md-0">
-          <div class="heading-section" style="padding: 30px; background: linear-gradient(135deg, rgba(255,255,255,0.6) 0%, rgba(255,248,240,0.4) 50%, rgba(245,237,224,0.3) 100%); border-radius: 20px; border: 2px solid rgba(200,169,126,0.15); box-shadow: 0 8px 30px rgba(200,169,126,0.1); position: relative; overflow: hidden;">
-            <div style="position: absolute; top: 0; left: 0; width: 80px; height: 80px; background: linear-gradient(135deg, rgba(200,169,126,0.1) 0%, transparent 100%); border-radius: 0 0 100px 0; pointer-events: none;"></div>
-            <span class="subheading" style="color: #c8a97e; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; display: block; margin-bottom: 10px; position: relative; z-index: 1;">Phòng nghỉ cao cấp</span>
-            <h2 class="mb-4" style="font-size: 36px; font-weight: 700; color: #1a1a1a; line-height: 1.2; position: relative; z-index: 1;">Không gian nghỉ dưỡng đẳng cấp</h2>
-            <p style="font-size: 16px; line-height: 1.8; color: #6b7280; margin-bottom: 20px; position: relative; z-index: 1;">Mỗi phòng nghỉ tại Resort Deluxe được thiết kế tỉ mỉ với phong cách hiện đại và sang trọng, mang đến cho bạn không gian thư giãn hoàn hảo sau những hoạt động trong ngày.</p>
-            <p style="font-size: 16px; line-height: 1.8; color: #6b7280; margin-bottom: 20px; position: relative; z-index: 1;">Từ phòng tiêu chuẩn đến suite cao cấp, tất cả đều được trang bị đầy đủ tiện nghi hiện đại như wifi tốc độ cao, TV màn hình lớn, minibar, hệ thống điều hòa và nhiều dịch vụ khác.</p>
-            <p style="font-size: 16px; line-height: 1.8; color: #6b7280; margin-bottom: 0; position: relative; z-index: 1;">Hãy sử dụng bộ lọc bên phải để tìm phòng phù hợp nhất với nhu cầu và ngân sách của bạn. Chúng tôi cam kết mang đến trải nghiệm nghỉ dưỡng đáng nhớ nhất.</p>
-          </div>
-        </div>
-        <div class="col-md-6">
-          <div style="background: linear-gradient(135deg, #ffffff 0%, #fff8f0 50%, #f5ede0 100%); padding: 40px; border-radius: 20px; border: 2px solid rgba(200,169,126,0.2); box-shadow: 0 10px 40px rgba(200,169,126,0.2); border-left: 5px solid #c8a97e; transition: all 0.3s ease; position: relative; overflow: hidden;">
-            <div style="position: absolute; top: 0; right: 0; width: 100px; height: 100px; background: linear-gradient(135deg, rgba(200,169,126,0.15) 0%, transparent 100%); border-radius: 0 20px 0 100px; pointer-events: none;"></div>
-            <h4 style="font-size: 20px; font-weight: 700; color: #1a1a1a; margin-bottom: 20px; position: relative; z-index: 1;">Tại sao chọn phòng của chúng tôi?</h4>
-            <ul style="list-style: none; padding: 0; margin: 0; position: relative; z-index: 1;">
-              <li style="display: flex; align-items: start; margin-bottom: 15px; padding: 12px; border-radius: 12px; background: rgba(200,169,126,0.05); transition: all 0.3s ease;">
-                <span style="font-size: 24px; margin-right: 12px; filter: drop-shadow(0 2px 4px rgba(200,169,126,0.3));">✨</span>
-                <div>
-                  <strong style="color: #1a1a1a; font-size: 15px;">Tiện nghi đầy đủ</strong>
-                  <p style="color: #6b7280; font-size: 14px; margin: 5px 0 0 0;">Mọi phòng đều được trang bị đầy đủ tiện nghi hiện đại</p>
-                </div>
-              </li>
-              <li style="display: flex; align-items: start; margin-bottom: 15px; padding: 12px; border-radius: 12px; background: rgba(200,169,126,0.05); transition: all 0.3s ease;">
-                <span style="font-size: 24px; margin-right: 12px; filter: drop-shadow(0 2px 4px rgba(200,169,126,0.3));">🌊</span>
-                <div>
-                  <strong style="color: #1a1a1a; font-size: 15px;">View đẹp</strong>
-                  <p style="color: #6b7280; font-size: 14px; margin: 5px 0 0 0;">Nhiều phòng có view ra biển hoặc vườn xanh</p>
-                </div>
-              </li>
-              <li style="display: flex; align-items: start; margin-bottom: 15px; padding: 12px; border-radius: 12px; background: rgba(200,169,126,0.05); transition: all 0.3s ease;">
-                <span style="font-size: 24px; margin-right: 12px; filter: drop-shadow(0 2px 4px rgba(200,169,126,0.3));">🛏️</span>
-                <div>
-                  <strong style="color: #1a1a1a; font-size: 15px;">Giường ngủ thoải mái</strong>
-                  <p style="color: #6b7280; font-size: 14px; margin: 5px 0 0 0;">Nệm và chăn ga gối chất lượng cao</p>
-                </div>
-              </li>
-              <li style="display: flex; align-items: start; padding: 12px; border-radius: 12px; background: rgba(200,169,126,0.05); transition: all 0.3s ease;">
-                <span style="font-size: 24px; margin-right: 12px; filter: drop-shadow(0 2px 4px rgba(200,169,126,0.3));">🚿</span>
-                <div>
-                  <strong style="color: #1a1a1a; font-size: 15px;">Phòng tắm sang trọng</strong>
-                  <p style="color: #6b7280; font-size: 14px; margin: 5px 0 0 0;">Phòng tắm riêng với đầy đủ đồ dùng cá nhân</p>
-                </div>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+    /* ── Room card image subtle scale on hover ── */
+    .ts-room-card-img {
+      overflow: hidden;
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .ts-room-card:hover .ts-room-card-img {
+      transform: scale(1.02);
+    }
+  </style>
+</head>
+
+<body class="layout-vertical">
+
+  <!-- Premium FX Elements -->
+  <div class="ts-grain"></div>
+
+  <!-- Site Header -->
+  <header id="site-header"></header>
 
   <!-- Main Content -->
-  <main class="container" style="background: linear-gradient(135deg, rgba(245,237,224,0.3) 0%, rgba(255,248,240,0.2) 50%, transparent 100%); padding: 40px 0; border-radius: 20px; margin-bottom: 40px;">
-    <div class="rooms-main-content">
-      <!-- Rooms List - Left Column -->
-      <div class="rooms-content-area">
-        <!-- Results Header with Sorting -->
-        <div class="results-header">
-          <div class="results-info">
-            <span style="font-size: 20px; margin-right: 8px;">📋</span>
-            <span id="resultsCount" class="results-count">Đang tải...</span>
-          </div>
-          <div class="sort-options">
-            <label for="sortBy" style="display: flex; align-items: center; gap: 8px;">
-              <span style="font-size: 18px;">🔀</span>
-              <span>Sắp xếp:</span>
-            </label>
-            <select id="sortBy" class="sort-select">
-              <option value="default">Mặc định</option>
-              <option value="price-asc">Giá: Thấp → Cao</option>
-              <option value="price-desc">Giá: Cao → Thấp</option>
-              <option value="name-asc">Tên: A → Z</option>
-              <option value="name-desc">Tên: Z → A</option>
-              <option value="size-desc">Diện tích: Lớn → Nhỏ</option>
-              <option value="size-asc">Diện tích: Nhỏ → Lớn</option>
-            </select>
-          </div>
-        </div>
-        
-        <div id="loading" class="loading-state" hidden>
-          <div class="loading-spinner"></div>
-          <p class="loading-text">Đang tải danh sách phòng...</p>
-        </div>
-        
-        <div id="roomsList" class="rooms-grid"></div>
+  <main id="page-content" data-page="rooms" data-layout="vertical">
+
+    <!-- Intro Slide -->
+    <section class="ts-slide ts-intro-slide" tabindex="0" aria-label="Slide">
+      <div class="ts-slide-bg" style="background-image: url('images/roommain.jpg'); filter: brightness(0.7);"></div>
+      <div class="ts-slide-content">
+        <h1 id="rooms-hero-text" class="playfair"
+          style="font-size: 56px; font-weight: 400; color: #fff; text-shadow: 0 4px 20px rgba(0,0,0,0.5); line-height: 1.2; text-align: center; margin: 0;">
+          Phòng của chúng tôi</h1>
       </div>
-      
-      <!-- Filter Section - Right Sidebar -->
-      <aside class="filter-section-modern">
-        <div class="filter-header">
-          <h3>Tìm phòng lý tưởng</h3>
-        </div>
-        <div class="filter-grid">
-          <div class="filter-group">
-            <label for="checkin">📅 Ngày nhận phòng</label>
-            <input id="checkin" type="text" class="form-control" placeholder="Chọn ngày..." />
-          </div>
-          <div class="filter-group">
-            <label for="checkout">📅 Ngày trả phòng</label>
-            <input id="checkout" type="text" class="form-control" placeholder="Chọn ngày..." />
-          </div>
-          <div class="filter-group">
-            <label for="typeFilter">🏨 Loại phòng</label>
-            <select id="typeFilter" class="form-select">
-              <option value="">Tất cả loại phòng</option>
-            </select>
-          </div>
-          <div class="filter-group">
-            <label for="guestsFilter">👥 Số khách</label>
-            <select id="guestsFilter" class="form-select">
-              <option value="">Bất kỳ</option>
-              <option value="1">1 khách</option>
-              <option value="2">2 khách</option>
-              <option value="3">3 khách</option>
-              <option value="4">4 khách</option>
-              <option value="5">5+ khách</option>
-            </select>
-          </div>
-          <div class="filter-group">
-            <label for="priceFilter">💰 Mức giá (đêm)</label>
-            <select id="priceFilter" class="form-select">
-              <option value="">Tất cả</option>
-              <option value="0-1000000">Dưới 1 triệu</option>
-              <option value="1000000-2000000">1 - 2 triệu</option>
-              <option value="2000000-3000000">2 - 3 triệu</option>
-              <option value="3000000-5000000">3 - 5 triệu</option>
-              <option value="5000000-999999999">Trên 5 triệu</option>
-            </select>
-          </div>
-          <div class="filter-actions">
-            <button id="btnSearch" class="btn-filter btn-filter-primary" title="Tìm kiếm phòng theo tiêu chí">
-              <span style="font-size: 18px; margin-right: 6px;">🔍</span> Tìm phòng
-            </button>
-            <button id="btnReset" class="btn-filter btn-filter-secondary" title="Xóa tất cả bộ lọc">
-              <span style="font-size: 18px; margin-right: 6px;">🔄</span> Xóa lọc
-            </button>
-          </div>
-        </div>
-      </aside>
-    </div>
+
+    </section>
+
+    <!-- Text Introduction Section -->
+    <section class="ts-text-section">
+      <h2 class="playfair ts-reveal-text">Resort Luxury là một khu nghỉ dưỡng được xây dựng thủ công. Các "phòng" tại
+        đây là những ngôi nhà nhỏ biệt lập—thường được gọi là bungalow—nằm trong khuôn viên các khu vườn có tường bao
+        quanh.</h2>
+    </section>
+
+    <!-- Asymmetrical Image Feature -->
+    <section class="ts-asym-section">
+      <div class="ts-asym-left">
+        <img src="images/room-3.jpg" alt="Interior Details">
+        <p class="ts-reveal-text ts-delay-1">Các nghệ nhân địa phương đã chế tác chúng theo lối tự nhiên, làm nổi bật
+          nét đặc trưng thủ công của khu nghỉ dưỡng trong kiến ​​trúc, nội thất và các món đồ trang trí.</p>
+      </div>
+      <div class="ts-asym-right">
+        <img src="images/bg_2.jpg" alt="Bungalow Exterior">
+        <h3 class="playfair ts-reveal-text ts-delay-1">Các căn nhà gỗ này được bố trí một cách tinh tế trong khuôn viên
+          khu nghỉ dưỡng và sở hữu thiết kế tuyệt đẹp, dựa trên bản phác thảo của người sáng lập – ông Wija Wawo-Runtu.
+        </h3>
+      </div>
+    </section>
+
+    <!-- Rooms will be injected here -->
+    <div id="ts-rooms-container" class="ts-rooms-grid"></div>
+
+
+
+
+
+    <!-- Zoom Transition to Restaurant -->
+    <section class="ts-slide zoom-transition-slide" tabindex="0" aria-label="Slide" data-target="restaurant.html">
+      <!-- Hidden content cloned during zoom -->
+      <div class="ts-slide-content" style="display: none;">
+
+        <h1 class="playfair"
+          style="font-size: 56px; font-weight: 400; color: #fff; text-shadow: 0 4px 20px rgba(0,0,0,0.5); line-height: 1.2; text-align: center; margin: 0;">
+          Nhà hàng của chúng tôi</h1>
+      </div>
+      <!-- Text Above -->
+      <div class="zoom-outer-text zoom-top-text">Khám phá nhà hàng</div>
+      <div class="zoom-image-container">
+        <div class="zoom-image" style="background-image: url('images/restaurantmain.jpg');"></div>
+      </div>
+      <!-- Big bottom text -->
+      <div class="zoom-big-bottom-text">Cuộn để tiếp tục</div>
+    </section>
+
+    <!-- Local Scripts moved inside main for PJAX execution -->
+    <script>
+      if (!window.__roomsInitialized) {
+        window.__roomsInitialized = true;
+
+        async function loadRoomTypes() {
+          try {
+            const resp = await fetch('/api/room-types');
+            if (!resp.ok) return;
+            const types = await resp.json();
+            const select = document.getElementById('roomTypeFilter');
+            if (select) {
+              select.innerHTML = '<option value="">Tất cả loại phòng</option>';
+              types.forEach(t => {
+                const val = t.roomTypeId || t.RoomTypeId || t.id;
+                const name = t.typeName || t.TypeName || t.name;
+                select.innerHTML += `<option value="${val}">${name}</option>`;
+              });
+            }
+          } catch (e) { console.error('Error loading room types:', e); }
+        }
+
+        async function loadRooms() {
+          const container = document.getElementById('ts-rooms-container');
+          if (!container) return;
+
+          const typeId = document.getElementById('roomTypeFilter')?.value || '';
+
+          try {
+            const resp = await fetch('/api/rooms');
+            if (!resp.ok) throw new Error('API Error');
+            let list = await resp.json();
+
+            // Extract from paginated result if needed
+            if (!Array.isArray(list)) {
+              if (list.items) list = list.items;
+              else if (list.rooms) list = list.rooms;
+              else list = [];
+            }
+
+            if (typeId) {
+              list = list.filter(r => r.roomTypeId == typeId || r.RoomTypeId == typeId);
+            }
+
+            if (!list || list.length === 0) {
+              container.innerHTML = `
+                <section class="ts-slide" tabindex="0" aria-label="Slide">
+                  <div class="ts-slide-content">
+                    <h2 class="playfair">Không tìm thấy phòng phù hợp</h2>
+                    <p>Vui lòng thử lại với bộ lọc khác.</p>
+                  </div>
+                </section>
+              `;
+              return;
+            }
+
+            // We will render room types instead of individual identical rooms
+            const renderedTypes = new Set();
+            const uniqueRooms = list.filter(r => {
+              const tId = r.roomTypeId || r.RoomTypeId;
+              if (renderedTypes.has(tId)) return false;
+              renderedTypes.add(tId);
+              return true;
+            });
+            const roomsToShow = uniqueRooms.slice(0, 5);
+
+            container.innerHTML = '';
+            roomsToShow.forEach((r, idx) => {
+              const card = document.createElement('div');
+              card.className = 'ts-room-card';
+
+              const imgUrl = pickImage(r);
+              const roomTypeStr = typeof r.roomType === 'string' ? r.roomType : (typeof r.RoomType === 'string' ? r.RoomType : null);
+              const roomTypeName = r.roomType?.typeName || r.RoomType?.TypeName || roomTypeStr;
+              const nameMap = {
+                'Standard': 'Phòng Tiêu Chuẩn',
+                'Deluxe': 'Phòng Cao Cấp',
+                'Suite': 'Phòng Suite (Gia đình)',
+                'Villa': 'Biệt Thự Vườn'
+              };
+              const rawName = r.name || r.Name || roomTypeName || 'Phòng Cao Cấp';
+              const name = nameMap[rawName] || rawName;
+              const maxOccupancy = r.maxOccupancy || r.MaxOccupancy || 2;
+              const roomSize = r.roomSize || r.RoomSize || '45m²';
+              const price = r.pricePerNight || r.PricePerNight || 0;
+              const desc = r.description || r.Description || 'Tucked away in its own garden with a spacious terrace and polished wooden interiors.';
+
+              card.innerHTML = `
+                <div class="ts-room-card-img ts-animate-on-scroll" style="background-image: url('${imgUrl}');"></div>
+                <div class="ts-room-card-header ts-animate-on-scroll">
+                  <h3 class="playfair ts-room-card-title">${name}</h3>
+                  <a href="room-detail.html?id=${r.roomId || r.RoomId}" class="ts-room-card-link" onclick="sessionStorage.setItem('pre_img', '${imgUrl}'); sessionStorage.setItem('pre_title', '${name.replace(/'/g, "\\'")}');">DISCOVER MORE</a>
+                </div>
+                <p class="ts-room-card-desc ts-animate-on-scroll">${desc}</p>
+              `;
+              container.appendChild(card);
+            });
+
+            setupScrollAnimations();
+          } catch (e) {
+            console.error('Lỗi tải danh sách phòng:', e);
+            container.innerHTML = `
+              <section class="ts-slide" tabindex="0" aria-label="Slide">
+                <div class="ts-slide-content">
+                  <h2 class="playfair">Đã xảy ra lỗi</h2>
+                  <p>Không thể tải dữ liệu. Vui lòng thử lại sau.</p>
+                </div>
+              </section>
+            `;
+          }
+        }
+
+        window.applyFilters = function () {
+          toggleBookingPanel();
+          loadRooms();
+          const intro = document.querySelector('.ts-intro-slide');
+          const pageContent = document.getElementById('page-content');
+          if (intro && pageContent) {
+            if (document.body.classList.contains('layout-vertical')) {
+              window.scrollBy({ top: window.innerHeight, behavior: 'smooth' });
+            } else {
+              pageContent.scrollBy({ left: window.innerWidth, behavior: 'smooth' });
+            }
+          }
+        }
+
+        window.setupScrollAnimations = function () {
+          const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+              if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+                entry.target.style.animation = 'slideUpFade 1s cubic-bezier(0.16, 1, 0.3, 1) forwards';
+                entry.target.setAttribute('data-initialized', 'true');
+              }
+            });
+          }, { threshold: 0.2 });
+
+          document.querySelectorAll('.ts-animate-on-scroll:not([data-initialized="true"])').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.animation = 'none';
+            observer.observe(el);
+          });
+        }
+
+        // Utils used by local scripts
+        if (typeof pickImage === 'undefined') {
+          window.pickImage = function (room) {
+            const idx = Math.max(1, (room.roomId || 1) % 6);
+            const url = room.imageUrl || room.ImageUrl || room.roomTypeImageUrl || room.RoomTypeImageUrl || room.image || room.Image;
+            return formatImageUrl(url, idx);
+          };
+        }
+        if (typeof formatImageUrl === 'undefined') {
+          window.formatImageUrl = function (url, defaultIdx) {
+            if (!url) return `images/room-${defaultIdx}.jpg`;
+            if (url.startsWith('http')) return url;
+            if (url.startsWith('/')) return url;
+            return url.startsWith('images/') ? url : `images/${url}`;
+          };
+        }
+        if (typeof vnd === 'undefined') {
+          window.vnd = function (n) {
+            try { return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(n || 0); }
+            catch (_) { return (n || 0) + 'đ'; }
+          };
+        }
+
+        window.loadRoomTypes = loadRoomTypes;
+        window.loadRooms = loadRooms;
+      }
+
+      // Auto-load on inject if not already triggered by PJAX loader
+      if (!document.getElementById('ts-rooms-container').hasAttribute('data-loaded')) {
+        if (typeof window.loadRoomTypes === 'function') window.loadRoomTypes();
+        if (typeof window.loadRooms === 'function') window.loadRooms();
+        document.getElementById('ts-rooms-container').setAttribute('data-loaded', 'true');
+      }
+    </script>
+
+
+    <script>
+      // ────────────────────────────────────────────────────
+      //  ROOMS PAGE SCROLL EFFECTS
+      // ────────────────────────────────────────────────────
+      window.__initRoomsEffects = function () {
+
+        // 1. Hero text fade-out on scroll
+        const heroText = document.getElementById('rooms-hero-text');
+        if (heroText) {
+          window.addEventListener('scroll', () => {
+            const scrollY = window.scrollY;
+            const vh = window.innerHeight;
+            // Fade out over the first 50% of the viewport height
+            const opacity = Math.max(0, 1 - (scrollY / (vh * 0.5)));
+            heroText.style.opacity = opacity;
+          }, { passive: true });
+        }
+
+        // 2. Asym images fade-up
+        const imgObserver = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('revealed');
+              imgObserver.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.15 });
+        document.querySelectorAll('.ts-asym-left img, .ts-asym-right img').forEach(img => imgObserver.observe(img));
+
+        // 3. ts-reveal-text support (text sections)
+        const revealObserver = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-visible');
+              revealObserver.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.2 });
+        document.querySelectorAll('.ts-reveal-text').forEach(el => revealObserver.observe(el));
+
+        // 4. Room cards stagger reveal
+        const cardObserver = new IntersectionObserver((entries) => {
+          entries.forEach((entry, i) => {
+            if (entry.isIntersecting) {
+              const card = entry.target;
+              const delay = parseFloat(card.dataset.staggerDelay || 0);
+              setTimeout(() => card.classList.add('revealed'), delay);
+              cardObserver.unobserve(card);
+            }
+          });
+        }, { threshold: 0.1 });
+
+        // Observe existing cards + hook into future injected cards
+        function observeCards() {
+          document.querySelectorAll('.ts-room-card:not([data-observed])').forEach((card, idx) => {
+            // Stagger: left col (even index) normal, right col (odd index) +150ms
+            card.dataset.staggerDelay = idx % 2 === 0 ? idx * 80 : (idx * 80) + 150;
+            card.setAttribute('data-observed', '1');
+            cardObserver.observe(card);
+          });
+        }
+
+        observeCards();
+
+        // Re-observe when new cards injected by loadRooms()
+        const roomsContainer = document.getElementById('ts-rooms-container');
+        if (roomsContainer) {
+          new MutationObserver(observeCards).observe(roomsContainer, { childList: true });
+        }
+
+        // 5. Text scramble on card titles when they appear
+        const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZẢĂÀẠ';
+        function scramble(el) {
+          const original = el.textContent;
+          let iteration = 0;
+          const maxIter = original.length * 3;
+          const interval = setInterval(() => {
+            el.textContent = original.split('').map((char, i) => {
+              if (char === ' ') return ' ';
+              if (i < iteration / 3) return original[i];
+              return CHARS[Math.floor(Math.random() * CHARS.length)];
+            }).join('');
+            iteration++;
+            if (iteration > maxIter) {
+              el.textContent = original;
+              clearInterval(interval);
+            }
+          }, 25);
+        }
+
+        const scrambleObserver = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const title = entry.target.querySelector('.ts-room-card-title');
+              if (title && !title.dataset.scrambled) {
+                title.dataset.scrambled = '1';
+                setTimeout(() => scramble(title), 300);
+              }
+              scrambleObserver.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.2 });
+
+        function observeScramble() {
+          document.querySelectorAll('.ts-room-card:not([data-scramble-obs])').forEach(card => {
+            card.setAttribute('data-scramble-obs', '1');
+            scrambleObserver.observe(card);
+          });
+        }
+        observeScramble();
+        if (roomsContainer) {
+          new MutationObserver(observeScramble).observe(roomsContainer, { childList: true });
+        }
+
+      };
+
+      // Run on direct load
+      document.addEventListener('DOMContentLoaded', () => window.__initRoomsEffects && window.__initRoomsEffects());
+      // Also run when injected via PJAX (page-loader calls reinitPlugins)
+      document.addEventListener('pjax:complete', () => window.__initRoomsEffects && window.__initRoomsEffects());
+    </script>
+
+    <!-- Lenis Smooth Scroll -->
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
+    <script>
+      (function initLenis() {
+        if (window.__lenisInstance) {
+          window.__lenisInstance.destroy();
+        }
+
+        if (document.body.classList.contains('layout-vertical')) {
+          const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            direction: 'vertical',
+            gestureDirection: 'vertical',
+            smooth: true,
+            mouseMultiplier: 1,
+            smoothTouch: false,
+            touchMultiplier: 2,
+            infinite: false,
+          });
+
+          window.__lenisInstance = lenis;
+
+          // Patch page-loader.js zoom overlay issue:
+          // When zoom overlay is active, stop Lenis
+          let isLenisStopped = false;
+
+          function raf(time) {
+            const zoomOverlay = document.getElementById('ts-zoom-overlay');
+            if (zoomOverlay && !isLenisStopped) {
+              lenis.stop();
+              isLenisStopped = true;
+            } else if (!zoomOverlay && isLenisStopped) {
+              lenis.start();
+              isLenisStopped = false;
+            }
+
+            lenis.raf(time);
+            requestAnimationFrame(raf);
+          }
+          requestAnimationFrame(raf);
+        }
+      })();
+    </script>
   </main>
 
-  <!-- Promotions Section -->
-  <section class="promotions-section" style="padding-top: 40px;">
-    <div class="container">
-      <div class="row justify-content-center mb-5">
-        <div class="col-md-8 text-center">
-          <span class="subheading" style="color: #c8a97e; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; display: block; margin-bottom: 10px;">Ưu đãi đặc biệt</span>
-          <h2 class="mb-4" style="font-size: 36px; font-weight: 700; color: #1a1a1a;">Khuyến mãi hiện tại</h2>
-          <p style="color: #6b7280; font-size: 16px;">Tận hưởng những ưu đãi hấp dẫn dành riêng cho bạn</p>
-        </div>
-      </div>
-      <div class="promotion-cards" id="promotionCards">
-        <!-- Coupons will be loaded dynamically from API -->
-        <div class="text-center py-5" id="loadingCoupons" style="color: #6b7280; min-height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-          <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem; border-width: 0.3em;">
-            <span class="visually-hidden">Đang tải...</span>
-          </div>
-          <p class="mt-3" style="font-size: 16px;">Đang tải mã giảm giá...</p>
-        </div>
-        <div id="noCouponsMessage" style="display: none;"></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- FAQ Section -->
-  <section class="faq-section">
-    <div class="container" style="position: relative; z-index: 1;">
-      <div class="row justify-content-center mb-5">
-        <div class="col-md-8 text-center">
-          <span class="subheading" style="color: #c8a97e; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; display: block; margin-bottom: 10px;">Câu hỏi thường gặp</span>
-          <h2 class="mb-4" style="font-size: 36px; font-weight: 700; color: #1a1a1a;">Bạn có thắc mắc?</h2>
-          <p style="color: #6b7280; font-size: 16px;">Tìm câu trả lời cho các câu hỏi phổ biến nhất</p>
-        </div>
-      </div>
-      <div class="faq-container">
-        <div class="faq-item">
-          <div class="faq-question">Giờ check-in và check-out là khi nào?</div>
-          <div class="faq-answer">
-            <p>Giờ check-in bắt đầu từ 14:00 và check-out trước 12:00. Nếu bạn cần check-in sớm hoặc check-out muộn, vui lòng liên hệ với chúng tôi trước để được sắp xếp (có thể phát sinh phụ phí tùy theo tình trạng phòng).</p>
-          </div>
-        </div>
-        
-        <div class="faq-item">
-          <div class="faq-question">Chính sách hủy phòng như thế nào?</div>
-          <div class="faq-answer">
-            <p>Bạn có thể hủy đặt phòng miễn phí nếu hủy trước 48 giờ so với giờ check-in dự kiến. Nếu hủy trong vòng 24-48 giờ, chúng tôi sẽ thu 50% giá trị đặt phòng. Hủy trong vòng 24 giờ hoặc không đến sẽ không được hoàn tiền.</p>
-          </div>
-        </div>
-        
-        <div class="faq-item">
-          <div class="faq-question">Có phụ phí gì khi đặt phòng không?</div>
-          <div class="faq-answer">
-            <p>Giá phòng đã bao gồm thuế VAT và phí dịch vụ. Các phụ phí có thể phát sinh bao gồm: phí dịch vụ phòng (room service), minibar, dịch vụ giặt ủi, và các dịch vụ bổ sung khác theo yêu cầu. Vui lòng xem chi tiết trong email xác nhận đặt phòng.</p>
-          </div>
-        </div>
-        
-        <div class="faq-item">
-          <div class="faq-question">Trẻ em có được miễn phí không?</div>
-          <div class="faq-answer">
-            <p>Trẻ em dưới 5 tuổi được ở miễn phí khi sử dụng giường có sẵn và không cần thêm giường. Trẻ em từ 5-12 tuổi có thể ở cùng giường với bố mẹ (miễn phí) hoặc yêu cầu thêm giường phụ (phụ phí 300.000 VNĐ/đêm). Trẻ em trên 12 tuổi được tính như người lớn.</p>
-          </div>
-        </div>
-        
-        <div class="faq-item">
-          <div class="faq-question">Có thể sử dụng mã khuyến mãi như thế nào?</div>
-          <div class="faq-answer">
-            <p>Khi đặt phòng online, bạn sẽ thấy trường "Mã khuyến mãi" ở bước thanh toán. Nhập mã khuyến mãi hợp lệ và nhấn "Áp dụng". Mã sẽ tự động tính giảm giá vào tổng tiền. Lưu ý: mỗi mã chỉ có thể sử dụng một lần và có thể có thời hạn áp dụng.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Footer -->
-      <footer class="ftco-footer ftco-bg-dark ftco-section">
-      <div class="container">
-        <div class="row mb-5">
-          <div class="col-md">
-            <div class="ftco-footer-widget mb-4">
-              <h2 class="ftco-heading-2">RESORT DELUXE</h2>
-              <p>Khu nghỉ dưỡng cao cấp với không gian sang trọng, dịch vụ chu đáo và tiện nghi hiện đại, mang đến cho bạn kỳ nghỉ trọn vẹn.</p>
-              <ul class="ftco-footer-social list-unstyled float-md-left float-lft mt-5">
-                <li class="ftco-animate"><a href="#" style="display: block !important; visibility: visible !important; opacity: 1 !important;"><span class="icon-twitter"></span></a></li>
-                <li class="ftco-animate"><a href="#" style="display: block !important; visibility: visible !important; opacity: 1 !important;"><span class="icon-facebook"></span></a></li>
-                <li class="ftco-animate"><a href="#" style="display: block !important; visibility: visible !important; opacity: 1 !important;"><span class="icon-instagram"></span></a></li>
-              </ul>
-            </div>
-          </div>
-          <div class="col-md">
-            <div class="ftco-footer-widget mb-4 ml-md-5">
-              <h2 class="ftco-heading-2">Liên kết hữu ích</h2>
-              <ul class="list-unstyled">
-                <li><a href="#" class="py-2 d-block">Blog</a></li>
-                <li><a href="#" class="py-2 d-block">Phòng</a></li>
-                <li><a href="#" class="py-2 d-block">Tiện ích</a></li>
-                <li><a href="#" class="py-2 d-block">Thẻ quà tặng</a></li>
-              </ul>
-            </div>
-          </div>
-          <div class="col-md">
-             <div class="ftco-footer-widget mb-4">
-              <h2 class="ftco-heading-2">Chính sách</h2>
-              <ul class="list-unstyled">
-                <li><a href="#" class="py-2 d-block">Tuyển dụng</a></li>
-                <li><a href="#" class="py-2 d-block">Về chúng tôi</a></li>
-                <li><a href="#" class="py-2 d-block">Liên hệ</a></li>
-                <li><a href="#" class="py-2 d-block">Dịch vụ</a></li>
-              </ul>
-            </div>
-          </div>
-          <div class="col-md">
-            <div class="ftco-footer-widget mb-4">
-                <h2 class="ftco-heading-2">Bạn cần hỗ trợ?</h2>
-            	<div class="block-23 mb-3">
-	              <ul>
-                <li><span class="icon icon-map-marker"></span><span class="text">Huflit Hốc Môn, Hồ Chí Minh</span></li>
-                <li><a href="#"><span class="icon icon-phone"></span><span class="text">+84 901 329 227</span></a></li>
-                <li><a href="#"><span class="icon icon-envelope"></span><span class="text">support@resortdeluxe.vn</span></a></li>
-	              </ul>
-	            </div>
-            </div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-md-12 text-center">
-            <p>Copyright ©<script>document.write(new Date().getFullYear());</script>2025 All rights reserved</p>
-          </div>
-        </div>
-      </div>
-    </footer>
-    
   <!-- Scripts -->
   <script src="js/jquery.min.js"></script>
-  <script src="js/bootstrap.min.js"></script>
-  <script src="js/popper.min.js"></script>
-  <script src="../js/api.js"></script>
-  <script src="js/navbar-auth.js"></script>
-  
-  <!-- AI Chat Widget -->
-  <script src="js/ai-chat.js"></script>
-  <script src="js/coupons.js"></script>
-  
-  <!-- Flatpickr JS -->
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-  <script src="https://npmcdn.com/flatpickr/dist/l10n/vn.js"></script>
-  
+
   <script>
-    let rooms = [];
-  const API_ROOMS = location.origin + '/api/rooms';
-    const API_TYPES = location.origin + '/api/room-types';
-
-    function vnd(n) {
+    // Global initial load (only runs on direct page access)
+    document.addEventListener('DOMContentLoaded', async () => {
       try {
-        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(n || 0);
-      } catch (_) {
-        return (n || 0) + 'đ';
-      }
-    }
-
-    function pickImage(room) {
-      console.log('🖼️ [pickImage] Room data:', room);
-      console.log('🖼️ [pickImage] Room keys:', Object.keys(room));
-      
-      // HÌNH ẢNH ĐẠI DIỆN - Ưu tiên Room.ImageUrl (hình riêng của phòng)
-      // Priority 1: Room.ImageUrl (hình đại diện riêng của phòng này, do admin upload)
-      const roomImageUrl = room.imageUrl || room.ImageUrl;
-      if (roomImageUrl && typeof roomImageUrl === 'string' && roomImageUrl.trim().length > 0) {
-        console.log('✅ [pickImage] Found Room.ImageUrl (hình đại diện riêng):', roomImageUrl);
-        return formatImageUrl(roomImageUrl);
-      }
-      
-      // Priority 2: RoomTypeImageUrl from API (from RoomTypeNavigation.MainImageUrl)
-      // Handle both camelCase and PascalCase (C# default)
-      const roomTypeImageUrl = room.roomTypeImageUrl || room.RoomTypeImageUrl;
-      if (roomTypeImageUrl && typeof roomTypeImageUrl === 'string' && roomTypeImageUrl.trim().length > 0) {
-        console.log('✅ [pickImage] Found RoomTypeImageUrl:', roomTypeImageUrl);
-        return formatImageUrl(roomTypeImageUrl);
-      }
-      
-      // Priority 3: Try other image fields from API
-      const fields = [
-        room.image, 
-        room.thumbnailUrl, 
-        room.thumbnail, 
-        room.photoUrl,
-        room.roomImageUrl,
-        room.roomImage
-      ];
-      const found = fields.find(u => typeof u === 'string' && u.trim().length > 0);
-      if (found) {
-        console.log('✅ [pickImage] Found in other fields:', found);
-        return formatImageUrl(found);
-      }
-      
-      // Priority 4: Try to parse Room.ImageGallery (lấy ảnh đầu tiên nếu có)
-      const roomImageGallery = room.imageGallery || room.ImageGallery;
-      if (roomImageGallery && typeof roomImageGallery === 'string') {
-        try {
-          const gallery = JSON.parse(roomImageGallery);
-          if (Array.isArray(gallery) && gallery.length > 0 && gallery[0]) {
-            console.log('✅ [pickImage] Found in Room.ImageGallery (first image):', gallery[0]);
-            return formatImageUrl(gallery[0]);
-          }
-        } catch (e) {
-          console.warn('⚠️ [pickImage] Error parsing Room.ImageGallery:', e);
-        }
-      }
-      
-      // Priority 5: Try RoomTypeImageGallery
-      const roomTypeImageGallery = room.roomTypeImageGallery || room.RoomTypeImageGallery;
-      if (roomTypeImageGallery && typeof roomTypeImageGallery === 'string') {
-        try {
-          const gallery = JSON.parse(roomTypeImageGallery);
-          if (Array.isArray(gallery) && gallery.length > 0 && gallery[0]) {
-            console.log('✅ [pickImage] Found in RoomTypeImageGallery (first image):', gallery[0]);
-            return formatImageUrl(gallery[0]);
-          }
-        } catch (e) {
-          console.warn('⚠️ [pickImage] Error parsing RoomTypeImageGallery:', e);
-        }
-      }
-      
-      // Fallback to default image based on roomId
-      const idx = Math.max(1, (room.roomId || 1) % 6);
-      const fallbackUrl = `images/room-${idx}.jpg`;
-      console.log('⚠️ [pickImage] Using fallback:', fallbackUrl);
-      return fallbackUrl;
-    }
-    
-    function formatImageUrl(url) {
-      if (!url || typeof url !== 'string') return null;
-      url = url.trim();
-      if (url.length === 0) return null;
-      
-      // If it's already a full URL, return as is
-      if (url.startsWith('http://') || url.startsWith('https://')) {
-        return url;
-      }
-      
-      // If it starts with /, it's an absolute path from root
-      if (url.startsWith('/')) {
-        return url;
-      }
-      
-      // Otherwise, treat as relative to images/ folder
-      return url.startsWith('images/') ? url : `images/${url}`;
-    }
-
-    function renderRooms(list) {
-      console.log('🎨 [renderRooms] Rendering:', list.length, 'rooms');
-      const wrap = document.getElementById('roomsList');
-      if (!wrap) {
-        console.error('❌ [renderRooms] roomsList element not found');
-        return;
-      }
-      wrap.innerHTML = '';
-      wrap.className = 'rooms-grid';
-      
-      if (!Array.isArray(list) || list.length === 0) {
-        console.warn('⚠️ [renderRooms] Empty list or not an array');
-        wrap.innerHTML = `
-          <div class="col-12">
-            <div class="empty-state">
-              <div class="empty-state-icon">🏨</div>
-              <h3>Không tìm thấy phòng phù hợp</h3>
-              <p>Vui lòng thử lại với bộ lọc khác hoặc liên hệ với chúng tôi</p>
-            </div>
-          </div>
-        `;
-        return;
-      }
-      
-      list.forEach((r, index) => {
-        const price = r.pricePerNight ?? r.basePrice ?? 0;
-        const name = r.roomTypeName || r.roomType || 'Phòng nghỉ';
-        const imgUrl = pickImage(r);
-        const available = (r.isAvailable !== false);
-        const roomNumber = r.roomNumber ? `Phòng ${r.roomNumber}` : name;
-        const maxOccupancy = r.maxOccupancy ?? '-';
-        const roomSize = (r.roomTypeRoomSize || r.RoomTypeRoomSize) ?? r.roomSize ?? '-';
-        
-        console.log(`🖼️ [renderRooms] Room ${r.roomId}: imgUrl = ${imgUrl}, RoomTypeImageUrl = ${r.roomTypeImageUrl || r.RoomTypeImageUrl || 'undefined'}`);
-        
-        const card = document.createElement('div');
-        card.className = 'room-card-modern';
-        card.style.animationDelay = `${index * 0.1}s`;
-        card.onclick = () => {
-          window.location.href = `room-detail.html?id=${r.roomId}`;
-        };
-        
-        card.innerHTML = `
-          <div class="room-image-wrapper">
-            <img src="${imgUrl}" alt="${name}" loading="lazy" 
-                 onerror="this.onerror=null; this.src='images/room-${Math.max(1, (r.roomId || 1) % 6)}.jpg'; this.style.display='block';" 
-                 onload="this.style.display='block';" />
-            <div class="room-image-overlay"></div>
-            <span class="room-badge-top">🏨 ${roomNumber}</span>
-            <span class="room-badge-status ${available ? 'room-badge-available' : 'room-badge-unavailable'}">
-              ${available ? '✓ Còn phòng' : '✗ Hết phòng'}
-            </span>
-          </div>
-          <div class="room-card-body">
-            <div class="room-rating">
-              ${'<i class="icon-star"></i>'.repeat(5)}
-            </div>
-            <h3 class="room-title">${name}</h3>
-            <div class="room-price">
-              <span class="room-price-amount">${vnd(price)}</span>
-              <span class="room-price-unit">/ đêm</span>
-            </div>
-            <div class="room-features">
-              <div class="room-feature" title="Số lượng khách tối đa">
-                <span style="font-size: 18px; margin-right: 6px;">👥</span>
-                <span>${maxOccupancy} khách</span>
-              </div>
-              ${roomSize !== '-' ? `
-              <div class="room-feature" title="Diện tích phòng">
-                <span style="font-size: 18px; margin-right: 6px;">📐</span>
-                <span>${roomSize}m²</span>
-              </div>
-              ` : ''}
-            </div>
-            <div class="room-actions">
-              <a href="room-detail.html?id=${r.roomId}" class="btn-room-action btn-room-secondary" onclick="event.stopPropagation();" title="Xem chi tiết phòng">
-                <span style="font-size: 16px; margin-right: 6px;">👁️</span> Chi tiết
-              </a>
-              <button class="btn-room-action btn-room-primary" 
-                      onclick="event.stopPropagation();bookNow(${r.roomId})" 
-                      ${available ? '' : 'disabled'}
-                      title="${available ? 'Đặt phòng ngay' : 'Phòng đã hết'}">
-                <span style="font-size: 16px; margin-right: 6px;">📅</span> Đặt ngay
-              </button>
-            </div>
-          </div>
-        `;
-        
-        wrap.appendChild(card);
-      });
-      
-      // Re-observe cards for animation
-      setTimeout(() => {
-        document.querySelectorAll('.room-card-modern').forEach(card => {
-          if (!card.classList.contains('animated')) {
-            card.classList.add('animated');
-          }
-        });
-      }, 100);
-    }
-
-    async function loadRoomTypes() {
-      try {
-        const url = API_TYPES + '?_=' + Date.now();
-        console.log('🔵 [loadRoomTypes] Fetching:', url);
-        const resp = await fetch(url, { cache: 'no-store' });
-        console.log('🔵 [loadRoomTypes] Response status:', resp.status);
-        if (!resp.ok) throw new Error('HTTP ' + resp.status);
-        const data = await resp.json();
-        console.log('✅ [loadRoomTypes] Data received:', data);
-        const sel = document.getElementById('typeFilter');
-        if (!sel) {
-          console.error('❌ [loadRoomTypes] typeFilter element not found');
-          return;
-        }
-        data.forEach(t => {
-          const op = document.createElement('option');
-          op.value = t.roomTypeId;
-          op.textContent = t.typeName;
-          sel.appendChild(op);
-        });
-        console.log('✅ [loadRoomTypes] Options added:', data.length);
-      } catch (e) {
-        console.error('❌ [loadRoomTypes] Error:', e);
-        if (typeof showToast === 'function') {
-          showToast('Lỗi tải loại phòng: ' + e.message, 'warning');
-        }
-      }
-    }
-
-    // Validation function
-    function validateSearchForm() {
-      const checkin = document.getElementById('checkin')?.value;
-      const checkout = document.getElementById('checkout')?.value;
-      const guestsFilter = document.getElementById('guestsFilter')?.value;
-      
-      // Clear previous errors
-      const errorElements = document.querySelectorAll('.filter-error');
-      errorElements.forEach(el => el.remove());
-      
-      let hasError = false;
-      
-      // Validate checkin date
-      if (checkin) {
-        const checkinDate = new Date(checkin);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        checkinDate.setHours(0, 0, 0, 0);
-        
-        if (checkinDate < today) {
-          showFieldError('checkin', 'Ngày nhận phòng không được trong quá khứ');
-          hasError = true;
-        }
-      }
-      
-      // Validate checkout date
-      if (checkout) {
-        const checkoutDate = new Date(checkout);
-        checkoutDate.setHours(0, 0, 0, 0);
-        
-        if (checkin) {
-          const checkinDate = new Date(checkin);
-          checkinDate.setHours(0, 0, 0, 0);
-          
-          if (checkoutDate <= checkinDate) {
-            showFieldError('checkout', 'Ngày trả phòng phải sau ngày nhận phòng');
-            hasError = true;
-          }
-        } else {
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-          
-          if (checkoutDate < today) {
-            showFieldError('checkout', 'Ngày trả phòng không được trong quá khứ');
-            hasError = true;
-          }
-        }
-      }
-      
-      // Validate guests
-      if (guestsFilter) {
-        const numGuests = parseInt(guestsFilter);
-        if (isNaN(numGuests) || numGuests < 1 || numGuests > 20) {
-          showFieldError('guestsFilter', 'Số khách phải từ 1 đến 20');
-          hasError = true;
-        }
-      }
-      
-      return !hasError;
-    }
-    
-    function showFieldError(fieldId, message) {
-      const field = document.getElementById(fieldId);
-      if (!field) return;
-      
-      const errorDiv = document.createElement('div');
-      errorDiv.className = 'filter-error';
-      errorDiv.style.cssText = 'color: #dc3545; font-size: 12px; margin-top: 4px; padding: 4px 8px; background: #fff5f5; border-radius: 4px;';
-      errorDiv.textContent = message;
-      
-      field.parentElement.appendChild(errorDiv);
-      field.style.borderColor = '#dc3545';
-      
-      // Remove error after 5 seconds
-      setTimeout(() => {
-        errorDiv.remove();
-        field.style.borderColor = '';
-      }, 5000);
-    }
-
-    async function loadRooms() {
-      // Validate form before searching
-      if (!validateSearchForm()) {
-        if (typeof showToast === 'function') {
-          showToast('Vui lòng kiểm tra lại thông tin tìm kiếm', 'error');
-        } else {
-          alert('Vui lòng kiểm tra lại thông tin tìm kiếm');
-        }
-        return;
-      }
-      
-      const loading = document.getElementById('loading');
-      const roomsList = document.getElementById('roomsList');
-      
-      // Clear old data
-      if (roomsList) {
-        roomsList.innerHTML = '';
-        roomsList.className = 'rooms-grid';
-        console.log('🗑️ [loadRooms] Cleared old room data');
-      }
-      rooms = [];
-      
-      try {
-        loading.hidden = false;
-        loading.textContent = 'Đang tải danh sách phòng...';
-        
-        // Show skeleton loaders
-        const skeletonCount = 6;
-        roomsList.innerHTML = '';
-        roomsList.className = 'rooms-grid';
-        for (let i = 0; i < skeletonCount; i++) {
-          const skeleton = document.createElement('div');
-          skeleton.className = 'room-skeleton';
-          skeleton.innerHTML = `
-            <div class="skeleton-image"></div>
-            <div class="skeleton-content">
-              <div class="skeleton-line short" style="margin-bottom: 16px;"></div>
-              <div class="skeleton-line medium" style="margin-bottom: 12px;"></div>
-              <div class="skeleton-line long" style="margin-bottom: 8px;"></div>
-              <div class="skeleton-line short" style="margin-bottom: 20px;"></div>
-              <div class="skeleton-line long" style="height: 40px; border-radius: 12px;"></div>
-            </div>
-          `;
-          roomsList.appendChild(skeleton);
-        }
-        
-        const typeId = document.getElementById('typeFilter')?.value || '';
-        const qs = new URLSearchParams();
-        qs.set('isAvailable', 'true');
-        qs.set('_', Date.now());
-        if (typeId) qs.set('roomTypeId', typeId);
-        
-        const url = API_ROOMS + '?' + qs.toString();
-        console.log('🔵 [loadRooms] Fetching:', url);
-        
-        const resp = await fetch(url, { cache: 'no-store' });
-        console.log('🔵 [loadRooms] Response status:', resp.status, resp.statusText);
-        
-        if (!resp.ok) {
-          const errorText = await resp.text();
-          console.error('❌ [loadRooms] API Error:', errorText);
-          throw new Error('HTTP ' + resp.status + ': ' + errorText);
-        }
-        
-      const data = await resp.json();
-        console.log('✅ [loadRooms] Data received:', data);
-        console.log('✅ [loadRooms] Is array:', Array.isArray(data));
-        
-        let allRooms = Array.isArray(data) ? data : (Array.isArray(data?.items) ? data.items : []);
-        console.log('✅ [loadRooms] Rooms array length:', allRooms.length);
-        
-        if (allRooms.length > 0) {
-          console.log('✅ [loadRooms] First room:', allRooms[0]);
-        }
-        
-        // Store all rooms for filtering/sorting
-        rooms = allRooms;
-        
-        // Apply filters and sorting
-        let filteredRooms = applyFilters(allRooms);
-        filteredRooms = applySorting(filteredRooms);
-        
-        // Update results count
-        updateResultsCount(filteredRooms.length);
-        
-        renderRooms(filteredRooms);
-      } catch (e) {
-        console.error('❌ [loadRooms] Error:', e);
-        if (typeof showToast === 'function') {
-          showToast('Lỗi tải phòng: ' + e.message, 'danger');
-        } else {
-          alert('Lỗi tải phòng: ' + e.message);
-        }
-        
-        const roomsList = document.getElementById('roomsList');
-        if (roomsList) {
-          roomsList.innerHTML = `
-            <div class="col-12">
-              <div class="empty-state">
-                <div class="empty-state-icon">⚠️</div>
-                <h3>Không thể tải danh sách phòng</h3>
-                <p>Vui lòng thử lại sau hoặc liên hệ với chúng tôi</p>
-              </div>
-            </div>
-          `;
-        }
-    } finally {
-        loading.hidden = true;
-      }
-    }
-
-    // Filter and Sort Functions
-    function applyFilters(roomList) {
-      let filtered = [...roomList];
-      
-      // Filter by room type (already handled in API query, but keeping for client-side consistency)
-      const typeId = document.getElementById('typeFilter')?.value || '';
-      if (typeId) {
-        filtered = filtered.filter(r => r.roomTypeId == typeId);
-      }
-      
-      // Filter by guests
-      const guestsFilter = document.getElementById('guestsFilter')?.value || '';
-      if (guestsFilter) {
-        const minGuests = parseInt(guestsFilter);
-        if (minGuests === 5) {
-          filtered = filtered.filter(r => (r.maxOccupancy || 0) >= 5);
-        } else {
-          filtered = filtered.filter(r => (r.maxOccupancy || 0) >= minGuests && (r.maxOccupancy || 0) < minGuests + 1);
-        }
-      }
-      
-      // Filter by price range
-      const priceFilter = document.getElementById('priceFilter')?.value || '';
-      if (priceFilter) {
-        const [minPrice, maxPrice] = priceFilter.split('-').map(p => parseInt(p));
-        filtered = filtered.filter(r => {
-          const price = r.pricePerNight ?? r.basePrice ?? 0;
-          return price >= minPrice && price <= maxPrice;
-        });
-      }
-      
-      return filtered;
-    }
-    
-    function applySorting(roomList) {
-      const sortBy = document.getElementById('sortBy')?.value || 'default';
-      const sorted = [...roomList];
-      
-      switch (sortBy) {
-        case 'price-asc':
-          sorted.sort((a, b) => {
-            const priceA = a.pricePerNight ?? a.basePrice ?? 0;
-            const priceB = b.pricePerNight ?? b.basePrice ?? 0;
-            return priceA - priceB;
-          });
-          break;
-        case 'price-desc':
-          sorted.sort((a, b) => {
-            const priceA = a.pricePerNight ?? a.basePrice ?? 0;
-            const priceB = b.pricePerNight ?? b.basePrice ?? 0;
-            return priceB - priceA;
-          });
-          break;
-        case 'name-asc':
-          sorted.sort((a, b) => {
-            const nameA = (a.roomTypeName || a.roomType || '').toLowerCase();
-            const nameB = (b.roomTypeName || b.roomType || '').toLowerCase();
-            return nameA.localeCompare(nameB);
-          });
-          break;
-        case 'name-desc':
-          sorted.sort((a, b) => {
-            const nameA = (a.roomTypeName || a.roomType || '').toLowerCase();
-            const nameB = (b.roomTypeName || b.roomType || '').toLowerCase();
-            return nameB.localeCompare(nameA);
-          });
-          break;
-        case 'size-desc':
-          sorted.sort((a, b) => {
-            const sizeA = parseFloat(a.roomTypeRoomSize || a.RoomTypeRoomSize || a.roomSize || 0);
-            const sizeB = parseFloat(b.roomTypeRoomSize || b.RoomTypeRoomSize || b.roomSize || 0);
-            return sizeB - sizeA;
-          });
-          break;
-        case 'size-asc':
-          sorted.sort((a, b) => {
-            const sizeA = parseFloat(a.roomTypeRoomSize || a.RoomTypeRoomSize || a.roomSize || 0);
-            const sizeB = parseFloat(b.roomTypeRoomSize || b.RoomTypeRoomSize || b.roomSize || 0);
-            return sizeA - sizeB;
-          });
-          break;
-        default:
-          // Keep original order
-          break;
-      }
-      
-      return sorted;
-    }
-    
-    function updateResultsCount(count) {
-      const resultsCountEl = document.getElementById('resultsCount');
-      if (resultsCountEl) {
-        resultsCountEl.textContent = `${count} phòng`;
-      }
-    }
-
-    // Initialize Flatpickr for booking dates
-    function initFlatpickr() {
-      const commonConfig = {
-        locale: "vn",
-        minDate: "today",
-        dateFormat: "Y-m-d"
-      };
-      flatpickr("#checkin", commonConfig);
-      flatpickr("#checkout", commonConfig);
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      // Setup real-time validation on change
-      ['checkin', 'checkout', 'guestsFilter'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-          el.addEventListener('change', () => {
-            if (el.classList.contains('is-invalid')) {
-              el.classList.remove('is-invalid');
-              const errorEl = document.getElementById(`${id}Error`);
-              if (errorEl) errorEl.style.display = 'none';
-            }
-          });
-        }
-      });
-      
-      initFlatpickr();
-      loadRoomTypes();
-      loadRooms();
-      loadActiveCoupons();
+        const res = await fetch(`components/header.html?_=${Date.now()}`);
+        if (res.ok) document.getElementById('site-header').innerHTML = await res.text();
+      } catch (e) { console.error('Error loading header', e); }
     });
+  </script>
 
-    function bookNow(id) {
-      // Kiểm tra authentication trước khi đặt phòng
-      const token = localStorage.getItem('token');
-      const userStr = localStorage.getItem('user');
-      
-      if (!token || !userStr) {
-        if (typeof showToast === 'function') {
-          showToast('Vui lòng đăng nhập để đặt phòng', 'warning');
-        } else {
-          alert('Vui lòng đăng nhập để đặt phòng');
-        }
-        // Lưu URL hiện tại để redirect lại sau khi login
-        const currentUrl = window.location.href;
-        setTimeout(() => {
-          window.location.href = `login.html?redirect=${encodeURIComponent(currentUrl)}`;
-        }, 1500);
-        return;
-      }
-      
-      // Kiểm tra user object hợp lệ
-      try {
-        const user = JSON.parse(userStr);
-        if (!user || !user.customerId) {
-          throw new Error('Invalid user data');
-        }
-      } catch (e) {
-        if (typeof showToast === 'function') {
-          showToast('Thông tin người dùng không hợp lệ. Vui lòng đăng nhập lại', 'danger');
-        } else {
-          alert('Thông tin người dùng không hợp lệ. Vui lòng đăng nhập lại');
-        }
-        setTimeout(() => {
-          window.location.href = 'login.html';
-        }, 1500);
-        return;
-      }
-      
-      // Đã đăng nhập, cho phép đặt phòng
-      window.location.href = 'room-detail.html?id=' + encodeURIComponent(id);
-    }
+  <script src="js/page-loader.js?v=69"></script>
+  <script src="js/premium-fx.js?v=5"></script>
+  <link rel="stylesheet" href="css/page-transition.css?v=84">
+  <link rel="stylesheet" href="css/premium-fx.css?v=5">
+  <script src="js/navbar-auth.js"></script>
+</body>
 
-    // Event Listeners
-    document.getElementById('btnSearch').addEventListener('click', loadRooms);
-    document.getElementById('btnReset').addEventListener('click', () => {
-      document.getElementById('typeFilter').value = '';
-      document.getElementById('checkin').value = '';
-      document.getElementById('checkout').value = '';
-      document.getElementById('guestsFilter').value = '';
-      document.getElementById('priceFilter').value = '';
-      document.getElementById('sortBy').value = 'default';
-      loadRooms();
-    });
-    
-    // Sort change handler
-    document.getElementById('sortBy')?.addEventListener('change', () => {
-      if (rooms.length > 0) {
-        let filteredRooms = applyFilters(rooms);
-        filteredRooms = applySorting(filteredRooms);
-        renderRooms(filteredRooms);
-        updateResultsCount(filteredRooms.length);
-      }
-    });
-    
-    // Filter change handlers (auto-apply on change)
-    ['guestsFilter', 'priceFilter'].forEach(filterId => {
-      const filterEl = document.getElementById(filterId);
-      if (filterEl) {
-        filterEl.addEventListener('change', () => {
-          if (rooms.length > 0) {
-            let filteredRooms = applyFilters(rooms);
-            filteredRooms = applySorting(filteredRooms);
-            renderRooms(filteredRooms);
-            updateResultsCount(filteredRooms.length);
-          }
-        });
-      }
-    });
-
-    // Navbar scroll effect
-    window.addEventListener('scroll', () => {
-      const navbar = document.querySelector('.ftco-navbar');
-      if (window.scrollY > 50) {
-        navbar?.classList.add('scrolled');
-      } else {
-        navbar?.classList.remove('scrolled');
-      }
-    });
-
-    // Helper functions for coupons - must be defined BEFORE loadActiveCoupons
-    function formatDiscountAmount(amount) {
-      // Format amount in VND
-      try {
-        return new Intl.NumberFormat('vi-VN', { 
-          style: 'currency', 
-          currency: 'VND',
-          maximumFractionDigits: 0
-        }).format(amount || 0);
-      } catch (_) {
-        return (amount || 0).toLocaleString('vi-VN') + 'đ';
-      }
-    }
-
-    function formatDate(dateStr) {
-      try {
-        const date = new Date(dateStr);
-        return date.toLocaleDateString('vi-VN', { 
-          day: '2-digit', 
-          month: '2-digit', 
-          year: 'numeric' 
-        });
-      } catch (_) {
-        return dateStr || '';
-      }
-    }
-
-    function getCouponDescription(coupon) {
-      if (coupon.description && coupon.description.length > 100) {
-        return coupon.description.substring(0, 100) + '...';
-      }
-      if (coupon.description) {
-        return coupon.description;
-      }
-      
-      // Default description based on type
-      if (coupon.type === 'percent') {
-        return `Giảm ${coupon.value}% cho đơn hàng của bạn`;
-      } else {
-        return `Giảm ${formatDiscountAmount(coupon.value)} cho đơn hàng của bạn`;
-      }
-    }
-
-    function renderCoupons(coupons) {
-      console.log('🎨 [renderCoupons] Starting to render:', coupons);
-      const container = document.getElementById('promotionCards');
-      if (!container) {
-        console.error('❌ [renderCoupons] Container not found!');
-        return;
-      }
-      
-      // Clear container
-      container.innerHTML = '';
-      
-      if (!coupons || !Array.isArray(coupons) || coupons.length === 0) {
-        console.warn('⚠️ [renderCoupons] No coupons to render');
-        return;
-      }
-      
-      console.log('🎨 [renderCoupons] Rendering', coupons.length, 'coupons');
-      
-      coupons.forEach((coupon, index) => {
-        try {
-          const isFirst = index === 0;
-          const badgeText = isFirst ? 'Nổi bật' : (index === 1 ? 'Mới' : 'Độc quyền');
-          
-          // Validate coupon data
-          if (!coupon.code) {
-            console.warn('⚠️ [renderCoupons] Coupon missing code:', coupon);
-            return;
-          }
-          
-          // Format discount display
-          let discountDisplay = '';
-          const couponType = (coupon.type || '').toLowerCase();
-          const couponValue = parseFloat(coupon.value) || 0;
-          
-          if (couponType === 'percent') {
-            discountDisplay = `${Math.round(couponValue)}%`;
-          } else {
-            discountDisplay = formatDiscountAmount(couponValue);
-          }
-          
-          // Format dates
-          const startDate = formatDate(coupon.startDate);
-          const endDate = formatDate(coupon.endDate);
-          
-          // Description or default text
-          const description = coupon.description || 'Mã giảm giá đặc biệt';
-          
-          // Escape HTML to prevent XSS
-          const escapeHtml = (text) => {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-          };
-          
-          const cardHtml = `
-            <div class="promotion-card ${isFirst ? 'featured' : ''}">
-              <div class="promotion-card-left">
-                <div class="discount">${escapeHtml(discountDisplay)}</div>
-              </div>
-              <div class="promotion-card-right">
-                <span class="badge">${escapeHtml(badgeText)}</span>
-                <h3>${escapeHtml(description)}</h3>
-                <div class="code-box">
-                  <div style="font-size: 11px; margin-bottom: 4px; ${isFirst ? 'opacity: 0.9;' : 'color: #6b7280;'}">Mã khuyến mãi:</div>
-                  <div class="code">${escapeHtml(coupon.code)}</div>
-                  <button class="btn-copy" onclick="copyCode('${escapeHtml(coupon.code)}', this)">Sao chép</button>
-                </div>
-                <p class="date-range">* Áp dụng từ ${escapeHtml(startDate)} - ${escapeHtml(endDate)}</p>
-              </div>
-            </div>
-          `;
-          
-          container.insertAdjacentHTML('beforeend', cardHtml);
-          console.log('✅ [renderCoupons] Rendered coupon:', coupon.code);
-        } catch (error) {
-          console.error('❌ [renderCoupons] Error rendering coupon:', error, coupon);
-        }
-      });
-      
-      console.log('✅ [renderCoupons] Finished rendering', coupons.length, 'coupons');
-    }
-
-    // Load active coupons from API - define BEFORE initialization
-    window.loadActiveCoupons = async function() {
-      console.log('🔄 [loadActiveCoupons] Starting to load coupons...');
-      const loadingEl = document.getElementById('loadingCoupons');
-      const noCouponsEl = document.getElementById('noCouponsMessage');
-      const cardsContainer = document.getElementById('promotionCards');
-      
-      try {
-        const url = `${location.origin}/api/coupons/active?_=${Date.now()}`;
-        console.log('🔄 [loadActiveCoupons] Fetching from:', url);
-        
-        const response = await fetch(url, {
-          cache: 'no-store',
-          headers: {
-            'Accept': 'application/json'
-          }
-        });
-        
-        console.log('🔄 [loadActiveCoupons] Response status:', response.status, response.statusText);
-        
-        if (!response.ok) {
-          const errorText = await response.text().catch(() => '');
-          console.error('❌ [loadActiveCoupons] HTTP Error:', response.status, errorText);
-          throw new Error(`HTTP ${response.status}: ${errorText || response.statusText}`);
-        }
-        
-        const coupons = await response.json();
-        console.log('✅ [loadActiveCoupons] Received coupons:', coupons);
-        console.log('📊 [loadActiveCoupons] Coupons count:', coupons ? coupons.length : 0);
-        
-        // Hide loading
-        if (loadingEl) loadingEl.style.display = 'none';
-        
-        if (!coupons || !Array.isArray(coupons) || coupons.length === 0) {
-          console.log('ℹ️ [loadActiveCoupons] No coupons found');
-          if (noCouponsEl) {
-            noCouponsEl.innerHTML = `
-              <div style="text-align: center; padding: 40px; color: #6b7280;">
-                <span style="font-size: 48px; opacity: 0.5; display: block; margin-bottom: 12px;">🎟️</span>
-                <p style="font-size: 16px; font-weight: 500; margin-bottom: 8px;">Hiện tại chưa có mã giảm giá nào</p>
-                <p style="font-size: 14px; opacity: 0.7;">Vui lòng quay lại sau để xem các ưu đãi mới nhất.</p>
-              </div>
-            `;
-            noCouponsEl.style.display = 'block';
-          }
-          return;
-        }
-        
-        // Hide no coupons message
-        if (noCouponsEl) noCouponsEl.style.display = 'none';
-        
-        // Limit to 3 coupons for display
-        const displayCoupons = coupons.slice(0, 3);
-        
-        // Render coupons
-        console.log('🎨 [loadActiveCoupons] Rendering coupons...');
-        renderCoupons(displayCoupons);
-        
-      } catch (error) {
-        console.error('❌ [loadActiveCoupons] Error:', error);
-        if (loadingEl) loadingEl.style.display = 'none';
-        if (noCouponsEl) {
-          noCouponsEl.innerHTML = `
-            <div style="text-align: center; padding: 40px; color: #6b7280;">
-              <span style="font-size: 48px; opacity: 0.5; display: block; margin-bottom: 12px;">⚠️</span>
-              <p style="font-size: 16px; font-weight: 500; margin-bottom: 8px;">Không thể tải mã giảm giá</p>
-              <p style="font-size: 14px; opacity: 0.7;">${error.message || 'Vui lòng thử lại sau.'}</p>
-              <button onclick="loadActiveCoupons()" class="btn btn-sm btn-primary mt-3" style="padding: 8px 16px; border-radius: 4px; border: none; cursor: pointer;">Thử lại</button>
-            </div>
-          `;
-          noCouponsEl.style.display = 'block';
-        }
-      }
-    };
-
-    // Initialize
-    (function() {
-      // Clear old data on page load
-      const roomsList = document.getElementById('roomsList');
-      if (roomsList) {
-        roomsList.innerHTML = '';
-        console.log('🗑️ [Page Load] Cleared old room data on page load');
-      }
-      rooms = [];
-      
-      loadRoomTypes();
-      loadRooms();
-      
-      // Load coupons from API
-      if (typeof loadActiveCoupons === 'function') {
-        console.log('🔄 [Init] Calling loadActiveCoupons...');
-        loadActiveCoupons();
-      } else {
-        console.error('❌ [Init] loadActiveCoupons function not found!');
-      }
-      
-      // Auto-refresh every 60 seconds
-      setInterval(loadRooms, 60000);
-      setInterval(() => {
-        if (typeof loadActiveCoupons === 'function') {
-          loadActiveCoupons();
-        }
-      }, 300000); // Refresh coupons every 5 minutes
-      
-      // Handle pageshow event for browser back/forward
-      window.addEventListener('pageshow', (event) => {
-        if (event.persisted) {
-          console.log('🔄 [PageShow] Page loaded from cache, reloading rooms...');
-      loadRooms();
-        }
-      });
-      
-    })();
-</script>
-
-<script>
-  // Copy promotion code function - make it global
-  window.copyCode = function(code, button) {
-    navigator.clipboard.writeText(code).then(function() {
-      const originalText = button.textContent;
-      button.textContent = 'Đã sao chép!';
-      button.style.background = '#28a745';
-      setTimeout(function() {
-        button.textContent = originalText;
-        button.style.background = '';
-      }, 2000);
-      // Auto-fill coupon input if exists
-      const couponInput = document.getElementById('couponCodeInput');
-      if (couponInput) {
-        couponInput.value = code;
-      }
-    }).catch(function(err) {
-      console.error('Failed to copy code:', err);
-      alert('Không thể sao chép mã. Vui lòng sao chép thủ công: ' + code);
-    });
-  }
-
-  // Clear applied coupon
-  window.clearAppliedCoupon = function() {
-    try {
-      localStorage.removeItem('appliedCoupon');
-      const couponInput = document.getElementById('couponCodeInput');
-      const couponMsg = document.getElementById('couponMessage');
-      const badge = document.getElementById('couponAppliedBadge');
-      if (couponInput) couponInput.value = '';
-      if (couponMsg) {
-        couponMsg.textContent = '';
-        couponMsg.style.color = '#6b7280';
-      }
-      if (badge) badge.style.display = 'none';
-      console.log('✅ [clearAppliedCoupon] Coupon cleared');
-    } catch (e) {
-      console.error('❌ [clearAppliedCoupon] Error:', e);
-    }
-  }
-
-  // Apply coupon from sidebar input
-  async function applyCouponFromInput() {
-    const couponInput = document.getElementById('couponCodeInput');
-    const applyBtn = document.getElementById('applyCouponBtn');
-    const couponMsg = document.getElementById('couponMessage');
-    const badge = document.getElementById('couponAppliedBadge');
-    const codeDisplay = document.getElementById('appliedCouponCode');
-    
-    if (!couponInput || !applyBtn) return;
-    
-    let code = (couponInput.value || '').trim().toUpperCase().replace(/\s+/g, '');
-    if (!code) {
-      if (couponMsg) {
-        couponMsg.textContent = 'Vui lòng nhập mã giảm giá';
-        couponMsg.style.color = '#ef4444';
-      }
-      return;
-    }
-    
-    // Validate format
-    if (code.length < 3 || code.length > 50) {
-      if (couponMsg) {
-        couponMsg.textContent = 'Mã giảm giá phải có từ 3 đến 50 ký tự';
-        couponMsg.style.color = '#ef4444';
-      }
-      return;
-    }
-    
-    applyBtn.disabled = true;
-    applyBtn.textContent = 'Đang kiểm tra...';
-    if (couponMsg) {
-      couponMsg.textContent = 'Đang kiểm tra mã...';
-      couponMsg.style.color = '#6b7280';
-    }
-    
-    try {
-      const url = `${location.origin}/api/coupons/validate?code=${encodeURIComponent(code)}&_=${Date.now()}`;
-      const response = await fetch(url, { cache: 'no-store' });
-      
-      if (!response.ok) {
-        let message = 'Mã giảm giá không hợp lệ';
-        try {
-          const errorData = await response.json();
-          message = errorData.message || message;
-        } catch (_) {}
-        throw new Error(message);
-      }
-      
-      const couponData = await response.json();
-      
-      // Save to localStorage
-      const couponToSave = {
-        code: couponData.code || code,
-        type: couponData.type,
-        value: couponData.value,
-        maxDiscount: couponData.maxDiscount,
-        description: couponData.description,
-        validated: true,
-        appliedAt: new Date().toISOString()
-      };
-      
-      try {
-        localStorage.setItem('appliedCoupon', JSON.stringify(couponToSave));
-      } catch (e) {
-        console.warn('⚠️ [applyCouponFromInput] Could not save to localStorage:', e);
-      }
-      
-      // Show success message
-      if (couponMsg) {
-        const discountText = couponData.type === 'percent' 
-          ? `${couponData.value}%` 
-          : `${vnd(couponData.value)}`;
-        couponMsg.textContent = `✅ Mã "${code}" đã được áp dụng thành công (Giảm ${discountText})`;
-        couponMsg.style.color = '#10b981';
-      }
-      
-      // Show badge
-      if (badge) {
-        if (codeDisplay) codeDisplay.textContent = code;
-        badge.style.display = 'block';
-      }
-      
-      console.log('✅ [applyCouponFromInput] Coupon applied:', couponToSave);
-      
-    } catch (error) {
-      console.error('❌ [applyCouponFromInput] Error:', error);
-      if (couponMsg) {
-        couponMsg.textContent = error.message || 'Mã giảm giá không hợp lệ';
-        couponMsg.style.color = '#ef4444';
-      }
-      if (badge) badge.style.display = 'none';
-    } finally {
-      applyBtn.disabled = false;
-      applyBtn.textContent = 'Áp dụng';
-    }
-  }
-
-  // Initialize coupon functionality
-  document.addEventListener('DOMContentLoaded', function() {
-    // Load coupons.js if not already loaded
-    if (!window.coupons) {
-      const script = document.createElement('script');
-      script.src = 'js/coupons.js';
-      document.head.appendChild(script);
-    }
-    
-    // Setup apply button
-    const applyBtn = document.getElementById('applyCouponBtn');
-    const couponInput = document.getElementById('couponCodeInput');
-    
-    if (applyBtn) {
-      applyBtn.addEventListener('click', applyCouponFromInput);
-    }
-    
-    if (couponInput) {
-      // Auto uppercase on input
-      couponInput.addEventListener('input', function(e) {
-        e.target.value = e.target.value.toUpperCase().replace(/\s+/g, '');
-      });
-      
-      // Apply on Enter key
-      couponInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          applyCouponFromInput();
-        }
-      });
-    }
-    
-    // Check if there's already an applied coupon
-    try {
-      const saved = localStorage.getItem('appliedCoupon');
-      if (saved) {
-        const coupon = JSON.parse(saved);
-        if (coupon && coupon.code) {
-          const badge = document.getElementById('couponAppliedBadge');
-          const codeDisplay = document.getElementById('appliedCouponCode');
-          if (badge && codeDisplay) {
-            codeDisplay.textContent = coupon.code;
-            badge.style.display = 'block';
-          }
-          if (couponInput) {
-            couponInput.value = coupon.code;
-          }
-        }
-      }
-    } catch (e) {
-      console.warn('⚠️ Could not load saved coupon:', e);
-    }
-  });
-  
-  // FAQ Toggle functionality
-  document.addEventListener('DOMContentLoaded', function() {
-    const faqItems = document.querySelectorAll('.faq-item');
-    
-    faqItems.forEach(function(item) {
-      const question = item.querySelector('.faq-question');
-      if (question) {
-        question.addEventListener('click', function() {
-          // Close other items
-          faqItems.forEach(function(otherItem) {
-            if (otherItem !== item) {
-              otherItem.classList.remove('active');
-            }
-          });
-          // Toggle current item
-          item.classList.toggle('active');
-        });
-      }
-    });
-  });
-</script>
-    
-  </body>
 </html>
-

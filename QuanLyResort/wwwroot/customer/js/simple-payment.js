@@ -256,7 +256,7 @@ async function openSimplePayment(bookingId) {
     }
 
     // Update modal content for QR payment
-    updatePaymentModal(bookingId, booking.bookingCode || `BKG${bookingId}`, amount);
+    updatePaymentModal(bookingId, booking.bookingCode || `BKG${bookingId}`, amount, booking);
 
     // Show modal
     const modalElement = document.getElementById('simplePaymentModal');
@@ -307,10 +307,24 @@ async function openSimplePayment(bookingId) {
 /**
  * Update modal content - Tạo SePay QR code động
  */
-async function updatePaymentModal(bookingId, bookingCode, amount) {
+async function updatePaymentModal(bookingId, bookingCode, amount, booking) {
   // Booking code
   const codeEl = document.getElementById('spBookingCode');
   if (codeEl) codeEl.textContent = bookingCode;
+
+  // Customer info
+  const nameEl = document.getElementById('spCustomerName');
+  if (nameEl && booking) {
+    nameEl.textContent = booking.customer?.fullName || booking.fullName || '-';
+  }
+  const phoneEl = document.getElementById('spCustomerPhone');
+  if (phoneEl && booking) {
+    phoneEl.textContent = booking.customer?.phoneNumber || booking.phoneNumber || '-';
+  }
+  const emailEl = document.getElementById('spCustomerEmail');
+  if (emailEl && booking) {
+    emailEl.textContent = booking.customer?.email || booking.email || '-';
+  }
 
   // Amount
   const amountEl = document.getElementById('spAmount');
@@ -763,11 +777,53 @@ function showBookingPaymentThankYou(booking) {
     return;
   }
   
+  const tasteModalRight = modal.querySelector('.payment-modal-right');
   const modalBody = modal.querySelector('.modal-body');
   const modalFooter = modal.querySelector('.modal-footer');
   const modalHeader = modal.querySelector('.modal-header');
   
-  if (modalBody && modalFooter && modalHeader) {
+  const bookingCode = booking?.bookingCode || `BKG${booking?.bookingId || ''}`;
+  const amount = booking?.estimatedTotalAmount || booking?.totalAmount || 0;
+
+  if (tasteModalRight) {
+    // Taste Skill styling
+    tasteModalRight.innerHTML = `
+      <div style="text-align: center; padding: 20px 0;">
+        <div style="font-size: 80px; margin-bottom: 24px;">🎉</div>
+        <h3 style="color: #d4af37; margin-bottom: 16px; font-weight: 700; font-family: 'Playfair Display', serif; font-size: 32px">Thanh toán thành công!</h3>
+        <p style="color: rgba(255,255,255,0.7); margin-bottom: 24px; font-size: 16px; line-height: 1.6;">
+          Cảm ơn bạn. Giao dịch đã được xác nhận thành công.
+        </p>
+        <div style="background: rgba(50,205,50,0.05); padding: 20px; border-radius: 12px; border: 1px solid rgba(50,205,50,0.2); margin-bottom: 24px; text-align: left">
+          <div class="d-flex justify-content-between mb-2">
+            <span style="color: rgba(255,255,255,0.5);">Mã đặt phòng:</span>
+            <strong style="color: #fff;">${bookingCode}</strong>
+          </div>
+          <div class="d-flex justify-content-between mb-2">
+            <span style="color: rgba(255,255,255,0.5);">Số tiền:</span>
+            <strong style="color: #d4af37;">${formatCurrency(amount)}</strong>
+          </div>
+          <div class="d-flex justify-content-between mb-2">
+            <span style="color: rgba(255,255,255,0.5);">Phương thức:</span>
+            <strong style="color: #fff;">QR Code</strong>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span style="color: rgba(255,255,255,0.5);">Trạng thái:</span>
+            <strong style="color: #32cd32;">Đã thanh toán</strong>
+          </div>
+        </div>
+        <div style="background: rgba(212,175,55,0.05); padding: 16px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.2); margin-bottom: 30px">
+          <p style="margin: 0; color: #d4af37; font-size: 14px; line-height: 1.6;">
+            <strong>💡 Lưu ý:</strong> Vui lòng mang theo CMND/CCCD hoặc Hộ chiếu khi đến làm thủ tục check-in.
+          </p>
+        </div>
+        <button type="button" class="taste-btn w-100 justify-content-center" data-bs-dismiss="modal" onclick="closeSimplePaymentModal()" style="font-weight: 600;">
+          <i class="fas fa-check"></i> Đóng
+        </button>
+      </div>
+    `;
+  } else if (modalBody && modalFooter && modalHeader) {
+    // Legacy styling
     // Update header
     const headerTitle = modalHeader.querySelector('.modal-title');
     const headerCloseBtn = modalHeader.querySelector('.btn-close');
@@ -782,8 +838,6 @@ function showBookingPaymentThankYou(booking) {
     }
     
     // Update body with thank you message
-    const bookingCode = booking?.bookingCode || `BKG${booking?.bookingId || ''}`;
-    const amount = booking?.estimatedTotalAmount || booking?.totalAmount || 0;
     modalBody.innerHTML = `
       <div style="text-align: center; padding: 40px 20px;">
         <div style="font-size: 80px; margin-bottom: 24px;">🎉</div>

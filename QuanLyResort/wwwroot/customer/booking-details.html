@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -11,399 +12,580 @@
   <link rel="stylesheet" href="/css/globals.css">
   <link rel="stylesheet" href="/css/grid.css">
   <link rel="stylesheet" href="css/navbar-auth.css">
+  <link rel="stylesheet" href="css/tandjungsari-split.css">
   <link rel="stylesheet" href="css/open-iconic-bootstrap.min.css">
   <!-- QRCode.js for generating QR codes from checkoutUrl -->
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <style>
-    body{font-family:'Poppins',sans-serif;padding-top:0;overflow-x:hidden;background:linear-gradient(135deg, #f5ede0 0%, #fff8f0 50%, #ffffff 100%);min-height:100vh}
-    .ftco-navbar{position:sticky!important;top:0!important;z-index:1030!important;background-color:#1a1a1a!important;width:100%!important;margin:0!important}
-    
-    .page-header{
+    body {
+      font-family: 'Poppins', sans-serif;
+      padding-top: 0;
+      overflow-x: hidden;
+      background: linear-gradient(135deg, #f5ede0 0%, #fff8f0 50%, #ffffff 100%);
+      min-height: 100vh
+    }
+
+    .ftco-navbar {
+      position: sticky !important;
+      top: 0 !important;
+      z-index: 1030 !important;
+      background-color: #1a1a1a !important;
+      width: 100% !important;
+      margin: 0 !important
+    }
+
+    .page-header {
       background-image: url('images/bg_1.jpg');
       background-size: cover;
       background-position: center;
       background-attachment: fixed;
       background-repeat: no-repeat;
-      padding:140px 0 100px;
-      color:#fff;
-      text-align:center;
-      position:relative;
-      overflow:hidden;
-      margin-bottom:60px;
-      min-height:500px;
-      display:flex;
-      align-items:center
+      padding: 140px 0 100px;
+      color: #fff;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 60px;
+      min-height: 500px;
+      display: flex;
+      align-items: center
     }
-    .page-header::before{
-      content:'';
-      position:absolute;
-      top:0;left:0;right:0;bottom:0;
-      background:linear-gradient(135deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 100%);
-      z-index:0
+
+    .page-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.5) 100%);
+      z-index: 0
     }
-    .page-header::after{
-      content:'';
-      position:absolute;
-      top:0;left:0;right:0;bottom:0;
-      background:url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
-      opacity:0.3;
-      z-index:1
+
+    .page-header::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+      opacity: 0.3;
+      z-index: 1
     }
-    .page-header .container{position:relative;z-index:2;width:100%}
-    .page-header h1{position:relative;z-index:2;font-weight:700;text-shadow:0 2px 10px rgba(0,0,0,0.3);font-size:48px;animation:fadeInDown 1s ease}
-    .page-header .subtitle{position:relative;z-index:2;opacity:0.95;font-size:20px;text-shadow:0 2px 8px rgba(0,0,0,0.2);animation:fadeInUp 1.2s ease}
-    @keyframes fadeInDown{from{opacity:0;transform:translateY(-30px)}to{opacity:1;transform:translateY(0)}}
-    @keyframes fadeInUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
-    
-    .detail-container{margin-top:-70px;position:relative;z-index:10}
-    
-    .booking-card-main{
-      background:linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-      border-radius:24px;
-      box-shadow:0 20px 60px rgba(200,169,126,0.15);
-      overflow:hidden;
-      margin-bottom:30px;
-      animation:slideUp 0.6s ease forwards;
-      opacity:0;
-      border:2px solid rgba(200,169,126,0.1);
-      position:relative
+
+    .page-header .container {
+      position: relative;
+      z-index: 2;
+      width: 100%
     }
-    .unpaid-badge{
-      position:absolute;
-      top:20px;
-      right:20px;
-      background:#dc3545;
-      color:#fff;
-      padding:8px 16px;
-      border-radius:25px;
-      font-size:13px;
-      font-weight:700;
-      text-transform:uppercase;
-      letter-spacing:0.5px;
-      box-shadow:0 4px 15px rgba(220,53,69,0.4);
-      z-index:20;
-      animation:pulse 2s infinite;
-      display:flex;
-      align-items:center;
-      gap:8px
+
+    .page-header h1 {
+      position: relative;
+      z-index: 2;
+      font-weight: 700;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      font-size: 48px;
+      animation: fadeInDown 1s ease
     }
-    .unpaid-badge::before{
-      content:'';
-      width:10px;
-      height:10px;
-      background:#fff;
-      border-radius:50%;
-      display:inline-block
+
+    .page-header .subtitle {
+      position: relative;
+      z-index: 2;
+      opacity: 0.95;
+      font-size: 20px;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      animation: fadeInUp 1.2s ease
     }
-    @keyframes pulse{
-      0%,100%{transform:scale(1)}
-      50%{transform:scale(1.05)}
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-30px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
     }
-    @keyframes blink{
-      0%,100%{opacity:1}
-      50%{opacity:0.3}
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
     }
-    @keyframes slideUp{
-      from{opacity:0;transform:translateY(30px)}
-      to{opacity:1;transform:translateY(0)}
+
+    .detail-container {
+      margin-top: -70px;
+      position: relative;
+      z-index: 10
     }
-    
-    .booking-header-section{
-      background:linear-gradient(135deg,#c8a97e 0%,#b89968 100%);
-      padding:40px;
-      color:#fff;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      flex-wrap:wrap;
-      gap:20px
+
+    .booking-card-main {
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(200, 169, 126, 0.15);
+      overflow: hidden;
+      margin-bottom: 30px;
+      animation: slideUp 0.6s ease forwards;
+      opacity: 0;
+      border: 2px solid rgba(200, 169, 126, 0.1);
+      position: relative
     }
-    .booking-code{font-size:32px;font-weight:700;letter-spacing:1px}
-    .booking-status-badge{
-      display:inline-block;
-      padding:10px 24px;
-      border-radius:50px;
-      font-weight:600;
-      font-size:14px;
-      text-transform:uppercase;
-      letter-spacing:0.5px;
-      background:rgba(255,255,255,0.2);
-      backdrop-filter:blur(10px);
-      border:2px solid rgba(255,255,255,0.3)
+
+    .unpaid-badge {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: #dc3545;
+      color: #fff;
+      padding: 8px 16px;
+      border-radius: 25px;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
+      z-index: 20;
+      animation: pulse 2s infinite;
+      display: flex;
+      align-items: center;
+      gap: 8px
     }
-    
-    .booking-body{padding:40px;background:linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,248,240,0.8) 50%, rgba(245,237,224,0.6) 100%)}
-    
-    .info-section{margin-bottom:35px}
-    .info-section-title{
-      font-size:18px;
-      font-weight:600;
-      color:#c8a97e;
-      margin-bottom:20px;
-      padding-bottom:10px;
-      border-bottom:2px solid #f0f0f0;
-      display:flex;
-      align-items:center;
-      gap:10px
+
+    .unpaid-badge::before {
+      content: '';
+      width: 10px;
+      height: 10px;
+      background: #fff;
+      border-radius: 50%;
+      display: inline-block
     }
-    .info-section-title .oi{margin-right:8px}
-    
-    .info-grid{
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
-      gap:20px
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        transform: scale(1)
+      }
+
+      50% {
+        transform: scale(1.05)
+      }
     }
-    .info-item{
-      background:linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-      padding:20px;
-      border-radius:12px;
-      border-left:4px solid #c8a97e;
-      transition:all 0.3s;
-      border:2px solid rgba(200,169,126,0.1);
-      box-shadow:0 4px 15px rgba(200,169,126,0.1)
+
+    @keyframes blink {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: 0.3
+      }
     }
-    .info-item:hover{
-      transform:translateY(-2px);
-      box-shadow:0 8px 20px rgba(200,169,126,0.2);
-      border-color:rgba(200,169,126,0.3)
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
     }
-    .info-label{
-      font-size:12px;
-      color:#666;
-      text-transform:uppercase;
-      letter-spacing:0.5px;
-      margin-bottom:8px;
-      font-weight:500
+
+    .booking-header-section {
+      background: linear-gradient(135deg, #c8a97e 0%, #b89968 100%);
+      padding: 40px;
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px
     }
-    .info-value{
-      font-size:18px;
-      font-weight:600;
-      color:#1a1a1a
+
+    .booking-code {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: 1px
     }
-    .info-value.text-primary{color:#c8a97e!important;font-size:24px}
-    
-    .special-requests-box{
-      background:linear-gradient(135deg, #fff8f0 0%, #f5ede0 100%);
-      border:2px solid rgba(200,169,126,0.2);
-      border-radius:12px;
-      padding:20px;
-      margin-top:10px;
-      box-shadow:0 4px 15px rgba(200,169,126,0.1)
+
+    .booking-status-badge {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 255, 255, 0.3)
     }
-    .special-requests-box .label{color:#856404;font-weight:600;margin-bottom:10px}
-    
-    .action-buttons{
-      display:flex;
-      gap:15px;
-      margin-top:30px;
-      flex-wrap:wrap
+
+    .booking-body {
+      padding: 40px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 248, 240, 0.8) 50%, rgba(245, 237, 224, 0.6) 100%)
     }
-    .btn-action{
-      padding:14px 28px;
-      font-weight:600;
-      border-radius:12px;
-      transition:all 0.3s;
-      display:inline-flex;
-      align-items:center;
-      gap:8px
+
+    .info-section {
+      margin-bottom: 35px
     }
-    .btn-action:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,0.15)}
-    
-    .status-paid{background:#d4edda;color:#155724;border-color:#c3e6cb}
-    .status-pending{background:#fff3cd;color:#856404;border-color:#ffe69c}
-    .status-confirmed{background:#d1ecf1;color:#0c5460;border-color:#bee5eb}
-    .status-cancelled{background:#f8d7da;color:#842029;border-color:#f5c6cb}
-    
-    @media(max-width:768px){
-      .booking-header-section{flex-direction:column;text-align:center}
-      .info-grid{grid-template-columns:1fr}
-      .action-buttons{flex-direction:column}
-      .btn-action{width:100%}
+
+    .info-section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #c8a97e;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #f0f0f0;
+      display: flex;
+      align-items: center;
+      gap: 10px
+    }
+
+    .info-section-title .oi {
+      margin-right: 8px
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px
+    }
+
+    .info-item {
+      background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+      padding: 20px;
+      border-radius: 12px;
+      border-left: 4px solid #c8a97e;
+      transition: all 0.3s;
+      border: 2px solid rgba(200, 169, 126, 0.1);
+      box-shadow: 0 4px 15px rgba(200, 169, 126, 0.1)
+    }
+
+    .info-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(200, 169, 126, 0.2);
+      border-color: rgba(200, 169, 126, 0.3)
+    }
+
+    .info-label {
+      font-size: 12px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      font-weight: 500
+    }
+
+    .info-value {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1a1a1a
+    }
+
+    .info-value.text-primary {
+      color: #c8a97e !important;
+      font-size: 24px
+    }
+
+    .special-requests-box {
+      background: linear-gradient(135deg, #fff8f0 0%, #f5ede0 100%);
+      border: 2px solid rgba(200, 169, 126, 0.2);
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 10px;
+      box-shadow: 0 4px 15px rgba(200, 169, 126, 0.1)
+    }
+
+    .special-requests-box .label {
+      color: #856404;
+      font-weight: 600;
+      margin-bottom: 10px
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 15px;
+      margin-top: 30px;
+      flex-wrap: wrap
+    }
+
+    .btn-action {
+      padding: 14px 28px;
+      font-weight: 600;
+      border-radius: 12px;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .btn-action:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15)
+    }
+
+    .status-paid {
+      background: #d4edda;
+      color: #155724;
+      border-color: #c3e6cb
+    }
+
+    .status-pending {
+      background: #fff3cd;
+      color: #856404;
+      border-color: #ffe69c
+    }
+
+    .status-confirmed {
+      background: #d1ecf1;
+      color: #0c5460;
+      border-color: #bee5eb
+    }
+
+    .status-cancelled {
+      background: #f8d7da;
+      color: #842029;
+      border-color: #f5c6cb
+    }
+
+    @media(max-width:768px) {
+      .booking-header-section {
+        flex-direction: column;
+        text-align: center
+      }
+
+      .info-grid {
+        grid-template-columns: 1fr
+      }
+
+      .action-buttons {
+        flex-direction: column
+      }
+
+      .btn-action {
+        width: 100%
+      }
     }
   </style>
 </head>
+
 <body>
   <!-- Header placeholder - will be loaded by load-header.js -->
   <div id="header-placeholder"></div>
-  
+
   <!-- Load header component -->
   <script src="js/load-header.js"></script>
 
-  <div class="page-header">
-    <div class="container">
-      <h1 class="display-5 mb-3">📋 Chi tiết đặt phòng</h1>
-      <p class="subtitle">Thông tin chi tiết về đặt phòng của bạn</p>
-    </div>
-  </div>
+  <main class="split-layout" id="page-content">
+    <div class="split-layout__image">
+      <div class="split-image-bg" style="background-image: url('images/bg_1.jpg');"></div>
+      <div class="split-image-overlay"></div>
 
-  <div class="container detail-container mb-5">
-    <div class="booking-card-main" id="detailCard">
-      <div class="text-center py-5" id="loading">
-        <div class="spinner-border text-primary" role="status" style="width:3rem;height:3rem"></div>
-        <p class="mt-3 text-muted">Đang tải thông tin đặt phòng...</p>
-      </div>
-      <div id="content" style="display:none">
-        <!-- Header Section -->
-        <div class="booking-header-section">
-          <div id="unpaidBadgeContainer"></div>
-          <div>
-            <div class="booking-code" id="code">-</div>
-            <small style="opacity:0.9;font-size:14px">Đặt ngày: <span id="bookingDate">-</span></small>
-          </div>
-          <span class="booking-status-badge" id="statusBadge">-</span>
+    </div>
+
+    <div class="split-layout__content">
+      <div class="form-container" style="max-width: 900px;">
+        <div class="form-header">
+          <h1 class="form-title">Chi Tiết Đặt Phòng</h1>
+          <p class="form-subtitle">Mã đặt phòng và thông tin hành khách</p>
         </div>
-        
-        <!-- Body Section -->
-        <div class="booking-body">
-          <!-- Thông tin cơ bản -->
-          <div class="info-section">
-            <div class="info-section-title">
-              <span class="oi oi-info"></span>
-              Thông tin cơ bản
-            </div>
-            <div class="info-grid">
-              <div class="info-item">
-                <div class="info-label">📅 Ngày nhận phòng</div>
-                <div class="info-value" id="checkin">-</div>
-              </div>
-              <div class="info-item">
-                <div class="info-label">📅 Ngày trả phòng</div>
-                <div class="info-value" id="checkout">-</div>
-              </div>
-              <div class="info-item">
-                <div class="info-label">🌙 Số đêm</div>
-                <div class="info-value" id="nights">-</div>
-              </div>
-              <div class="info-item">
-                <div class="info-label">👥 Số khách</div>
-                <div class="info-value" id="guests">-</div>
-              </div>
-              <div class="info-item">
-                <div class="info-label">🏨 Phòng/Loại phòng</div>
-                <div class="info-value" id="room">-</div>
-              </div>
-              <div class="info-item">
-                <div class="info-label">💰 Tổng tiền</div>
-                <div class="info-value text-primary" id="amount">0 ₫</div>
-              </div>
-            </div>
+
+        <div class="minimalist-card" id="detailCard" style="padding: 0; overflow: hidden; opacity: 1; animation: none;">
+          <div class="text-center py-5" id="loading">
+            <div class="spinner-border text-primary" role="status" style="width:3rem;height:3rem"></div>
+            <p class="mt-3 text-muted">Đang tải thông tin đặt phòng...</p>
           </div>
-          
-          <!-- Yêu cầu đặc biệt -->
-          <div class="info-section" id="specialRequestsSection" style="display:none">
-            <div class="info-section-title">
-              <span class="oi oi-star"></span>
-              Yêu cầu đặc biệt
-            </div>
-            <div class="special-requests-box">
-              <div class="label">Thông tin khách hàng và yêu cầu:</div>
-              <div id="specialRequests">-</div>
-            </div>
-          </div>
-          
-          <!-- Hóa đơn (nếu có) -->
-          <div class="info-section" id="invoiceSection" style="display:none">
-            <div class="info-section-title">
-              <span class="oi oi-document"></span>
-              Thông tin hóa đơn
-            </div>
-            <div class="info-grid">
-              <div class="info-item">
-                <div class="info-label">Mã hóa đơn</div>
-                <div class="info-value" id="invoiceNumber">-</div>
+          <div id="content" style="display:none">
+            <!-- Header Section -->
+            <div class="booking-header-section">
+              <div id="unpaidBadgeContainer"></div>
+              <div>
+                <div class="booking-code" id="code">-</div>
+                <small style="opacity:0.9;font-size:14px">Đặt ngày: <span id="bookingDate">-</span></small>
               </div>
-              <div class="info-item">
-                <div class="info-label">Ngày phát hành</div>
-                <div class="info-value" id="invoiceDate">-</div>
-              </div>
-              <div class="info-item">
-                <div class="info-label">Trạng thái</div>
-                <div class="info-value" id="invoiceStatus">-</div>
-              </div>
+              <span class="booking-status-badge" id="statusBadge">-</span>
             </div>
-          </div>
-          
-          <!-- Action Buttons -->
-          <div class="action-buttons">
-            <button class="btn btn-primary btn-action" id="btnPay" style="display:none">
-              <span class="oi oi-credit-card"></span>
-              Thanh toán
-            </button>
-            <div id="awaitingConfirmationMsg" class="alert alert-info" style="display:none; margin-bottom: 15px; padding: 15px 20px; border-radius: 12px; background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); border: 2px solid #2196f3; color: #1565c0;">
-              <div style="display: flex; align-items: center; gap: 10px;">
-                <span class="oi oi-clock" style="font-size: 20px;"></span>
-                <div>
-                  <strong>⏳ Đang chờ admin xác nhận thanh toán</strong>
-                  <p style="margin: 5px 0 0 0; font-size: 14px; opacity: 0.9;">Yêu cầu thanh toán tiền mặt của bạn đã được gửi. Vui lòng chờ admin xác nhận.</p>
+
+            <!-- Body Section -->
+            <div class="booking-body">
+              <!-- Thông tin cơ bản -->
+              <div class="info-section">
+                <div class="info-section-title">
+                  <span class="oi oi-info"></span>
+                  Thông tin cơ bản
+                </div>
+                <div class="info-grid">
+                  <div class="info-item">
+                    <div class="info-label">📅 Ngày nhận phòng</div>
+                    <div class="info-value" id="checkin">-</div>
+                  </div>
+                  <div class="info-item">
+                    <div class="info-label">📅 Ngày trả phòng</div>
+                    <div class="info-value" id="checkout">-</div>
+                  </div>
+                  <div class="info-item">
+                    <div class="info-label">🌙 Số đêm</div>
+                    <div class="info-value" id="nights">-</div>
+                  </div>
+                  <div class="info-item">
+                    <div class="info-label">👥 Số khách</div>
+                    <div class="info-value" id="guests">-</div>
+                  </div>
+                  <div class="info-item">
+                    <div class="info-label">🏨 Phòng/Loại phòng</div>
+                    <div class="info-value" id="room">-</div>
+                  </div>
+                  <div class="info-item">
+                    <div class="info-label">💰 Tổng tiền</div>
+                    <div class="info-value text-primary" id="amount">0 ₫</div>
+                  </div>
                 </div>
               </div>
+
+              <!-- Yêu cầu đặc biệt -->
+              <div class="info-section" id="specialRequestsSection" style="display:none">
+                <div class="info-section-title">
+                  <span class="oi oi-star"></span>
+                  Yêu cầu đặc biệt
+                </div>
+                <div class="special-requests-box">
+                  <div class="label">Thông tin khách hàng và yêu cầu:</div>
+                  <div id="specialRequests">-</div>
+                </div>
+              </div>
+
+              <!-- Hóa đơn (nếu có) -->
+              <div class="info-section" id="invoiceSection" style="display:none">
+                <div class="info-section-title">
+                  <span class="oi oi-document"></span>
+                  Thông tin hóa đơn
+                </div>
+                <div class="info-grid">
+                  <div class="info-item">
+                    <div class="info-label">Mã hóa đơn</div>
+                    <div class="info-value" id="invoiceNumber">-</div>
+                  </div>
+                  <div class="info-item">
+                    <div class="info-label">Ngày phát hành</div>
+                    <div class="info-value" id="invoiceDate">-</div>
+                  </div>
+                  <div class="info-item">
+                    <div class="info-label">Trạng thái</div>
+                    <div class="info-value" id="invoiceStatus">-</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="action-buttons">
+                <button class="btn btn-primary btn-action" id="btnPay" style="display:none">
+                  <span class="oi oi-credit-card"></span>
+                  Thanh toán
+                </button>
+                <div id="awaitingConfirmationMsg" class="alert alert-info"
+                  style="display:none; margin-bottom: 15px; padding: 15px 20px; border-radius: 12px; background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); border: 2px solid #2196f3; color: #1565c0;">
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <span class="oi oi-clock" style="font-size: 20px;"></span>
+                    <div>
+                      <strong>⏳ Đang chờ admin xác nhận thanh toán</strong>
+                      <p style="margin: 5px 0 0 0; font-size: 14px; opacity: 0.9;">Yêu cầu thanh toán tiền mặt của bạn
+                        đã được gửi. Vui lòng chờ admin xác nhận.</p>
+                    </div>
+                  </div>
+                </div>
+                <button class="btn btn-outline-secondary btn-action" onclick="window.location.href='my-bookings.html'">
+                  <span class="oi oi-arrow-left"></span>
+                  Quay lại danh sách
+                </button>
+              </div>
             </div>
-            <button class="btn btn-outline-secondary btn-action" onclick="window.location.href='my-bookings.html'">
-              <span class="oi oi-arrow-left"></span>
-              Quay lại danh sách
-            </button>
           </div>
         </div>
       </div>
     </div>
-  </div>
-  
-      <footer class="ftco-footer ftco-bg-dark ftco-section">
-      <div class="container">
-        <div class="row mb-5">
-          <div class="col-md">
-            <div class="ftco-footer-widget mb-4">
-              <h2 class="ftco-heading-2">RESORT DELUXE</h2>
-              <p>Khu nghỉ dưỡng cao cấp với không gian sang trọng, dịch vụ chu đáo và tiện nghi hiện đại, mang đến cho bạn kỳ nghỉ trọn vẹn.</p>
-              <ul class="ftco-footer-social list-unstyled float-md-left float-lft mt-5">
-                <li class="ftco-animate"><a href="#" style="display: block !important; visibility: visible !important; opacity: 1 !important;"><span class="icon-twitter"></span></a></li>
-                <li class="ftco-animate"><a href="#" style="display: block !important; visibility: visible !important; opacity: 1 !important;"><span class="icon-facebook"></span></a></li>
-                <li class="ftco-animate"><a href="#" style="display: block !important; visibility: visible !important; opacity: 1 !important;"><span class="icon-instagram"></span></a></li>
-              </ul>
-            </div>
-          </div>
-          <div class="col-md">
-            <div class="ftco-footer-widget mb-4 ml-md-5">
-              <h2 class="ftco-heading-2">Liên kết hữu ích</h2>
-              <ul class="list-unstyled">
-                <li><a href="#" class="py-2 d-block">Blog</a></li>
-                <li><a href="#" class="py-2 d-block">Phòng</a></li>
-                <li><a href="#" class="py-2 d-block">Tiện ích</a></li>
-                <li><a href="#" class="py-2 d-block">Thẻ quà tặng</a></li>
-              </ul>
-            </div>
-          </div>
-          <div class="col-md">
-             <div class="ftco-footer-widget mb-4">
-              <h2 class="ftco-heading-2">Chính sách</h2>
-              <ul class="list-unstyled">
-                <li><a href="#" class="py-2 d-block">Tuyển dụng</a></li>
-                <li><a href="#" class="py-2 d-block">Về chúng tôi</a></li>
-                <li><a href="#" class="py-2 d-block">Liên hệ</a></li>
-                <li><a href="#" class="py-2 d-block">Dịch vụ</a></li>
-              </ul>
-            </div>
-          </div>
-          <div class="col-md">
-            <div class="ftco-footer-widget mb-4">
-                <h2 class="ftco-heading-2">Bạn cần hỗ trợ?</h2>
-            	<div class="block-23 mb-3">
-	              <ul>
-                <li><span class="icon icon-map-marker"></span><span class="text">Huflit Hốc Môn, Hồ Chí Minh</span></li>
-                <li><a href="#"><span class="icon icon-phone"></span><span class="text">+84 901 329 227</span></a></li>
-                <li><a href="#"><span class="icon icon-envelope"></span><span class="text">support@resortdeluxe.vn</span></a></li>
-	              </ul>
-	            </div>
-            </div>
+  </main>
+
+  <footer class="ftco-footer ftco-bg-dark ftco-section">
+    <div class="container">
+      <div class="row mb-5">
+        <div class="col-md">
+          <div class="ftco-footer-widget mb-4">
+            <h2 class="ftco-heading-2">RESORT DELUXE</h2>
+            <p>Khu nghỉ dưỡng cao cấp với không gian sang trọng, dịch vụ chu đáo và tiện nghi hiện đại, mang đến cho bạn
+              kỳ nghỉ trọn vẹn.</p>
+            <ul class="ftco-footer-social list-unstyled float-md-left float-lft mt-5">
+              <li class="ftco-animate"><a href="#"
+                  style="display: block !important; visibility: visible !important; opacity: 1 !important;"><span
+                    class="icon-twitter"></span></a></li>
+              <li class="ftco-animate"><a href="#"
+                  style="display: block !important; visibility: visible !important; opacity: 1 !important;"><span
+                    class="icon-facebook"></span></a></li>
+              <li class="ftco-animate"><a href="#"
+                  style="display: block !important; visibility: visible !important; opacity: 1 !important;"><span
+                    class="icon-instagram"></span></a></li>
+            </ul>
           </div>
         </div>
-        <div class="row">
-          <div class="col-md-12 text-center">
-            <p>Copyright ©<script>document.write(new Date().getFullYear());</script>2025 All rights reserved</p>
+        <div class="col-md">
+          <div class="ftco-footer-widget mb-4 ml-md-5">
+            <h2 class="ftco-heading-2">Liên kết hữu ích</h2>
+            <ul class="list-unstyled">
+              <li><a href="#" class="py-2 d-block">Blog</a></li>
+              <li><a href="#" class="py-2 d-block">Phòng</a></li>
+              <li><a href="#" class="py-2 d-block">Tiện ích</a></li>
+              <li><a href="#" class="py-2 d-block">Thẻ quà tặng</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-md">
+          <div class="ftco-footer-widget mb-4">
+            <h2 class="ftco-heading-2">Chính sách</h2>
+            <ul class="list-unstyled">
+              <li><a href="#" class="py-2 d-block">Tuyển dụng</a></li>
+              <li><a href="#" class="py-2 d-block">Về chúng tôi</a></li>
+              <li><a href="#" class="py-2 d-block">Liên hệ</a></li>
+              <li><a href="#" class="py-2 d-block">Dịch vụ</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-md">
+          <div class="ftco-footer-widget mb-4">
+            <h2 class="ftco-heading-2">Bạn cần hỗ trợ?</h2>
+            <div class="block-23 mb-3">
+              <ul>
+                <li><span class="icon icon-map-marker"></span><span class="text">Huflit Hốc Môn, Hồ Chí Minh</span></li>
+                <li><a href="#"><span class="icon icon-phone"></span><span class="text">+84 901 329 227</span></a></li>
+                <li><a href="#"><span class="icon icon-envelope"></span><span
+                      class="text">support@resortdeluxe.vn</span></a></li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
-    </footer>
+      <div class="row">
+        <div class="col-md-12 text-center">
+          <p>Copyright ©
+            <script>document.write(new Date().getFullYear());</script>2025 All rights reserved
+          </p>
+        </div>
+      </div>
+    </div>
+  </footer>
 
   <!-- Modal Thanh Toán Đơn Giản (from simple-payment.js) -->
   <div class="modal fade" id="simplePaymentModal" tabindex="-1">
@@ -422,10 +604,12 @@
           <div id="spQRSection">
             <p class="text-center mb-3">
               <strong>Nội dung chuyển khoản:</strong><br>
-              <code id="spContent" style="background: #f8f9fa; padding: 8px 12px; border-radius: 8px; font-size: 16px; font-weight: 600;">BOOKING-</code>
+              <code id="spContent"
+                style="background: #f8f9fa; padding: 8px 12px; border-radius: 8px; font-size: 16px; font-weight: 600;">BOOKING-</code>
             </p>
             <div class="text-center mb-4">
-              <img id="spQRImage" alt="QR Code" style="max-width: 300px; border: 4px solid #e9ecef; border-radius: 15px; padding: 15px; display: none;">
+              <img id="spQRImage" alt="QR Code"
+                style="max-width: 300px; border: 4px solid #e9ecef; border-radius: 15px; padding: 15px; display: none;">
             </div>
             <div class="card" style="background: #f8f9fa; padding: 20px; border-radius: 12px;">
               <p class="mb-2"><strong>Ngân hàng:</strong> MBBank</p>
@@ -457,7 +641,8 @@
   <div class="modal fade" id="paymentModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
       <div class="modal-content" style="border-radius:20px;overflow:hidden">
-        <div class="modal-header" style="background:linear-gradient(135deg,#c8a97e 0%,#b89968 100%);color:#fff;border:none">
+        <div class="modal-header"
+          style="background:linear-gradient(135deg,#c8a97e 0%,#b89968 100%);color:#fff;border:none">
           <h5 class="modal-title" style="font-weight:600;font-size:20px">
             <span class="oi oi-credit-card mr-2"></span>
             💳 Chọn phương thức thanh toán
@@ -471,14 +656,17 @@
               Nội dung chuyển khoản: <code class="bg-light px-2 py-1 rounded">BOOKING-<span id="plCode2">#</span></code>
             </p>
             <div class="text-center mb-3">
-              <img id="plVqrImg" alt="VietQR" style="max-width:300px;border:2px solid #eee;border-radius:15px;padding:10px;background:#fff" onerror="this.style.display='none'">
+              <img id="plVqrImg" alt="VietQR"
+                style="max-width:300px;border:2px solid #eee;border-radius:15px;padding:10px;background:#fff"
+                onerror="this.style.display='none'">
             </div>
             <div class="card bg-light p-3" style="border-radius:12px">
               <div class="row small">
                 <div class="col-6 mb-2"><strong>Ngân hàng:</strong><br><span id="plBankName">MBBank</span></div>
                 <div class="col-6 mb-2"><strong>STK:</strong><br><span id="plBankAcc">0901329227</span></div>
                 <div class="col-6 mb-2"><strong>CTK:</strong><br><span id="plBankAccName">Resort Deluxe</span></div>
-                <div class="col-6 mb-2"><strong>Số tiền:</strong><br><span id="plAmount" class="text-primary font-weight-bold">0 ₫</span></div>
+                <div class="col-6 mb-2"><strong>Số tiền:</strong><br><span id="plAmount"
+                    class="text-primary font-weight-bold">0 ₫</span></div>
               </div>
             </div>
           </div>
@@ -515,19 +703,19 @@
       btnPay.disabled = true;
       btnPay.dataset.ready = 'false';
     }
-    
+
     // Validate bookingId
     if (!bookingId) {
       document.getElementById('loading').innerHTML = '<p class="text-danger">Không tìm thấy mã đặt phòng. <a href="my-bookings.html">Quay lại</a></p>';
       throw new Error('Booking ID is required');
     }
-    
+
     // BANK_CODE, BANK_ACCOUNT, BANK_ACCOUNT_NAME are defined in simple-payment.js
     // Use window.BANK_CODE, window.BANK_ACCOUNT, window.BANK_ACCOUNT_NAME if needed
 
-    function vnd(n){try{return new Intl.NumberFormat('vi-VN',{style:'currency',currency:'VND'}).format(n||0)}catch(_){return (n||0)+' ₫'}}
-    function fdate(s){if(!s)return '-';return new Date(s).toLocaleDateString('vi-VN')}
-    
+    function vnd(n) { try { return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(n || 0) } catch (_) { return (n || 0) + ' ₫' } }
+    function fdate(s) { if (!s) return '-'; return new Date(s).toLocaleDateString('vi-VN') }
+
     function getStatusClass(status) {
       const classes = {
         'Pending': 'status-pending',
@@ -553,19 +741,19 @@
       };
       return texts[status] || status;
     }
-    
+
     function hasCashPaymentRequest(booking) {
       if (!booking || !booking.specialRequests) return false;
       try {
-        const specialRequests = typeof booking.specialRequests === 'string' 
-          ? JSON.parse(booking.specialRequests) 
+        const specialRequests = typeof booking.specialRequests === 'string'
+          ? JSON.parse(booking.specialRequests)
           : booking.specialRequests;
         return specialRequests && typeof specialRequests === 'object' && specialRequests.cashPaymentRequested === true;
       } catch (e) {
         return false;
       }
     }
-    
+
     function canPayBooking(booking) {
       // Nếu đã request cash payment, không cho phép thanh toán nữa (chờ admin approve)
       if (hasCashPaymentRequest(booking)) {
@@ -577,7 +765,7 @@
       }
       return (booking.status === 'Pending' || booking.status === 'Confirmed') && booking.status !== 'Paid';
     }
-    
+
     function renderSpecialRequests(special) {
       if (!special) return null;
       try {
@@ -605,23 +793,23 @@
           html += '</div>';
           return html;
         }
-      } catch(_) {}
+      } catch (_) { }
       return String(special).replace(/\n/g, '<br>');
     }
 
-    async function loadBooking(){
-      try{
+    async function loadBooking() {
+      try {
         const token = localStorage.getItem('token');
-        if(!token){ 
-          showToast('Vui lòng đăng nhập','warning'); 
-          setTimeout(() => window.location.href='login.html', 1500);
+        if (!token) {
+          showToast('Vui lòng đăng nhập', 'warning');
+          setTimeout(() => window.location.href = 'login.html', 1500);
           return;
         }
-        document.getElementById('loading').style.display='block';
-        document.getElementById('content').style.display='none';
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('content').style.display = 'none';
         const url = `${location.origin}/api/bookings/${bookingId}?_=${Date.now()}`;
-        const resp = await fetch(url,{cache:'no-store',headers:{'Authorization':`Bearer ${token}`}});
-        if(!resp.ok) {
+        const resp = await fetch(url, { cache: 'no-store', headers: { 'Authorization': `Bearer ${token}` } });
+        if (!resp.ok) {
           if (resp.status === 401 || resp.status === 403) {
             showToast('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.', 'warning');
             document.getElementById('loading').innerHTML = `<div class="alert alert-info">Vui lòng <a href="login.html">đăng nhập</a> để xem chi tiết đặt phòng.</div>`;
@@ -631,7 +819,7 @@
         }
         const b = await resp.json();
         currentBooking = b;
-        
+
         // Add booking to window._bookings for openSimplePayment to find
         if (!window._bookings) {
           window._bookings = [];
@@ -640,7 +828,7 @@
         window._bookings = window._bookings.filter(book => String(book.bookingId) !== String(bookingId));
         // Add current booking
         window._bookings.push(b);
-        
+
         // Update header
         document.getElementById('code').textContent = b.bookingCode || `BKG${b.bookingId}`;
         const statusBadge = document.getElementById('statusBadge');
@@ -648,22 +836,22 @@
         statusBadge.className = `booking-status-badge ${getStatusClass(b.status)}`;
         const bookingDate = b.createdAt ? new Date(b.createdAt).toLocaleDateString('vi-VN') : '-';
         document.getElementById('bookingDate').textContent = bookingDate;
-        
+
         // Update info
         document.getElementById('checkin').textContent = fdate(b.checkInDate);
         document.getElementById('checkout').textContent = fdate(b.checkOutDate);
-        const nights = b.checkInDate && b.checkOutDate 
+        const nights = b.checkInDate && b.checkOutDate
           ? Math.ceil((new Date(b.checkOutDate) - new Date(b.checkInDate)) / (1000 * 60 * 60 * 24))
           : '-';
         document.getElementById('nights').textContent = nights !== '-' ? `${nights} đêm` : '-';
-        document.getElementById('guests').textContent = (b.numberOfGuests||'-')+" khách";
+        document.getElementById('guests').textContent = (b.numberOfGuests || '-') + " khách";
         document.getElementById('room').textContent = b.roomNumber || b.requestedRoomType || '-';
         const computedAmount = Number(b.estimatedTotalAmount ?? b.totalAmount ?? 0);
         document.getElementById('amount').textContent = vnd(computedAmount);
         // Expose computed amount for payment script to use
         window._bookingAmountOverrides = window._bookingAmountOverrides || {};
         window._bookingAmountOverrides[Number(bookingId)] = computedAmount;
-        
+
         // Special requests
         if (b.specialRequests) {
           const specialHtml = renderSpecialRequests(b.specialRequests);
@@ -672,7 +860,7 @@
             document.getElementById('specialRequestsSection').style.display = 'block';
           }
         }
-        
+
         // Invoice info
         if (b.invoice) {
           document.getElementById('invoiceNumber').textContent = b.invoice.invoiceNumber || '-';
@@ -680,11 +868,11 @@
           document.getElementById('invoiceStatus').textContent = getStatusText(b.invoice.status);
           document.getElementById('invoiceSection').style.display = 'block';
         }
-        
+
         // Show/hide pay button and unpaid badge
         const unpaidBadgeContainer = document.getElementById('unpaidBadgeContainer');
         const awaitingConfirmationMsg = document.getElementById('awaitingConfirmationMsg');
-        
+
         if (btnPay) {
           const hasCashRequest = hasCashPaymentRequest(b);
           const isCashPayment = b.paymentMethod === 'Cash' || b.paymentMethod === 'PayAtHotel';
@@ -693,7 +881,7 @@
           const paymentStatus = b.paymentStatus || b.invoice?.paymentStatus || b.invoice?.status;
           const isPaid = paymentStatus === 'Paid' || b.status === 'Paid' || b.invoice?.status === 'Paid';
           const showAwaitingConfirmation = hasCashRequest && !isPaid;
-          
+
           if (showAwaitingConfirmation) {
             // Đã request cash payment và chưa thanh toán - ẩn nút thanh toán, hiển thị message chờ admin
             btnPay.style.display = 'none';
@@ -754,23 +942,23 @@
             }
           }
         }
-        
-        document.getElementById('loading').style.display='none';
-        document.getElementById('content').style.display='block';
-      }catch(e){
-        showToast('Lỗi: '+e.message,'danger');
+
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('content').style.display = 'block';
+      } catch (e) {
+        showToast('Lỗi: ' + e.message, 'danger');
         document.getElementById('loading').innerHTML = `<p class="text-danger">Không thể tải thông tin. <a href="my-bookings.html">Quay lại</a></p>`;
       }
     }
 
     // Hiển thị modal thanh toán
     const payModal = new bootstrap.Modal(document.getElementById('paymentModal'));
-    
+
     document.getElementById('btnPay')?.addEventListener('click', async () => {
       try {
         console.log('🔵 [btnPay click] Button clicked, bookingId:', bookingId);
         console.log('🔵 [btnPay click] currentBooking:', currentBooking);
-        
+
         if (!currentBooking) {
           console.warn('⚠️ [btnPay click] No currentBooking, reloading...');
           await loadBooking();
@@ -779,16 +967,16 @@
             return;
           }
         }
-        
+
         if (!canPayBooking(currentBooking)) {
           console.warn('⚠️ [btnPay click] Cannot pay booking:', currentBooking.status);
           showToast('Đặt phòng này không đủ điều kiện thanh toán.', 'warning');
           return;
         }
-        
+
         btnPay.disabled = true;
         btnPay.dataset.ready = 'processing';
-        
+
         // Wait for simple-payment.js to load if not ready
         if (typeof openSimplePayment !== 'function') {
           console.warn('⚠️ [booking-details] openSimplePayment not found, waiting for script...');
@@ -799,7 +987,7 @@
             attempts++;
           }
         }
-        
+
         // Use simple-payment.js for consistent payment flow
         if (typeof openSimplePayment === 'function') {
           console.log('✅ [booking-details] Using openSimplePayment from simple-payment.js, bookingId:', bookingId);
@@ -810,10 +998,10 @@
           console.error('❌ [booking-details] openSimplePayment not found after waiting, using fallback');
           const token = localStorage.getItem('token');
           const url = `${location.origin}/api/bookings/${bookingId}?_=${Date.now()}`;
-          const resp = await fetch(url, {cache:'no-store', headers:{'Authorization':`Bearer ${token}`}});
+          const resp = await fetch(url, { cache: 'no-store', headers: { 'Authorization': `Bearer ${token}` } });
           if (!resp.ok) throw new Error('Không thể tải thông tin');
           const b = await resp.json();
-          
+
           const amount = Number(b?.estimatedTotalAmount ?? b?.totalAmount ?? 0);
           const bookingCode = b.bookingCode || `BKG${bookingId}`;
           const info = `BOOKING${bookingId}`;
@@ -822,7 +1010,7 @@
           const bankAccount = window.BANK_ACCOUNT || '0901329227';
           const bankAccountName = window.BANK_ACCOUNT_NAME || 'Resort Deluxe';
           const imgUrl = `https://img.vietqr.io/image/${encodeURIComponent(bankCode)}-${encodeURIComponent(bankAccount)}-compact.png?amount=${encodeURIComponent(amount)}&addInfo=${encodeURIComponent(info)}&accountName=${encodeURIComponent(bankAccountName)}`;
-          
+
           document.getElementById('plCode2').textContent = bookingCode;
           document.getElementById('plAmount').textContent = vnd(amount);
           document.getElementById('plBankName').textContent = 'MBBank';
@@ -830,15 +1018,15 @@
           document.getElementById('plBankAccName').textContent = bankAccountName;
           const imgEl = document.getElementById('plVqrImg');
           if (imgEl) {
-            imgEl.style.display='block';
+            imgEl.style.display = 'block';
             imgEl.src = imgUrl;
           }
           payModal.show();
-          
+
           // Bắt đầu polling để tự động kiểm tra thanh toán
           startPaymentPolling(bookingId);
         }
-      } catch(e) {
+      } catch (e) {
         showToast('Lỗi: ' + e.message, 'danger');
       } finally {
         if (btnPay) {
@@ -850,13 +1038,13 @@
 
     // Polling interval - using window.paymentPollingInterval from simple-payment.js
     // let paymentPollingInterval = null; // Removed - using global from simple-payment.js
-    
+
     // Hàm kiểm tra trạng thái booking
     async function checkBookingPaymentStatus(bookingId) {
       try {
         const token = localStorage.getItem('token');
         if (!token) return null;
-        
+
         const url = `${location.origin}/api/bookings/${bookingId}?_=${Date.now()}`;
         const resp = await fetch(url, {
           headers: {
@@ -864,17 +1052,17 @@
           },
           cache: 'no-store'
         });
-        
+
         if (!resp.ok) return null;
-        
+
         const booking = await resp.json();
         return booking.status;
-      } catch(e) {
+      } catch (e) {
         console.error('❌ [checkBookingPaymentStatus] Error:', e);
         return null;
       }
     }
-    
+
     // Bắt đầu polling khi modal mở
     function startPaymentPolling(bookingId) {
       // Dừng polling cũ nếu có (using global from simple-payment.js)
@@ -882,42 +1070,42 @@
         clearInterval(window.paymentPollingInterval);
         window.paymentPollingInterval = null;
       }
-      
+
       console.log('🔄 [startPaymentPolling] Starting payment polling for booking:', bookingId);
-      
+
       // Hiển thị thông báo đang chờ
       const waitingMsg = document.getElementById('plWaitingMessage');
       const paidMsg = document.getElementById('plPaidMessage');
       if (waitingMsg) waitingMsg.style.display = 'block';
       if (paidMsg) paidMsg.style.display = 'none';
-      
+
       // Bắt đầu polling mỗi 3 giây (using global from simple-payment.js)
       window.paymentPollingInterval = setInterval(async () => {
         const status = await checkBookingPaymentStatus(bookingId);
         console.log('🔍 [PaymentPolling] Current status:', status);
-        
+
         if (status === 'Paid') {
           console.log('✅ [PaymentPolling] Payment detected! Stopping polling and updating UI...');
-          
+
           // Dừng polling
           if (window.paymentPollingInterval) {
             clearInterval(window.paymentPollingInterval);
             window.paymentPollingInterval = null;
           }
-          
+
           // Hiển thị thông báo thành công
           if (waitingMsg) waitingMsg.style.display = 'none';
           if (paidMsg) paidMsg.style.display = 'block';
-          
+
           // Ẩn QR code
           const qrImg = document.getElementById('plVqrImg');
           if (qrImg) {
             qrImg.style.display = 'none';
           }
-          
+
           // Hiển thị thông báo và đóng modal sau 2 giây
           showToast('✅ Thanh toán thành công! Trạng thái đã được cập nhật.', 'success');
-          
+
           setTimeout(() => {
             payModal.hide();
             // Reload booking để hiển thị trạng thái mới
@@ -925,7 +1113,7 @@
           }, 2000);
         }
       }, 3000); // Kiểm tra mỗi 3 giây
-      
+
       // Dừng polling sau 5 phút (300 giây) để tránh polling vô hạn
       setTimeout(() => {
         if (window.paymentPollingInterval) {
@@ -936,7 +1124,7 @@
         }
       }, 300000); // 5 phút
     }
-    
+
     // Dừng polling khi modal đóng
     const payModalElement = document.getElementById('paymentModal');
     if (payModalElement) {
@@ -952,33 +1140,33 @@
         if (paidMsg) paidMsg.style.display = 'none';
       });
     }
-    
+
     loadBooking();
-    
+
     // Background polling để check payment status khi admin approve cash payment
     // Chạy ngay cả khi modal đóng
     let backgroundPollingInterval = null;
-    
+
     function startBackgroundPolling() {
       // Dừng polling cũ nếu có
       if (backgroundPollingInterval) {
         clearInterval(backgroundPollingInterval);
       }
-      
+
       // Lấy booking ID từ URL
       const urlParams = new URLSearchParams(window.location.search);
       const bookingId = urlParams.get('id');
-      
+
       if (!bookingId) {
         console.warn('⚠️ [BackgroundPolling] No booking ID found in URL');
         return;
       }
-      
+
       console.log('🔄 [BackgroundPolling] Starting background polling for booking:', bookingId);
-      
+
       // Lưu old status để so sánh
       let oldStatus = null;
-      
+
       // Poll mỗi 10 giây để check payment status
       backgroundPollingInterval = setInterval(async () => {
         try {
@@ -987,19 +1175,19 @@
             console.warn('⚠️ [BackgroundPolling] No token found');
             return;
           }
-          
+
           // Check booking status
           const url = `${location.origin}/api/bookings/${bookingId}?_=${Date.now()}`;
           const resp = await fetch(url, {
             headers: { 'Authorization': `Bearer ${token}` },
             cache: 'no-store'
           });
-          
+
           if (resp.ok) {
             const booking = await resp.json();
             // Check status (case-insensitive) - Booking model chỉ có 'status', không có 'paymentStatus'
             const newStatus = (booking.status || booking.Status || '').toString().toLowerCase();
-            
+
             // Debug: log raw booking object để xem structure
             if (oldStatus === null || newStatus !== oldStatus) {
               console.log(`🔍 [BackgroundPolling] Booking ${bookingId} raw data:`, {
@@ -1009,27 +1197,27 @@
                 normalizedStatus: newStatus
               });
             }
-            
+
             // Lần đầu tiên, lưu old status
             if (oldStatus === null) {
               oldStatus = newStatus;
               console.log(`🔍 [BackgroundPolling] Initial status for booking ${bookingId}: '${newStatus}'`);
               return;
             }
-            
+
             console.log(`🔍 [BackgroundPolling] Booking ${bookingId}: oldStatus='${oldStatus}', newStatus='${newStatus}'`);
-            
+
             // Nếu status thay đổi từ non-paid sang paid, reload booking
             if (newStatus === 'paid' && oldStatus !== 'paid') {
               console.log('✅ [BackgroundPolling] ✅✅✅ PAYMENT DETECTED! Status changed from', oldStatus, 'to', newStatus);
               showToast('✅ Thanh toán thành công! Trạng thái đã được cập nhật.', 'success');
-              
+
               // Reload booking
               setTimeout(() => {
                 console.log('🔄 [BackgroundPolling] Reloading booking...');
                 loadBooking();
               }, 1000);
-              
+
               // Dừng polling
               if (backgroundPollingInterval) {
                 clearInterval(backgroundPollingInterval);
@@ -1051,12 +1239,12 @@
         }
       }, 10000); // Poll mỗi 10 giây
     }
-    
+
     // Bắt đầu background polling sau khi load booking
     setTimeout(() => {
       startBackgroundPolling();
     }, 2000);
-    
+
     // Dừng background polling khi trang đóng
     window.addEventListener('beforeunload', () => {
       if (backgroundPollingInterval) {
@@ -1064,8 +1252,9 @@
       }
     });
   </script>
-  
+
   <!-- AI Chat Widget -->
   <script src="js/ai-chat.js"></script>
 </body>
+
 </html>

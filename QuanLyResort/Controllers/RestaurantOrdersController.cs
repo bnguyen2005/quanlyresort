@@ -774,6 +774,53 @@ public class RestaurantOrdersController : ControllerBase
             return StatusCode(500, new { message = "Lỗi khi xác nhận thanh toán", error = ex.Message });
         }
     }
+
+    /// <summary>
+    /// Hủy đơn đặt món (Customer)
+    /// POST /api/restaurant-orders/{id}/cancel
+    /// </summary>
+    [HttpPost("{id}/cancel")]
+    [Authorize(Roles = "Customer")]
+    public async Task<IActionResult> CancelMyOrder(int id)
+    {
+        try
+        {
+            var customerIdClaim = User.FindFirst("CustomerId")?.Value;
+            if (string.IsNullOrEmpty(customerIdClaim) || !int.TryParse(customerIdClaim, out int customerId))
+            {
+                return Unauthorized(new { message = "Vui lòng đăng nhập để hủy đơn" });
+            }
+
+            var order = await _context.RestaurantOrders.FindAsync(id);
+            if (order == null)
+            {
+                return NotFound(new { message = "Đơn đặt món không tồn tại" });
+            }
+
+            if (order.CustomerId != customerId)
+            {
+                return Forbid();
+            }
+
+            if (order.Status != "Pending")
+            {
+                return BadRequest(new { message = "Chỉ có thể hủy đơn hàng đang ở trạng thái Chờ xử lý" });
+            }
+
+            order.Status = "Cancelled";
+            order.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+            _logger.LogInformation($"[CancelMyOrder] Customer {customerId} cancelled order {id}");
+
+            return Ok(new { message = "Hủy đơn hàng thành công", order });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"[CancelMyOrder] Error cancelling order {id}");
+            return StatusCode(500, new { message = "Lỗi khi hủy đơn hàng", error = ex.Message });
+        }
+    }
 }
 
 // DTOs

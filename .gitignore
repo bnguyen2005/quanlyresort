@@ -49,3 +49,8 @@ Thumbs.db
 # Migration files (keep structure, ignore compiled)
 Migrations/*.Designer.cs
 
+# Large Media Files
+*.mp4
+*.mov
+*.avi
+*.mkv

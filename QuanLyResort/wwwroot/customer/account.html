@@ -1,464 +1,658 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
   <title>Tài khoản của tôi | Resort Deluxe</title>
-  <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700&display=swap" rel="stylesheet">
+
+  <!-- Google Fonts: Playfair Display + Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
+
   <link rel="stylesheet" href="css/bootstrap.min.css">
   <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="/css/tokens.css">
-  <link rel="stylesheet" href="/css/globals.css">
-  <link rel="stylesheet" href="/css/grid.css">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/globals.css">
+  <link rel="stylesheet" href="css/grid.css">
+  <link rel="stylesheet" href="css/page-transition.css">
   <link rel="stylesheet" href="css/navbar-auth.css">
-  <link rel="stylesheet" href="css/open-iconic-bootstrap.min.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script src="/js/toast-notification.js"></script>
-  <script src="/js/form-validation.js"></script>
+  <script src="js/toast-notification.js"></script>
+  <script src="js/form-validation.js"></script>
+
   <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      padding-top: 0;
-      overflow-x: hidden;
-      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-      min-height: 100vh;
+    /* ============================================
+       TASTE SKILL — ELEGANT LIGHT LUXURY (TANDJUNG SARI)
+       DESIGN_VARIANCE=8 | MOTION=8 | DENSITY=2
+    ============================================ */
+    :root {
+      --bg-deep:       #e8e4db;
+      --bg-primary:    #f4f0e6;
+      --bg-surface:    #ebe5d8;
+      --bg-glass:      rgba(244, 240, 230, 0.65);
+      --gold:          #8a2017;
+      --gold-soft:     #a03830;
+      --gold-dim:      rgba(138, 32, 23, 0.15);
+      --border-subtle: rgba(138, 32, 23, 0.12);
+      --border-mid:    rgba(138, 32, 23, 0.35);
+      --text-primary:  #1c1917;
+      --text-secondary:#44403c;
+      --text-muted:    #78716c;
+      --error:         #dc2626;
+      --success:       #16a34a;
+      --font-heading:  'Cormorant Garamond', 'Playfair Display', serif;
+      --font-body:     'Inter', sans-serif;
+      --ease-apple:    cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-smooth:   cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .ftco-navbar {
-      position: sticky !important;
-      top: 0 !important;
-      z-index: 1030 !important;
-      background-color: #1a1a1a !important;
-      width: 100% !important;
-      margin: 0 !important;
-    }
-    
-    .profile-header {
-      background: linear-gradient(135deg, #C8A97E 0%, #B89968 100%);
-      padding: 80px 0 60px;
-      color: #fff;
-      text-align: center;
-      position: relative;
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      font-family: var(--font-body);
+      background: var(--bg-deep);
+      color: var(--text-primary);
       overflow: hidden;
     }
-    .profile-header::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse"><path d="M 100 0 L 0 0 0 100" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></pattern></defs><rect width="100%" height="100%" fill="url(%23grid)"/></svg>');
-      opacity: 0.3;
+
+    /* ─── SPLIT LAYOUT ─── */
+    .account-wrapper {
+      display: grid;
+      grid-template-columns: 4fr 5fr;
+      height: 100vh;
+      width: 100%;
+      position: relative;
     }
+
+    /* ─── LEFT PANEL — Immersive image side ─── */
+    .panel-visual {
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .panel-visual__bg {
+      position: absolute;
+      inset: 0;
+      background-image: url('images/bg_2.jpg');
+      background-size: cover;
+      background-position: center 30%;
+      transform: scale(1.08);
+      filter: sepia(0.3) brightness(0.9);
+      transition: transform 18s ease;
+      animation: panVisual 18s ease forwards;
+    }
+
+    @keyframes panVisual {
+      from { transform: scale(1.08) translateX(0); }
+      to   { transform: scale(1.0)  translateX(-2%); }
+    }
+
+    .panel-visual__overlay {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(to right, rgba(232, 228, 219, 0.2) 0%, rgba(232, 228, 219, 0.6) 100%),
+        linear-gradient(to bottom, transparent 40%, rgba(232, 228, 219, 0.9) 100%);
+    }
+
+    .panel-visual__grain {
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    /* Glass Profile Card overlaid on visual */
+    .glass-profile-card {
+      position: relative;
+      z-index: 10;
+      background: rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      border-radius: 12px;
+      padding: 40px;
+      width: 80%;
+      max-width: 400px;
+      text-align: center;
+      animation: fadeSlideUp 1s var(--ease-apple) forwards;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    }
+
     .profile-avatar-container {
       position: relative;
       display: inline-block;
-      margin: 0 auto 25px;
+      margin-bottom: 25px;
     }
-    .profile-avatar {
-      width: 140px;
-      height: 140px;
-      background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 70px;
-      box-shadow: 0 15px 50px rgba(0,0,0,0.3);
-      position: relative;
-      z-index: 1;
-      border: 5px solid rgba(255,255,255,0.3);
-      transition: transform 0.3s ease;
-    }
-    .profile-avatar:hover {
-      transform: scale(1.05);
-    }
-    .profile-avatar-img {
-      width: 140px;
-      height: 140px;
+
+    .profile-avatar-img,
+    .profile-avatar-placeholder {
+      width: 130px;
+      height: 130px;
       border-radius: 50%;
       object-fit: cover;
-      border: 5px solid rgba(255,255,255,0.3);
-      box-shadow: 0 15px 50px rgba(0,0,0,0.3);
-      transition: transform 0.3s ease;
+      border: 3px solid rgba(255,255,255,0.8);
+      background: var(--bg-surface);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 50px;
+      color: var(--gold);
+      margin: 0 auto;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
     }
-    .profile-avatar-img:hover {
-      transform: scale(1.05);
-    }
+
     .avatar-upload-btn {
       position: absolute;
-      bottom: 5px;
-      right: 5px;
-      width: 45px;
-      height: 45px;
-      background: linear-gradient(135deg, #C8A97E 0%, #B89968 100%);
+      bottom: 0;
+      right: 0;
+      width: 38px;
+      height: 38px;
+      background: var(--gold);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: white;
+      color: #fff;
       cursor: pointer;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-      transition: all 0.3s ease;
-      z-index: 2;
-      border: 3px solid white;
+      transition: background 0.3s ease;
+      border: 2px solid #fff;
     }
-    .avatar-upload-btn:hover {
-      transform: scale(1.1);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
-    }
-    .avatar-upload-btn i {
-      font-size: 18px;
-    }
-    
-    .profile-card {
-      background: #fff;
-      padding: 50px;
-      border-radius: 25px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-      margin-top: -60px;
-      position: relative;
-      z-index: 10;
-      animation: slideUp 0.8s ease;
-    }
-    
-    .action-buttons {
-      position: absolute;
-      top: 30px;
-      right: 30px;
-      display: flex;
-      gap: 10px;
-    }
-    .action-buttons .btn {
-      border-radius: 12px;
-      padding: 10px 20px;
+
+    .avatar-upload-btn:hover { background: var(--gold-soft); }
+
+    #profileName {
+      font-family: var(--font-heading);
+      font-size: 28px;
+      color: var(--text-primary);
+      margin-bottom: 5px;
       font-weight: 600;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      text-shadow: 0 1px 2px rgba(255,255,255,0.5);
     }
-    .action-buttons .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+
+    #profileEmail {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 30px;
     }
-    
+
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 25px;
-      margin: 40px 0;
+      grid-template-columns: 1fr;
+      gap: 15px;
+      text-align: left;
+      border-top: 1px solid rgba(0,0,0,0.1);
+      padding-top: 25px;
     }
-    .stat-card {
-      background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
-      padding: 30px;
-      border-radius: 20px;
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+    }
+
+    .stat-row .stat-label {
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .stat-row .stat-label i {
+      color: var(--gold);
+      width: 16px;
       text-align: center;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-      transition: all 0.3s ease;
-      border: 1px solid rgba(200,169,126,0.2);
-      position: relative;
-      overflow: hidden;
     }
-    .stat-card::before {
+
+    .stat-row .stat-value {
+      font-weight: 500;
+      color: var(--text-primary);
+      font-family: var(--font-heading);
+      font-size: 18px;
+    }
+
+    /* ─── RIGHT PANEL — Glass form ─── */
+    .panel-form {
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      position: relative;
+      background: var(--bg-primary);
+      overflow-y: auto;
+      padding: 100px 0 60px 0;
+    }
+
+    /* Subtle radial glow behind form */
+    .panel-form::before {
       content: '';
       position: absolute;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(138, 32, 23, 0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .form-shell {
+      width: 100%;
+      max-width: 600px;
+      padding: 0 48px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ─── HEADER ─── */
+    .form-header {
+      margin-bottom: 44px;
+      opacity: 0;
+      animation: fadeSlideUp 0.9s var(--ease-apple) 0.2s forwards;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .form-header__left .form-header__eyebrow {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-header__left .form-header__eyebrow::before {
+      content: '';
+      display: inline-block;
+      width: 24px;
+      height: 1px;
+      background: var(--gold);
+    }
+
+    .form-header__left .form-header__title {
+      font-family: var(--font-heading);
+      font-size: clamp(28px, 3vw, 36px);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      line-height: 1.15;
+    }
+
+    /* Action Buttons in Header */
+    .action-buttons {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn-action-outline {
+      border: 1px solid var(--border-mid);
+      background: transparent;
+      color: var(--text-primary);
+      padding: 10px 18px;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 4px;
+    }
+
+    .btn-action-outline:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    .btn-action-solid {
+      border: none;
+      background: var(--gold);
+      color: #fff;
+      padding: 10px 18px;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.5s var(--ease-apple);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 4px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(138, 32, 23, 0.25);
+    }
+
+    .btn-action-solid:hover {
+      background: var(--gold-soft);
+      transform: translateY(-2px);
+    }
+
+    .btn-action-solid::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent);
+      transform: skewX(-20deg);
+      transition: left 0.7s var(--ease-apple);
+    }
+    .btn-action-solid:hover::after { left: 160%; }
+
+    /* ─── FLOAT LABEL INPUTS ─── */
+    .ts-form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 30px;
+    }
+
+    .field-wrap {
+      position: relative;
+      margin-bottom: 28px;
+      opacity: 0; 
+      animation: fadeSlideUp 0.9s var(--ease-apple) forwards;
+    }
+    
+    .field-wrap.full-width {
+      grid-column: 1 / -1;
+    }
+
+    /* Staggered animation */
+    .field-wrap:nth-child(1) { animation-delay: 0.3s; }
+    .field-wrap:nth-child(2) { animation-delay: 0.35s; }
+    .field-wrap:nth-child(3) { animation-delay: 0.4s; }
+    .field-wrap:nth-child(4) { animation-delay: 0.45s; }
+    .field-wrap:nth-child(5) { animation-delay: 0.5s; }
+    .field-wrap:nth-child(6) { animation-delay: 0.55s; }
+    .field-wrap:nth-child(7) { animation-delay: 0.6s; }
+    .field-wrap:nth-child(8) { animation-delay: 0.65s; }
+
+    .field-wrap__label {
+      position: absolute;
+      left: 0;
+      top: 16px;
+      font-size: 14px;
+      color: var(--text-muted);
+      font-weight: 400;
+      pointer-events: none;
+      transition: all 0.5s var(--ease-apple);
+      transform-origin: left top;
+    }
+
+    .field-wrap__input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+      padding: 16px 0 10px;
+      font-size: 15px;
+      font-family: var(--font-body);
+      color: var(--text-primary);
+      outline: none;
+      transition: border-color 0.5s var(--ease-apple);
+      caret-color: var(--gold);
+    }
+    
+    textarea.field-wrap__input {
+      resize: none;
+    }
+
+    .field-wrap__input:focus,
+    .field-wrap__input:not(:placeholder-shown),
+    .field-wrap__input[type="date"]:not(:placeholder-shown) {
+      border-bottom-color: var(--gold);
+    }
+    
+    .field-wrap__input:read-only:not(:focus) {
+      border-bottom-color: rgba(0, 0, 0, 0.08);
+      color: var(--text-muted);
+    }
+
+    .field-wrap__input:focus + .field-wrap__label,
+    .field-wrap__input:not(:placeholder-shown) + .field-wrap__label,
+    .field-wrap__input[type="date"] + .field-wrap__label {
+      top: -2px;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      font-weight: 600;
+      color: var(--gold);
+      text-transform: uppercase;
+    }
+    
+    .field-wrap__input:read-only + .field-wrap__label {
+      color: var(--text-muted);
+    }
+
+    .field-wrap__line {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: var(--gold);
+      transition: width 0.6s var(--ease-apple);
+    }
+
+    .field-wrap__input:not(:read-only):focus ~ .field-wrap__line { width: 100%; }
+
+    /* ─── ANIMATIONS ─── */
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── NAVBAR OVERLAY ─── */
+    #header-placeholder {
+      position: fixed;
       top: 0;
       left: 0;
       right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, #C8A97E 0%, #B89968 100%);
+      z-index: 1000;
     }
-    .stat-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 12px 35px rgba(0,0,0,0.15);
+
+    #header-placeholder nav,
+    #header-placeholder .ftco-navbar,
+    #header-placeholder .navbar {
+      background: rgba(244, 240, 230, 0.65) !important;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(138, 32, 23, 0.12) !important;
+      box-shadow: none !important;
     }
-    .stat-icon {
-      font-size: 32px;
-      color: #C8A97E;
-      margin-bottom: 15px;
-      display: block;
+
+    #header-placeholder .navbar-brand,
+    .navbar-brand {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      width: 0 !important;
+      overflow: hidden !important;
     }
-    .stat-number {
-      font-size: 42px;
-      font-weight: 700;
-      color: #1a1a1a;
-      display: block;
-      margin-bottom: 10px;
-      background: linear-gradient(135deg, #C8A97E 0%, #B89968 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .stat-label {
-      color: #666;
-      font-size: 14px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      font-weight: 600;
-    }
-    
-    .section-title {
-      font-size: 28px;
-      font-weight: 700;
-      color: #1a1a1a;
-      margin: 50px 0 30px;
-      padding-bottom: 15px;
-      border-bottom: 3px solid #C8A97E;
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-    .section-title i {
-      color: #C8A97E;
-    }
-    
-    .info-row {
-      display: flex;
-      padding: 25px 0;
-      border-bottom: 1px solid #e9ecef;
-      align-items: center;
-      transition: all 0.3s ease;
-    }
-    .info-row:last-child {
-      border-bottom: none;
-    }
-    .info-row:hover {
-      background: rgba(200,169,126,0.05);
-      margin: 0 -20px;
-      padding-left: 20px;
-      padding-right: 20px;
-      border-radius: 10px;
-    }
-    .info-label {
-      flex: 0 0 220px;
-      color: #666;
-      font-weight: 600;
-      font-size: 15px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .info-label i {
-      color: #C8A97E;
-      width: 20px;
-    }
-    .info-value {
-      flex: 1;
-      color: #1a1a1a;
-      font-weight: 500;
-    }
-    .info-value input,
-    .info-value select,
-    .info-value textarea {
-      width: 100%;
-      border: none;
-      background: transparent;
-      color: #1a1a1a;
-      font-weight: 500;
-      padding: 8px 0;
-      font-size: 15px;
-      transition: all 0.3s ease;
-    }
-    .info-value input:focus,
-    .info-value select:focus,
-    .info-value textarea:focus {
-      outline: none;
-      border-bottom: 2px solid #C8A97E;
-      padding-bottom: 6px;
-    }
-    .info-value input:read-only,
-    .info-value textarea:read-only {
-      color: #666;
-      cursor: default;
-    }
-    .info-value input:not(:read-only),
-    .info-value textarea:not(:read-only) {
-      border-bottom: 2px solid #C8A97E;
-      background: rgba(200,169,126,0.05);
-      padding: 8px 12px;
-      border-radius: 8px;
-    }
-    
-    @keyframes slideUp {
-      from {
-        opacity: 0;
-        transform: translateY(50px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    
-    @media (max-width: 768px) {
-      .profile-card {
-        padding: 30px 20px;
-        margin-top: -40px;
-      }
-      .action-buttons {
-        position: static;
-        margin-bottom: 20px;
-        flex-wrap: wrap;
-      }
-      .info-row {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-      }
-      .info-label {
-        flex: none;
-        width: 100%;
-      }
-      .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 15px;
-      }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 992px) {
+      html, body { overflow: auto; }
+      .account-wrapper { grid-template-columns: 1fr; height: auto; min-height: 100vh; }
+      .panel-visual { padding: 80px 20px 40px; }
+      .glass-profile-card { width: 100%; max-width: 500px; }
+      .panel-form { padding: 40px 0; }
+      .form-shell { padding: 0 28px; }
+      .ts-form-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
-<body>
-  <!-- Header placeholder - will be loaded by load-header.js -->
+
+<body class="layout-vertical">
+  <!-- Navbar (floats above split-screen) -->
   <div id="header-placeholder"></div>
-  
-  <!-- Load header component -->
   <script src="js/load-header.js"></script>
+  <script>
+    (function hideNavbarBrand() {
+      function removeBrand() {
+        document.querySelectorAll('.navbar-brand, a.navbar-brand').forEach(el => {
+          el.style.cssText = 'display:none!important;visibility:hidden!important;width:0!important;overflow:hidden!important;';
+        });
+      }
+      removeBrand();
+      const obs = new MutationObserver(() => { removeBrand(); });
+      obs.observe(document.documentElement, { childList: true, subtree: true });
+      setTimeout(removeBrand, 300);
+      setTimeout(removeBrand, 800);
+    })();
+  </script>
 
-  <div class="profile-header">
-    <div class="container">
-      <div class="profile-avatar-container">
-        <img id="profileAvatarImg" src="" alt="Avatar" class="profile-avatar-img" style="display: none; width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 4px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
-        <div id="profileAvatarPlaceholder" class="profile-avatar">👤</div>
-        <label for="avatarUpload" class="avatar-upload-btn" title="Tải ảnh đại diện">
-          <i class="fas fa-camera"></i>
-        </label>
-        <input type="file" id="avatarUpload" accept="image/*" style="display: none;" onchange="handleAvatarUpload(event)">
-      </div>
-      <h1 class="display-5 mb-2" id="profileName" style="position: relative; z-index: 1;">Đang tải...</h1>
-      <p class="lead mb-0" id="profileEmail" style="position: relative; z-index: 1;">Đang tải...</p>
-    </div>
-  </div>
-
-  <div class="container mb-5">
-    <div class="profile-card position-relative">
-      <div class="action-buttons">
-        <button class="btn btn-outline-primary" id="btnEdit" onclick="toggleEdit()">
-          <i class="fas fa-edit"></i> Chỉnh sửa
-        </button>
-        <button class="btn btn-primary" id="btnSave" onclick="saveProfile()" style="display:none">
-          <i class="fas fa-save"></i> Lưu thay đổi
-        </button>
-        <button class="btn btn-outline-secondary" id="btnCancel" onclick="cancelEdit()" style="display:none">
-          <i class="fas fa-times"></i> Hủy
-        </button>
-      </div>
-      
-      <div class="stats-grid">
-        <div class="stat-card">
-          <i class="fas fa-calendar-check stat-icon"></i>
-          <span class="stat-number" id="totalBookings">0</span>
-          <span class="stat-label">Đặt phòng</span>
-        </div>
-        <div class="stat-card">
-          <i class="fas fa-wallet stat-icon"></i>
-          <span class="stat-number" id="totalSpent">0 ₫</span>
-          <span class="stat-label">Tổng chi tiêu</span>
-        </div>
-        <div class="stat-card">
-          <i class="fas fa-star stat-icon"></i>
-          <span class="stat-number" id="loyaltyPoints">0</span>
-          <span class="stat-label">Điểm thưởng</span>
-        </div>
-        <div class="stat-card">
-          <i class="fas fa-crown stat-icon"></i>
-          <span class="stat-number" id="customerType">-</span>
-          <span class="stat-label">Loại khách hàng</span>
-        </div>
-      </div>
-
-      <h3 class="section-title">
-        <i class="fas fa-user-circle"></i>
-        Thông tin cá nhân
-      </h3>
-      
-      <div class="info-row">
-        <span class="info-label">
-          <i class="fas fa-user"></i>
-          Họ và tên:
-        </span>
-        <span class="info-value">
-          <input type="text" id="fullName" value="" readonly required />
-        </span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">
-          <i class="fas fa-envelope"></i>
-          Email:
-        </span>
-        <span class="info-value">
-          <input type="email" id="email" value="" readonly required />
-        </span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">
-          <i class="fas fa-phone"></i>
-          Số điện thoại:
-        </span>
-        <span class="info-value">
-          <input type="tel" id="phoneNumber" value="" readonly />
-        </span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">
-          <i class="fas fa-birthday-cake"></i>
-          Ngày sinh:
-        </span>
-        <span class="info-value">
-          <input type="date" id="dateOfBirth" value="" readonly />
-        </span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">
-          <i class="fas fa-flag"></i>
-          Quốc tịch:
-        </span>
-        <span class="info-value">
-          <input type="text" id="nationality" value="" readonly />
-        </span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">
-          <i class="fas fa-map-marker-alt"></i>
-          Địa chỉ:
-        </span>
-        <span class="info-value">
-          <textarea id="address" rows="2" readonly></textarea>
-        </span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">
-          <i class="fas fa-id-card"></i>
-          CMND/CCCD:
-        </span>
-        <span class="info-value">
-          <input type="text" id="idCardNumber" value="" readonly />
-        </span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">
-          <i class="fas fa-passport"></i>
-          Hộ chiếu:
-        </span>
-        <span class="info-value">
-          <input type="text" id="passportNumber" value="" readonly />
-        </span>
-      </div>
-    </div>
-  </div>
-
+  <!-- Core Scripts -->
   <script src="js/jquery.min.js"></script>
-  <script src="js/bootstrap.min.js"></script>
+  <script src="js/jquery-migrate-3.0.1.min.js"></script>
   <script src="js/popper.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+  <script src="js/main.js"></script>
   <script src="../js/api.js"></script>
   <script src="js/navbar-auth.js"></script>
+
+  <!-- Main Content wrapped for PJAX -->
+  <main id="page-content" data-page="account">
+    <div class="account-wrapper">
+      
+      <!-- ═══ LEFT — Visual & Profile Card ═══ -->
+      <aside class="panel-visual">
+        <div class="panel-visual__bg"></div>
+        <div class="panel-visual__overlay"></div>
+        <div class="panel-visual__grain"></div>
+
+        <div class="glass-profile-card">
+          <div class="profile-avatar-container">
+            <img id="profileAvatarImg" src="" alt="Avatar" class="profile-avatar-img" style="display: none;">
+            <div id="profileAvatarPlaceholder" class="profile-avatar-placeholder"><i class="fas fa-user-circle"></i></div>
+            <label for="avatarUpload" class="avatar-upload-btn" title="Tải ảnh đại diện">
+              <i class="fas fa-camera" style="font-size: 14px;"></i>
+            </label>
+            <input type="file" id="avatarUpload" accept="image/*" style="display: none;" onchange="handleAvatarUpload(event)">
+          </div>
+
+          <h2 id="profileName">Đang tải...</h2>
+          <p id="profileEmail">Đang tải...</p>
+
+          <div class="stats-grid">
+            <div class="stat-row">
+              <span class="stat-label"><i class="fas fa-crown"></i> Hạng thành viên</span>
+              <span class="stat-value" id="customerType">-</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label"><i class="fas fa-star"></i> Điểm thưởng</span>
+              <span class="stat-value" id="loyaltyPoints">0</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label"><i class="fas fa-calendar-check"></i> Đặt phòng</span>
+              <span class="stat-value" id="totalBookings">0</span>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label"><i class="fas fa-wallet"></i> Tổng chi tiêu</span>
+              <span class="stat-value" id="totalSpent">0 ₫</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- ═══ RIGHT — Details Form ═══ -->
+      <section class="panel-form">
+        <div class="form-shell">
+          
+          <div class="form-header">
+            <div class="form-header__left">
+              <div class="form-header__eyebrow">Hồ sơ cá nhân</div>
+              <h1 class="form-header__title">Thông tin của bạn</h1>
+            </div>
+            <div class="action-buttons">
+              <button type="button" class="btn-action-outline" id="btnEdit" onclick="toggleEdit()">
+                <i class="fas fa-pen"></i> Chỉnh sửa
+              </button>
+              <button type="button" class="btn-action-solid" id="btnSave" onclick="saveProfile()" style="display:none">
+                <i class="fas fa-check"></i> Lưu
+              </button>
+              <button type="button" class="btn-action-outline" id="btnCancel" onclick="cancelEdit()" style="display:none">
+                <i class="fas fa-times"></i> Hủy
+              </button>
+            </div>
+          </div>
+
+          <div class="ts-form-grid">
+            <div class="field-wrap">
+              <input type="text" class="field-wrap__input ts-input" id="fullName" placeholder=" " readonly required />
+              <label class="field-wrap__label" for="fullName">Họ và tên</label>
+              <span class="field-wrap__line"></span>
+            </div>
+            
+            <div class="field-wrap">
+              <input type="email" class="field-wrap__input ts-input" id="email" placeholder=" " readonly required />
+              <label class="field-wrap__label" for="email">Email</label>
+              <span class="field-wrap__line"></span>
+            </div>
+            
+            <div class="field-wrap">
+              <input type="tel" class="field-wrap__input ts-input" id="phoneNumber" placeholder=" " readonly />
+              <label class="field-wrap__label" for="phoneNumber">Số điện thoại</label>
+              <span class="field-wrap__line"></span>
+            </div>
+            
+            <div class="field-wrap">
+              <input type="date" class="field-wrap__input ts-input" id="dateOfBirth" placeholder=" " readonly />
+              <label class="field-wrap__label" for="dateOfBirth">Ngày sinh</label>
+              <span class="field-wrap__line"></span>
+            </div>
+            
+            <div class="field-wrap">
+              <input type="text" class="field-wrap__input ts-input" id="nationality" placeholder=" " readonly />
+              <label class="field-wrap__label" for="nationality">Quốc tịch</label>
+              <span class="field-wrap__line"></span>
+            </div>
+            
+            <div class="field-wrap">
+              <input type="text" class="field-wrap__input ts-input" id="idCardNumber" placeholder=" " readonly />
+              <label class="field-wrap__label" for="idCardNumber">CMND/CCCD</label>
+              <span class="field-wrap__line"></span>
+            </div>
+            
+            <div class="field-wrap full-width">
+              <input type="text" class="field-wrap__input ts-input" id="passportNumber" placeholder=" " readonly />
+              <label class="field-wrap__label" for="passportNumber">Hộ chiếu</label>
+              <span class="field-wrap__line"></span>
+            </div>
+            
+            <div class="field-wrap full-width">
+              <textarea class="field-wrap__input ts-input" id="address" rows="1" placeholder=" " readonly></textarea>
+              <label class="field-wrap__label" for="address">Địa chỉ</label>
+              <span class="field-wrap__line"></span>
+            </div>
+          </div>
+          
+        </div>
+      </section>
+      
+    </div>
+  </main>
+
+  <!-- Loader & PJAX scripts -->
+  <script src="js/page-loader.js"></script>
+
+  <!-- ACCOUNT LOGIC SCRIPT (Preserved exactly as before) -->
   <script>
     let originalData = {};
     let customerId = null;
@@ -466,8 +660,8 @@
 
     function vnd(n) {
       try {
-        return new Intl.NumberFormat('vi-VN', {style:'currency', currency:'VND'}).format(n || 0);
-      } catch(_) {
+        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(n || 0);
+      } catch (_) {
         return (n || 0) + '₫';
       }
     }
@@ -479,25 +673,22 @@
     }
 
     function showPageLoading(message) {
-      // Simple loading indicator
       if (!document.getElementById('pageLoader')) {
         const loader = document.createElement('div');
         loader.id = 'pageLoader';
         loader.style.cssText = `
           position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: rgba(0,0,0,0.5);
+          top: 0; left: 0; right: 0; bottom: 0;
+          background: rgba(244, 240, 230, 0.8);
           display: flex;
           align-items: center;
           justify-content: center;
           z-index: 9999;
-          color: white;
-          font-size: 18px;
+          color: #8a2017;
+          font-family: 'Cormorant Garamond', serif;
+          font-size: 24px;
         `;
-        loader.innerHTML = `<div style="text-align:center;"><div class="spinner-border" role="status"></div><div style="margin-top:15px;">${message || 'Đang tải...'}</div></div>`;
+        loader.innerHTML = `<div style="text-align:center;"><div class="spinner-border" role="status" style="width: 3rem; height: 3rem; border-width: 2px;"></div><div style="margin-top:20px;">${message || 'Đang tải...'}</div></div>`;
         document.body.appendChild(loader);
       }
     }
@@ -511,7 +702,7 @@
       try {
         const token = localStorage.getItem('token');
         const userStr = localStorage.getItem('user');
-        
+
         if (!token || !userStr) {
           if (window.showToast) {
             showToast('Vui lòng đăng nhập', 'warning');
@@ -529,91 +720,66 @@
               const payload = JSON.parse(atob(parts[1]));
               return payload.CustomerId || payload.customerId || null;
             }
-          } catch(e) {
+          } catch (e) {
             console.warn('Error decoding token:', e);
           }
           return null;
         }
-        
+
         let customerIdFromToken = getCustomerIdFromToken(token);
         const user = JSON.parse(userStr);
         customerId = customerIdFromToken || user.customerId || user.userId || user.CustomerId;
-        
-        console.log('🔵 [loadProfile] CustomerId from token:', customerIdFromToken);
-        console.log('🔵 [loadProfile] CustomerId from user:', user.customerId || user.userId || user.CustomerId);
-        console.log('🔵 [loadProfile] Final CustomerId:', customerId);
-        
+
         if (!customerId) {
           const msg = 'Không tìm thấy thông tin khách hàng. Vui lòng đăng nhập lại';
-          if (window.showToast) {
-            showToast(msg, 'error');
-          } else {
-            alert(msg);
-          }
+          if (window.showToast) showToast(msg, 'error'); else alert(msg);
           setTimeout(() => window.location.href = 'login.html', 2000);
           return;
         }
 
         showPageLoading('Đang tải thông tin...');
-        
-        // Ưu tiên dùng endpoint /my để lấy thông tin từ JWT token
-        // Fallback về endpoint /{id} nếu cần
+
         let API_CUSTOMERS = location.origin + '/api/customermanagement/my?_=' + Date.now();
         let resp = await fetch(API_CUSTOMERS, {
           cache: 'no-store',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
+          headers: { 'Authorization': `Bearer ${token}` }
         });
 
-        // Nếu endpoint /my không hoạt động (403 hoặc 404), thử endpoint /{id}
         if (!resp.ok && customerId) {
-          console.log('⚠️ [loadProfile] /my endpoint failed, trying /{id} endpoint');
           API_CUSTOMERS = location.origin + '/api/customermanagement/' + customerId + '?_=' + Date.now();
           resp = await fetch(API_CUSTOMERS, {
             cache: 'no-store',
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
+            headers: { 'Authorization': `Bearer ${token}` }
           });
         }
 
         if (!resp.ok) {
           const errorText = await resp.text();
-          console.error('API Error:', resp.status, errorText);
           let errorMsg = 'Không thể tải thông tin';
           try {
             const errorData = JSON.parse(errorText);
             errorMsg = errorData.message || errorMsg;
-          } catch(e) {
-            // Keep default errorMsg
-          }
+          } catch (e) { }
           throw new Error(errorMsg);
         }
 
         const customer = await resp.json();
-        originalData = {...customer};
-        // Cập nhật customerId từ response nếu có
+        originalData = { ...customer };
         if (customer.customerId && !customerId) {
           customerId = customer.customerId;
         }
         renderProfile(customer);
-        
-      } catch(e) {
+
+      } catch (e) {
         console.error('Error loading profile:', e);
         const msg = 'Lỗi tải thông tin: ' + e.message;
-        if (window.showToast) {
-          showToast(msg, 'error');
-        } else {
-          alert(msg);
-        }
+        if (window.showToast) showToast(msg, 'error'); else alert(msg);
       } finally {
         hidePageLoading();
       }
     }
 
     function renderProfile(customer) {
-      // Normalize field names từ API response (có thể là CustomerId hoặc customerId)
       const normalized = {
         fullName: customer.fullName || customer.FullName || '',
         email: customer.email || customer.Email || '',
@@ -629,10 +795,10 @@
         customerId: customer.customerId || customer.CustomerId,
         avatarUrl: customer.avatarUrl || customer.AvatarUrl || null
       };
-      
+
       document.getElementById('profileName').textContent = normalized.fullName || normalized.email || 'Khách hàng';
       document.getElementById('profileEmail').textContent = normalized.email || '';
-      
+
       document.getElementById('fullName').value = normalized.fullName;
       document.getElementById('email').value = normalized.email;
       document.getElementById('phoneNumber').value = normalized.phoneNumber;
@@ -641,12 +807,11 @@
       document.getElementById('address').value = normalized.address;
       document.getElementById('idCardNumber').value = normalized.idCardNumber;
       document.getElementById('passportNumber').value = normalized.passportNumber;
-      
+
       document.getElementById('totalSpent').textContent = vnd(normalized.totalSpent);
       document.getElementById('loyaltyPoints').textContent = normalized.loyaltyPoints;
       document.getElementById('customerType').textContent = normalized.customerType === 'VIP' ? 'VIP' : 'Thường';
-      
-      // Update avatar display
+
       const avatarImg = document.getElementById('profileAvatarImg');
       const avatarPlaceholder = document.getElementById('profileAvatarPlaceholder');
       if (normalized.avatarUrl) {
@@ -657,17 +822,14 @@
         avatarImg.style.display = 'none';
         avatarPlaceholder.style.display = 'flex';
       }
-      
-      // Đảm bảo email luôn readonly
+
       document.getElementById('email').readOnly = true;
       document.getElementById('email').style.cursor = 'not-allowed';
-      
-      // Cập nhật customerId nếu có
+
       if (normalized.customerId && !customerId) {
         customerId = normalized.customerId;
       }
-      
-      // Load booking count
+
       loadBookingCount();
     }
 
@@ -677,49 +839,33 @@
         const API_BOOKINGS = location.origin + '/api/bookings/customer/' + customerId + '?_=' + Date.now();
         const resp = await fetch(API_BOOKINGS, {
           cache: 'no-store',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
+          headers: { 'Authorization': `Bearer ${token}` }
         });
-        
+
         if (resp.ok) {
           const bookings = await resp.json();
           document.getElementById('totalBookings').textContent = Array.isArray(bookings) ? bookings.length : 0;
         }
-      } catch(e) {
+      } catch (e) {
         console.warn('Could not load booking count:', e);
       }
     }
 
     function toggleEdit() {
       isEditing = !isEditing;
-      const inputs = document.querySelectorAll('.info-value input, .info-value textarea, .info-value select');
+      const inputs = document.querySelectorAll('.ts-input');
       inputs.forEach(input => {
-        // Email luôn readonly, không cho sửa
         if (input.id === 'email') {
           input.readOnly = true;
           input.style.cursor = 'not-allowed';
-          input.style.opacity = '0.7';
         } else {
           input.readOnly = !isEditing;
         }
-        
-        if (isEditing && input.id !== 'email') { // Email không cho sửa
-          input.style.borderBottom = '2px solid #C8A97E';
-          input.style.padding = '8px 12px';
-          input.style.background = 'rgba(200,169,126,0.05)';
-          input.style.borderRadius = '8px';
-        } else if (input.id !== 'email') {
-          input.style.borderBottom = 'none';
-          input.style.padding = '8px 0';
-          input.style.background = 'transparent';
-          input.style.borderRadius = '0';
-        }
       });
-      
-      document.getElementById('btnEdit').style.display = isEditing ? 'none' : 'inline-block';
-      document.getElementById('btnSave').style.display = isEditing ? 'inline-block' : 'none';
-      document.getElementById('btnCancel').style.display = isEditing ? 'inline-block' : 'none';
+
+      document.getElementById('btnEdit').style.display = isEditing ? 'none' : 'inline-flex';
+      document.getElementById('btnSave').style.display = isEditing ? 'inline-flex' : 'none';
+      document.getElementById('btnCancel').style.display = isEditing ? 'inline-flex' : 'none';
     }
 
     function cancelEdit() {
@@ -732,32 +878,22 @@
         const token = localStorage.getItem('token');
         if (!token) {
           const msg = 'Vui lòng đăng nhập lại';
-          if (window.showToast) {
-            showToast(msg, 'warning');
-          } else {
-            alert(msg);
-          }
+          if (window.showToast) showToast(msg, 'warning'); else alert(msg);
           return;
         }
 
-        // Validate form
         const fullName = document.getElementById('fullName').value.trim();
         if (!fullName) {
           const msg = 'Vui lòng nhập họ và tên';
-          if (window.showToast) {
-            showToast(msg, 'error');
-          } else {
-            alert(msg);
-          }
+          if (window.showToast) showToast(msg, 'error'); else alert(msg);
           return;
         }
 
-        // Email không thể thay đổi, lấy từ originalData
         const email = originalData.email || originalData.Email || document.getElementById('email').value.trim();
-        
+
         const updateData = {
           fullName: fullName,
-          email: email, // Email không thay đổi được, lấy từ dữ liệu gốc
+          email: email,
           phoneNumber: document.getElementById('phoneNumber').value.trim(),
           dateOfBirth: document.getElementById('dateOfBirth').value || null,
           nationality: document.getElementById('nationality').value.trim() || 'Vietnam',
@@ -767,11 +903,9 @@
           customerType: originalData.customerType || originalData.CustomerType || 'Regular',
           notes: originalData.notes || originalData.Notes || ''
         };
-        
-        console.log('📤 [saveProfile] Sending update data:', updateData);
 
         showPageLoading('Đang lưu thông tin...');
-        
+
         const API_CUSTOMERS = location.origin + '/api/customermanagement/' + customerId;
         const resp = await fetch(API_CUSTOMERS, {
           method: 'PUT',
@@ -783,109 +917,61 @@
         });
 
         if (!resp.ok) {
-          const errorData = await resp.json().catch(() => ({message: 'Lỗi cập nhật'}));
-          console.error('API Error:', resp.status, errorData);
+          const errorData = await resp.json().catch(() => ({ message: 'Lỗi cập nhật' }));
           throw new Error(errorData.message || 'Lỗi cập nhật');
         }
 
         const response = await resp.json();
-        console.log('✅ [saveProfile] API Response:', response);
-        
-        // API trả về { message: "...", customer: {...} } hoặc trực tiếp customer object
         let updated = response.customer || response;
-        
-        // Đảm bảo customerId được lấy đúng từ response
-        if (updated.customerId && !customerId) {
-          customerId = updated.customerId;
-        } else if (updated.CustomerId && !customerId) {
-          customerId = updated.CustomerId;
-        }
-        
-        // Normalize field names (API có thể trả về CustomerId hoặc customerId)
-        if (updated.CustomerId && !updated.customerId) {
-          updated.customerId = updated.CustomerId;
-        }
-        if (updated.FullName && !updated.fullName) {
-          updated.fullName = updated.FullName;
-        }
-        if (updated.Email && !updated.email) {
-          updated.email = updated.Email;
-        }
-        if (updated.PhoneNumber && !updated.phoneNumber) {
-          updated.phoneNumber = updated.PhoneNumber;
-        }
-        if (updated.DateOfBirth && !updated.dateOfBirth) {
-          updated.dateOfBirth = updated.DateOfBirth;
-        }
-        if (updated.Nationality && !updated.nationality) {
-          updated.nationality = updated.Nationality;
-        }
-        if (updated.Address && !updated.address) {
-          updated.address = updated.Address;
-        }
-        if (updated.IdCardNumber && !updated.idCardNumber) {
-          updated.idCardNumber = updated.IdCardNumber;
-        }
-        if (updated.PassportNumber && !updated.passportNumber) {
-          updated.passportNumber = updated.PassportNumber;
-        }
-        if (updated.CustomerType && !updated.customerType) {
-          updated.customerType = updated.CustomerType;
-        }
-        
-        originalData = {...updated};
-        
+
+        // Normalize
+        if (updated.customerId && !customerId) customerId = updated.customerId;
+        else if (updated.CustomerId && !customerId) customerId = updated.CustomerId;
+
+        updated.customerId = updated.customerId || updated.CustomerId;
+        updated.fullName = updated.fullName || updated.FullName;
+        updated.email = updated.email || updated.Email;
+        updated.phoneNumber = updated.phoneNumber || updated.PhoneNumber;
+        updated.dateOfBirth = updated.dateOfBirth || updated.DateOfBirth;
+        updated.nationality = updated.nationality || updated.Nationality;
+        updated.address = updated.address || updated.Address;
+        updated.idCardNumber = updated.idCardNumber || updated.IdCardNumber;
+        updated.passportNumber = updated.passportNumber || updated.PassportNumber;
+        updated.customerType = updated.customerType || updated.CustomerType;
+
+        originalData = { ...updated };
+
         const successMsg = 'Cập nhật thông tin thành công!';
-        if (window.showToast) {
-          showToast(successMsg, 'success');
-        } else {
-          alert(successMsg);
-        }
-        
-        // Reload profile để đảm bảo dữ liệu mới nhất từ server
+        if (window.showToast) showToast(successMsg, 'success'); else alert(successMsg);
+
         await loadProfile();
         toggleEdit();
-        
-      } catch(e) {
+
+      } catch (e) {
         console.error('Error saving profile:', e);
         const msg = 'Lỗi: ' + e.message;
-        if (window.showToast) {
-          showToast(msg, 'error');
-        } else {
-          alert(msg);
-        }
+        if (window.showToast) showToast(msg, 'error'); else alert(msg);
       } finally {
         hidePageLoading();
       }
     }
 
-    // Handle avatar upload
     async function handleAvatarUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
 
-      // Validate file type
       const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
       if (!allowedTypes.includes(file.type)) {
         const msg = 'Chỉ chấp nhận file ảnh: JPG, PNG, GIF, WEBP';
-        if (window.showToast) {
-          showToast(msg, 'error');
-        } else {
-          alert(msg);
-        }
+        if (window.showToast) showToast(msg, 'error'); else alert(msg);
         event.target.value = '';
         return;
       }
 
-      // Validate file size (max 10MB)
-      const maxSize = 10 * 1024 * 1024; // 10MB
+      const maxSize = 10 * 1024 * 1024;
       if (file.size > maxSize) {
         const msg = 'Kích thước file không được vượt quá 10MB';
-        if (window.showToast) {
-          showToast(msg, 'error');
-        } else {
-          alert(msg);
-        }
+        if (window.showToast) showToast(msg, 'error'); else alert(msg);
         event.target.value = '';
         return;
       }
@@ -894,61 +980,45 @@
         const token = localStorage.getItem('token');
         if (!token) {
           const msg = 'Vui lòng đăng nhập lại';
-          if (window.showToast) {
-            showToast(msg, 'warning');
-          } else {
-            alert(msg);
-          }
+          if (window.showToast) showToast(msg, 'warning'); else alert(msg);
           return;
         }
 
         if (!customerId) {
           const msg = 'Không tìm thấy thông tin khách hàng';
-          if (window.showToast) {
-            showToast(msg, 'error');
-          } else {
-            alert(msg);
-          }
+          if (window.showToast) showToast(msg, 'error'); else alert(msg);
           return;
         }
 
         showPageLoading('Đang tải ảnh đại diện...');
 
-        // Create FormData
         const formData = new FormData();
         formData.append('file', file);
 
-        // Upload avatar
         const API_UPLOAD = location.origin + '/api/customermanagement/' + customerId + '/upload-avatar';
         const resp = await fetch(API_UPLOAD, {
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          },
+          headers: { 'Authorization': `Bearer ${token}` },
           body: formData
         });
 
         if (!resp.ok) {
-          const errorData = await resp.json().catch(() => ({message: 'Lỗi tải ảnh'}));
+          const errorData = await resp.json().catch(() => ({ message: 'Lỗi tải ảnh' }));
           throw new Error(errorData.message || 'Lỗi tải ảnh');
         }
-        
-        const response = await resp.json();
-        console.log('✅ [handleAvatarUpload] Avatar uploaded:', response);
 
-        // Update avatar display
+        const response = await resp.json();
+
         if (response.avatarUrl) {
           const avatarImg = document.getElementById('profileAvatarImg');
           const avatarPlaceholder = document.getElementById('profileAvatarPlaceholder');
           avatarImg.src = response.avatarUrl;
           avatarImg.style.display = 'block';
           avatarPlaceholder.style.display = 'none';
-          
-          // Update originalData
+
           originalData.avatarUrl = response.avatarUrl;
           originalData.AvatarUrl = response.avatarUrl;
-          
-          // Cập nhật localStorage
+
           try {
             let userStr = localStorage.getItem('user');
             if (userStr) {
@@ -956,110 +1026,50 @@
               userObj.avatarUrl = response.avatarUrl;
               userObj.AvatarUrl = response.avatarUrl;
               localStorage.setItem('user', JSON.stringify(userObj));
-              // Cập nhật navbar nếu cần
-              if (typeof updateNavbarAuth === 'function') {
-                updateNavbarAuth();
-              }
+              if (typeof updateNavbarAuth === 'function') updateNavbarAuth();
             }
           } catch (err) { console.error('Error updating localStorage', err); }
         } else {
-          // Avatar removed
           const avatarImg = document.getElementById('profileAvatarImg');
           const avatarPlaceholder = document.getElementById('profileAvatarPlaceholder');
           avatarImg.style.display = 'none';
           avatarPlaceholder.style.display = 'flex';
-          
+
           originalData.avatarUrl = null;
           originalData.AvatarUrl = null;
         }
 
         const successMsg = response.message || 'Cập nhật ảnh đại diện thành công!';
-        if (window.showToast) {
-          showToast(successMsg, 'success');
-        } else {
-          alert(successMsg);
-        }
+        if (window.showToast) showToast(successMsg, 'success'); else alert(successMsg);
 
-      } catch(e) {
+      } catch (e) {
         console.error('Error uploading avatar:', e);
         const msg = 'Lỗi: ' + e.message;
-        if (window.showToast) {
-          showToast(msg, 'error');
-        } else {
-          alert(msg);
-        }
+        if (window.showToast) showToast(msg, 'error'); else alert(msg);
       } finally {
         hidePageLoading();
-        // Reset file input
         event.target.value = '';
       }
     }
 
-    // Load profile on page load
-    document.addEventListener('DOMContentLoaded', function() {
-      loadProfile();
+    // Load profile on initial load or PJAX load
+    document.addEventListener('DOMContentLoaded', loadProfile);
+    document.addEventListener('pjax:complete', function() {
+      if (document.getElementById('profileName')) {
+        loadProfile();
+      }
+    });
+
+    // Global initial load for sidebar (only runs on direct page access)
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (document.getElementById('site-header') && !document.querySelector('#site-header .ts-sidebar')) {
+        try {
+          const res = await fetch(`components/header.html?_=${Date.now()}`);
+          if (res.ok) document.getElementById('site-header').innerHTML = await res.text();
+        } catch (e) { console.error('Error loading header', e); }
+      }
     });
   </script>
-
-  <!-- Footer -->
-      <footer class="ftco-footer ftco-bg-dark ftco-section">
-      <div class="container">
-        <div class="row mb-5">
-          <div class="col-md">
-            <div class="ftco-footer-widget mb-4">
-              <h2 class="ftco-heading-2">RESORT DELUXE</h2>
-              <p>Khu nghỉ dưỡng cao cấp với không gian sang trọng, dịch vụ chu đáo và tiện nghi hiện đại, mang đến cho bạn kỳ nghỉ trọn vẹn.</p>
-              <ul class="ftco-footer-social list-unstyled float-md-left float-lft mt-5">
-                <li class="ftco-animate"><a href="#" style="display: block !important; visibility: visible !important; opacity: 1 !important;"><span class="icon-twitter"></span></a></li>
-                <li class="ftco-animate"><a href="#" style="display: block !important; visibility: visible !important; opacity: 1 !important;"><span class="icon-facebook"></span></a></li>
-                <li class="ftco-animate"><a href="#" style="display: block !important; visibility: visible !important; opacity: 1 !important;"><span class="icon-instagram"></span></a></li>
-              </ul>
-            </div>
-          </div>
-          <div class="col-md">
-            <div class="ftco-footer-widget mb-4 ml-md-5">
-              <h2 class="ftco-heading-2">Liên kết hữu ích</h2>
-              <ul class="list-unstyled">
-                <li><a href="#" class="py-2 d-block">Blog</a></li>
-                <li><a href="#" class="py-2 d-block">Phòng</a></li>
-                <li><a href="#" class="py-2 d-block">Tiện ích</a></li>
-                <li><a href="#" class="py-2 d-block">Thẻ quà tặng</a></li>
-              </ul>
-            </div>
-          </div>
-          <div class="col-md">
-             <div class="ftco-footer-widget mb-4">
-              <h2 class="ftco-heading-2">Chính sách</h2>
-              <ul class="list-unstyled">
-                <li><a href="#" class="py-2 d-block">Tuyển dụng</a></li>
-                <li><a href="#" class="py-2 d-block">Về chúng tôi</a></li>
-                <li><a href="#" class="py-2 d-block">Liên hệ</a></li>
-                <li><a href="#" class="py-2 d-block">Dịch vụ</a></li>
-              </ul>
-            </div>
-          </div>
-          <div class="col-md">
-            <div class="ftco-footer-widget mb-4">
-                <h2 class="ftco-heading-2">Bạn cần hỗ trợ?</h2>
-            	<div class="block-23 mb-3">
-	              <ul>
-                <li><span class="icon icon-map-marker"></span><span class="text">Huflit Hốc Môn, Hồ Chí Minh</span></li>
-                <li><a href="#"><span class="icon icon-phone"></span><span class="text">+84 901 329 227</span></a></li>
-                <li><a href="#"><span class="icon icon-envelope"></span><span class="text">support@resortdeluxe.vn</span></a></li>
-	              </ul>
-	            </div>
-            </div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-md-12 text-center">
-            <p>Copyright ©<script>document.write(new Date().getFullYear());</script>2025 All rights reserved</p>
-          </div>
-        </div>
-      </div>
-    </footer>
-  
-  <!-- AI Chat Widget -->
-  <script src="js/ai-chat.js"></script>
 </body>
+
 </html>

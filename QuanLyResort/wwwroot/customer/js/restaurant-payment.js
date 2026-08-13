@@ -612,11 +612,53 @@ function showRestaurantPaymentThankYou(order) {
     return;
   }
   
+  const tasteModalRight = modal.querySelector('.payment-modal-right');
   const modalBody = modal.querySelector('.modal-body');
   const modalFooter = modal.querySelector('.modal-footer');
   const modalHeader = modal.querySelector('.modal-header');
   
-  if (modalBody && modalFooter && modalHeader) {
+  const orderNumber = order?.orderNumber || `ORD${order?.orderId || ''}`;
+  const amount = order?.totalAmount || 0;
+
+  if (tasteModalRight) {
+    // Taste Skill styling
+    tasteModalRight.innerHTML = `
+      <div style="text-align: center; padding: 20px 0;">
+        <div style="font-size: 80px; margin-bottom: 24px;">🎉</div>
+        <h3 style="color: #d4af37; margin-bottom: 16px; font-weight: 700; font-family: 'Playfair Display', serif; font-size: 32px">Thanh toán thành công!</h3>
+        <p style="color: rgba(255,255,255,0.7); margin-bottom: 24px; font-size: 16px; line-height: 1.6;">
+          Cảm ơn bạn. Giao dịch đã được xác nhận thành công.
+        </p>
+        <div style="background: rgba(50,205,50,0.05); padding: 20px; border-radius: 12px; border: 1px solid rgba(50,205,50,0.2); margin-bottom: 24px; text-align: left">
+          <div class="d-flex justify-content-between mb-2">
+            <span style="color: rgba(255,255,255,0.5);">Mã đơn hàng:</span>
+            <strong style="color: #fff;">${orderNumber}</strong>
+          </div>
+          <div class="d-flex justify-content-between mb-2">
+            <span style="color: rgba(255,255,255,0.5);">Số tiền:</span>
+            <strong style="color: #d4af37;">${formatCurrency(amount)}</strong>
+          </div>
+          <div class="d-flex justify-content-between mb-2">
+            <span style="color: rgba(255,255,255,0.5);">Phương thức:</span>
+            <strong style="color: #fff;">QR Code</strong>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span style="color: rgba(255,255,255,0.5);">Trạng thái:</span>
+            <strong style="color: #32cd32;">Đã thanh toán</strong>
+          </div>
+        </div>
+        <div style="background: rgba(212,175,55,0.05); padding: 16px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.2); margin-bottom: 30px">
+          <p style="margin: 0; color: #d4af37; font-size: 14px; line-height: 1.6;">
+            <strong>💡 Lưu ý:</strong> Đơn hàng của bạn sẽ được chuẩn bị và phục vụ.
+          </p>
+        </div>
+        <button type="button" class="taste-btn w-100 justify-content-center" data-bs-dismiss="modal" onclick="closeRestaurantPaymentModal()" style="font-weight: 600;">
+          <i class="fas fa-check"></i> Đóng
+        </button>
+      </div>
+    `;
+  } else if (modalBody && modalFooter && modalHeader) {
+    // Legacy styling
     // Update header
     const headerTitle = modalHeader.querySelector('.modal-title');
     const headerCloseBtn = modalHeader.querySelector('.btn-close');
@@ -631,8 +673,6 @@ function showRestaurantPaymentThankYou(order) {
     }
     
     // Update body with thank you message
-    const orderNumber = order?.orderNumber || `ORD${order?.orderId || ''}`;
-    const amount = order?.totalAmount || 0;
     modalBody.innerHTML = `
       <div style="text-align: center; padding: 40px 20px;">
         <div style="font-size: 80px; margin-bottom: 24px;">🎉</div>

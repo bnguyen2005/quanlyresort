@@ -1,0 +1,992 @@
+/* css/page-transition.css */
+
+/* Horizontal Track Setup */
+@media (min-width: 769px) {
+
+    html {
+        overflow-y: scroll !important;
+        -ms-overflow-style: none;  /* IE and Edge */
+        scrollbar-width: none;  /* Firefox */
+    }
+    
+    html::-webkit-scrollbar {
+        display: none; /* Chrome, Safari and Opera */
+    }
+    
+    html.pjax-loading {
+        overflow: hidden !important;
+    }
+
+    body {
+        overflow: hidden !important;
+        /* Block vertical scroll on desktop */
+    }
+
+    #page-content {
+        display: flex;
+        flex-direction: row;
+        height: 100vh;
+        width: calc(100vw - 40px);
+        margin-left: 40px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        /* scroll-snap-type: x mandatory; removed for continuous scroll */
+        scroll-behavior: auto;
+        /* changed from smooth to auto for 1:1 wheel mapping */
+    }
+
+    /* Hide scrollbar for cleaner look */
+    #page-content::-webkit-scrollbar {
+        display: none;
+    }
+
+    #page-content {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    .ts-slide {
+        width: calc(100vw - 40px);
+        flex: 0 0 calc(100vw - 40px);
+        height: 100vh;
+        max-height: 100vh;
+        /* HARD LOCK: never exceed viewport height */
+        flex-shrink: 0;
+        /* scroll-snap-align: start; removed */
+        position: relative;
+        overflow: hidden;
+        /* Block ALL overflow in both directions */
+    }
+
+    /* Hide scrollbar for slides */
+    .ts-slide::-webkit-scrollbar {
+        display: none;
+    }
+
+    .ts-slide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    .next-page-trigger {
+        width: 100vw;
+        height: 100vh;
+        flex-shrink: 0;
+        scroll-snap-align: start;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* === HYBRID VERTICAL SCROLL MODS === */
+    html.layout-vertical {
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    
+    html.layout-vertical::-webkit-scrollbar {
+        display: none;
+    }
+    
+    html.layout-vertical.pjax-loading {
+        overflow: hidden !important;
+    }
+
+    body.layout-vertical {
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+    }
+
+    body.layout-vertical #page-content {
+        display: flex;
+        flex-direction: column;
+        width: calc(100% - var(--ts-sidebar-width, 40px));
+        height: auto;
+        min-height: 100vh;
+        margin-left: var(--ts-sidebar-width, 40px);
+        /* keep sidebar offset */
+        overflow-y: visible;
+        overflow-x: visible;
+    }
+
+    body.layout-vertical .ts-slide {
+        width: 100%;
+        height: auto;
+        min-height: 100vh;
+        flex-shrink: 0;
+        position: relative;
+        overflow-y: visible;
+        overflow-x: hidden;
+    }
+
+    body.layout-vertical .ts-intro-slide .ts-slide-content {
+        position: absolute !important;
+        left: 0 !important;
+        width: 100% !important;
+    }
+}
+
+/* Fallback for reduced motion and mobile */
+@media (max-width: 768px) {
+
+    html,
+    body {
+        overflow: auto !important;
+        overflow-x: hidden !important;
+    }
+
+    #page-content {
+        display: block;
+        height: auto;
+        width: 100%;
+        overflow: visible;
+        scroll-snap-type: none;
+    }
+
+    .ts-slide {
+        width: calc(100vw - 40px);
+        height: auto;
+        min-height: 100vh;
+        scroll-snap-align: none;
+        overflow-y: visible;
+    }
+
+    .next-page-trigger {
+        width: 100%;
+        height: 100vh;
+        scroll-snap-align: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+/* Timeline Line Removed */
+.ts-global-progress {
+    position: fixed;
+    bottom: 0;
+    left: 40px;
+    /* Offset for sidebar */
+    width: calc(100vw - 40px);
+    height: 3px;
+    background-color: rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.ts-global-progress-bar {
+    height: 100%;
+    width: 0%;
+    background-color: var(--ts-gold, #c8a97e);
+    will-change: width;
+}
+
+.ts-timeline-diamond {
+    position: relative;
+    width: 8px;
+    height: 8px;
+    border: 1px solid var(--ts-dark, #111);
+    background-color: var(--ts-light, #f5f0e6);
+    transform: rotate(45deg);
+    z-index: 1;
+}
+
+/* 1. Split Screen */
+.ts-split-slide {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: center;
+    background-color: var(--ts-light, #f5f0e6);
+    color: var(--ts-dark, #111);
+}
+
+.ts-split-content {
+    flex: 1;
+    position: relative;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5vh;
+    box-sizing: border-box;
+}
+
+.ts-split-logo {
+    position: absolute;
+    top: -40px; /* Partially cut off at the top like the reference */
+    right: 0;
+    transform: translateX(50%); /* Center perfectly on the split line */
+    width: 220px; /* Larger size to act as a watermark graphic */
+    height: 220px;
+    border-radius: 0;
+    background-color: transparent; /* Transparent overlay */
+    padding: 0;
+    object-fit: contain;
+    z-index: 10;
+    box-shadow: none;
+    margin-bottom: 0;
+    box-sizing: border-box;
+    filter: opacity(0.15); /* Make it a subtle dark watermark */
+    pointer-events: none;
+}
+
+.ts-split-title-wrap {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.ts-split-title-wrap span {
+    font-size: 20px;
+    color: #999;
+    margin-bottom: -15px;
+    /* Pull the giant text closer */
+    z-index: 1;
+}
+
+.ts-split-title-wrap h2 {
+    font-size: 11vw;
+    /* Huge text */
+    margin: 0;
+    color: var(--ts-dark, #111);
+    line-height: 1;
+    letter-spacing: -2px;
+}
+
+.ts-split-content p {
+    font-size: 12px;
+    line-height: 2;
+    color: var(--ts-muted, #555);
+    font-weight: 500;
+    width: 50%;
+    text-align: center;
+    margin: 0;
+}
+
+.ts-split-image-container {
+    flex: 1;
+    padding: 5vh 6% 5vh 4%;
+    /* Adjusted top/bottom white space to 5vh */
+    box-sizing: border-box;
+}
+
+.ts-split-image-full {
+    padding: 0 !important;
+}
+
+.ts-split-text-left {
+    align-items: flex-start !important;
+    text-align: left !important;
+    padding: 8vh 8% !important;
+    justify-content: flex-start;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.ts-split-text-left h2 {
+    font-size: clamp(20px, 2.8vw, 48px) !important;
+    /* Responsive, won't overflow */
+    line-height: 1.3 !important;
+    letter-spacing: 0 !important;
+    margin-bottom: 30px !important;
+    position: static !important;
+    flex-shrink: 0;
+}
+
+.ts-text-divider {
+    width: 80%;
+    height: 1px;
+    background-color: var(--ts-dark);
+    opacity: 0.2;
+    margin-bottom: 40px;
+}
+
+.ts-split-text-left p {
+    position: static !important;
+    width: 85% !important;
+    padding: 0 !important;
+    text-align: left !important;
+    margin: 0 0 20px 0 !important;
+}
+
+/* Slide 3.10 Modifiers */
+.ts-video-slide {
+    background-color: var(--ts-dark, #111);
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    /* Critical: clip the video so it doesn't bleed into next slide */
+}
+
+.ts-video-container {
+    width: 100%;
+    height: 100vh;
+    position: relative;
+    overflow: hidden;
+}
+
+.ts-video-container video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    outline: none;
+    border: none;
+}
+
+.ts-video-blur.ts-reveal-text {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    background-color: rgba(0, 0, 0, 0.4);
+    opacity: 1 !important;
+    /* Override reveal-text default */
+    transform: none !important;
+    /* Override reveal-text default */
+    transition: backdrop-filter 2.5s ease-out, background-color 2.5s ease-out, opacity 2.5s ease-out;
+    pointer-events: none;
+}
+
+.ts-video-blur.ts-reveal-text.is-visible {
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+    background-color: transparent;
+    opacity: 0 !important;
+}
+
+.ts-video-overlay-text {
+    position: absolute;
+    bottom: 10%;
+    left: 5%;
+    color: white;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+    pointer-events: none;
+    /* Let user click controls through text */
+    z-index: 10;
+}
+
+.ts-video-overlay-text h2 {
+    font-size: 3vw !important;
+    margin-bottom: 10px !important;
+    color: white !important;
+}
+
+.ts-video-overlay-text p {
+    font-size: 1.2vw !important;
+    opacity: 0.9;
+    color: white !important;
+}
+
+/* Slide 3.9 Modifiers */
+.ts-three-column-slide {
+    background-color: var(--ts-light, #f5f0e6);
+    padding: 0;
+}
+
+.ts-three-col-content {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    padding: 0 4%;
+    align-items: stretch;
+    gap: 4%;
+    box-sizing: border-box;
+}
+
+.ts-col-3-left {
+    flex: 0 0 42%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 6vh;
+}
+
+.ts-col-3-left .ts-img-container {
+    width: 90%;
+    height: 45vh;
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+}
+
+.ts-col-3-left .ts-large-paragraph {
+    width: 95% !important;
+    font-size: clamp(14px, min(2vw, 3.5vh), 28px) !important;
+    line-height: 1.3 !important;
+    margin-bottom: 2% !important;
+}
+
+.ts-col-3-mid {
+    flex: 0 0 20%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 12vh;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.ts-col-3-mid .ts-thumbnail-container {
+    width: 120px;
+    height: 120px;
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+}
+
+.ts-col-3-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8vh;
+    padding: 0 2% 0 0;
+    box-sizing: border-box;
+}
+
+.ts-col-3-right .ts-medium-paragraph {
+    font-size: clamp(14px, min(2.1vw, 3.5vh), 26px) !important;
+    line-height: 1.3 !important;
+    color: var(--ts-dark, #111) !important;
+    width: 100% !important;
+    margin: 0 !important;
+}
+
+.ts-col-3-right .ts-small-paragraph {
+    width: 100% !important;
+    position: static !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    text-align: left !important;
+}
+
+.ts-large-paragraph {
+    font-size: clamp(14px, min(2vw, 3.5vh), 28px) !important;
+    line-height: 1.4 !important;
+    color: var(--ts-dark, #111) !important;
+    font-weight: normal !important;
+    width: 90% !important;
+    margin-bottom: min(30px, 4vh) !important;
+}
+
+.ts-small-paragraph {
+    font-size: clamp(11px, min(1.2vw, 1.8vh), 14px) !important;
+    line-height: 1.6 !important;
+    color: var(--ts-muted, #555) !important;
+    width: 60% !important;
+}
+
+/* Slide 3.8 Modifiers */
+.ts-double-image-container {
+    flex: 0 0 45%;
+    padding: 5%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    height: 100vh;
+    box-sizing: border-box;
+}
+
+.ts-double-image-container .ts-img-top,
+.ts-double-image-container .ts-img-bottom {
+    flex: 1;
+    background-size: cover;
+    background-position: center;
+    border-radius: 2px;
+}
+
+.ts-two-column-text {
+    flex: 1;
+    display: flex;
+    flex-direction: row !important;
+    align-items: stretch !important;
+    padding: min(6%, 5vh) min(4%, 4vh) min(4%, 4vh) min(4%, 4vh) !important;
+    gap: min(40px, 4vw);
+    box-sizing: border-box;
+}
+
+.ts-two-column-text p {
+    position: static !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.ts-col-left {
+    flex: 0 0 45%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.ts-col-left .ts-large-paragraph {
+    width: 100% !important;
+    font-size: clamp(16px, min(2.2vw, 4vh), 32px) !important;
+    line-height: 1.3 !important;
+}
+
+.ts-tiny-paragraph {
+    font-size: clamp(10px, min(1vw, 1.5vh), 12px) !important;
+    color: var(--ts-muted, #555);
+    font-weight: 500;
+}
+
+.ts-col-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.ts-col-right .ts-small-paragraph {
+    width: 100% !important;
+    position: static !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    text-align: left !important;
+}
+
+.ts-red-content {
+    background-color: #a23330 !important;
+    /* Deep earthy red */
+    color: #ffffff !important;
+    justify-content: flex-start !important;
+    padding-top: 25% !important;
+    padding-bottom: 10% !important;
+    position: relative;
+    z-index: 5;
+}
+
+.ts-red-content h2 {
+    color: #ffffff !important;
+    margin-bottom: auto !important;
+    /* Pushes the line and small text to the bottom */
+}
+
+.ts-red-content p {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-size: 14px !important;
+    font-weight: 300 !important;
+    width: 90% !important;
+}
+
+.ts-text-divider-white {
+    width: 80%;
+    height: 1px;
+    background-color: #ffffff;
+    opacity: 0.4;
+    margin-bottom: 30px;
+}
+
+
+.ts-red-logo {
+    position: absolute;
+    top: -40px; /* Partially cut off at the top like the reference */
+    left: 0;
+    transform: translateX(-50%); /* Center perfectly on the split line */
+    width: 220px; /* Larger size to act as a watermark graphic */
+    height: 220px;
+    border-radius: 0;
+    background-color: transparent; /* Transparent overlay */
+    padding: 0;
+    object-fit: contain;
+    z-index: 10;
+    box-shadow: none;
+    margin-bottom: 0;
+    box-sizing: border-box;
+    filter: invert(1) opacity(0.5); /* Make it white and semi-transparent */
+    pointer-events: none;
+}
+
+.ts-sticky-left {
+    position: sticky !important;
+    left: 0;
+    z-index: 1;
+}
+
+.ts-split-image {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    z-index: 1;
+    /* Above timeline if we want */
+}
+
+/* 2. Timeline Gallery Slide */
+.ts-gallery-slide {
+    position: relative;
+    background-color: var(--ts-light, #f5f0e6);
+    padding: 0;
+    width: 100vw !important;
+    /* Normal width */
+    min-width: 100vw !important;
+}
+
+.ts-gallery-item {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 320px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+}
+
+.ts-gallery-img {
+    width: 100%;
+    height: 35vh;
+    /* 35% of viewport height */
+    background-size: cover;
+    background-position: center;
+    position: absolute;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    z-index: 1;
+}
+
+.ts-img-top {
+    position: relative;
+    width: 100%;
+    height: 35vh;
+}
+
+.ts-img-bottom {
+    position: relative;
+    width: 100%;
+    height: 35vh;
+}
+
+.ts-gallery-text {
+    position: relative;
+    width: 100%;
+    text-align: center;
+}
+
+.ts-gallery-text p {
+    font-size: 13px;
+    line-height: 2;
+    color: var(--ts-muted, #555);
+    font-weight: 400;
+    margin: 0;
+}
+
+.ts-text-top {
+    /* No absolute positioning needed */
+}
+
+.ts-text-bottom {
+    /* No absolute positioning needed */
+}
+
+/* 3. Collage Layout */
+.ts-collage-slide {
+    background-color: var(--ts-light, #f5f0e6);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 10%;
+    position: relative;
+}
+
+.ts-collage-images {
+    position: relative;
+    width: 50%;
+    height: 100vh;
+}
+
+.ts-collage-img1 {
+    position: absolute;
+    bottom: 50%;
+    left: 0;
+    width: 60%;
+    height: 40vh;
+    margin-bottom: 20px;
+    background-size: cover;
+    background-position: center;
+    z-index: 1;
+    box-shadow: -10px 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.ts-collage-img2 {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    width: 55%;
+    height: 35vh;
+    margin-top: 20px;
+    background-size: cover;
+    background-position: center;
+    z-index: 2;
+    box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.ts-collage-content {
+    width: 40%;
+    position: relative;
+    height: 100vh;
+}
+
+.ts-collage-content h2 {
+    font-size: 42px;
+    color: var(--ts-dark, #111);
+    margin: 0;
+    line-height: 1.3;
+    position: absolute;
+    bottom: 50%;
+    padding-bottom: 40px;
+}
+
+.ts-collage-content p {
+    font-size: 16px;
+    color: var(--ts-muted, #555);
+    line-height: 1.8;
+    position: absolute;
+    top: 50%;
+    padding-top: 40px;
+}
+
+/* Loading Edge */
+#pjax-loading-edge {
+    width: 200px;
+    height: 100vh;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    scroll-snap-align: center;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+#pjax-loading-edge.show {
+    opacity: 1;
+}
+
+/* Zoom Transition Anchor */
+.zoom-transition-slide {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #9f8c76;
+    /* Matches left sidebar color */
+    overflow: hidden;
+    /* Hide overflow when zooming */
+    position: relative;
+}
+
+.zoom-image-container {
+    width: 30vh;
+    height: 45vh;
+    position: relative;
+    overflow: hidden;
+    transform-origin: center center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.zoom-image {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    transition: opacity 0.5s;
+    filter: brightness(0.7) grayscale(1);
+}
+
+.zoom-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 2;
+    pointer-events: none;
+    opacity: 0;
+    /* Hidden initially */
+}
+
+/* Deleted duplicated text styles */
+.zoom-outer-text {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 13px;
+    letter-spacing: 4px;
+    color: rgba(255, 255, 255, 0.85);
+    /* White on dark bg */
+    text-transform: uppercase;
+    font-weight: 500;
+    z-index: 1;
+}
+
+.zoom-top-text {
+    top: 8%;
+    font-size: 11px;
+    letter-spacing: 6px;
+    opacity: 0.5;
+}
+
+/* Big decorative 'SCROLL TO CONTINUE' text below the image */
+.zoom-big-bottom-text {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 13px;
+    letter-spacing: 4px;
+    color: rgba(255, 255, 255, 0.85);
+    text-transform: uppercase;
+    font-weight: 500;
+    z-index: 1;
+    bottom: 8%;
+    white-space: nowrap;
+    font-family: 'Inter', sans-serif;
+}
+
+.zoom-text-eyebrow {
+    font-size: 14px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--ts-gold, #c8a97e);
+    display: block;
+    margin-bottom: 10px;
+}
+
+.zoom-text-title {
+    font-size: 56px;
+    color: #fff;
+    margin: 0;
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.zoom-hint {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+/* Next Page Trigger Look */
+.next-page-trigger {
+    background-color: var(--ts-dark, #111);
+    text-decoration: none;
+    text-align: center;
+    border-left: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background 0.4s;
+    cursor: pointer;
+}
+
+.next-page-trigger:hover {
+    background-color: #1a1a1a;
+}
+
+.next-page-trigger-content {
+    opacity: 0.6;
+    transition: all 0.4s ease;
+    transform: translateY(20px);
+}
+
+.next-page-trigger:hover .next-page-trigger-content {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.next-page-trigger-eyebrow {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--ts-gold, #c8a97e);
+    display: block;
+    margin-bottom: 10px;
+}
+
+.next-page-trigger-title {
+    font-size: 42px;
+    color: #fff;
+    margin: 0 0 20px 0;
+}
+
+/* Booking Panel Styling */
+.booking-panel {
+    position: fixed;
+    top: -500px;
+    right: 40px;
+    width: 320px;
+    background: rgba(17, 17, 17, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(200, 169, 126, 0.3);
+    padding: 30px;
+    z-index: 999;
+    transition: top 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.booking-panel.open {
+    top: 90px;
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.booking-panel label {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.booking-panel input,
+.booking-panel select {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    padding: 8px 0;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+}
+
+.booking-panel input:focus,
+.booking-panel select:focus {
+    border-bottom-color: var(--ts-gold, #c8a97e);
+}
+
+.booking-panel .check-rates {
+    margin-top: 15px;
+    background: var(--ts-gold, #c8a97e);
+    color: #111;
+    border: none;
+    padding: 12px;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.booking-panel .check-rates:hover {
+    background: #fff;
+}

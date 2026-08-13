@@ -1,1274 +1,333 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Work+Sans:wght@300;400;500;600&display=swap');
+
 /**
- * Admin Custom Theme - Màu sắc Resort
- * Dựa trên màu chủ đạo #C8A97E (vàng/cam resort)
+ * Tandjung Sari Luxury Admin Theme
  */
 
 :root {
-  /* Resort Color Palette - Làm sáng hơn */
-  --resort-primary: #D4B892;
-  --resort-primary-dark: #C8A97E;
-  --resort-primary-light: #E8D5B7;
-  --resort-secondary: #FEFCF9;
-  --resort-accent: #F5F1E8;
-  --resort-success: #10B981;
-  --resort-warning: #F59E0B;
-  --resort-danger: #EF4444;
-  --resort-info: #3B82F6;
+  --ts-gold: #c8a97e;
+  --ts-gold-dark: #b39362;
+  --ts-gold-light: #e0c6a3;
+  --ts-cream: #fdfbf7;
+  --ts-cream-dark: #f0ebe1;
+  --ts-dark: #1c1b19;
+  --ts-black: #111111;
+  --ts-gray: #6b6b6b;
+  --ts-border: rgba(200, 169, 126, 0.2);
+  
+  --font-serif: 'Playfair Display', 'Cormorant Garamond', serif;
+  --font-sans: 'Work Sans', sans-serif;
 }
 
 /* ============================================
-   NAVBAR - Thanh điều hướng trên cùng
+   GLOBAL & TYPOGRAPHY
+   ============================================ */
+body {
+  font-family: var(--font-sans) !important;
+  background-color: var(--ts-cream) !important;
+  color: var(--ts-dark) !important;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6, .card-title, .menu-header-text, .navbar-brand {
+  font-family: var(--font-serif) !important;
+  color: var(--ts-black) !important;
+  font-weight: 500 !important;
+}
+
+/* ============================================
+   NAVBAR (TOP)
    ============================================ */
 .layout-navbar {
-  background: linear-gradient(135deg, var(--resort-primary) 0%, var(--resort-primary-dark) 100%) !important;
-  box-shadow: 0 2px 10px rgba(200, 169, 126, 0.3) !important;
-  border-bottom: 2px solid var(--resort-primary-dark) !important;
+  background-color: #ffffff !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03) !important;
+  border-bottom: 1px solid var(--ts-border) !important;
+  padding: 0 2rem !important;
 }
 
-.layout-navbar .navbar-nav .nav-link {
-  color: rgba(255, 255, 255, 0.9) !important;
+.layout-navbar .nav-link, .layout-navbar .navbar-nav .nav-link {
+  color: var(--ts-dark) !important;
+  transition: color 0.3s ease;
 }
 
-.layout-navbar .navbar-nav .nav-link:hover {
-  color: #ffffff !important;
-  background: rgba(255, 255, 255, 0.1) !important;
-  border-radius: 6px;
-}
-
-.layout-navbar .navbar-brand,
-.layout-navbar h4,
-.layout-navbar h5 {
-  color: #ffffff !important;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-}
-
-/* User dropdown avatar border */
-.navbar-nav .avatar {
-  border: 2px solid rgba(255, 255, 255, 0.3) !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
-  overflow: hidden !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
-
-/* Fix avatar image overflow */
-.navbar-nav .avatar img,
-.avatar img {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover !important;
-  object-position: center !important;
-  display: block !important;
-  border-radius: 50% !important;
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-/* Ensure avatar container is properly sized */
-.avatar {
-  overflow: hidden !important;
-  border-radius: 50% !important;
-  flex-shrink: 0 !important;
-}
-
-/* Fix for w-px-40 class */
-.w-px-40 {
-  width: 40px !important;
-  max-width: 40px !important;
-  min-width: 40px !important;
+.layout-navbar .nav-link:hover {
+  color: var(--ts-gold) !important;
 }
 
 /* ============================================
-   SIDEBAR MENU - Menu bên trái
+   SIDEBAR (MENU)
    ============================================ */
 .layout-menu {
-  background: linear-gradient(180deg, #ffffff 0%, var(--resort-secondary) 100%) !important;
-  border-right: 2px solid var(--resort-accent) !important;
-  overflow-y: visible !important;
-  overflow-x: hidden !important;
-  height: auto !important;
-  min-height: 100vh !important;
-  box-shadow: 2px 0 15px rgba(200, 169, 126, 0.1) !important;
+  background-color: #ffffff !important;
+  border-right: 1px solid var(--ts-border) !important;
+  box-shadow: none !important;
 }
 
-.menu-inner .menu-item .menu-link {
-  color: #374151 !important;
-  border-radius: 12px;
-  margin: 4px 12px;
-  padding: 0.75rem 1rem !important;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  font-weight: 500;
-  position: relative;
-  overflow: hidden;
-}
-
-.menu-inner .menu-item .menu-link:hover {
-  background: linear-gradient(90deg, var(--resort-accent) 0%, var(--resort-secondary) 100%) !important;
-  color: var(--resort-primary-dark) !important;
-  transform: translateX(5px);
-  box-shadow: 0 2px 8px rgba(200, 169, 126, 0.2);
-}
-
-.menu-inner .menu-item.active > .menu-link {
-  background: linear-gradient(90deg, var(--resort-primary) 0%, var(--resort-primary-light) 100%) !important;
-  color: #ffffff !important;
-  font-weight: 600;
-  box-shadow: 0 4px 12px rgba(200, 169, 126, 0.3);
-}
-
-.menu-inner .menu-item .menu-link i {
-  color: var(--resort-primary) !important;
-  transition: all 0.3s ease;
-}
-
-.menu-inner .menu-item.active > .menu-link i,
-.menu-inner .menu-item .menu-link:hover i {
-  color: #ffffff !important;
-  transform: scale(1.1);
-}
-
-.menu-header {
-  color: var(--resort-primary-dark) !important;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  font-size: 11px;
-  margin-top: 20px;
-  margin-bottom: 10px;
-}
-
-/* Menu kéo dài ra thay vì cuộn */
-.menu-inner {
-  overflow-y: visible !important;
-  overflow-x: hidden !important;
-  max-height: none !important;
-  height: auto !important;
-}
-
-/* Tắt PerfectScrollbar cho menu */
-#layout-menu .ps,
-#layout-menu .ps__rail-y,
-#layout-menu .ps__thumb-y {
-  display: none !important;
-}
-
-/* Đảm bảo menu container không bị giới hạn chiều cao */
-.layout-menu-fixed .layout-menu {
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: auto !important;
-  min-height: 100vh !important;
-  overflow-y: visible !important;
-  overflow-x: hidden !important;
-}
-
-/* Tắt scrollbar cho menu wrapper */
-.layout-menu .menu-inner-wrapper {
-  overflow: visible !important;
-  height: auto !important;
-  max-height: none !important;
-}
-
-/* App brand logo */
 .app-brand {
-  background: linear-gradient(135deg, var(--resort-primary) 0%, var(--resort-primary-dark) 100%);
-  padding: 1rem;
-  border-radius: 0 0 12px 12px;
-  margin-bottom: 1rem;
-  box-shadow: 0 4px 12px rgba(200, 169, 126, 0.2);
-}
-
-.app-brand-link {
-  color: #ffffff !important;
-  font-weight: 700;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-}
-
-/* ============================================
-   BUTTONS - Nút bấm
-   ============================================ */
-.btn-primary {
-  background: linear-gradient(135deg, var(--resort-primary) 0%, var(--resort-primary-dark) 100%) !important;
-  border: none !important;
-  box-shadow: 0 4px 12px rgba(200, 169, 126, 0.3) !important;
-  transition: all 0.3s ease;
-}
-
-.btn-primary:hover {
-  background: linear-gradient(135deg, var(--resort-primary-dark) 0%, #A6895A 100%) !important;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(200, 169, 126, 0.4) !important;
-}
-
-.btn-primary:active {
-  transform: translateY(0);
-}
-
-.btn-success {
-  background: linear-gradient(135deg, var(--resort-success) 0%, #059669 100%) !important;
-  border: none !important;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3) !important;
-}
-
-.btn-success:hover {
-  background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
-  transform: translateY(-2px);
-}
-
-.btn-warning {
-  background: linear-gradient(135deg, var(--resort-warning) 0%, #D97706 100%) !important;
-  border: none !important;
-  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3) !important;
-}
-
-.btn-danger {
-  background: linear-gradient(135deg, var(--resort-danger) 0%, #DC2626 100%) !important;
-  border: none !important;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3) !important;
-}
-
-.btn-info {
-  background: linear-gradient(135deg, var(--resort-info) 0%, #2563EB 100%) !important;
-  border: none !important;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
-}
-
-.btn-outline-primary {
-  border: 2px solid var(--resort-primary) !important;
-  color: var(--resort-primary-dark) !important;
+  padding: 2rem 1.5rem !important;
   background: transparent !important;
+  border-bottom: 1px solid var(--ts-border);
+  margin-bottom: 1rem;
 }
 
-.btn-outline-primary:hover {
-  background: var(--resort-primary) !important;
-  color: #ffffff !important;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(200, 169, 126, 0.3);
+.app-brand-text {
+  font-family: var(--font-serif) !important;
+  font-size: 1.5rem !important;
+  font-weight: 600 !important;
+  color: var(--ts-black) !important;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.menu-inner {
+  padding-top: 1rem;
+}
+
+.menu-item .menu-link {
+  color: var(--ts-gray) !important;
+  font-family: var(--font-sans) !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.5px;
+  border-radius: 0 !important;
+  margin: 0 !important;
+  padding: 1rem 1.5rem !important;
+  transition: all 0.4s ease !important;
+  border-left: 3px solid transparent;
+}
+
+.menu-item.active > .menu-link {
+  background-color: var(--ts-cream) !important;
+  color: var(--ts-black) !important;
+  border-left: 3px solid var(--ts-gold) !important;
+  font-weight: 500 !important;
+  box-shadow: none !important;
+}
+
+.menu-item .menu-link:hover {
+  background-color: var(--ts-cream-dark) !important;
+  color: var(--ts-black) !important;
+}
+
+.menu-item .menu-icon {
+  color: var(--ts-gold) !important;
+  opacity: 0.8;
+}
+
+.menu-header-text {
+  text-transform: uppercase;
+  font-size: 0.75rem !important;
+  letter-spacing: 2px;
+  color: var(--ts-gold-dark) !important;
+  font-family: var(--font-sans) !important;
 }
 
 /* ============================================
-   CARDS - Thẻ thông tin
+   CARDS & CONTAINERS
    ============================================ */
 .card {
-  border: 1px solid var(--resort-accent) !important;
-  border-radius: 12px !important;
-  box-shadow: 0 2px 8px rgba(200, 169, 126, 0.1) !important;
-  transition: all 0.3s ease;
-  overflow: visible !important; /* CRITICAL: Allow dropdown to escape */
+  background-color: #ffffff !important;
+  border: 1px solid var(--ts-border) !important;
+  border-radius: 0 !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.02) !important;
+  margin-bottom: 2rem;
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
 }
 
 .card:hover {
-  box-shadow: 0 8px 24px rgba(200, 169, 126, 0.2) !important;
-  /* REMOVED transform: translateY(-4px) - creates stacking context */
-  /* Use margin-top instead if needed for visual effect */
+  transform: translateY(-5px);
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.05) !important;
 }
 
 .card-header {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(245, 241, 232, 0.95) 100%) !important;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border-bottom: 2px solid var(--resort-accent) !important;
-  padding: 1.25rem 1.5rem !important;
-  font-weight: 600;
+  background-color: transparent !important;
+  border-bottom: 1px solid var(--ts-border) !important;
+  padding: 1.5rem 2rem !important;
 }
 
-.card-header h5 {
-  color: var(--resort-primary-dark) !important;
+.card-title {
+  font-size: 1.5rem;
   margin: 0;
+  letter-spacing: 1px;
 }
 
 .card-body {
-  background: rgba(255, 255, 255, 0.95) !important;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  overflow: visible !important;
-  position: relative;
-}
-
-/* Stats Cards với màu sắc */
-.stats-card {
-  background: linear-gradient(135deg, var(--resort-primary) 0%, var(--resort-primary-dark) 100%);
-  border-radius: 16px;
-  padding: 1.5rem;
-  color: white;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 4px 15px rgba(200, 169, 126, 0.3);
-  transition: transform 0.3s ease;
-  border: none;
-}
-
-.stats-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 24px rgba(200, 169, 126, 0.4);
-}
-
-.stats-card.success {
-  background: linear-gradient(135deg, var(--resort-success) 0%, #059669 100%);
-  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-}
-
-.stats-card.warning {
-  background: linear-gradient(135deg, var(--resort-warning) 0%, #D97706 100%);
-  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
-}
-
-.stats-card.danger {
-  background: linear-gradient(135deg, var(--resort-danger) 0%, #DC2626 100%);
-  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
-}
-
-.stats-card.info {
-  background: linear-gradient(135deg, var(--resort-info) 0%, #2563EB 100%);
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+  padding: 2rem !important;
 }
 
 /* ============================================
-   TABLES - Bảng dữ liệu
+   BUTTONS (LUXURY FLAT)
    ============================================ */
-.table {
-  border-radius: 8px;
-  overflow: visible !important;
-}
-
-/* Chỉ áp dụng overflow: hidden cho thead để giữ border-radius */
-.table thead {
-  overflow: hidden;
-  border-radius: 8px 8px 0 0;
-}
-
-.table thead {
-  background: linear-gradient(135deg, var(--resort-primary) 0%, var(--resort-primary-dark) 100%);
-  color: #ffffff;
-}
-
-.table thead th {
+.btn-primary {
+  background-color: var(--ts-gold) !important;
+  color: #ffffff !important;
   border: none !important;
-  font-weight: 600;
+  border-radius: 0 !important;
+  padding: 0.75rem 2rem !important;
+  font-family: var(--font-sans);
+  letter-spacing: 1px;
   text-transform: uppercase;
-  font-size: 12px;
-  letter-spacing: 0.5px;
-  padding: 1rem;
+  font-size: 0.85rem;
+  transition: all 0.4s ease !important;
+  box-shadow: none !important;
 }
 
-.table tbody tr {
-  transition: all 0.2s ease;
-  border-bottom: 1px solid var(--resort-accent);
+.btn-primary:hover {
+  background-color: var(--ts-black) !important;
+  color: var(--ts-gold) !important;
 }
 
-.table tbody tr:hover {
-  background: var(--resort-secondary) !important;
-  /* REMOVED transform: scale(1.01) - creates stacking context */
-  box-shadow: 0 2px 8px rgba(200, 169, 126, 0.1);
-}
-
-.table tbody td {
-  padding: 1rem;
-  vertical-align: middle;
-}
-
-/* Striped table với màu resort */
-.table-striped > tbody > tr:nth-of-type(odd) > td {
-  background-color: #FAFAFA;
-}
-
-.table-striped > tbody > tr:nth-of-type(even) > td {
-  background-color: var(--resort-secondary);
-}
-
-/* ============================================
-   BADGES - Nhãn
-   ============================================ */
-.badge {
-  padding: 0.5rem 0.75rem;
-  border-radius: 20px;
-  font-weight: 600;
-  font-size: 0.75rem;
-  letter-spacing: 0.5px;
-}
-
-.badge.bg-primary,
-.badge.bg-success,
-.badge.bg-warning,
-.badge.bg-danger,
-.badge.bg-info {
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-}
-
-.badge.bg-success {
-  background: linear-gradient(135deg, var(--resort-success) 0%, #059669 100%) !important;
-}
-
-.badge.bg-warning {
-  background: linear-gradient(135deg, var(--resort-warning) 0%, #D97706 100%) !important;
-}
-
-.badge.bg-danger {
-  background: linear-gradient(135deg, var(--resort-danger) 0%, #DC2626 100%) !important;
-}
-
-.badge.bg-info {
-  background: linear-gradient(135deg, var(--resort-info) 0%, #2563EB 100%) !important;
-}
-
-/* ============================================
-   FORMS - Biểu mẫu
-   ============================================ */
-.form-control:focus,
-.form-select:focus {
-  border-color: var(--resort-primary) !important;
-  box-shadow: 0 0 0 0.25rem rgba(200, 169, 126, 0.25) !important;
-}
-
-.form-label {
-  color: var(--resort-primary-dark);
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-}
-
-.input-group-text {
-  background: var(--resort-secondary);
-  border-color: var(--resort-accent);
-  color: var(--resort-primary-dark);
-  font-weight: 600;
-}
-
-/* ============================================
-   MODALS - Hộp thoại
-   ============================================ */
-.modal-header {
-  background: linear-gradient(135deg, var(--resort-primary) 0%, var(--resort-primary-dark) 100%);
-  color: #ffffff;
-  border-bottom: none;
-  border-radius: 12px 12px 0 0;
-  padding: 1.5rem;
-}
-
-.modal-header .modal-title {
-  color: #ffffff;
-  font-weight: 700;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-}
-
-.modal-header .btn-close {
-  filter: invert(1);
-  opacity: 0.9;
-}
-
-.modal-header .btn-close:hover {
-  opacity: 1;
-}
-
-.modal-content {
-  border: 2px solid var(--resort-accent);
-  border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(200, 169, 126, 0.3);
-}
-
-.modal-footer {
-  border-top: 2px solid var(--resort-accent);
-  background: var(--resort-secondary);
-  border-radius: 0 0 12px 12px;
-}
-
-/* ============================================
-   DROPDOWNS - Menu thả xuống
-   ============================================ */
-.dropdown {
-  position: relative !important;
-}
-
-.dropdown-menu {
-  border: 1px solid var(--resort-accent);
-  border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(200, 169, 126, 0.2);
-  padding: 0.5rem;
-  position: absolute !important;
-  top: 100% !important;
-  right: 0 !important;
-  left: auto !important;
-  z-index: 1000 !important;
-  margin-top: 0.25rem !important;
-  min-width: 180px;
-  display: none;
-}
-
-.dropdown-menu.show {
-  display: block !important;
-}
-
-/* Fix dropdown trong table */
-.table-responsive,
-.table {
-  overflow: visible !important;
-}
-
-.table td {
-  overflow: visible !important;
-  position: relative;
-}
-
-/* Fix dropdown button */
-.dropdown-toggle {
-  position: relative;
-  z-index: 1;
-}
-
-.dropdown-toggle::after {
-  margin-left: 0.5em;
-}
-
-.dropdown-item {
-  border-radius: 6px;
-  margin: 2px 0;
-  padding: 0.5rem 1rem;
-  transition: background-color 0.15s ease, color 0.15s ease;
-  cursor: pointer;
-  display: block;
-  width: 100%;
-  clear: both;
-  font-weight: 400;
-  color: #212529;
-  text-align: inherit;
-  text-decoration: none;
-  white-space: nowrap;
-  background-color: transparent;
-  border: 0;
-}
-
-.dropdown-item:hover,
-.dropdown-item:focus {
-  background: linear-gradient(90deg, var(--resort-accent) 0%, var(--resort-secondary) 100%);
-  color: var(--resort-primary-dark);
-  transform: none;
-}
-
-.dropdown-item.active,
-.dropdown-item:active {
-  background: linear-gradient(90deg, var(--resort-primary) 0%, var(--resort-primary-light) 100%);
-  color: #ffffff;
-}
-
-/* Prevent re-render loop */
-.dropdown-menu:hover {
-  display: block !important;
-}
-
-/* Fix for table cells with dropdown */
-#usersTable td:last-child,
-table td:last-child {
-  position: relative;
-  overflow: visible !important;
-}
-
-#usersTable .dropdown,
-table .dropdown {
-  position: static; /* Keep static for layout, but menu will use fixed positioning */
-}
-
-#usersTable .dropdown-menu,
-table .dropdown-menu {
-  position: absolute !important;
-  right: 0 !important;
-  left: auto !important;
-  z-index: 1050 !important;
-}
-
-/* Fix dropdown trong DataTables */
-.dataTables_wrapper .table-responsive {
-  overflow: visible !important;
-}
-
-.dataTables_wrapper table {
-  overflow: visible !important;
-}
-
-/* CRITICAL: Dropdown menu must escape stacking context */
-.dataTables_wrapper .dropdown-menu {
-  z-index: 99999 !important; /* Very high z-index */
-  position: fixed !important; /* Fixed to escape all stacking contexts */
-  isolation: isolate !important; /* Create new stacking context */
-}
-
-/* Ensure dropdown menu is always on top */
-.dataTables_wrapper .dropdown.show .dropdown-menu,
-.dataTables_wrapper .dropdown-menu.show {
-  z-index: 99999 !important;
-  position: fixed !important;
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-
-/* Fix cho tất cả tables trong admin */
-.card .table-responsive,
-.table-responsive {
-  overflow: visible !important;
-  position: relative;
-}
-
-.card .table,
-.table {
-  overflow: visible !important;
-}
-
-.card .table td,
-.table td {
-  overflow: visible !important;
-  position: relative;
-}
-
-.card .table .dropdown,
-.table .dropdown {
-  position: static;
-}
-
-.card .table .dropdown-menu,
-.table .dropdown-menu {
-  /* Use fixed positioning to escape stacking contexts */
-  position: fixed !important;
-  z-index: 99999 !important; /* Very high z-index */
-  right: auto !important; /* Will be calculated by JS */
-  left: auto !important; /* Will be calculated by JS */
-  top: auto !important; /* Will be calculated by JS */
-  margin-top: 0.25rem !important;
-  display: none;
-  isolation: isolate !important; /* Create new stacking context */
-  will-change: transform, top, right; /* Optimize for position changes */
-}
-
-.card .table .dropdown-menu.show,
-.table .dropdown-menu.show {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  pointer-events: auto !important;
-}
-
-/* CRITICAL: Prevent parent elements from creating stacking context when dropdown is open */
-.card:has(.dropdown-menu.show),
-.table:has(.dropdown-menu.show),
-.table-responsive:has(.dropdown-menu.show),
-.dataTables_wrapper:has(.dropdown-menu.show) {
-  overflow: visible !important;
-  transform: none !important;
-  filter: none !important;
-  opacity: 1 !important;
-  perspective: none !important;
-  isolation: auto !important;
-}
-
-/* Alternative selector for browsers that don't support :has() */
-.card .dropdown.show,
-.table .dropdown.show,
-.table-responsive .dropdown.show {
-  position: static !important;
-  transform: none !important;
-  filter: none !important;
-  opacity: 1 !important;
-  perspective: none !important;
-  isolation: auto !important;
-}
-
-/* Fix cho DataTables - dropdown phải render bên ngoài table */
-.dataTables_wrapper {
-  position: relative;
-  overflow: visible !important;
-}
-
-.dataTables_wrapper .dataTables_scrollBody {
-  overflow: visible !important;
-}
-
-.dataTables_wrapper .dataTables_scroll {
-  overflow: visible !important;
-}
-
-/* Đảm bảo dropdown trong DataTables có z-index cao nhất */
-.dataTables_wrapper .dropdown-menu {
-  z-index: 10000 !important;
-}
-
-/* Khi dropdown mở, tính toán vị trí từ button */
-.dataTables_wrapper .dropdown.show .dropdown-menu,
-.dataTables_wrapper .dropdown-menu.show {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  z-index: 10000 !important;
-}
-
-/* Fix cho DataTables scroll body */
-.dataTables_scrollBody {
-  overflow: visible !important;
-  transform: none !important; /* Prevent stacking context */
-}
-
-.dataTables_scrollHeadInner {
-  overflow: visible !important;
-  transform: none !important; /* Prevent stacking context */
-}
-
-/* Đảm bảo table wrapper không cắt dropdown */
-.dataTables_wrapper {
-  overflow: visible !important;
-  transform: none !important; /* Prevent stacking context */
-  isolation: auto !important; /* Don't create stacking context */
-}
-
-.dataTables_wrapper .dataTables_scroll {
-  overflow: visible !important;
-  transform: none !important;
-}
-
-.dataTables_wrapper .dataTables_scrollHead {
-  overflow: visible !important;
-  transform: none !important;
-}
-
-.dataTables_wrapper .dataTables_scrollBody {
-  overflow: visible !important;
-  transform: none !important;
-}
-
-/* Ensure DataTables table itself doesn't create stacking context */
-.dataTables_wrapper table {
-  transform: none !important;
-  filter: none !important;
-  opacity: 1 !important;
-  perspective: none !important;
-}
-
-/* ============================================
-   ACTION ICON BUTTONS - Thay thế dropdown
-   ============================================ */
-.action-buttons {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  justify-content: center;
-}
-
-.action-btn {
-  width: 36px;
-  height: 36px;
-  padding: 0;
-  border: none;
-  border-radius: 6px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 16px;
-  color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.action-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
-.action-btn:active {
-  transform: translateY(0);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-.action-btn-view {
-  background-color: #0d6efd; /* Blue */
-}
-
-.action-btn-view:hover {
-  background-color: #0b5ed7;
-}
-
-.action-btn-edit {
-  background-color: #fd7e14; /* Orange */
-}
-
-.action-btn-edit:hover {
-  background-color: #e66a00;
-}
-
-.action-btn-change {
-  background-color: #198754; /* Green */
-}
-
-.action-btn-change:hover {
-  background-color: #157347;
-}
-
-.action-btn-delete {
-  background-color: #dc3545; /* Red */
-}
-
-.action-btn-delete:hover {
-  background-color: #bb2d3b;
-}
-
-.action-btn-add {
-  background-color: #20c997; /* Teal */
-}
-
-.action-btn-add:hover {
-  background-color: #1aa179;
-}
-
-.action-btn-toggle {
-  background-color: #6c757d; /* Gray */
-}
-
-.action-btn-toggle:hover {
-  background-color: #5c636a;
-}
-
-/* Responsive cho mobile */
-@media (max-width: 768px) {
-  .action-buttons {
-    gap: 0.25rem;
-  }
-  
-  .action-btn {
-    width: 32px;
-    height: 32px;
-    font-size: 14px;
-  }
-}
-
-/* ============================================
-   ALERTS - Thông báo
-   ============================================ */
-.alert {
-  border-radius: 10px;
-  border-left: 4px solid;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.alert-success {
-  background: linear-gradient(90deg, #D1FAE5 0%, #ECFDF5 100%);
-  border-left-color: var(--resort-success);
-  color: #065F46;
-}
-
-.alert-warning {
-  background: linear-gradient(90deg, #FEF3C7 0%, #FFFBEB 100%);
-  border-left-color: var(--resort-warning);
-  color: #92400E;
-}
-
-.alert-danger {
-  background: linear-gradient(90deg, #FEE2E2 0%, #FEF2F2 100%);
-  border-left-color: var(--resort-danger);
-  color: #991B1B;
-}
-
-.alert-info {
-  background: linear-gradient(90deg, #DBEAFE 0%, #EFF6FF 100%);
-  border-left-color: var(--resort-info);
-  color: #1E40AF;
-}
-
-/* ============================================
-   PAGINATION - Phân trang
-   ============================================ */
-.page-link {
-  color: var(--resort-primary-dark);
-  border-color: var(--resort-accent);
-  pointer-events: auto !important;
-  cursor: pointer !important;
-  z-index: 1 !important;
-  position: relative !important;
-}
-
-.page-link:hover {
-  background: var(--resort-accent);
-  border-color: var(--resort-primary);
-  color: var(--resort-primary-dark);
-  pointer-events: auto !important;
-  cursor: pointer !important;
-}
-
-.page-item.active .page-link {
-  background: linear-gradient(135deg, var(--resort-primary) 0%, var(--resort-primary-dark) 100%);
-  border-color: var(--resort-primary-dark);
-  color: #ffffff;
-  box-shadow: 0 2px 8px rgba(200, 169, 126, 0.3);
-  pointer-events: auto !important;
-  cursor: pointer !important;
-}
-
-.page-item.disabled .page-link {
-  pointer-events: none !important;
-  cursor: not-allowed !important;
-  opacity: 0.6;
-}
-
-/* Fix cho DataTables pagination */
-.dataTables_wrapper .dataTables_paginate .pagination .page-link {
-  pointer-events: auto !important;
-  cursor: pointer !important;
-  z-index: 10 !important;
-  position: relative !important;
-}
-
-.dataTables_wrapper .dataTables_paginate {
-  pointer-events: auto !important;
-  z-index: 10 !important;
-  position: relative !important;
-}
-
-/* ============================================
-   FILTERS - Bộ lọc
-   ============================================ */
-.card.filter-section-modern,
-.card.filter-section {
-  background: linear-gradient(135deg, #ffffff 0%, var(--resort-secondary) 100%);
-  border: 2px solid var(--resort-accent);
-}
-
-.filter-header {
-  border-bottom: 2px solid var(--resort-primary);
-  padding-bottom: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.filter-header h3 {
-  color: var(--resort-primary-dark);
-  font-weight: 700;
-}
-
-/* ============================================
-   CHARTS - Biểu đồ
-   ============================================ */
-.chart-container {
-  background: linear-gradient(135deg, #ffffff 0%, var(--resort-secondary) 100%);
-  border: 2px solid var(--resort-accent);
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 12px rgba(200, 169, 126, 0.15);
-}
-
-/* ============================================
-   ACTIVITY ITEMS - Hoạt động
-   ============================================ */
-.activity-item {
-  border-left: 4px solid var(--resort-primary);
-  background: var(--resort-secondary);
-  padding: 1rem;
-  margin-bottom: 0.75rem;
-  border-radius: 0 8px 8px 0;
-  transition: all 0.3s ease;
-}
-
-.activity-item:hover {
-  background: var(--resort-accent);
-  transform: translateX(5px);
-  box-shadow: 0 2px 8px rgba(200, 169, 126, 0.2);
-}
-
-/* ============================================
-   FOOTER - Chân trang
-   ============================================ */
-.content-footer {
-  background: linear-gradient(135deg, var(--resort-secondary) 0%, #ffffff 100%);
-  border-top: 2px solid var(--resort-accent);
-}
-
-/* ============================================
-   LOADING - Tải dữ liệu
-   ============================================ */
-.spinner-border {
-  border-color: var(--resort-primary);
-  border-right-color: transparent;
-}
-
-/* ============================================
-   TOAST NOTIFICATIONS - Thông báo
-   ============================================ */
-.toast {
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.toast.bg-success {
-  background: linear-gradient(135deg, var(--resort-success) 0%, #059669 100%) !important;
-}
-
-.toast.bg-warning {
-  background: linear-gradient(135deg, var(--resort-warning) 0%, #D97706 100%) !important;
-}
-
-.toast.bg-danger {
-  background: linear-gradient(135deg, var(--resort-danger) 0%, #DC2626 100%) !important;
-}
-
-/* ============================================
-   ICONS - Biểu tượng
-   ============================================ */
-.menu-icon,
-.navbar-nav .nav-link i {
-  transition: all 0.3s ease;
-}
-
-.menu-item.active .menu-icon,
-.navbar-nav .nav-link:hover i {
-  transform: scale(1.15);
-  filter: drop-shadow(0 2px 4px rgba(200, 169, 126, 0.3));
-}
-
-/* ============================================
-   SCROLLBAR - Thanh cuộn
-   ============================================ */
-::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--resort-secondary);
-  border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, var(--resort-primary) 0%, var(--resort-primary-dark) 100%);
-  border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--resort-primary-dark);
-}
-
-/* ============================================
-   HIGHLIGHTS - Làm nổi bật
-   ============================================ */
-.highlight {
-  background: linear-gradient(90deg, var(--resort-accent) 0%, transparent 100%);
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-weight: 600;
-  color: var(--resort-primary-dark);
-}
-
-/* ============================================
-   BACKGROUND IMAGE - Hình nền theo chủ đề Resort
-   ============================================ */
-body {
-  /* Background image resort với overlay gradient nhẹ hơn - Sáng hơn */
-  background: 
-    linear-gradient(135deg, rgba(200, 169, 126, 0.2) 0%, rgba(184, 153, 104, 0.15) 50%, rgba(245, 241, 232, 0.2) 100%),
-    url('https://images.unsplash.com/photo-1559827260-dc66d52bef19?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80') !important;
-  background-size: cover !important;
-  background-position: center center !important;
-  background-attachment: fixed !important;
-  background-repeat: no-repeat !important;
-  background-color: #FEFCF9 !important; /* Fallback color sáng hơn */
-  position: relative;
-  min-height: 100vh;
-}
-
-/* Fallback background nếu image không load được - chỉ một ::before */
-body::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: 
-    linear-gradient(135deg, rgba(200, 169, 126, 0.1) 0%, rgba(245, 241, 232, 0.2) 50%, rgba(232, 213, 183, 0.1) 100%),
-    repeating-linear-gradient(
-      45deg,
-      transparent,
-      transparent 10px,
-      rgba(200, 169, 126, 0.03) 10px,
-      rgba(200, 169, 126, 0.03) 20px
-    );
-  pointer-events: none;
-  z-index: -2;
-  display: none; /* Ẩn fallback khi có background image */
-}
-
-/* Đảm bảo layout-wrapper có background trong suốt để hiển thị background image */
-.layout-wrapper {
-  position: relative;
-  z-index: 1;
-  background: transparent !important;
+.btn-outline-primary {
   background-color: transparent !important;
+  color: var(--ts-black) !important;
+  border: 1px solid var(--ts-gold) !important;
+  border-radius: 0 !important;
+  padding: 0.75rem 2rem !important;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.85rem;
+  transition: all 0.4s ease !important;
 }
 
-/* Đảm bảo layout-container không che background */
-.layout-container {
-  background: transparent !important;
-  background-color: transparent !important;
-}
-
-/* Content wrapper có background sáng hơn */
-.content-wrapper {
-  background: rgba(255, 255, 255, 0.95) !important;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-radius: 12px 0 0 0;
-  box-shadow: 0 0 30px rgba(200, 169, 126, 0.15);
-  position: relative;
-  z-index: 1;
-}
-
-/* Cards có background sáng hơn */
-.card {
-  background: rgba(255, 255, 255, 0.98) !important;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow: 0 4px 20px rgba(200, 169, 126, 0.2) !important;
-  border: 1px solid rgba(200, 169, 126, 0.25) !important;
-}
-
-/* Menu sidebar có background sáng hơn */
-.layout-menu {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(250, 248, 245, 0.98) 100%) !important;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: 2px 0 20px rgba(200, 169, 126, 0.15);
-}
-
-/* Navbar có background gradient đậm hơn */
-.layout-navbar {
-  background: linear-gradient(135deg, var(--resort-primary) 0%, var(--resort-primary-dark) 100%) !important;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow: 0 2px 20px rgba(200, 169, 126, 0.3) !important;
-  position: relative;
-  z-index: 1000;
-}
-
-/* Table có background sáng hơn */
-.table {
-  background: rgba(255, 255, 255, 0.95) !important;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
-
-.table-striped > tbody > tr:nth-of-type(odd) > td {
-  background-color: rgba(250, 248, 245, 0.6) !important;
-}
-
-/* Modal có background sáng hơn */
-.modal-content {
-  background: rgba(255, 255, 255, 0.98) !important;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 10px 40px rgba(200, 169, 126, 0.25) !important;
-}
-
-/* Form controls có background sáng hơn */
-.form-control,
-.form-select {
-  background: rgba(255, 255, 255, 1) !important;
-  border: 1px solid rgba(200, 169, 126, 0.3) !important;
-}
-
-.form-control:focus,
-.form-select:focus {
-  background: rgba(255, 255, 255, 1) !important;
-  border-color: var(--resort-primary) !important;
-  box-shadow: 0 0 0 0.2rem rgba(200, 169, 126, 0.25) !important;
-}
-
-/* ============================================
-   RESPONSIVE - Đáp ứng
-   ============================================ */
-@media (max-width: 1200px) {
-  .layout-menu {
-    border-right: none;
-  }
-  
-  /* Trên mobile, background đơn giản hơn */
-  body::before {
-    background: linear-gradient(135deg, rgba(245, 241, 232, 0.2) 0%, rgba(232, 213, 183, 0.1) 100%);
-  }
-}
-
-/* ============================================
-   ANIMATIONS - Hiệu ứng
-   ============================================ */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.card,
-.table tbody tr,
-.activity-item {
-  animation: fadeInUp 0.5s ease;
-}
-
-/* ============================================
-   UTILITY CLASSES - Lớp tiện ích
-   ============================================ */
-.bg-resort-primary {
-  background: var(--resort-primary) !important;
+.btn-outline-primary:hover {
+  background-color: var(--ts-gold) !important;
   color: #ffffff !important;
 }
 
-.bg-resort-secondary {
-  background: var(--resort-secondary) !important;
+/* ============================================
+   TABLES
+   ============================================ */
+.table {
+  color: var(--ts-dark) !important;
 }
 
-.text-resort-primary {
-  color: var(--resort-primary-dark) !important;
+.table th {
+  font-family: var(--font-serif) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1px !important;
+  color: var(--ts-gold-dark) !important;
+  font-weight: 600 !important;
+  border-bottom: 2px solid var(--ts-border) !important;
+  padding: 1.5rem 1rem !important;
+  font-size: 0.9rem !important;
 }
 
-.border-resort {
-  border-color: var(--resort-accent) !important;
+.table td {
+  padding: 1.5rem 1rem !important;
+  border-bottom: 1px solid rgba(200, 169, 126, 0.1) !important;
+  vertical-align: middle;
 }
 
-.shadow-resort {
-  box-shadow: 0 4px 12px rgba(200, 169, 126, 0.2) !important;
+.table tbody tr {
+  transition: background-color 0.3s ease;
+}
+
+.table tbody tr:hover {
+  background-color: var(--ts-cream) !important;
 }
 
 /* ============================================
-   FORCE BACKGROUND IMAGE - Đảm bảo background hiển thị
+   FORMS & INPUTS
    ============================================ */
-/* Override tất cả background khác để hiển thị background image */
-html {
-  background: transparent !important;
-}
-
-html body {
-  background: 
-    linear-gradient(135deg, rgba(200, 169, 126, 0.2) 0%, rgba(184, 153, 104, 0.15) 50%, rgba(245, 241, 232, 0.2) 100%),
-    url('https://images.unsplash.com/photo-1559827260-dc66d52bef19?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80') !important;
-  background-size: cover !important;
-  background-position: center center !important;
-  background-attachment: fixed !important;
-  background-repeat: no-repeat !important;
-  background-color: #FEFCF9 !important;
-}
-
-/* Đảm bảo layout-page không che background */
-.layout-page {
-  background: transparent !important;
+.form-control, .form-select {
+  border: 1px solid var(--ts-border) !important;
+  border-radius: 0 !important;
+  padding: 0.75rem 1rem !important;
   background-color: transparent !important;
+  color: var(--ts-dark) !important;
+  font-family: var(--font-sans);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Đảm bảo các container và wrapper không che background */
-.container,
-.container-fluid,
-.row {
-  background: transparent !important;
-  background-color: transparent !important;
+.form-control:focus, .form-select:focus {
+  border-color: var(--ts-gold) !important;
+  box-shadow: 0 0 0 0.2rem rgba(200, 169, 126, 0.1) !important;
 }
 
-/* Đảm bảo các col không che background */
-[class*="col-"] {
-  background: transparent !important;
-  background-color: transparent !important;
+.form-label {
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.75rem;
+  color: var(--ts-gray) !important;
+  margin-bottom: 0.5rem;
 }
 
+/* ============================================
+   BADGES (STATUS)
+   ============================================ */
+.badge {
+  border-radius: 0 !important;
+  padding: 0.5em 1em !important;
+  font-family: var(--font-sans);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+}
+
+.bg-label-primary { background-color: rgba(200, 169, 126, 0.1) !important; color: var(--ts-gold-dark) !important; }
+.bg-label-success { background-color: rgba(16, 185, 129, 0.1) !important; color: #10B981 !important; }
+.bg-label-warning { background-color: rgba(245, 158, 11, 0.1) !important; color: #F59E0B !important; }
+.bg-label-danger { background-color: rgba(239, 68, 68, 0.1) !important; color: #EF4444 !important; }
+
+/* ============================================
+   CUSTOM DASHBOARD WIDGETS
+   ============================================ */
+.ts-stat-widget {
+  background: #ffffff;
+  border: 1px solid var(--ts-border);
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  transition: all 0.4s ease;
+  height: 100%;
+}
+
+.ts-stat-widget:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(0,0,0,0.03);
+  border-color: var(--ts-gold);
+}
+
+.ts-stat-title {
+  font-family: var(--font-sans);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 0.75rem;
+  color: var(--ts-gray);
+  margin-bottom: 1rem;
+}
+
+.ts-stat-value {
+  font-family: var(--font-serif);
+  font-size: 3rem;
+  line-height: 1;
+  color: var(--ts-black);
+  margin-bottom: 0.5rem;
+}
+
+.ts-stat-desc {
+  font-size: 0.85rem;
+  color: var(--ts-gold);
+  font-style: italic;
+  font-family: var(--font-serif);
+}
+
+.ts-page-header {
+  margin-bottom: 3rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--ts-border);
+}
+
+.ts-page-title {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.ts-page-subtitle {
+  color: var(--ts-gray);
+  font-family: var(--font-sans);
+  letter-spacing: 1px;
+}

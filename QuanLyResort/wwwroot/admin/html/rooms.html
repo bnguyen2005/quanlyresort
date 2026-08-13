@@ -95,68 +95,40 @@
           <div class="container-xxl flex-grow-1 container-p-y">
             
             <!-- Header -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="ts-page-header d-flex justify-content-between align-items-center">
               <div>
-                <h4 class="fw-bold mb-0">🏠 Danh sách Phòng</h4>
-                <p class="text-muted mb-0">Quản lý các phòng trong hệ thống resort</p>
+                <h4 class="ts-page-title m-0">Danh sách Phòng</h4>
+                <p class="ts-page-subtitle m-0 mt-2">Quản lý các phòng trong hệ thống resort</p>
               </div>
               <button type="button" class="btn btn-primary" id="btnAddRoom">
-                <i class="bx bx-plus me-1"></i> Thêm Phòng mới
+                Thêm Phòng Mới
               </button>
             </div>
 
             <!-- Statistics Cards -->
-            <div class="row mb-4">
+            <div class="row mb-5">
               <div class="col-md-3 col-6 mb-4">
-                <div class="nalika-stats-card">
-                  <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                      <h3 class="card-title mb-2" id="totalRooms">0</h3>
-                      <small class="text-white">Tổng phòng</small>
-                    </div>
-                    <div class="avatar flex-shrink-0">
-                      <i class="bx bx-home-alt text-white"></i>
-                    </div>
-                  </div>
+                <div class="ts-stat-widget text-center">
+                  <h3 class="ts-stat-value" id="totalRooms">0</h3>
+                  <p class="ts-stat-title mt-2">Tổng phòng</p>
                 </div>
               </div>
               <div class="col-md-3 col-6 mb-4">
-                <div class="nalika-stats-card success">
-                  <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                      <h3 class="card-title mb-2" id="availableRooms">0</h3>
-                      <small class="text-white">Sẵn sàng</small>
-                    </div>
-                    <div class="avatar flex-shrink-0">
-                      <i class="bx bx-check-circle text-white"></i>
-                    </div>
-                  </div>
+                <div class="ts-stat-widget text-center">
+                  <h3 class="ts-stat-value" id="availableRooms">0</h3>
+                  <p class="ts-stat-title mt-2 text-success">Sẵn sàng</p>
                 </div>
               </div>
               <div class="col-md-3 col-6 mb-4">
-                <div class="nalika-stats-card warning">
-                  <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                      <h3 class="card-title mb-2" id="occupiedRooms">0</h3>
-                      <small class="text-white">Đang dùng</small>
-                    </div>
-                    <div class="avatar flex-shrink-0">
-                      <i class="bx bx-user text-white"></i>
-                    </div>
-                  </div>
+                <div class="ts-stat-widget text-center">
+                  <h3 class="ts-stat-value" id="occupiedRooms">0</h3>
+                  <p class="ts-stat-title mt-2 text-warning">Đang dùng</p>
                 </div>
               </div>
               <div class="col-md-3 col-6 mb-4">
-                <div class="nalika-stats-card danger">
-                  <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                      <h3 class="card-title mb-2" id="maintenanceRooms">0</h3>
-                      <small class="text-white">Bảo trì</small>
-                    </div>
-                    <div class="avatar flex-shrink-0">
-                      <i class="bx bx-wrench text-white"></i>
-                    </div>
-                  </div>
+                <div class="ts-stat-widget text-center">
+                  <h3 class="ts-stat-value" id="maintenanceRooms">0</h3>
+                  <p class="ts-stat-title mt-2 text-danger">Bảo trì</p>
                 </div>
               </div>
             </div>

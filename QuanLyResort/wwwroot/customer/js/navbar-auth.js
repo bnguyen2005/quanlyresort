@@ -129,8 +129,8 @@ function updateNavbarAuth(retryCount = 0) {
   
   console.log('[Navbar Auth] Updating navbar...', { hasToken: !!token, hasUser: !!userStr, retry: retryCount });
   
-  // Tìm navbar menu
-  const navbarMenu = document.querySelector('#ftco-nav .navbar-nav.ml-auto');
+  // Tìm navbar menu (Ưu tiên Taste Header mới, sau đó fallback về Header cũ)
+  const navbarMenu = document.querySelector('.ts-nav-list.main-nav') || document.querySelector('#ftco-nav .navbar-nav.ml-auto');
   
   if (!navbarMenu) {
     console.warn('[Navbar Auth] Navbar menu not found, retry:', retryCount);
@@ -145,7 +145,7 @@ function updateNavbarAuth(retryCount = 0) {
   }
   
   // Debug: Đếm số auth items hiện tại
-  const currentAuthItems = navbarMenu.querySelectorAll('.nav-item.auth-item, .user-dropdown');
+  const currentAuthItems = navbarMenu.querySelectorAll('.nav-item.auth-item, .user-dropdown, .auth-item-taste');
   console.log('[Navbar Auth] Current auth items count:', currentAuthItems.length);
   
   if (token && userStr) {
@@ -169,47 +169,98 @@ function updateNavbarAuth(retryCount = 0) {
  * Hiển thị nav cho user đã đăng nhập
  */
 function showAuthenticatedNav(navbarMenu, user) {
+  const isTasteHeader = navbarMenu.classList.contains('main-nav');
+
   // XÓA TẤT CẢ auth items cũ (tránh duplicate)
-  navbarMenu.querySelectorAll('.nav-item.auth-item, .user-dropdown').forEach(item => item.remove());
+  navbarMenu.querySelectorAll('.nav-item.auth-item, .user-dropdown, .auth-item-taste').forEach(item => item.remove());
   
-  // Tìm và xóa các menu item login/register
-  const loginItem = navbarMenu.querySelector('a[href="/customer/login.html"], a[href="login.html"]')?.parentElement;
-  const registerItem = navbarMenu.querySelector('a[href="/customer/register.html"], a[href="register.html"]')?.parentElement;
-  
-  if (loginItem) loginItem.remove();
-  if (registerItem) registerItem.remove();
-  
-  // Tạo user dropdown
-  const userDropdown = createUserDropdown(user);
-  navbarMenu.appendChild(userDropdown);
-  
-  // Force navbar to refresh/repaint
-  forceNavbarRefresh();
+  // Tìm và xóa các menu item login/register mặc định (đặc biệt trong Taste header)
+  const tsAuthLinks = navbarMenu.querySelectorAll('a[href*="login.html"], a[href*="register.html"], a[href*="account.html"]');
+  tsAuthLinks.forEach(link => {
+    if (link.parentElement && link.parentElement.tagName === 'LI') {
+      link.parentElement.remove();
+    }
+  });
+
+  if (isTasteHeader) {
+    const displayName = user.name || user.fullName || user.email || 'Khách hàng';
+    const tasteAuthNav = document.getElementById('ts-auth-nav');
+    
+    if (tasteAuthNav) {
+      tasteAuthNav.innerHTML = ''; // Clear old items
+      const authHtml = `
+        <li style="margin-top: 15px;">
+          <span style="font-size: 11px; letter-spacing: 2px; color: var(--ts-gold); text-transform: uppercase; font-family: 'Inter', sans-serif;">Tài khoản của tôi</span>
+        </li>
+        <li><a href="account.html" onclick="document.body.classList.remove('menu-open')">${displayName}</a></li>
+        <li><a href="my-bookings.html" onclick="document.body.classList.remove('menu-open')">Đặt Phòng Của Tôi <span id="taste-unpaid-badge" style="display:none; background:#ffffff; color:#8a2017; font-size:14px; padding:2px 10px; border-radius:20px; margin-left:10px; font-weight:bold; vertical-align: middle;"></span></a></li>
+        <li><a href="my-restaurant-orders.html" onclick="document.body.classList.remove('menu-open')">Món Ăn Đã Đặt</a></li>
+        <li style="margin-top: 20px;"><a href="#" onclick="handleLogout(event)" style="color: rgba(255, 255, 255, 0.6); font-size: 24px;">Đăng Xuất</a></li>
+      `;
+      tasteAuthNav.insertAdjacentHTML('beforeend', authHtml);
+    }
+    
+    // Xóa Dropdown ở Top Right nếu có (vì đã bỏ tính năng này)
+    const topAuthContainer = document.getElementById('ts-header-auth-container');
+    if (topAuthContainer) {
+      topAuthContainer.innerHTML = '';
+    }
+
+    // Update badge cho Taste
+    setTimeout(() => { updateUnpaidBadge(); }, 500);
+  } else {
+    // Logic cũ cho header Bootstrap
+    const userDropdown = createUserDropdown(user);
+    navbarMenu.appendChild(userDropdown);
+    forceNavbarRefresh();
+  }
 }
 
 /**
  * Hiển thị nav cho guest (chưa đăng nhập)
  */
 function showGuestNav(navbarMenu) {
-  // XÓA TẤT CẢ auth items cũ (tránh duplicate)
-  navbarMenu.querySelectorAll('.nav-item.auth-item, .user-dropdown').forEach(item => item.remove());
+  const isTasteHeader = navbarMenu.classList.contains('main-nav');
+
+  // XÓA TẤT CẢ auth items cũ
+  navbarMenu.querySelectorAll('.nav-item.auth-item, .user-dropdown, .auth-item-taste').forEach(item => item.remove());
   
-  // Đảm bảo có nút login/register
-  const hasLogin = navbarMenu.querySelector('a[href="/customer/login.html"], a[href="login.html"]');
-  const hasRegister = navbarMenu.querySelector('a[href="/customer/register.html"], a[href="register.html"]');
+  // Tìm và xóa các menu item mặc định để render lại cho chuẩn
+  const tsAuthLinks = navbarMenu.querySelectorAll('a[href*="login.html"], a[href*="register.html"], a[href*="account.html"]');
+  tsAuthLinks.forEach(link => {
+    if (link.parentElement && link.parentElement.tagName === 'LI') {
+      link.parentElement.remove();
+    }
+  });
   
-  if (!hasLogin) {
-    const loginItem = document.createElement('li');
-    loginItem.className = 'nav-item auth-item';
-    loginItem.innerHTML = '<a href="/customer/login.html" class="nav-link">Đăng Nhập</a>';
-    navbarMenu.appendChild(loginItem);
-  }
-  
-  if (!hasRegister) {
-    const registerItem = document.createElement('li');
-    registerItem.className = 'nav-item auth-item';
-    registerItem.innerHTML = '<a href="/customer/register.html" class="nav-link">Đăng Ký</a>';
-    navbarMenu.appendChild(registerItem);
+  if (isTasteHeader) {
+    const tasteAuthNav = document.getElementById('ts-auth-nav');
+    if (tasteAuthNav) {
+      tasteAuthNav.innerHTML = '';
+      const authHtml = `
+        <li><a href="login.html" onclick="document.body.classList.remove('menu-open')">Sign In</a></li>
+        <li><a href="register.html" onclick="document.body.classList.remove('menu-open')">Register</a></li>
+      `;
+      tasteAuthNav.insertAdjacentHTML('beforeend', authHtml);
+    }
+  } else {
+    // Bootstrap logic
+    const hasLogin = navbarMenu.querySelector('a[href="/customer/login.html"], a[href="login.html"]');
+    const hasRegister = navbarMenu.querySelector('a[href="/customer/register.html"], a[href="register.html"]');
+    
+    if (!hasLogin) {
+      const loginItem = document.createElement('li');
+      loginItem.className = 'nav-item auth-item';
+      loginItem.innerHTML = '<a href="/customer/login.html" class="nav-link">Đăng Nhập</a>';
+      navbarMenu.appendChild(loginItem);
+    }
+    
+    if (!hasRegister) {
+      const registerItem = document.createElement('li');
+      registerItem.className = 'nav-item auth-item';
+      registerItem.innerHTML = '<a href="/customer/register.html" class="nav-link">Đăng Ký</a>';
+      navbarMenu.appendChild(registerItem);
+    }
   }
 }
 
@@ -263,20 +314,32 @@ async function getUnpaidBookingsCount() {
  */
 async function updateUnpaidBadge() {
   const unpaidCount = await getUnpaidBookingsCount();
-  const bookingMenuItem = document.querySelector('.user-dropdown .dropdown-item[href="my-bookings.html"]');
   
+  // 1. Cập nhật badge cho Bootstrap Menu (cũ)
+  const bookingMenuItem = document.querySelector('.user-dropdown .dropdown-item[href="my-bookings.html"]');
   if (bookingMenuItem) {
-    // Xóa badge cũ nếu có
     const oldBadge = bookingMenuItem.querySelector('.unpaid-badge-menu');
     if (oldBadge) oldBadge.remove();
-    
-    // Thêm badge mới nếu có booking chưa thanh toán
     if (unpaidCount > 0) {
       const badge = document.createElement('span');
       badge.className = 'unpaid-badge-menu';
       badge.textContent = unpaidCount > 99 ? '99+' : unpaidCount;
       bookingMenuItem.appendChild(badge);
     }
+  }
+
+  // 2. Cập nhật badge cho Taste Menu (mới)
+  const tasteBadge = document.getElementById('taste-unpaid-badge');
+  
+  if (unpaidCount > 0) {
+    const text = unpaidCount > 99 ? '99+' : unpaidCount;
+    if (tasteBadge) {
+      tasteBadge.textContent = text;
+      tasteBadge.style.display = 'inline-block';
+      tasteBadge.style.animation = 'pulse-badge 2s infinite';
+    }
+  } else {
+    if (tasteBadge) tasteBadge.style.display = 'none';
   }
 }
 
@@ -292,8 +355,13 @@ function createUserDropdown(user) {
     document.head.appendChild(faLink);
   }
 
-  const li = document.createElement('li');
-  li.className = 'nav-item dropdown user-dropdown';
+  const isTaste = document.querySelector('#navbar-auth-placeholder') !== null;
+  const li = document.createElement(isTaste ? 'div' : 'li');
+  if (isTaste) {
+    li.className = 'taste-user-dropdown dropdown user-dropdown';
+  } else {
+    li.className = 'nav-item dropdown user-dropdown';
+  }
   
   // Force inline styles to ensure visibility
   li.style.display = 'block';
@@ -356,7 +424,7 @@ function forceNavbarRefresh() {
   
   try {
     // Method 1: Force reflow của navbar menu
-    const navbarMenu = document.querySelector('#ftco-nav .navbar-nav.ml-auto');
+    const navbarMenu = document.querySelector('#navbar-auth-placeholder') || document.querySelector('#ftco-nav .navbar-nav.ml-auto');
     if (navbarMenu) {
       // Force browser to repaint
       navbarMenu.style.opacity = '0.99';
@@ -420,3 +488,26 @@ setInterval(() => {
   }
 }, 30000);
 
+// === SYNC SIDEBAR WIDTH FOR PERFECT PIXEL ALIGNMENT ===
+function syncSidebarWidth() {
+  const sidebar = document.querySelector('.ts-sidebar');
+  if (sidebar) {
+    const width = sidebar.getBoundingClientRect().width;
+    document.documentElement.style.setProperty('--ts-sidebar-width', `${width}px`);
+  }
+}
+
+// Chạy khi DOM load xong
+document.addEventListener('DOMContentLoaded', syncSidebarWidth);
+// Chạy khi load header xong (vì header load bằng Ajax)
+window.addEventListener('load', syncSidebarWidth);
+// Chạy khi resize màn hình (đề phòng đổi DPI/zoom)
+window.addEventListener('resize', syncSidebarWidth);
+
+// Thêm MutationObserver để chạy ngay khi .ts-sidebar xuất hiện trong DOM
+const sidebarObserver = new MutationObserver((mutations) => {
+  if (document.querySelector('.ts-sidebar')) {
+    syncSidebarWidth();
+  }
+});
+sidebarObserver.observe(document.body, { childList: true, subtree: true });

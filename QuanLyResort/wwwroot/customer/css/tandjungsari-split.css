@@ -1,0 +1,296 @@
+/* ============================================
+   TANDJUNG SARI SPLIT LAYOUT (MINIMALIST)
+   ============================================ */
+
+/* Ghi đè body */
+body {
+  overflow: hidden !important;
+  /* Bị che bởi layout */
+  background: #f4f0e6 !important;
+}
+
+/* Layout Chia Đôi (Split Screen) */
+.split-layout {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.split-layout__image {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  display: none;
+}
+
+@media (min-width: 992px) {
+  .split-layout__image {
+    display: block;
+  }
+}
+
+.split-image-bg {
+  position: absolute;
+  top: -5%;
+  left: -5%;
+  width: 110%;
+  height: 110%;
+  background-size: cover;
+  background-position: center;
+  filter: grayscale(10%) sepia(20%) brightness(0.8);
+  animation: panImage 30s linear infinite alternate;
+}
+
+.split-image-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.1));
+}
+
+.split-image-text {
+  position: absolute;
+  bottom: 100px;
+  left: 50px;
+  right: 50px;
+  color: #fff;
+}
+
+.split-image-text h2 {
+  font-size: 48px;
+  margin-bottom: 20px;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  font-family: 'Playfair Display', serif;
+}
+
+.split-image-text p {
+  font-size: 14px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.split-layout__content {
+  flex: 1;
+  background: var(--bg-light, #f4f0e6);
+  color: var(--text-color, #2a2a2a);
+  position: relative;
+  overflow-y: auto;
+  display: flex;
+  justify-content: center;
+  padding: 60px 5%;
+  scrollbar-width: thin;
+}
+
+.split-layout__content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.split-layout__content::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.form-container {
+  max-width: 800px;
+  width: 100%;
+  padding-top: 40px;
+}
+
+.form-title {
+  font-size: 42px;
+  margin-bottom: 10px;
+  color: #111;
+  font-family: 'Playfair Display', serif;
+}
+
+.form-subtitle {
+  font-size: 13px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(0, 0, 0, 0.5);
+  margin-bottom: 40px;
+}
+
+/* Minimalist Cards */
+.minimalist-card {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+  padding: 30px;
+  margin-bottom: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
+  transition: all 0.5s ease;
+  animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
+
+.minimalist-card:hover {
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.06);
+  transform: translateY(-3px);
+}
+
+.minimalist-card .booking-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.minimalist-card .booking-code {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px;
+  color: #111;
+}
+
+.minimalist-card .booking-date {
+  color: rgba(0, 0, 0, 0.4);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+/* Override Details Text */
+.booking-details .detail-label {
+  color: rgba(0, 0, 0, 0.5) !important;
+}
+
+.booking-details .detail-label i {
+  color: #a98d58 !important;
+}
+
+.booking-details .detail-value {
+  color: #222 !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 18px !important;
+  font-weight: 500;
+}
+
+.booking-details .detail-value.text-primary {
+  color: #a98d58 !important;
+  font-family: 'Playfair Display', serif !important;
+  font-size: 22px !important;
+}
+
+/* Override Status Badges */
+.booking-status {
+  border: none !important;
+  padding: 6px 15px !important;
+  border-radius: 2px !important;
+  font-size: 10px !important;
+}
+
+.status-pending {
+  color: #8a6d3b !important;
+  background: rgba(212, 175, 55, 0.15) !important;
+}
+
+.status-confirmed {
+  color: #31708f !important;
+  background: rgba(0, 191, 255, 0.1) !important;
+}
+
+.status-paid {
+  color: #3c763d !important;
+  background: rgba(0, 255, 127, 0.15) !important;
+}
+
+.status-assigned {
+  color: #5e35b1 !important;
+  background: rgba(138, 43, 226, 0.1) !important;
+}
+
+.status-checkedin {
+  color: #2e7d32 !important;
+  background: rgba(50, 205, 50, 0.15) !important;
+}
+
+.status-checkedout {
+  color: #616161 !important;
+  background: rgba(169, 169, 169, 0.15) !important;
+}
+
+.status-cancelled {
+  color: #c62828 !important;
+  background: rgba(255, 69, 0, 0.1) !important;
+}
+
+/* Override Buttons */
+.booking-actions {
+  border-top: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+.taste-btn {
+  border: 1px solid #111 !important;
+  color: #111 !important;
+  background: transparent !important;
+  border-radius: 2px !important;
+  font-size: 11px !important;
+  padding: 10px 20px !important;
+}
+
+.taste-btn:hover {
+  background: #111 !important;
+  color: #fff !important;
+  transform: none !important;
+}
+
+.taste-btn-primary {
+  background: #a98d58 !important;
+  border-color: #a98d58 !important;
+  color: #fff !important;
+}
+
+.taste-btn-primary:hover {
+  background: #8b7346 !important;
+  border-color: #8b7346 !important;
+  color: #fff !important;
+}
+
+.taste-btn-danger {
+  color: #c62828 !important;
+  border-color: #c62828 !important;
+}
+
+.taste-btn-danger:hover {
+  background: #c62828 !important;
+  color: #fff !important;
+}
+
+/* Modals */
+.swal2-popup {
+  background: #fff !important;
+  color: #111 !important;
+  border-radius: 4px !important;
+}
+
+.swal2-title {
+  color: #111 !important;
+}
+
+.modal-content {
+  border-radius: 4px !important;
+  border: none;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+  background: #fff !important;
+  color: #111 !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.btn-close-white {
+  filter: none !important;
+}
+
+@keyframes panImage {
+  0% {
+    transform: scale(1.05) translate(0, 0);
+  }
+
+  100% {
+    transform: scale(1.1) translate(-2%, -1%);
+  }
+}

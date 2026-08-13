@@ -1,457 +1,307 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Đặt phòng thành công | Resort Deluxe</title>
-  <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700&display=swap" rel="stylesheet">
+
+  <!-- Google Fonts: Playfair Display + Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap"
+    rel="stylesheet">
+
   <link rel="stylesheet" href="css/bootstrap.min.css">
   <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="/css/tokens.css">
-  <link rel="stylesheet" href="/css/globals.css">
-  <link rel="stylesheet" href="/css/grid.css">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/globals.css">
+  <link rel="stylesheet" href="css/grid.css">
+  <link rel="stylesheet" href="css/page-transition.css">
   <link rel="stylesheet" href="css/navbar-auth.css">
-  <link rel="stylesheet" href="css/open-iconic-bootstrap.min.css">
-  <link rel="stylesheet" href="/css/components/navbar.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
   <style>
-    body{font-family:'Poppins',sans-serif;padding-top:0;overflow-x:hidden;background:#f8f9fa;font-size:16px;line-height:1.6;color:#1a1a1a}
-    h1,h2,h3,h4,h5,h6{font-family:'Poppins',sans-serif;font-weight:700;color:#1a1a1a}
-    p,span,div,label{font-family:'Poppins',sans-serif}
-    .booking-details-card *{font-family:'Poppins',sans-serif}
-    .detail-label{font-family:'Poppins',sans-serif;font-size:15px;font-weight:500}
-    .detail-value{font-family:'Poppins',sans-serif;font-size:16px;font-weight:600}
-    .ftco-navbar{position:sticky!important;top:0!important;z-index:1030!important;background-color:#1a1a1a!important;transition:all 0.3s ease;width:100%!important;margin:0!important}
-    
-    /* Modern Hero Section - Same as other pages */
-    .success-hero {
-      background-image: url('images/bg_1.jpg');
-      background-size: cover;
-      background-position: center;
-      background-attachment: fixed;
-      background-repeat: no-repeat;
-      padding: 140px 0 100px;
-      color: #fff;
+    /* ============================================
+       TANDJUNG SARI LIGHT LUXURY CSS
+       ============================================ */
+    body {
+      background-color: var(--bg-light, #f4f0e6) !important;
+      color: var(--text-main, #333333) !important;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .success-wrapper {
+      padding: 100px 5%;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .success-hero-img {
+      width: 100%;
+      height: 250px;
+      object-fit: cover;
+      margin-bottom: 40px;
+      border-radius: 20px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.08);
+    }
+
+    .success-header {
       text-align: center;
+      margin-bottom: 50px;
       position: relative;
-      overflow: hidden;
-      margin-bottom: 60px;
-      min-height: 500px;
+    }
+
+    .success-header h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(36px, 4vw, 56px);
+      color: var(--ts-dark, #111);
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .success-header p {
+      font-size: 14px;
+      letter-spacing: 2px;
+      color: var(--text-muted, #777);
+      text-transform: uppercase;
+    }
+
+    .success-icon-main {
+      font-size: 60px;
+      color: var(--ts-gold, #8a2017);
+      margin-bottom: 20px;
+    }
+
+    /* Card Details */
+    .taste-glass-panel {
+      background: #fff;
+      padding: 50px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.03);
+      border: 1px solid var(--border-light, #e0dcd0);
+    }
+
+    .panel-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 28px;
+      color: var(--ts-dark, #111);
+      margin-bottom: 30px;
+      text-align: center;
+      border-bottom: 1px solid var(--border-light, #e0dcd0);
+      padding-bottom: 20px;
+    }
+
+    /* Re-style injected JS classes */
+    .detail-row {
       display: flex;
       align-items: center;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border-light, #e0dcd0);
+      gap: 20px;
     }
-    .success-hero::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: linear-gradient(135deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 100%);
-      z-index: 0;
+
+    .detail-row:last-child {
+      border-bottom: none;
     }
-    .success-hero::after {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M 50 0 L 0 0 0 50" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
-      opacity: 0.3;
-      z-index: 1;
+
+    .detail-icon {
+      width: 50px;
+      height: 50px;
+      background: var(--bg-surface, #ebe5d8);
+      color: var(--ts-gold, #8a2017);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
     }
-    .success-hero .container {
-      position: relative;
-      z-index: 2;
+
+    .detail-content {
+      flex: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
     }
-    .success-hero h1 {
-      font-size: 48px;
-      font-weight: 700;
-      margin-bottom: 20px;
-      color: #ffffff !important;
-      text-shadow: 0 2px 10px rgba(0,0,0,0.3);
-      animation: fadeInDown 1s ease;
+
+    .detail-label {
+      color: var(--text-muted, #777);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
     }
-    .success-hero p {
-      font-size: 20px;
-      color: #ffffff !important;
-      opacity: 0.95;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.2);
-      animation: fadeInUp 1.2s ease;
+
+    .detail-value {
+      color: var(--ts-dark, #111);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px;
+      text-align: right;
+      font-weight: 500;
     }
-    
-    @keyframes fadeInDown {
-      from {
-        opacity: 0;
-        transform: translateY(-30px);
+
+    .detail-value.amount {
+      color: var(--ts-gold, #8a2017);
+      font-size: 28px;
+      font-weight: 600;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 15px;
+      margin-top: 40px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .taste-btn {
+      border: 1px solid var(--border-light, #e0dcd0);
+      background: transparent;
+      color: var(--ts-dark, #111);
+      padding: 12px 30px;
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .taste-btn:hover {
+      border-color: var(--ts-gold, #8a2017);
+      color: var(--ts-gold, #8a2017);
+    }
+
+    .taste-btn-primary {
+      border: 1px solid var(--ts-gold, #8a2017);
+      background: var(--ts-gold, #8a2017);
+      color: #fff;
+    }
+
+    .taste-btn-primary:hover {
+      background: #a03830;
+      border-color: #a03830;
+      color: #fff;
+    }
+
+    .special-requests-box {
+      background: var(--bg-surface, #ebe5d8);
+      padding: 20px;
+      margin-top: 10px;
+      border-left: 3px solid var(--ts-gold, #8a2017);
+      font-size: 14px;
+      color: var(--text-main, #333);
+    }
+
+    @media (max-width: 768px) {
+      .success-wrapper {
+        padding: 60px 5%;
       }
-      to {
-        opacity: 1;
-        transform: translateY(0);
+
+      .taste-glass-panel {
+        padding: 30px 20px;
       }
-    }
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
+
+      .detail-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
       }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    .success-icon{
-      width:140px;
-      height:140px;
-      background:#fff;
-      border-radius:50%;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      margin:0 auto 35px;
-      font-size:70px;
-      animation:successPulse 2s infinite;
-      box-shadow:0 15px 50px rgba(0,0,0,0.25);
-      position:relative;
-      z-index:1
-    }
-    .success-icon::after{
-      content:'';
-      position:absolute;
-      width:100%;
-      height:100%;
-      border-radius:50%;
-      border:3px solid rgba(200,169,126,0.3);
-      animation:ripple 2s infinite
-    }
-    
-    .booking-details-card{
-      background:#fff;
-      padding:50px;
-      border-radius:24px;
-      box-shadow:0 20px 60px rgba(0,0,0,0.12);
-      margin-top:-70px;
-      position:relative;
-      z-index:10;
-      animation:slideUp 0.8s ease;
-      max-width:900px;
-      margin-left:auto;
-      margin-right:auto
-    }
-    .detail-row{
-      display:flex;
-      align-items:center;
-      padding:20px 0;
-      border-bottom:2px solid #f0f0f0;
-      gap:20px
-    }
-    .detail-row:last-child{border-bottom:none}
-    .detail-icon{
-      width:50px;
-      height:50px;
-      background:linear-gradient(135deg,#c8a97e 0%,#b89968 100%);
-      border-radius:12px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:24px;
-      flex-shrink:0;
-      box-shadow:0 4px 12px rgba(200,169,126,0.25)
-    }
-    .detail-content{
-      flex:1;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:20px
-    }
-    .detail-label{
-      color:#666;
-      font-weight:500;
-      font-size:15px
-    }
-    .detail-value{
-      color:#1a1a1a;
-      font-weight:700;
-      font-size:16px;
-      text-align:right
-    }
-    .detail-value.badge{
-      padding:8px 16px;
-      font-size:14px;
-      font-weight:600;
-      border-radius:8px
-    }
-    .detail-value.amount{
-      color:#c8a97e;
-      font-size:20px;
-      font-weight:700
-    }
-    
-    .action-buttons{
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-      gap:15px;
-      margin-top:40px;
-      padding-top:30px;
-      border-top:2px solid #f0f0f0
-    }
-    .btn-action{
-      padding:16px 28px;
-      border-radius:12px;
-      font-weight:600;
-      font-size:16px;
-      transition:all 0.3s;
-      text-decoration:none;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:8px;
-      border:2px solid transparent
-    }
-    .btn-action:hover{
-      transform:translateY(-2px);
-      box-shadow:0 8px 20px rgba(0,0,0,0.15)
-    }
-    .btn-primary-action{
-      background:linear-gradient(135deg,#c8a97e 0%,#b89968 100%);
-      color:#fff;
-      border:none
-    }
-    .btn-primary-action:hover{
-      background:linear-gradient(135deg,#b89968 0%,#c8a97e 100%);
-      color:#fff
-    }
-    .btn-outline-action{
-      background:#fff;
-      color:#c8a97e;
-      border-color:#c8a97e
-    }
-    .btn-outline-action:hover{
-      background:#c8a97e;
-      color:#fff;
-      border-color:#c8a97e
-    }
-    
-    .special-requests-box{
-      background:#f8f9fa;
-      border-radius:12px;
-      padding:20px;
-      margin-top:10px;
-      border-left:4px solid #c8a97e
-    }
-    .special-requests-box pre{
-      margin:0;
-      font-family:'Poppins',sans-serif;
-      font-size:14px;
-      color:#555;
-      white-space:pre-wrap;
-      word-wrap:break-word
-    }
-    
-    
-    @keyframes successPulse{
-      0%,100%{transform:scale(1);box-shadow:0 15px 50px rgba(0,0,0,0.25)}
-      50%{transform:scale(1.05);box-shadow:0 20px 60px rgba(0,0,0,0.35)}
-    }
-    @keyframes ripple{
-      0%{transform:scale(1);opacity:1}
-      100%{transform:scale(1.3);opacity:0}
-    }
-    @keyframes slideUp{
-      from{opacity:0;transform:translateY(50px)}
-      to{opacity:1;transform:translateY(0)}
-    }
-    
-    @media(max-width:768px){
-      .booking-details-card{padding:30px 20px;margin-top:-50px}
-      .detail-row{flex-direction:column;align-items:flex-start;gap:15px}
-      .detail-content{flex-direction:column;align-items:flex-start;width:100%}
-      .detail-value{text-align:left;width:100%}
-      .action-buttons{grid-template-columns:1fr}
-      .success-hero{
-        padding: 100px 0 60px;
-        min-height: 400px;
-      }
-      .success-hero h1 {
-        font-size: 32px;
-      }
-      .success-hero p {
-        font-size: 16px;
+
+      .detail-value {
+        text-align: left;
       }
     }
   </style>
 </head>
-<body>
-  <!-- Header placeholder - will be loaded by load-header.js -->
-  <div id="header-placeholder"></div>
-  
-  <!-- Load header component -->
-  <script src="js/load-header.js"></script>
 
-  <div class="success-hero">
-    <div class="container">
-      <h1 class="display-4 mb-3" style="font-weight:700;font-size:48px;text-shadow:0 2px 10px rgba(0,0,0,0.2)">Đặt phòng thành công!</h1>
-      <p class="lead" style="font-size:20px;font-weight:400;opacity:0.95">Cảm ơn bạn đã chọn RESORT DELUXE. Chúng tôi đã ghi nhận yêu cầu đặt phòng của bạn.</p>
-    </div>
-  </div>
+<body class="layout-vertical">
+  <!-- Navbar -->
+  <header id="site-header"></header>
 
-  <div class="container mb-5">
-    <div class="booking-details-card">
-      <h3 class="mb-4 text-center" style="font-size:28px;font-weight:700;color:#1a1a1a;margin-bottom:35px">
-        📋 Thông tin đặt phòng
-      </h3>
-      <div id="bookingDetails">
-        <div class="text-center py-5">
-          <div class="spinner-border text-primary" role="status" style="width:3rem;height:3rem;border-width:4px">
-            <span class="sr-only">Loading...</span>
-          </div>
-          <p class="mt-4 text-muted" style="font-size:16px">Đang tải thông tin...</p>
-        </div>
-      </div>
-      
-      <div class="action-buttons">
-        <a href="my-bookings.html" class="btn btn-primary-action">
-          <span class="oi oi-list"></span> Xem đặt phòng của tôi
-        </a>
-        <a href="index.html" class="btn btn-outline-action">
-          <span class="oi oi-home"></span> Về trang chủ
-        </a>
-      </div>
-    </div>
-  </div>
-
-      <footer class="ftco-footer ftco-bg-dark ftco-section">
-      <div class="container">
-        <div class="row mb-5">
-          <div class="col-md">
-            <div class="ftco-footer-widget mb-4">
-              <h2 class="ftco-heading-2">RESORT DELUXE</h2>
-              <p>Khu nghỉ dưỡng cao cấp với không gian sang trọng, dịch vụ chu đáo và tiện nghi hiện đại, mang đến cho bạn kỳ nghỉ trọn vẹn.</p>
-              <ul class="ftco-footer-social list-unstyled float-md-left float-lft mt-5">
-                <li class="ftco-animate"><a href="#" style="display: block !important; visibility: visible !important; opacity: 1 !important;"><span class="icon-twitter"></span></a></li>
-                <li class="ftco-animate"><a href="#" style="display: block !important; visibility: visible !important; opacity: 1 !important;"><span class="icon-facebook"></span></a></li>
-                <li class="ftco-animate"><a href="#" style="display: block !important; visibility: visible !important; opacity: 1 !important;"><span class="icon-instagram"></span></a></li>
-              </ul>
-            </div>
-          </div>
-          <div class="col-md">
-            <div class="ftco-footer-widget mb-4 ml-md-5">
-              <h2 class="ftco-heading-2">Liên kết hữu ích</h2>
-              <ul class="list-unstyled">
-                <li><a href="#" class="py-2 d-block">Blog</a></li>
-                <li><a href="#" class="py-2 d-block">Phòng</a></li>
-                <li><a href="#" class="py-2 d-block">Tiện ích</a></li>
-                <li><a href="#" class="py-2 d-block">Thẻ quà tặng</a></li>
-              </ul>
-            </div>
-          </div>
-          <div class="col-md">
-             <div class="ftco-footer-widget mb-4">
-              <h2 class="ftco-heading-2">Chính sách</h2>
-              <ul class="list-unstyled">
-                <li><a href="#" class="py-2 d-block">Tuyển dụng</a></li>
-                <li><a href="#" class="py-2 d-block">Về chúng tôi</a></li>
-                <li><a href="#" class="py-2 d-block">Liên hệ</a></li>
-                <li><a href="#" class="py-2 d-block">Dịch vụ</a></li>
-              </ul>
-            </div>
-          </div>
-          <div class="col-md">
-            <div class="ftco-footer-widget mb-4">
-                <h2 class="ftco-heading-2">Bạn cần hỗ trợ?</h2>
-            	<div class="block-23 mb-3">
-	              <ul>
-                <li><span class="icon icon-map-marker"></span><span class="text">Huflit Hốc Môn, Hồ Chí Minh</span></li>
-                <li><a href="#"><span class="icon icon-phone"></span><span class="text">+84 901 329 227</span></a></li>
-                <li><a href="#"><span class="icon icon-envelope"></span><span class="text">support@resortdeluxe.vn</span></a></li>
-	              </ul>
-	            </div>
-            </div>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-md-12 text-center">
-            <p>Copyright ©<script>document.write(new Date().getFullYear());</script>2025 All rights reserved</p>
-          </div>
-        </div>
-      </div>
-    </footer>
-
+  <!-- Core Scripts -->
   <script src="js/jquery.min.js"></script>
   <script src="js/bootstrap.min.js"></script>
   <script src="js/popper.min.js"></script>
   <script src="../js/api.js"></script>
   <script src="js/navbar-auth.js"></script>
   <script src="js/coupons.js"></script>
+
+  <!-- Main Content wrapped for PJAX -->
+  <main id="page-content" data-page="booking-success" data-layout="vertical">
+    <div class="success-wrapper">
+      <img src="images/bg_1.jpg" alt="Resort Luxury" class="success-hero-img">
+      
+      <div class="success-header">
+        <div class="success-icon-main"><i class="fas fa-check-circle"></i></div>
+        <h1>Đặt phòng thành công</h1>
+        <p>Cảm ơn bạn đã chọn Resort Luxury</p>
+      </div>
+
+      <div class="taste-glass-panel">
+        <h3 class="panel-title">Thông tin đặt phòng</h3>
+
+        <div id="bookingDetails">
+          <div class="text-center py-5">
+            <div class="spinner-border" role="status" style="width:3rem;height:3rem;border-width:2px;color:#8a2017">
+              <span class="sr-only">Loading...</span>
+            </div>
+            <p class="mt-4" style="font-size:11px; text-transform:uppercase; letter-spacing:2px; color:#777">Đang tải
+              thông tin...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Script block exactly as originally -->
   <script>
     const urlParams = new URLSearchParams(window.location.search);
     const bookingId = urlParams.get('bookingId');
-    
-    // Load room types cache for price calculation
-    // IMPORTANT: Always reload to get latest prices (admin may have updated)
+
     async function loadRoomTypesCache() {
       try {
         const token = localStorage.getItem('token');
-        if (!token) {
-          console.warn('⚠️ [loadRoomTypesCache] No token, skipping');
-          return;
-        }
-        
-        // Force reload by adding timestamp and clearing cache
+        if (!token) return;
         const roomTypesResp = await fetch(`${location.origin}/api/room-types?_=${Date.now()}`, {
           cache: 'no-store',
-          headers: { 
+          headers: {
             'Authorization': `Bearer ${token}`,
             'Cache-Control': 'no-cache',
             'Pragma': 'no-cache'
           }
         });
-        
         if (roomTypesResp.ok) {
-          const roomTypes = await roomTypesResp.json();
-          window._roomTypesCache = roomTypes;
-          console.log('✅ [loadRoomTypesCache] Room types cached:', roomTypes.length, 'types');
-          
-          // Log Standard Room price for debugging
-          const standardRoom = roomTypes.find(rt => 
-            rt.typeName?.toLowerCase().includes('standard') || 
-            rt.typeCode?.toLowerCase().includes('standard')
-          );
-          if (standardRoom) {
-            console.log('💰 [loadRoomTypesCache] Standard Room price from API:', {
-              typeName: standardRoom.typeName,
-              basePrice: standardRoom.basePrice,
-              formatted: vnd(standardRoom.basePrice)
-            });
-          }
-        } else {
-          console.warn('⚠️ [loadRoomTypesCache] Failed to load room types:', roomTypesResp.status);
+          window._roomTypesCache = await roomTypesResp.json();
         }
-      } catch(e) {
-        console.warn('⚠️ [loadRoomTypesCache] Error:', e);
-      }
+      } catch (e) { }
     }
-    
-    // Load room types cache on page load (force reload to get latest prices)
     loadRoomTypesCache();
 
     function vnd(n) {
       try {
-        // IMPORTANT: VND has no minor units (no cents), so we must set minimumFractionDigits: 0
-        // to prevent automatic division by 100
         return new Intl.NumberFormat('vi-VN', {
-          style: 'currency', 
+          style: 'currency',
           currency: 'VND',
           minimumFractionDigits: 0,
           maximumFractionDigits: 0
         }).format(n || 0);
-      } catch(_) {
+      } catch (_) {
         return (n || 0).toLocaleString('vi-VN') + ' ₫';
       }
     }
-    
 
     async function loadBookingDetails() {
       if (!bookingId) {
         document.getElementById('bookingDetails').innerHTML = `
-          <div class="alert alert-warning" style="padding:25px;border-radius:12px;border-left:4px solid #ffc107">
-            <h5 style="font-weight:700;margin-bottom:15px">⚠️ Không tìm thấy mã đặt phòng</h5>
-            <p style="margin:0;font-size:15px">Vui lòng kiểm tra lại email hoặc liên hệ với chúng tôi qua số điện thoại: <strong>+84 901 329 227</strong></p>
+          <div style="text-align:center; padding: 40px 0; color: #8a2017;">
+            <h5 style="font-family:'Cormorant Garamond',serif; font-size:24px; margin-bottom:15px">⚠️ Không tìm thấy mã đặt phòng</h5>
+            <p style="font-size:15px; color:#777">Vui lòng kiểm tra lại email hoặc liên hệ: <strong>+84 901 329 227</strong></p>
           </div>
         `;
         return;
@@ -461,9 +311,9 @@
         const token = localStorage.getItem('token');
         if (!token) {
           document.getElementById('bookingDetails').innerHTML = `
-            <div class="alert alert-info" style="padding:25px;border-radius:12px;border-left:4px solid #0dcaf0">
-              <h5 style="font-weight:700;margin-bottom:15px">🔐 Vui lòng đăng nhập</h5>
-              <p style="margin:0;font-size:15px">Để xem chi tiết đặt phòng, vui lòng <a href="login.html" style="font-weight:600;color:#0dcaf0">đăng nhập</a>.</p>
+            <div style="text-align:center; padding: 40px 0;">
+              <h5 style="font-family:'Cormorant Garamond',serif; font-size:24px; margin-bottom:15px">Vui lòng đăng nhập</h5>
+              <p style="font-size:15px; color:#777">Để xem chi tiết đặt phòng, vui lòng <a href="login.html" style="color:#8a2017">đăng nhập</a>.</p>
             </div>
           `;
           return;
@@ -471,25 +321,19 @@
 
         const API_BOOKINGS = `${location.origin}/api/bookings/${bookingId}?_=${Date.now()}`;
         const resp = await fetch(API_BOOKINGS, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          },
+          headers: { 'Authorization': `Bearer ${token}` },
           cache: 'no-store'
         });
 
-        if (!resp.ok) {
-          throw new Error('Không thể tải thông tin đặt phòng');
-        }
-
+        if (!resp.ok) throw new Error('Không thể tải thông tin đặt phòng');
         const booking = await resp.json();
         renderBookingDetails(booking);
-      } catch(e) {
-        console.error('Error loading booking:', e);
+      } catch (e) {
         document.getElementById('bookingDetails').innerHTML = `
-          <div class="alert alert-success" style="padding:25px;border-radius:12px;border-left:4px solid #198754">
-            <h5 style="font-weight:700;margin-bottom:15px">✅ Đặt phòng đã được ghi nhận</h5>
-            <p style="margin-bottom:10px"><strong>Mã đặt phòng:</strong> <span style="color:#198754;font-size:18px">${bookingId}</span></p>
-            <p style="margin:0;font-size:15px">Chúng tôi sẽ liên hệ với bạn trong thời gian sớm nhất để xác nhận. Vui lòng kiểm tra email hoặc điện thoại của bạn.</p>
+          <div style="text-align:center; padding: 40px 0;">
+            <h5 style="font-family:'Cormorant Garamond',serif; font-size:24px; margin-bottom:15px; color:#16a34a">✅ Đặt phòng đã được ghi nhận</h5>
+            <p style="margin-bottom:10px">Mã đặt phòng: <strong>${bookingId}</strong></p>
+            <p style="font-size:15px; color:#777">Chúng tôi sẽ liên hệ với bạn sớm nhất.</p>
           </div>
         `;
       }
@@ -500,215 +344,152 @@
       const checkout = new Date(booking.checkOutDate).toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
       const bookingCode = booking.bookingCode || `BKG${bookingId}`;
       const roomInfo = booking.room ? `${booking.room.roomNumber} - ${booking.room.roomTypeNavigation?.typeName || booking.requestedRoomType || 'N/A'}` : (booking.requestedRoomType || 'N/A');
-      
-      // Calculate base price and check for coupon
+
       let baseAmount = Number(booking.estimatedTotalAmount || booking.totalAmount || 0);
       let discount = 0;
       let couponInfo = null;
       let couponCode = booking.couponCode || null;
-      
-      // Try to get couponCode from specialRequests if not in booking
+
       if (!couponCode && booking.specialRequests) {
         try {
           const parsed = JSON.parse(booking.specialRequests);
           if (typeof parsed === 'object' && parsed !== null && parsed.couponCode) {
             couponCode = parsed.couponCode;
           }
-        } catch(_) {}
+        } catch (_) { }
       }
-      
-      // If we have couponCode, try to fetch coupon and calculate discount
-      // If validation fails (403), use estimatedTotalAmount from backend (already includes discount)
+
       if (couponCode && window.coupons) {
         try {
           const coupon = await window.coupons.validateCoupon(couponCode);
           couponInfo = coupon;
-          
-          // Calculate base amount if not available
-          // IMPORTANT: Use estimatedTotalAmount from backend as primary source
           if (baseAmount <= 0 && booking.checkInDate && booking.checkOutDate) {
             const nights = Math.ceil((new Date(booking.checkOutDate) - new Date(booking.checkInDate)) / (1000 * 60 * 60 * 24));
-            let roomPrice = 0;
-            
-            // Try to get room price - prioritize BasePrice over pricePerNight
-            if (booking.room?.roomTypeNavigation?.basePrice) {
-              roomPrice = Number(booking.room.roomTypeNavigation.basePrice);
-              console.log('🔵 [renderBookingDetails] Using roomTypeNavigation.basePrice:', roomPrice);
-            } else if (booking.room?.pricePerNight) {
-              roomPrice = Number(booking.room.pricePerNight);
-              console.log('🔵 [renderBookingDetails] Using room.pricePerNight:', roomPrice);
-            } else if (booking.room?.roomTypeNavigation?.pricePerNight) {
-              roomPrice = Number(booking.room.roomTypeNavigation.pricePerNight);
-              console.log('🔵 [renderBookingDetails] Using roomTypeNavigation.pricePerNight:', roomPrice);
-            }
-            
+            let roomPrice = Number(booking.room?.roomTypeNavigation?.basePrice || booking.room?.pricePerNight || booking.room?.roomTypeNavigation?.pricePerNight || 0);
             if (nights > 0 && roomPrice > 0) {
               baseAmount = nights * roomPrice;
-              console.log('🔵 [renderBookingDetails] Calculated baseAmount:', baseAmount, `(${nights} nights × ${roomPrice})`);
-              
-              // If backend has estimatedTotalAmount, use it as authoritative source
               const backendAmount = Number(booking.estimatedTotalAmount || booking.totalAmount || 0);
               if (backendAmount > 0 && baseAmount !== backendAmount) {
-                console.warn('⚠️ [renderBookingDetails] Calculated amount differs from backend. Using backend amount:', backendAmount);
                 baseAmount = backendAmount;
               }
             }
           }
-          
-          // Calculate discount
           if (baseAmount > 0) {
             const result = window.coupons.calculateDiscountedTotal(baseAmount, coupon);
             discount = result.discount;
           }
-        } catch(e) {
-          // If validation fails (403, 401, etc.), assume backend already calculated discount
-          // Use estimatedTotalAmount as final amount (it may already include discount)
-          console.warn('Could not validate coupon (using backend calculated amount):', e);
-          
-          // If baseAmount is 0, try to estimate from dates to show breakdown
-          // IMPORTANT: Use estimatedTotalAmount from backend as primary source
-          // Only recalculate if it's missing or invalid
+        } catch (e) {
           if (baseAmount <= 0 && booking.checkInDate && booking.checkOutDate) {
             const nights = Math.ceil((new Date(booking.checkOutDate) - new Date(booking.checkInDate)) / (1000 * 60 * 60 * 24));
-            let roomPrice = 0;
-            
-            // Try to get room price - prioritize BasePrice over pricePerNight
-            if (booking.room?.roomTypeNavigation?.basePrice) {
-              roomPrice = Number(booking.room.roomTypeNavigation.basePrice);
-              console.log('🔵 [renderBookingDetails] Using roomTypeNavigation.basePrice:', roomPrice);
-            } else if (booking.room?.pricePerNight) {
-              roomPrice = Number(booking.room.pricePerNight);
-              console.log('🔵 [renderBookingDetails] Using room.pricePerNight:', roomPrice);
-            } else if (booking.room?.roomTypeNavigation?.pricePerNight) {
-              roomPrice = Number(booking.room.roomTypeNavigation.pricePerNight);
-              console.log('🔵 [renderBookingDetails] Using roomTypeNavigation.pricePerNight:', roomPrice);
-            }
-            
+            let roomPrice = Number(booking.room?.roomTypeNavigation?.basePrice || booking.room?.pricePerNight || booking.room?.roomTypeNavigation?.pricePerNight || 0);
             if (nights > 0 && roomPrice > 0) {
               baseAmount = nights * roomPrice;
-              console.log('🔵 [renderBookingDetails] Calculated baseAmount:', baseAmount, `(${nights} nights × ${roomPrice})`);
-              
-              // Estimate discount as difference between base and final
               const finalAmount = Number(booking.estimatedTotalAmount || booking.totalAmount || 0);
               if (finalAmount > 0 && baseAmount > finalAmount) {
                 discount = baseAmount - finalAmount;
-                couponInfo = { code: couponCode }; // Mark as applied but not validated
+                couponInfo = { code: couponCode };
               } else if (finalAmount > 0 && baseAmount !== finalAmount) {
-                // If calculated amount differs from backend, use backend amount (it's authoritative)
-                console.warn('⚠️ [renderBookingDetails] Calculated amount differs from backend. Using backend amount:', finalAmount);
                 baseAmount = finalAmount;
               }
             }
           } else if (baseAmount > 0) {
-            // Calculate discount as difference
             const finalAmount = Number(booking.estimatedTotalAmount || booking.totalAmount || 0);
             if (finalAmount > 0 && baseAmount > finalAmount) {
               discount = baseAmount - finalAmount;
-              couponInfo = { code: couponCode }; // Mark as applied but not validated
+              couponInfo = { code: couponCode };
             }
           }
         }
       }
-      
+
       let specialRequestsHtml = '';
       if (booking.specialRequests) {
         try {
           const parsed = JSON.parse(booking.specialRequests);
           if (typeof parsed === 'object' && parsed !== null) {
             specialRequestsHtml = Object.entries(parsed).map(([key, value]) => {
-              // Skip couponCode from display
               if (key === 'couponCode') return '';
               const labels = {
-                guestName: 'Họ tên',
-                guestEmail: 'Email',
-                guestPhone: 'Số điện thoại',
-                nationality: 'Quốc tịch',
-                idCard: 'CMND/CCCD',
-                passport: 'Hộ chiếu',
-                address: 'Địa chỉ',
-                arrivalTime: 'Giờ đến',
-                flightNumber: 'Số chuyến bay',
-                paymentMethod: 'Phương thức thanh toán',
-                note: 'Ghi chú'
+                guestName: 'Họ tên', guestEmail: 'Email', guestPhone: 'Số điện thoại',
+                nationality: 'Quốc tịch', idCard: 'CMND/CCCD', passport: 'Hộ chiếu',
+                address: 'Địa chỉ', arrivalTime: 'Giờ đến', flightNumber: 'Số chuyến bay',
+                paymentMethod: 'Phương thức thanh toán', note: 'Ghi chú'
               };
               return `<div style="margin-bottom:8px"><strong>${labels[key] || key}:</strong> ${value || '-'}</div>`;
             }).join('');
           } else {
             specialRequestsHtml = booking.specialRequests;
           }
-        } catch(_) {
+        } catch (_) {
           specialRequestsHtml = booking.specialRequests;
         }
       }
-      
-      
-      // Build price breakdown HTML
+
       let priceBreakdownHtml = '';
       if (couponInfo && discount > 0 && baseAmount > 0) {
-        const finalAmount = baseAmount - discount;
         priceBreakdownHtml = `
         <div class="detail-row">
-          <div class="detail-icon">🎟️</div>
+          <div class="detail-icon"><i class="fas fa-ticket-alt"></i></div>
           <div class="detail-content">
             <span class="detail-label">Mã giảm giá</span>
-            <span class="detail-value"><strong style="color:#c8a97e">${couponCode}</strong></span>
+            <span class="detail-value" style="color:#8a2017">${couponCode}</span>
           </div>
         </div>
         <div class="detail-row">
-          <div class="detail-icon">💵</div>
+          <div class="detail-icon"><i class="fas fa-money-bill-wave"></i></div>
           <div class="detail-content">
             <span class="detail-label">Giá gốc</span>
-            <span class="detail-value" style="color:#6b7280;text-decoration:line-through">${vnd(baseAmount)}</span>
+            <span class="detail-value" style="color:#aaa;text-decoration:line-through">${vnd(baseAmount)}</span>
           </div>
         </div>
         <div class="detail-row">
-          <div class="detail-icon">💸</div>
+          <div class="detail-icon"><i class="fas fa-tags"></i></div>
           <div class="detail-content">
             <span class="detail-label">Giảm giá</span>
-            <span class="detail-value" style="color:#10b981;font-weight:700">-${vnd(discount)}</span>
+            <span class="detail-value" style="color:#16a34a">-${vnd(discount)}</span>
           </div>
         </div>
         `;
       }
-      
+
       document.getElementById('bookingDetails').innerHTML = `
         <div class="detail-row">
-          <div class="detail-icon">🎫</div>
+          <div class="detail-icon"><i class="fas fa-barcode"></i></div>
           <div class="detail-content">
             <span class="detail-label">Mã đặt phòng</span>
             <span class="detail-value">${bookingCode}</span>
           </div>
         </div>
         <div class="detail-row">
-          <div class="detail-icon">📊</div>
+          <div class="detail-icon"><i class="fas fa-info-circle"></i></div>
           <div class="detail-content">
             <span class="detail-label">Trạng thái</span>
-            <span class="detail-value"><span class="badge bg-${getStatusColor(booking.status)}">${getStatusText(booking.status)}</span></span>
+            <span class="detail-value" style="color:#8a2017">${getStatusText(booking.status)}</span>
           </div>
         </div>
         <div class="detail-row">
-          <div class="detail-icon">📅</div>
+          <div class="detail-icon"><i class="fas fa-calendar-check"></i></div>
           <div class="detail-content">
             <span class="detail-label">Ngày nhận phòng</span>
             <span class="detail-value">${checkin}</span>
           </div>
         </div>
         <div class="detail-row">
-          <div class="detail-icon">📅</div>
+          <div class="detail-icon"><i class="fas fa-calendar-times"></i></div>
           <div class="detail-content">
             <span class="detail-label">Ngày trả phòng</span>
             <span class="detail-value">${checkout}</span>
           </div>
         </div>
         <div class="detail-row">
-          <div class="detail-icon">👥</div>
+          <div class="detail-icon"><i class="fas fa-users"></i></div>
           <div class="detail-content">
             <span class="detail-label">Số khách</span>
             <span class="detail-value">${booking.numberOfGuests || '-'} khách</span>
           </div>
         </div>
         <div class="detail-row">
-          <div class="detail-icon">🏨</div>
+          <div class="detail-icon"><i class="fas fa-door-open"></i></div>
           <div class="detail-content">
             <span class="detail-label">Phòng</span>
             <span class="detail-value">${roomInfo}</span>
@@ -716,53 +497,40 @@
         </div>
         ${priceBreakdownHtml}
         <div class="detail-row">
-          <div class="detail-icon">💰</div>
+          <div class="detail-icon"><i class="fas fa-coins"></i></div>
           <div class="detail-content">
             <span class="detail-label">${couponInfo && discount > 0 ? 'Tổng tiền sau giảm giá' : 'Tổng tiền'}</span>
             <span class="detail-value amount">${vnd(couponInfo && discount > 0 ? (baseAmount - discount) : (booking.estimatedTotalAmount || booking.totalAmount || 0))}</span>
           </div>
         </div>
         ${specialRequestsHtml ? `
-        <div class="detail-row" style="flex-direction:column;align-items:flex-start">
-          <div style="display:flex;align-items:center;gap:15px;margin-bottom:15px;width:100%">
-            <div class="detail-icon">📝</div>
-            <span class="detail-label">Thông tin khách hàng & Yêu cầu đặc biệt</span>
+        <div class="detail-row" style="flex-direction:column;align-items:flex-start;border-bottom:none">
+          <div style="display:flex;align-items:center;gap:20px;width:100%;margin-bottom:15px">
+            <div class="detail-icon"><i class="fas fa-file-alt"></i></div>
+            <span class="detail-label" style="margin-top:10px">Thông tin & Yêu cầu</span>
           </div>
-          <div class="special-requests-box" style="width:100%;margin-left:70px">
+          <div class="special-requests-box" style="width:100%">
             ${specialRequestsHtml}
           </div>
         </div>
         ` : ''}
+        <div class="action-buttons" id="dynActionButtons"></div>
       `;
-      
-      // Update action buttons to include booking details link if bookingId exists
-      const actionButtons = document.querySelector('.action-buttons');
+
+      const actionButtons = document.getElementById('dynActionButtons');
       if (bookingId && actionButtons) {
         actionButtons.innerHTML = `
-          <a href="booking-details.html?id=${bookingId}" class="btn btn-primary-action">
-            <span class="oi oi-eye"></span> Xem chi tiết
+          <a href="booking-details.html?id=${bookingId}" class="taste-btn taste-btn-primary">
+            <i class="fas fa-eye"></i> Xem chi tiết
           </a>
-          <a href="my-bookings.html" class="btn btn-outline-action">
-            <span class="oi oi-list"></span> Đặt phòng của tôi
+          <a href="my-bookings.html" class="taste-btn">
+            <i class="fas fa-list"></i> Đặt phòng của tôi
           </a>
-          <a href="index.html" class="btn btn-outline-action">
-            <span class="oi oi-home"></span> Về trang chủ
+          <a href="index.html" class="taste-btn">
+            <i class="fas fa-home"></i> Về trang chủ
           </a>
         `;
       }
-    }
-
-    function getStatusColor(status) {
-      const colors = {
-        'Pending': 'warning',
-        'Confirmed': 'info',
-        'Paid': 'success',
-        'Assigned': 'primary',
-        'CheckedIn': 'success',
-        'CheckedOut': 'secondary',
-        'Cancelled': 'danger'
-      };
-      return colors[status] || 'secondary';
     }
 
     function getStatusText(status) {
@@ -778,22 +546,25 @@
       return texts[status] || status;
     }
 
-    // Load on page load
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', loadBookingDetails);
-    } else {
-      loadBookingDetails();
-    }
-
-    // Also load on pageshow (back/forward navigation)
-    window.addEventListener('pageshow', function(event) {
-      if (event.persisted || (performance.navigation && performance.navigation.type === 2)) {
+    document.addEventListener('DOMContentLoaded', loadBookingDetails);
+    document.addEventListener('pjax:complete', function () {
+      if (document.getElementById('bookingDetails')) {
         loadBookingDetails();
       }
     });
+
+    // Global initial load for sidebar (only runs on direct page access)
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (document.getElementById('site-header') && !document.querySelector('#site-header .ts-sidebar')) {
+        try {
+          const res = await fetch(`components/header.html?_=${Date.now()}`);
+          if (res.ok) document.getElementById('site-header').innerHTML = await res.text();
+        } catch (e) { console.error('Error loading header', e); }
+      }
+    });
   </script>
-  
-  <!-- AI Chat Widget -->
-  <script src="js/ai-chat.js"></script>
+
+  <script src="js/page-loader.js"></script>
 </body>
+
 </html>

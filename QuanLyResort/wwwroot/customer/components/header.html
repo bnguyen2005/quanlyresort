@@ -1,33 +1,719 @@
-<!-- Unified Header Component -->
-<nav class="navbar navbar-expand-lg navbar-dark ftco_navbar bg-dark ftco-navbar-light" id="ftco-navbar">
-  <div class="container">
-    <a class="navbar-brand" href="index.html">RESORT DELUXE</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#ftco-nav" aria-controls="ftco-nav" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="oi oi-menu"></span> Menu
-    </button>
-    <div class="collapse navbar-collapse" id="ftco-nav">
-      <ul class="navbar-nav ml-auto">
-        <li class="nav-item" data-nav="index"><a href="index.html" class="nav-link">Trang chủ</a></li>
-        <li class="nav-item" data-nav="rooms"><a href="rooms.html" class="nav-link">Phòng</a></li>
-        <li class="nav-item" data-nav="restaurant"><a href="restaurant.html" class="nav-link">Nhà hàng</a></li>
-        <li class="nav-item" data-nav="reviews"><a href="reviews.html" class="nav-link">Đánh giá</a></li>
-        <li class="nav-item" data-nav="about"><a href="about.html" class="nav-link">Giới thiệu</a></li>
-        <li class="nav-item" data-nav="contact"><a href="contact.html" class="nav-link">Liên hệ</a></li>
-      </ul>
-      <div class="ml-auto d-flex align-items-center">
-        <!-- Dark Mode Toggle -->
-        <div class="theme-switch-wrapper mr-3">
-          <span class="theme-icon">☀️</span>
-          <label class="theme-switch" for="checkbox-theme">
-            <input type="checkbox" id="checkbox-theme" />
-            <div class="slider round"></div>
-          </label>
-          <span class="theme-icon">🌙</span>
-        </div>
-        <div id="navbar-auth-placeholder"></div>
-      </div>
+<!-- Tandjung Sari Style Vertical Header -->
+<style>
+  /* Base Layout Reset for Tandjung Style */
+  :root {
+    --ts-gold: #c8a97e;
+    --ts-dark: #111111;
+    --ts-light: #f5f0e6;
+    --ts-muted: #888888;
+    --ts-border: rgba(200, 169, 126, 0.3);
+    --ts-menu-red: #9d3227;
+    --ts-sidebar-red: #8a2017;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+    background-color: var(--ts-dark);
+    color: #fff;
+    overflow-x: hidden;
+  }
+
+  body.menu-open {
+    overflow: hidden;
+  }
+
+  /* Left Vertical Sidebar */
+  .ts-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 40px;
+    height: 100vh;
+    contain: strict;
+    isolation: isolate;
+    background-color: #9f8c76;
+    /* Muted gold/brown */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 30px 0;
+    z-index: 9999;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    transition: background-color 0.5s ease;
+    transform: translateZ(0);
+    /* Hardware acceleration to prevent repaint flashes */
+    will-change: transform;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+
+  body.menu-open .ts-sidebar {
+    background-color: var(--ts-sidebar-red);
+    border-right: none;
+  }
+
+  .ts-brand-logo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: #fff;
+    transition: opacity 0.3s;
+  }
+
+  .ts-brand-logo img {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    margin-bottom: 10px;
+  }
+
+  body.menu-open .ts-brand-logo {
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+  }
+
+  /* Hamburger Menu */
+  .ts-menu-toggle {
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px;
+    transition: opacity 0.3s;
+  }
+
+  .ts-menu-toggle span {
+    display: block;
+    width: 20px;
+    height: 2px;
+    background-color: #fff;
+    transition: all 0.3s ease;
+  }
+
+  .ts-menu-toggle:hover span {
+    background-color: var(--ts-gold);
+  }
+
+  body.menu-open .ts-menu-toggle {
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+  }
+
+  /* Vertical CLOSE button (only shows when menu is open) */
+  .ts-menu-close-vert {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: #fff;
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+    top: 40px;
+    transition: opacity 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .ts-menu-close-vert::after {
+    content: '';
+    display: inline-block;
+    width: 1px;
+    height: 30px;
+    background-color: rgba(255, 255, 255, 0.5);
+  }
+
+  body.menu-open .ts-menu-close-vert {
+    opacity: 1;
+    pointer-events: auto;
+    position: static;
+  }
+
+  .ts-menu-close-vert:hover {
+    color: var(--ts-gold);
+  }
+
+  /* Vertical Whatsapp / Contact Text */
+  .ts-vertical-contact {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: #fff;
+    text-decoration: none;
+    transition: color 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .ts-vertical-contact::before {
+    content: '';
+    display: inline-block;
+    width: 1px;
+    height: 40px;
+    background-color: rgba(255, 255, 255, 0.5);
+  }
+
+  .ts-vertical-contact:hover {
+    color: var(--ts-gold);
+  }
+
+  /* Top Right Fixed Actions */
+  .ts-top-actions {
+    position: fixed;
+    top: 30px;
+    right: 40px;
+    display: flex;
+    gap: 15px;
+    z-index: 998;
+    /* Below menu overlay */
+    transform: translateZ(0);
+    will-change: transform;
+    transition: opacity 0.3s;
+  }
+
+  body.menu-open .ts-top-actions {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .ts-btn-outline {
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    color: #fff;
+    padding: 12px 24px;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: all 0.4s ease;
+  }
+
+  .ts-btn-outline:hover {
+    background: #fff;
+    color: var(--ts-dark);
+  }
+
+  .ts-btn-solid {
+    border: 1px solid var(--ts-gold);
+    background: var(--ts-gold);
+    color: var(--ts-dark);
+    padding: 12px 24px;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.4s ease;
+  }
+
+  .ts-btn-solid:hover {
+    background: transparent;
+    color: var(--ts-gold);
+    backdrop-filter: blur(10px);
+  }
+
+  /* Booking Panel (Desktop) */
+  .booking-panel {
+    position: fixed;
+    top: 80px;
+    right: 40px;
+    width: 320px;
+    background: #fff;
+    color: #333;
+    padding: 25px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+  }
+
+  .booking-panel.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  /* User Dropdown in Top Actions */
+  .ts-user-menu {
+    position: relative;
+    display: inline-block;
+  }
+
+  .ts-user-btn {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .ts-user-btn img {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 1px solid var(--ts-gold);
+  }
+
+  .ts-user-dropdown-content {
+    position: absolute;
+    top: calc(100% + 15px);
+    right: 0;
+    background: rgba(17, 17, 17, 0.95);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    min-width: 240px;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  }
+
+  .ts-user-menu:hover .ts-user-dropdown-content {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .ts-user-dropdown-content a {
+    color: rgba(255, 255, 255, 0.8);
+    padding: 16px 24px;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .ts-user-dropdown-content a:last-child {
+    border-bottom: none;
+  }
+
+  .ts-user-dropdown-content a:hover {
+    background: rgba(200, 169, 126, 0.1);
+    color: var(--ts-gold);
+    padding-left: 28px;
+  }
+
+  .booking-panel label {
+    display: block;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+    color: #666;
+  }
+
+  .booking-panel input,
+  .booking-panel select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    font-family: inherit;
+    box-sizing: border-box;
+  }
+
+  .booking-panel .check-rates {
+    width: 100%;
+    padding: 15px;
+    background: var(--ts-gold);
+    color: #fff;
+    border: none;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+
+  .booking-panel .check-rates:hover {
+    background: #b89768;
+  }
+
+  /* Fullscreen Menu Overlay */
+  .ts-fullscreen-menu {
+    position: fixed;
+    top: 0;
+    left: 40px;
+    /* start after sidebar */
+    right: 0;
+    bottom: 0;
+    background: var(--ts-menu-red);
+    z-index: 999;
+    display: flex;
+    visibility: hidden;
+    transform: translateX(-100%);
+    transition: transform 0.7s cubic-bezier(0.77, 0, 0.175, 1), visibility 0.7s;
+  }
+
+  body.menu-open .ts-fullscreen-menu {
+    visibility: visible;
+    transform: translateX(0);
+  }
+
+  /* Menu Left Image Panel */
+  .ts-menu-img-panel {
+    flex: 0 0 32%;
+    background-image: url('images/image_6.jpg');
+    /* fallback, will use a nice interior */
+    background-size: cover;
+    background-position: center;
+    position: relative;
+  }
+
+  .ts-menu-img-panel::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.1);
+  }
+
+  /* Menu Right Content Panel */
+  .ts-menu-content-panel {
+    flex: 1;
+    padding: 50px 80px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  /* Menu Logo */
+  .ts-menu-logo {
+    margin-bottom: 60px;
+  }
+
+  .ts-menu-logo img {
+    height: 40px;
+    filter: brightness(0) invert(1);
+    opacity: 0.9;
+  }
+
+  /* Main Navigation List */
+  .ts-nav-list.main-nav {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 60px 0;
+  }
+
+  .ts-nav-list.main-nav li {
+    margin: 15px 0;
+    transform: translateX(30px);
+    opacity: 0;
+    transition: all 0.5s ease;
+  }
+
+  body.menu-open .ts-nav-list.main-nav li {
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  body.menu-open .ts-nav-list.main-nav li:nth-child(1) {
+    transition-delay: 0.1s;
+  }
+
+  body.menu-open .ts-nav-list.main-nav li:nth-child(2) {
+    transition-delay: 0.2s;
+  }
+
+  body.menu-open .ts-nav-list.main-nav li:nth-child(3) {
+    transition-delay: 0.3s;
+  }
+
+  body.menu-open .ts-nav-list.main-nav li:nth-child(4) {
+    transition-delay: 0.4s;
+  }
+
+  body.menu-open .ts-nav-list.main-nav li:nth-child(5) {
+    transition-delay: 0.5s;
+  }
+
+  .ts-nav-list.main-nav a {
+    font-family: 'Cormorant Garamond', 'Playfair Display', serif;
+    font-size: 42px;
+    color: rgba(255, 255, 255, 0.4);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-block;
+  }
+
+  .ts-nav-list.main-nav a:hover,
+  .ts-nav-list.main-nav a.active {
+    color: #fff;
+  }
+
+  /* Bottom Navigation and Social */
+  .ts-menu-bottom {
+    margin-top: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+
+  .ts-nav-list.sub-nav {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .ts-nav-list.sub-nav li {
+    margin: 12px 0;
+  }
+
+  .ts-nav-list.sub-nav a {
+    font-family: var(--ts-font-body);
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+
+  .ts-nav-list.sub-nav a:hover {
+    color: #fff;
+  }
+
+  .ts-menu-social p {
+    font-family: var(--ts-font-body);
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0 0 15px 0;
+  }
+
+  .ts-social-icons {
+    display: flex;
+    gap: 15px;
+  }
+
+  .ts-social-icons a {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    font-size: 16px;
+    transition: color 0.3s;
+  }
+
+  .ts-social-icons a:hover {
+    color: #fff;
+  }
+
+  .ts-menu-copyright {
+    position: absolute;
+    bottom: 50px;
+    left: 80px;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.3);
+    letter-spacing: 1px;
+  }
+
+  @media (max-width: 900px) {
+    .ts-menu-img-panel {
+      display: none;
+    }
+
+    .ts-menu-content-panel {
+      padding: 40px;
+    }
+
+    .ts-menu-bottom {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 30px;
+    }
+
+    .ts-menu-copyright {
+      position: static;
+      margin-top: 30px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .ts-sidebar {
+      width: 40px;
+      padding: 20px 0;
+    }
+
+    .ts-top-actions {
+      top: 20px;
+      right: 20px;
+      gap: 10px;
+    }
+
+    .ts-btn-outline,
+    .ts-btn-solid {
+      padding: 10px 15px;
+      font-size: 10px;
+    }
+
+    .ts-nav-list.main-nav a {
+      font-size: 32px;
+    }
+  }
+</style>
+
+<!-- Left Sidebar Navigation -->
+<div class="ts-sidebar">
+  <a href="index.html" class="ts-brand-logo">
+    <img src="https://ui-avatars.com/api/?name=RD&background=c8a97e&color=fff" alt="Logo">
+  </a>
+
+  <div class="ts-menu-toggle" onclick="document.body.classList.add('menu-open')">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+
+  <div class="ts-menu-close-vert" onclick="document.body.classList.remove('menu-open')">
+    CLOSE
+  </div>
+
+  <a href="contact.html" class="ts-vertical-contact">WHATSAPP</a>
+</div>
+
+<!-- Top Right Actions -->
+<div class="ts-top-actions">
+  <div id="ts-header-auth-container" style="display: flex; align-items: center; gap: 15px;"></div>
+  <a href="rooms.html" onclick="toggleBookingPanel()" class="ts-btn-solid book-room-btn">BOOK ROOM</a>
+  <a href="restaurant.html" class="ts-btn-outline">BOOK TABLE</a>
+</div>
+
+<!-- Booking Panel (Desktop) -->
+<div class="booking-panel" id="bookingPanel">
+  <label>Arrival</label>
+  <input type="date" id="bookingCheckin" />
+
+  <label>Departure</label>
+  <input type="date" id="bookingCheckout" />
+
+  <div style="display: flex; gap: 10px;">
+    <div style="flex: 1;">
+      <label>Adults</label>
+      <select id="bookingAdults">
+        <option value="1">1</option>
+        <option value="2" selected>2</option>
+        <option value="3">3</option>
+        <option value="4">4+</option>
+      </select>
+    </div>
+    <div style="flex: 1;">
+      <label>Children</label>
+      <select id="bookingChildren">
+        <option value="0">0</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+      </select>
     </div>
   </div>
-</nav>
-<!-- END nav -->
 
+  <button class="check-rates" onclick="window.location.href='rooms.html'">CHECK RATES</button>
+</div>
+
+<!-- Auth Placeholder for scripts -->
+<div id="navbar-auth-placeholder" style="display: none;"></div>
+
+<!-- Fullscreen Overlay Menu -->
+<div class="ts-fullscreen-menu" id="ts-menu">
+  <div class="ts-menu-img-panel"></div>
+  <div class="ts-menu-content-panel">
+
+    <div class="ts-menu-logo">
+      <img src="images/logomain.png" alt="Tandjung Sari">
+    </div>
+
+    <div style="display: flex; justify-content: space-between; width: 100%; align-items: flex-start;">
+      <!-- Nav List -->
+      <ul class="ts-nav-list main-nav" style="margin-bottom: 0;">
+        <li><a href="index.html" onclick="document.body.classList.remove('menu-open')">Trang chủ</a></li>
+        <li><a href="rooms.html" onclick="document.body.classList.remove('menu-open')">Phòng</a></li>
+        <li><a href="restaurant.html" onclick="document.body.classList.remove('menu-open')">Nhà Hàng</a></li>
+        <li><a href="reviews.html" onclick="document.body.classList.remove('menu-open')">Đánh giá và Thư Viện</a></li>
+      </ul>
+
+      <!-- Auth Nav (Right Side) -->
+      <ul class="ts-nav-list auth-nav main-nav" id="ts-auth-nav"
+        style="text-align: right; list-style: none; padding: 0; margin: 0;">
+        <!-- JS will inject auth items here -->
+      </ul>
+    </div>
+
+    <div class="ts-menu-bottom">
+      <ul class="ts-nav-list sub-nav">
+        <li><a href="#" onclick="document.body.classList.remove('menu-open')">The Foundation</a></li>
+        <li><a href="#" onclick="document.body.classList.remove('menu-open')">Packages & Activities</a></li>
+        <li><a href="#" onclick="document.body.classList.remove('menu-open')">Getting Here</a></li>
+        <li><a href="#" onclick="document.body.classList.remove('menu-open')">Terms & Conditions</a></li>
+      </ul>
+
+      <div class="ts-menu-social">
+        <p>Get in Touch</p>
+        <div class="ts-social-icons">
+          <a href="#">&#9993;</a> <!-- email -->
+          <a href="#">&#128247;</a> <!-- ig approx -->
+          <a href="#">&#128101;</a> <!-- fb approx -->
+          <a href="#">&#9654;</a> <!-- yt approx -->
+        </div>
+      </div>
+    </div>
+
+    <div class="ts-menu-copyright">
+      &copy; 2026 Resort Luxury. All Right Reserved.
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function toggleBookingPanel() {
+    var panel = document.getElementById('bookingPanel');
+    if (panel) panel.classList.toggle('active');
+  }
+
+  // Simple auth sync for the new menu
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        if (document.getElementById('ts-auth-link')) document.getElementById('ts-auth-link').style.display = 'none';
+        if (document.getElementById('ts-profile-link')) document.getElementById('ts-profile-link').style.display = 'inline-block';
+      }
+
+      // Auto-highlight active nav item based on URL
+      const currentPath = window.location.pathname;
+      const navLinks = document.querySelectorAll('.ts-nav-list.main-nav a');
+      navLinks.forEach(link => {
+        if (link.getAttribute('href') !== '#' && currentPath.includes(link.getAttribute('href'))) {
+          link.classList.add('active');
+        }
+      });
+
+      // Close menu when a link is clicked (useful for PJAX transitions)
+      document.querySelectorAll('.ts-nav-list a, .ts-brand-logo').forEach(link => {
+        link.addEventListener('click', () => {
+          document.body.classList.remove('menu-open');
+        });
+      });
+    }, 500);
+  });
+</script>

@@ -149,6 +149,25 @@
   // Track if header is already loaded to avoid duplicate loads
   let headerLoaded = false;
 
+  // Load footer component dynamically
+  async function loadFooter() {
+    const footerElement = document.querySelector('footer');
+    if (!footerElement) return;
+
+    // To prevent infinite reloads if it already has the taste footer, check if it already loaded
+    // Actually, outerHTML replaces the element entirely, but if we navigate back, it might reload
+    try {
+      const response = await fetch(`components/footer.html?_=${Date.now()}`, { cache: 'no-store' });
+      if (response.ok) {
+        const html = await response.text();
+        // Replace the entire old footer with the new Taste footer component
+        footerElement.outerHTML = html;
+      }
+    } catch (e) {
+      console.error('[LoadFooter] Error loading footer:', e);
+    }
+  }
+
   // Auto-load header when DOM is ready
   function initializeHeader() {
     if (headerLoaded) return;
@@ -156,11 +175,13 @@
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => {
         loadHeader(true);
+        loadFooter();
         headerLoaded = true;
       });
     } else {
       // DOM already loaded
       loadHeader(true);
+      loadFooter();
       headerLoaded = true;
     }
   }
