@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" class="layout-vertical">
 
 <head>
   <meta charset="utf-8" />
@@ -610,31 +610,8 @@
   <!-- Navbar -->
   <header id="site-header"></header>
 
-  <!-- Core Scripts moved outside PJAX container -->
-  <script src="js/jquery.min.js"></script>
-  <script src="js/jquery-migrate-3.0.1.min.js"></script>
-  <script src="js/popper.min.js"></script>
-  <script src="js/bootstrap.min.js"></script>
-  <script src="js/jquery.easing.1.3.js"></script>
-  <script src="js/jquery.waypoints.min.js"></script>
-  <script src="js/jquery.stellar.min.js"></script>
-  <script src="js/owl.carousel.min.js"></script>
-  <script src="js/jquery.magnific-popup.min.js"></script>
-  <script src="js/aos.js"></script>
-  <script src="js/jquery.animateNumber.min.js"></script>
-  <script src="js/bootstrap-datepicker.js"></script>
-  <script src="js/scrollax.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-  <script src="https://npmcdn.com/flatpickr/dist/l10n/vn.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
-  <script src="js/main.js"></script>
-  <script src="js/customer-api.js"></script>
-  <script src="js/simple-payment.js"></script>
-
   <!-- Wrap main content for PJAX -->
   <main id="page-content" data-page="room-detail" data-layout="vertical">
-
-
 
     <!-- Minimalist Hero Section -->
     <section class="hero-gallery">
@@ -653,7 +630,7 @@
       style="background-color: var(--bg-light) !important; color: var(--text-main) !important; width: 100%;">
 
       <!-- Main Content Layout -->
-      <main class="detail-main">
+      <div class="detail-main">
 
         <!-- Left Column: Room Info -->
         <div class="room-info">
@@ -816,7 +793,7 @@
             </form>
           </div>
         </div>
-      </main>
+      </div>
 
       <!-- Suggested Rooms (Other Bungalows) -->
       <div class="other-bungalows-section">
@@ -2122,68 +2099,68 @@
       loadRoomDetail();
     </script>
 
-  </main>
-  <!-- Footer Removed -->
+    <!-- Modal Thanh toán (SimplePayment) -->
+    <div class="modal fade" id="simplePaymentModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content" style="border-radius: 20px;">
+          <div class="modal-header" style="background: linear-gradient(135deg, #c8a97e 0%, #b89968 100%); color: white;">
+            <h5 class="modal-title" style="font-size: 24px; font-weight: 700;">💳 Thanh Toán</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body" style="padding: 30px;">
+            <div class="text-center mb-4">
+              <h6>Mã đặt phòng: <strong id="spBookingCode">-</strong></h6>
+              <h4 class="text-primary">Số tiền: <span id="spAmount">0 ₫</span></h4>
+            </div>
 
-  <!-- Scripts -->
+            <div id="spQRSection">
+              <p class="text-center mb-3">
+                <strong>Nội dung chuyển khoản:</strong><br>
+                <code id="spContent"
+                  style="background: #f8f9fa; padding: 8px 12px; border-radius: 8px; font-size: 16px; font-weight: 600;">BOOKING-</code>
+              </p>
+              <div class="text-center mb-4">
+                <img id="spQRImage" alt="QR Code"
+                  style="max-width: 300px; border: 4px solid #e9ecef; border-radius: 15px; padding: 15px; display: none;">
+              </div>
+              <div class="card" style="background: #f8f9fa; padding: 20px; border-radius: 12px;">
+                <p class="mb-2"><strong>Ngân hàng:</strong> MBBank</p>
+                <p class="mb-2"><strong>Số tài khoản:</strong> <span id="spBankAccount">0901329227</span></p>
+                <p class="mb-0"><strong>Chủ tài khoản:</strong> <span id="spBankName">Resort Deluxe</span></p>
+              </div>
+            </div>
+
+            <div id="spWaiting" class="text-center mt-4" style="display: block;">
+              <div class="spinner-border text-primary" role="status"></div>
+              <p class="mt-2">Đang chờ thanh toán...</p>
+            </div>
+
+            <div id="spSuccess" class="text-center mt-4" style="display: none;">
+              <div class="alert alert-success">
+                <h5>✅ Thanh toán thành công!</h5>
+                <p>Đang cập nhật thông tin...</p>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts inside PJAX container -->
+    <script src="js/customer-api.js"></script>
+    <script src="js/simple-payment.js"></script>
+    <script src="js/ai-chat.js"></script>
+  </main>
+
+  <!-- Global Scripts -->
   <script src="js/jquery.min.js"></script>
   <script src="js/bootstrap.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/vn.js"></script>
-  <!-- AI Chat Widget -->
-  <script src="js/ai-chat.js"></script>
-  <!-- Modal Thanh toán (SimplePayment) -->
-  <div class="modal fade" id="simplePaymentModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-      <div class="modal-content" style="border-radius: 20px;">
-        <div class="modal-header" style="background: linear-gradient(135deg, #c8a97e 0%, #b89968 100%); color: white;">
-          <h5 class="modal-title" style="font-size: 24px; font-weight: 700;">💳 Thanh Toán</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body" style="padding: 30px;">
-          <div class="text-center mb-4">
-            <h6>Mã đặt phòng: <strong id="spBookingCode">-</strong></h6>
-            <h4 class="text-primary">Số tiền: <span id="spAmount">0 ₫</span></h4>
-          </div>
-
-          <div id="spQRSection">
-            <p class="text-center mb-3">
-              <strong>Nội dung chuyển khoản:</strong><br>
-              <code id="spContent"
-                style="background: #f8f9fa; padding: 8px 12px; border-radius: 8px; font-size: 16px; font-weight: 600;">BOOKING-</code>
-            </p>
-            <div class="text-center mb-4">
-              <img id="spQRImage" alt="QR Code"
-                style="max-width: 300px; border: 4px solid #e9ecef; border-radius: 15px; padding: 15px; display: none;">
-            </div>
-            <div class="card" style="background: #f8f9fa; padding: 20px; border-radius: 12px;">
-              <p class="mb-2"><strong>Ngân hàng:</strong> MBBank</p>
-              <p class="mb-2"><strong>Số tài khoản:</strong> <span id="spBankAccount">0901329227</span></p>
-              <p class="mb-0"><strong>Chủ tài khoản:</strong> <span id="spBankName">Resort Deluxe</span></p>
-            </div>
-          </div>
-
-          <div id="spWaiting" class="text-center mt-4" style="display: block;">
-            <div class="spinner-border text-primary" role="status"></div>
-            <p class="mt-2">Đang chờ thanh toán...</p>
-          </div>
-
-          <div id="spSuccess" class="text-center mt-4" style="display: none;">
-            <div class="alert alert-success">
-              <h5>✅ Thanh toán thành công!</h5>
-              <p>Đang cập nhật thông tin...</p>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  </main>
 
   <script>
     // Global initial load (only runs on direct page access)
