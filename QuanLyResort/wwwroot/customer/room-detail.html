@@ -541,7 +541,7 @@
 
     .other-bungalows-slider {
       display: flex;
-      gap: 30px;
+      gap: 60px;
       overflow-x: auto;
       scroll-snap-type: x mandatory;
       scrollbar-width: none;
@@ -556,7 +556,7 @@
     }
 
     .other-bungalow-card {
-      flex: 0 0 400px;
+      flex: 0 0 480px;
       scroll-snap-align: center;
       text-decoration: none !important;
       color: var(--text-color) !important;
@@ -592,7 +592,7 @@
 
     @media (max-width: 768px) {
       .other-bungalow-card {
-        flex: 0 0 300px;
+        flex: 0 0 320px;
       }
 
       .other-bungalow-img {
@@ -1040,7 +1040,18 @@
           console.error("Error initializing flatpickr:", err);
         }
       }
-
+      function getVietnameseRoomName(roomObj, defaultName = 'Phòng') {
+        const roomTypeStr = typeof roomObj.roomType === 'string' ? roomObj.roomType : (typeof roomObj.RoomType === 'string' ? roomObj.RoomType : null);
+        const roomTypeName = roomObj.roomTypeName || roomObj.RoomTypeName || roomTypeStr;
+        const nameMap = {
+          'Standard': 'Phòng Tiêu Chuẩn',
+          'Deluxe': 'Phòng Cao Cấp',
+          'Suite': 'Phòng Suite (Gia đình)',
+          'Villa': 'Biệt Thự Vườn'
+        };
+        const rawName = roomObj.name || roomObj.Name || roomTypeName || defaultName;
+        return nameMap[rawName] || rawName;
+      }
       async function loadRoomDetail() {
         if (!roomId) {
           console.error('❌ [loadRoomDetail] No roomId provided');
@@ -1084,19 +1095,7 @@
 
           // Populate basic UI elements (titles, prices, etc)
           const elRoomTitle = document.getElementById('roomTitle');
-          
-          function getVietnameseRoomName(roomObj, defaultName = 'Phòng') {
-            const roomTypeStr = typeof roomObj.roomType === 'string' ? roomObj.roomType : (typeof roomObj.RoomType === 'string' ? roomObj.RoomType : null);
-            const roomTypeName = roomObj.roomTypeName || roomObj.RoomTypeName || roomTypeStr;
-            const nameMap = {
-              'Standard': 'Phòng Tiêu Chuẩn',
-              'Deluxe': 'Phòng Cao Cấp',
-              'Suite': 'Phòng Suite (Gia đình)',
-              'Villa': 'Biệt Thự Vườn'
-            };
-            const rawName = roomObj.name || roomObj.Name || roomTypeName || defaultName;
-            return nameMap[rawName] || rawName;
-          }
+
 
           if (elRoomTitle) {
             elRoomTitle.textContent = getVietnameseRoomName(room, 'Phòng');
@@ -2097,13 +2096,62 @@
       });
 
       loadRoomDetail();
-    </script>
 
+    </script>
+    <script>
+      (function () {
+        if (window.__bungalowScrollHijackInit) return;
+        window.__bungalowScrollHijackInit = true;
+        console.log('[hijack] init script chạy');
+
+        const section = document.querySelector('.other-bungalows-section');
+        const slider = document.getElementById('otherRoomsSlider');
+        console.log('[hijack] section:', section, 'slider:', slider);
+        if (!section || !slider) {
+          console.warn('[hijack] KHÔNG TÌM THẤY section hoặc slider -> dừng');
+          return;
+        }
+
+        function isSectionIntersecting() {
+          const rect = section.getBoundingClientRect();
+          return rect.top < window.innerHeight && rect.bottom > 0;
+        }
+
+        window.addEventListener('wheel', function (e) {
+          const intersecting = isSectionIntersecting();
+          const maxScroll = slider.scrollWidth - slider.clientWidth;
+
+          console.log('[hijack] wheel event | intersecting:', intersecting,
+            '| scrollWidth:', slider.scrollWidth, '| clientWidth:', slider.clientWidth,
+            '| maxScroll:', maxScroll, '| scrollLeft:', slider.scrollLeft, '| deltaY:', e.deltaY);
+
+          if (!intersecting) return;
+          if (maxScroll <= 0) return;
+
+          const delta = e.deltaY;
+          const atStart = slider.scrollLeft <= 0;
+          const atEnd = slider.scrollLeft >= maxScroll - 1;
+
+          if (delta > 0 && !atEnd) {
+            console.log('[hijack] -> preventDefault + cuộn phải');
+            e.preventDefault();
+            slider.scrollLeft += delta;
+          } else if (delta < 0 && !atStart) {
+            console.log('[hijack] -> preventDefault + cuộn trái');
+            e.preventDefault();
+            slider.scrollLeft += delta;
+          } else {
+            console.log('[hijack] -> đã tới biên, KHÔNG chặn, cho cuộn dọc');
+          }
+        }, { passive: false });
+      })();
+    </script>
     <!-- Modal Thanh toán (SimplePayment) -->
     <div class="modal fade" id="simplePaymentModal" tabindex="-1">
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content" style="border-radius: 20px;">
-          <div class="modal-header" style="background: linear-gradient(135deg, #c8a97e 0%, #b89968 100%); color: white;">
+          <div class="modal-header"
+            style="background: linear-gradient(135deg, #c8a97e 0%, #b89968 100%); color: white;">
             <h5 class="modal-title" style="font-size: 24px; font-weight: 700;">💳 Thanh Toán</h5>
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
           </div>

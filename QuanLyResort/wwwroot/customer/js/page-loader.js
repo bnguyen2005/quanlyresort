@@ -2,10 +2,10 @@
 
 // Đặt gọi hàm này ở: (1) lúc trang load lần đầu, (2) mỗi lần PJAX xong (kể cả trang đích), (3) lúc resize
 function syncSidebarWidthVar() {
-  const nav = document.querySelector('#ftco-navbar');
-  if (!nav) return;
-  const realWidth = nav.getBoundingClientRect().width; // SỐ THẬT, không đoán
-  document.documentElement.style.setProperty('--ts-sidebar-width', `${realWidth}px`);
+    const nav = document.querySelector('#ftco-navbar');
+    if (!nav) return;
+    const realWidth = nav.getBoundingClientRect().width; // SỐ THẬT, không đoán
+    document.documentElement.style.setProperty('--ts-sidebar-width', `${realWidth}px`);
 }
 
 syncSidebarWidthVar();
@@ -13,7 +13,7 @@ window.addEventListener('load', syncSidebarWidthVar); // đợi font/icon load x
 window.addEventListener('resize', syncSidebarWidthVar);
 
 // Chống wipe DOM do document.write trong quá trình PJAX
-if (typeof document !== 'undefined') document.write = function() {};
+if (typeof document !== 'undefined') document.write = function () { };
 const PageLoader = {
     cache: {},
     isFetching: false,
@@ -100,7 +100,7 @@ const PageLoader = {
     setupScrollJacking() {
         const track = document.getElementById('page-content');
         if (!track) return;
-        
+
         // Remove existing listener if any to prevent duplicates on PJAX load
         if (this._wheelHandler) {
             window.removeEventListener('wheel', this._wheelHandler, { passive: false });
@@ -108,7 +108,7 @@ const PageLoader = {
         if (this._zoomRaf) {
             cancelAnimationFrame(this._zoomRaf);
         }
-        
+
         let isAnimating = false;
         let wheelTimeout = null;
 
@@ -128,7 +128,7 @@ const PageLoader = {
             if (!zoomImage) return;
 
             currentZoom = currentZoom + (targetZoom - currentZoom) * 0.08;
-            
+
             if (Math.abs(targetZoom - currentZoom) < 0.005) {
                 currentZoom = targetZoom;
                 isZoomLerping = false;
@@ -158,7 +158,7 @@ const PageLoader = {
                     overlay.style.alignItems = 'center';
                     overlay.style.justifyContent = 'center';
                     overlay.style.pointerEvents = 'none';
-                    
+
                     clone = document.createElement('div');
                     clone.id = 'ts-zoom-clone';
                     clone.style.width = '30vh';
@@ -166,20 +166,20 @@ const PageLoader = {
                     clone.style.position = 'relative';
                     clone.style.overflow = 'hidden';
                     clone.style.boxShadow = '0 10px 30px rgba(0,0,0,0.1)';
-                    
+
                     const innerClone = document.createElement('div');
                     innerClone.style.width = '100%';
                     innerClone.style.height = '100%';
                     innerClone.style.backgroundSize = 'cover';
                     innerClone.style.backgroundPosition = 'center';
-                    
+
                     const srcImg = zoomImage.querySelector('.zoom-image');
                     if (srcImg) innerClone.style.backgroundImage = srcImg.style.backgroundImage;
                     innerClone.style.filter = 'brightness(0.7) grayscale(1)';
-                    
+
                     clone.appendChild(innerClone);
                     overlay.appendChild(clone);
-                    
+
                     // Clone the text into the overlay so it sits on top of the FLIP image
                     const srcText = document.querySelector('.zoom-transition-slide .ts-slide-content');
                     if (srcText) {
@@ -206,16 +206,16 @@ const PageLoader = {
                         ].join(';'));
                         clone.appendChild(textClone);
                     }
-                    
+
                     document.body.appendChild(overlay);
-                    
+
                     if (zoomImage) zoomImage.style.opacity = '0'; // Hide original
                 }
-                
+
                 const progress = Math.min(1, currentZoom / 4.5);
                 const startWidth = window.innerHeight * 0.30;
                 const startHeight = window.innerHeight * 0.45;
-                
+
                 if (progress >= 1) {
                     // Full zoom: clone fills the overlay absolutely
                     clone.style.position = 'absolute';
@@ -228,12 +228,12 @@ const PageLoader = {
                     clone.style.top = 'auto';
                     clone.style.left = 'auto';
                     clone.style.inset = 'auto';
-                    
-                    const sidebarWidthPx = window.innerWidth <= 768 
-                        ? 0 
+
+                    const sidebarWidthPx = window.innerWidth <= 768
+                        ? 0
                         : parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--ts-sidebar-width')) || 40;
                     const targetWidth = window.innerWidth - sidebarWidthPx;
-                    
+
                     const targetHeight = window.innerHeight;
                     const cw = startWidth + (targetWidth - startWidth) * progress;
                     const ch = startHeight + (targetHeight - startHeight) * progress;
@@ -283,7 +283,7 @@ const PageLoader = {
             if (!track) return;
             const currentScroll = track.scrollLeft;
             const nextScroll = currentScroll + (targetScroll - currentScroll) * 0.08; // 0.08 is smoothness factor
-            
+
             if (Math.abs(targetScroll - nextScroll) < 1) {
                 track.scrollLeft = targetScroll;
                 isLerping = false;
@@ -303,11 +303,11 @@ const PageLoader = {
             if (isVertical) {
                 // Ensure document is scrolled to bottom
                 isAtEnd = Math.ceil(window.scrollY + window.innerHeight) >= document.documentElement.scrollHeight - 10;
-                
+
                 // Allow native vertical scroll unless at bottom and scrolling down
                 // Or if we are currently zooming in and trying to scroll up (to unzoom)
                 if (!isAtEnd || (e.deltaY < 0 && targetZoom <= 0)) {
-                    return; 
+                    return;
                 }
             } else {
                 isAtEnd = Math.ceil(track.scrollLeft + track.clientWidth) >= track.scrollWidth - 10;
@@ -347,29 +347,29 @@ const PageLoader = {
 
             // Continuous Fluid Scroll (Translate vertical wheel to horizontal)
             e.preventDefault();
-            
+
             if (!isLerping) {
                 targetScroll = track.scrollLeft;
             }
-            
+
             if (isVertical) {
                 targetScroll += e.deltaY;
             } else {
-                targetScroll += e.deltaY * 1.5; 
+                targetScroll += e.deltaY * 1.5;
                 const maxScroll = track.scrollWidth - track.clientWidth;
                 targetScroll = Math.max(0, Math.min(targetScroll, maxScroll));
-                
+
                 // If zooming has started, force perfect alignment to avoid gaps!
                 if (currentZoom > 1) {
                     targetScroll = track.scrollWidth;
                     track.scrollLeft = track.scrollWidth;
                 }
-            } 
+            }
             if (!isLerping) {
                 isLerping = true;
                 requestAnimationFrame(renderScroll);
             }
-            
+
         };
 
         window.addEventListener('wheel', this._wheelHandler, { passive: false });
@@ -443,7 +443,7 @@ const PageLoader = {
                 track.scrollBy({ left: -window.innerWidth, behavior: 'smooth' });
             }
         };
-        
+
         document.addEventListener('keydown', this._keydownHandler);
     },
 
@@ -495,7 +495,52 @@ const PageLoader = {
             setTimeout(() => edge.remove(), 300);
         }
     },
+    async ensureGlobalScripts(doc) {
+        // Các script nằm NGOÀI #page-content (jquery, bootstrap, flatpickr, AOS, Lenis...)
+        // chỉ được browser tải 1 lần lúc load trang gốc. Nếu người dùng PJAX sang một
+        // trang cần lib mà trang gốc không có, lib đó sẽ thiếu vĩnh viễn cho tới khi F5.
+        // Hàm này đảm bảo mọi lib toàn cục mà trang ĐÍCH cần đều đã có mặt trước khi
+        // script riêng của trang đích (bên trong #page-content) được thực thi.
+        const pageContentInDoc = doc.querySelector('#page-content');
+        const allScripts = Array.from(doc.querySelectorAll('script[src]'));
+        const globalScripts = allScripts.filter(s => !pageContentInDoc || !pageContentInDoc.contains(s));
 
+        const existingSrcs = new Set(
+            Array.from(document.querySelectorAll('script[src]')).map(s => s.src)
+        );
+
+        for (const s of globalScripts) {
+            const rawSrc = s.getAttribute('src');
+            if (!rawSrc) continue;
+
+            // DOMParser tạo document rời (base URI = about:blank), nên phải tự resolve
+            // URL tương đối theo location.href của trang hiện tại, không dùng s.src.
+            let absSrc;
+            try {
+                absSrc = new URL(rawSrc, location.href).href;
+            } catch (e) {
+                continue;
+            }
+
+            if (existingSrcs.has(absSrc)) continue; // đã có trên trang, bỏ qua
+
+            await new Promise((resolve) => {
+                const newScript = document.createElement('script');
+                Array.from(s.attributes).forEach(attr => {
+                    if (attr.name !== 'src') newScript.setAttribute(attr.name, attr.value);
+                });
+                newScript.src = absSrc;
+                newScript.onload = () => resolve();
+                newScript.onerror = () => {
+                    console.error('Không thể tải global script:', absSrc);
+                    resolve(); // không chặn luồng nếu 1 lib lỗi, chỉ log
+                };
+                document.head.appendChild(newScript);
+            });
+
+            existingSrcs.add(absSrc); // tránh tải trùng nếu doc liệt kê 2 lần
+        }
+    },
     async load(url, options = { mode: 'replace', push: true }) {
         if (this.isFetching) return;
         this.isFetching = true;
@@ -527,6 +572,10 @@ const PageLoader = {
                 window.location.href = url;
                 return;
             }
+
+            // Đảm bảo mọi lib toàn cục (bootstrap, flatpickr, jquery, AOS, Lenis...)
+            // mà trang đích cần đều đã được tải, TRƯỚC khi chạy script riêng của trang đích.
+            await this.ensureGlobalScripts(doc);
 
             // Cleanup any global smooth scroll instances to prevent scroll locking on new page
             if (options.mode === 'replace' && window.__lenisInstance) {
@@ -621,14 +670,14 @@ const PageLoader = {
                 document.documentElement.scrollTop = 0;
                 document.body.scrollTop = 0;
                 if (currentContainer) currentContainer.scrollTop = 0;
-                
+
                 if (track && layout !== 'vertical') track.scrollLeft = 0;
 
                 if (title) document.title = title;
                 if (options.push) {
                     history.pushState({ url, slideIndex: 0 }, title, url);
                 }
-                
+
                 if ('scrollRestoration' in history) {
                     history.scrollRestoration = 'manual';
                 }
@@ -660,9 +709,9 @@ const PageLoader = {
                 if (oldZoom) {
                     oldZoom.remove();
                 }
-                
+
                 window.scrollTo(0, 0);
-                
+
                 // SEAMLESS TRANSITION: Fade the overlay out after new page is ready
                 // This creates the illusion that text stayed in place while bg changed
                 const overlay = document.getElementById('ts-zoom-overlay');
@@ -739,9 +788,9 @@ const PageLoader = {
     setupTandjungAnimations() {
         const track = document.getElementById('page-content');
         if (!track) return;
-        
+
         const isVertical = document.body.classList.contains('layout-vertical');
-        
+
         // 1. Reveal Text via IntersectionObserver (root: null for viewport)
         const revealElements = document.querySelectorAll('.ts-reveal-text');
         if (revealElements.length > 0) {
@@ -758,7 +807,7 @@ const PageLoader = {
                     }
                 });
             }, revealOptions);
-            
+
             revealElements.forEach(el => revealObserver.observe(el));
         }
 
@@ -769,11 +818,11 @@ const PageLoader = {
             const updateParallax = () => {
                 const containerWidth = window.innerWidth;
                 const containerHeight = window.innerHeight;
-                
+
                 parallaxImages.forEach(img => {
                     const wrapper = img.parentElement;
                     const rect = wrapper.getBoundingClientRect();
-                    
+
                     if (isVertical) {
                         // Check if in vertical viewport
                         if (rect.top < containerHeight && rect.bottom > 0) {
@@ -792,10 +841,10 @@ const PageLoader = {
                 });
                 rafId = requestAnimationFrame(updateParallax);
             };
-            
+
             // Start parallax loop
             rafId = requestAnimationFrame(updateParallax);
-            
+
             // Clean up on page unload/pjax
             const cleanup = () => {
                 cancelAnimationFrame(rafId);

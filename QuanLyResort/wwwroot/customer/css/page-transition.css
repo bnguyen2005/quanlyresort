@@ -1023,10 +1023,10 @@
 
     body.layout-vertical #page-content {
         display: block !important;
-        width: 100% !important;
+        width: calc(100% - var(--ts-sidebar-width, 40px)) !important;
         height: auto !important;
         min-height: 100vh !important;
-        margin-left: 0 !important;
+        margin-left: var(--ts-sidebar-width, 40px) !important;
         overflow: visible !important;
     }
 

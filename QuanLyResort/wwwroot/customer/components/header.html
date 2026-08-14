@@ -408,8 +408,12 @@
   }
 
   .ts-menu-logo img {
-    height: 40px;
-    filter: brightness(0) invert(1);
+    height: 70px;
+    width: 70px;
+    /* cần width = height để tròn đều */
+    border-radius: 50%;
+    object-fit: cover;
+    /* tránh ảnh bị méo khi ép thành hình tròn */
     opacity: 0.9;
   }
 
@@ -575,9 +579,7 @@
 
 <!-- Left Sidebar Navigation -->
 <div class="ts-sidebar">
-  <a href="index.html" class="ts-brand-logo">
-    <img src="https://ui-avatars.com/api/?name=RD&background=c8a97e&color=fff" alt="Logo">
-  </a>
+  <a href="index.html" class="ts-brand-logo"> <img src="images/logomain.png" alt="Logo"> </a>
 
   <div class="ts-menu-toggle" onclick="document.body.classList.add('menu-open')">
     <span></span>
