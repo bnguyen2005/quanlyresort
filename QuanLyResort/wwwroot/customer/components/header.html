@@ -393,27 +393,26 @@
     background: rgba(0, 0, 0, 0.1);
   }
 
-  /* Menu Right Content Panel */
   .ts-menu-content-panel {
     flex: 1;
-    padding: 50px 80px;
+    padding: clamp(24px, 5vh, 50px) clamp(30px, 6vw, 80px);
     display: flex;
     flex-direction: column;
     position: relative;
+    overflow-y: auto;
+    /* fallback nếu vẫn tràn thì cuộn thay vì bị cắt */
   }
 
   /* Menu Logo */
   .ts-menu-logo {
-    margin-bottom: 60px;
+    margin-bottom: clamp(20px, 5vh, 60px);
   }
 
   .ts-menu-logo img {
-    height: 70px;
-    width: 70px;
-    /* cần width = height để tròn đều */
+    height: clamp(48px, 8vh, 70px);
+    width: clamp(48px, 8vh, 70px);
     border-radius: 50%;
     object-fit: cover;
-    /* tránh ảnh bị méo khi ép thành hình tròn */
     opacity: 0.9;
   }
 
@@ -421,7 +420,7 @@
   .ts-nav-list.main-nav {
     list-style: none;
     padding: 0;
-    margin: 0 0 60px 0;
+    margin: 0 0 clamp(20px, 4vh, 60px) 0;
   }
 
   .ts-nav-list.main-nav li {
@@ -458,11 +457,12 @@
 
   .ts-nav-list.main-nav a {
     font-family: 'Cormorant Garamond', 'Playfair Display', serif;
-    font-size: 42px;
+    font-size: clamp(22px, 4vh, 42px);
     color: rgba(255, 255, 255, 0.4);
     text-decoration: none;
     transition: all 0.3s ease;
     display: inline-block;
+    line-height: 1.15;
   }
 
   .ts-nav-list.main-nav a:hover,
@@ -524,9 +524,9 @@
   }
 
   .ts-menu-copyright {
-    position: absolute;
-    bottom: 50px;
-    left: 80px;
+    position: static;
+    margin-top: clamp(16px, 3vh, 50px);
+    padding-left: clamp(30px, 6vw, 80px);
     font-size: 11px;
     color: rgba(255, 255, 255, 0.3);
     letter-spacing: 1px;
@@ -575,6 +575,133 @@
       font-size: 32px;
     }
   }
+
+  /* Ẩn nút chat nổi mặc định của ai-chat.js (đã thay bằng sidebar) */
+  #aiChatWidget {
+    display: none !important;
+  }
+
+  /* Dời modal chat sang trái, khớp vị trí trigger trên sidebar */
+  #aiChatModal {
+    right: auto !important;
+    left: 60px !important;
+    bottom: 30px !important;
+  }
+
+  @media (max-width: 768px) {
+    #aiChatModal {
+      left: 10px !important;
+      right: 10px !important;
+      width: calc(100vw - 20px) !important;
+    }
+  }
+
+  /* Ẩn modal khi menu fullscreen đang mở, tránh chồng lấn */
+  body.menu-open #aiChatModal {
+    display: none !important;
+  }
+
+  /* ── Đồng bộ màu AI Chat Modal — tông be/kem theo theme ── */
+  #aiChatModal {
+    background: var(--ts-light) !important;
+    /* #f5f0e6 - be kem đồng bộ sidebar/booking panel */
+    border: 1px solid var(--ts-border) !important;
+  }
+
+  #aiChatModal .ai-chat-header {
+    background: #9f8c76 !important;
+    /* be đậm, đúng màu sidebar mặc định */
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+  }
+
+  #aiChatModal .ai-chat-avatar {
+    border-color: var(--ts-dark) !important;
+    color: var(--ts-dark) !important;
+  }
+
+  #aiChatModal .ai-chat-header-info h4 {
+    color: var(--ts-dark) !important;
+    font-family: 'Cormorant Garamond', 'Playfair Display', serif !important;
+    font-weight: 500 !important;
+    font-size: 16px !important;
+  }
+
+  #aiChatModal .ai-chat-header-info small {
+    color: rgba(17, 17, 17, 0.6) !important;
+  }
+
+  #aiChatModal .ai-chat-close {
+    color: rgba(17, 17, 17, 0.5) !important;
+  }
+
+  #aiChatModal .ai-chat-close:hover {
+    color: var(--ts-dark) !important;
+  }
+
+  #aiChatModal .ai-chat-messages {
+    background: transparent !important;
+  }
+
+  #aiChatModal .ai-message .ai-chat-bubble {
+    background: rgba(255, 255, 255, 0.5) !important;
+    color: var(--ts-dark) !important;
+    border-left: 2px solid var(--ts-gold) !important;
+  }
+
+  #aiChatModal .user-message .ai-chat-bubble {
+    background: rgba(255, 255, 255, 0.7) !important;
+    color: var(--ts-dark) !important;
+    border: 1px solid var(--ts-border) !important;
+  }
+
+  #aiChatModal .ai-chat-avatar-small {
+    background: rgba(255, 255, 255, 0.6) !important;
+    border-color: var(--ts-border) !important;
+    color: var(--ts-dark) !important;
+  }
+
+  #aiChatModal .user-message .ai-chat-avatar-small {
+    background: transparent !important;
+    border-color: var(--ts-gold) !important;
+    color: var(--ts-dark) !important;
+  }
+
+  #aiChatModal .ai-chat-input-container {
+    background: #9f8c76 !important;
+    border-top: 1px solid rgba(0, 0, 0, 0.1) !important;
+  }
+
+  #aiChatModal .ai-chat-input {
+    color: #fff !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3) !important;
+  }
+
+  #aiChatModal .ai-chat-input::placeholder {
+    color: rgba(255, 255, 255, 0.6) !important;
+  }
+
+  #aiChatModal .ai-chat-input:focus {
+    border-bottom-color: var(--ts-dark) !important;
+  }
+
+  #aiChatModal .ai-chat-send-btn {
+    color: #fff !important;
+    border: 1px solid #fff !important;
+  }
+
+  #aiChatModal .ai-chat-send-btn:hover {
+    background: #fff !important;
+    color: var(--ts-dark) !important;
+  }
+
+  #aiChatModal .ai-chat-typing span {
+    background: var(--ts-gold) !important;
+  }
+
+  .ai-chat-button {
+    border-color: var(--ts-gold) !important;
+    color: var(--ts-gold) !important;
+  }
 </style>
 
 <!-- Left Sidebar Navigation -->
@@ -591,7 +718,7 @@
     CLOSE
   </div>
 
-  <a href="contact.html" class="ts-vertical-contact">WHATSAPP</a>
+  <div class="ts-vertical-contact" style="cursor: pointer;">CHAT AI</div>
 </div>
 
 <!-- Top Right Actions -->
@@ -691,6 +818,7 @@
     var panel = document.getElementById('bookingPanel');
     if (panel) panel.classList.toggle('active');
   }
+
 
   // Simple auth sync for the new menu
   document.addEventListener('DOMContentLoaded', () => {

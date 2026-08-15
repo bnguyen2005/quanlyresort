@@ -14,7 +14,7 @@
     rel="stylesheet">
 
   <!-- Theme CSS -->
-  <link rel="stylesheet" href="css/tandjung-theme.css?v=82">
+  <link rel="stylesheet" href="css/tandjung-theme.css?v=83">
 
   <style>
     /* ── Hero text fade on scroll ── */
@@ -258,8 +258,7 @@
             container.innerHTML = '';
             roomsToShow.forEach((r, idx) => {
               const card = document.createElement('div');
-              card.className = 'ts-room-card';
-
+              card.className = 'ts-room-card' + (idx % 2 === 1 ? ' ts-room-card--offset' : '');
               const imgUrl = pickImage(r);
               const roomTypeStr = typeof r.roomType === 'string' ? r.roomType : (typeof r.RoomType === 'string' ? r.RoomType : null);
               const roomTypeName = r.roomType?.typeName || r.RoomType?.TypeName || roomTypeStr;

@@ -20,6 +20,23 @@
     body {
       overflow: hidden;
     }
+
+    /* ── Cover reveal: Slide 2 trượt đè lên Slide 1 ── */
+    .ts-intro-slide {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    #ts-slide-cover-target {
+      position: relative;
+      z-index: 2;
+      background: #fdfbf7;
+      /* nền của slide 2, để che kín slide 1 phía dưới khi phủ lên */
+      box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.35);
+      /* đổ bóng nhẹ ở mép trên để tạo chiều sâu khi đè lên */
+      border-radius: 0;
+    }
   </style>
 </head>
 
@@ -49,7 +66,7 @@
     </section>
 
     <!-- Slide 2: Split Screen (Story) -->
-    <section class="ts-slide ts-split-slide" tabindex="0" aria-label="Slide">
+    <section class="ts-slide ts-split-slide" id="ts-slide-cover-target" tabindex="0" aria-label="Slide">
       <div class="ts-split-content">
 
         <div class="ts-split-title-wrap ts-reveal-text ts-delay-1">
@@ -199,18 +216,7 @@
             dưỡng.</p>
         </div>
 
-        <!-- Small image and text at bottom right -->
-        <div class="ts-corner-caption ts-reveal-text ts-delay-3"
-          style="position: absolute; bottom: 8vh; right: 8vw; display: flex; flex-direction: column; align-items: flex-end; gap: 15px; z-index: 20;">
-          <div
-            style="width: 140px; height: 100px; border-radius: 2px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
-            <img src="images/story3.png"
-              style="width: 100%; height: 100%; object-fit: cover; filter: sepia(0.3) grayscale(0.5);" alt="Detail">
-          </div>
-          <p class="playfair"
-            style="font-size: 15px !important; font-style: italic; color: rgba(255,255,255,0.8) !important; margin: 0; width: 100% !important; text-align: right;">
-            Góc nhỏ bình yên</p>
-        </div>
+
 
       </div>
     </section>
@@ -417,10 +423,11 @@
     });
   </script>
   <script src="js/page-loader.js?v=69"></script>
-  <script src="js/premium-fx.js?v=5"></script>
+  <script src="js/premium-fx.js?v=6"></script>
   <link rel="stylesheet" href="css/page-transition.css?v=84">
-  <link rel="stylesheet" href="css/premium-fx.css?v=5">
+  <link rel="stylesheet" href="css/premium-fx.css?v=6">
   <script src="js/navbar-auth.js"></script>
+  <script src="js/ai-chat.js?v=3"></script>
 </body>
 
 </html>

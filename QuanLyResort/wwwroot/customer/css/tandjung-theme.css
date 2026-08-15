@@ -517,11 +517,13 @@ main[data-page="rooms"] .ts-intro-slide .ts-slide-bg {
   position: relative;
   z-index: 2;
   background-color: var(--ts-light);
-  padding: 20px 10% 120px 10%;
+  padding: 20px 10% 200px 10%;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 6%;
+  column-gap: 6%;
+  row-gap: calc(6% + 100px);
   align-items: start;
+  grid-auto-rows: min-content;
 }
 
 .ts-room-card {
@@ -530,8 +532,8 @@ main[data-page="rooms"] .ts-intro-slide .ts-slide-bg {
 }
 
 /* Stagger right column */
-.ts-rooms-grid .ts-room-card:nth-child(even) {
-  margin-top: 80px;
+.ts-room-card.ts-room-card--offset {
+  margin-top: 40px;
 }
 
 .ts-room-card-img {
@@ -540,6 +542,9 @@ main[data-page="rooms"] .ts-intro-slide .ts-slide-bg {
   background-size: cover;
   background-position: center;
   margin-bottom: 30px;
+  min-height: 200px;
+  background-color: #e8e0d0;
+  /* nền dự phòng, tránh card mất hẳn chiều cao khi ảnh 404 */
 }
 
 .ts-room-card-header {
@@ -578,8 +583,8 @@ main[data-page="rooms"] .ts-intro-slide .ts-slide-bg {
 }
 
 @media (max-width: 992px) {
-  .ts-text-section h2 {
-    font-size: 2.5rem;
+  .ts-room-card.ts-room-card--offset {
+    margin-top: 0;
   }
 
   .ts-asym-left,
@@ -598,6 +603,7 @@ main[data-page="rooms"] .ts-intro-slide .ts-slide-bg {
     margin-top: 0;
   }
 }
+
 
 /* ══════════════════════════════════════════════
    REVIEWS PAGE STYLES (Moved from inline to support PJAX)

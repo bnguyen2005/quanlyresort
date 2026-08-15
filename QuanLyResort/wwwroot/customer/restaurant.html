@@ -2,11 +2,11 @@
 <html lang="vi">
 
 <head>
-  <title>Nhà Hàng — Resort Deluxe</title>
+  <title>Nhà Hàng — Resort Luxury</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <meta name="description"
-    content="Nhà hàng Resort Deluxe — Thực đơn tinh hoa, hương vị đẳng cấp. Đặt bàn ngay hôm nay.">
+    content="Nhà hàng Resort Luxury — Thực đơn tinh hoa, hương vị đẳng cấp. Đặt bàn ngay hôm nay.">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -48,6 +48,333 @@
       opacity: 1;
       transform: translateY(0);
     }
+
+    /* ── Thu nhỏ Cart Modal ── */
+    #cartModal .modal-dialog {
+      max-width: 560px;
+      /* thay vì modal-lg ~800px */
+      margin: 3vh auto;
+    }
+
+    #cartModal .modal-content {
+      max-height: 94vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #cartModal .modal-header {
+      padding: 16px 24px;
+      background: #9f8c76 !important;
+      color: var(--ts-dark) !important;
+      border-bottom: 1px solid var(--ts-border);
+    }
+
+    #cartModal .modal-header .btn-close {
+      filter: none !important;
+      /* bỏ btn-close-white vì nền giờ sáng */
+    }
+
+    #cartModal .modal-header .modal-title {
+      font-size: 15px;
+      /* chữ "CHI TIẾT GIỎ HÀNG" đang quá to */
+      letter-spacing: 1.5px;
+    }
+
+    #cartModal .modal-body {
+      padding: 20px 24px;
+      overflow-y: auto;
+      /* cuộn nội dung thay vì kéo dài modal */
+      flex: 1;
+    }
+
+    #cartModal #cartTotal {
+      font-size: 20px;
+      /* thay vì 26px */
+    }
+
+    #cartModal .cart-summary strong:first-child {
+      font-size: 12px;
+    }
+
+    #cartModal .form-label {
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+
+    #cartModal .form-control,
+    #cartModal .form-select {
+      padding: 8px 12px;
+      font-size: 14px;
+    }
+
+    #cartModal .modal-footer {
+      padding: 14px 24px;
+      /* thay vì 20px 30px */
+    }
+
+    #cartModal .taste-btn-primary {
+      padding: 12px !important;
+      /* thay vì 15px */
+      font-size: 13px;
+    }
+
+    /* ── Đồng bộ màu Cart Modal với theme ── */
+    #cartModal .modal-content {
+      background: #fdfbf7;
+      /* nền ngà nhẹ thay vì trắng tinh, đồng điệu ts-light */
+    }
+
+    #cartModal .modal-body {
+      background: #fdfbf7;
+      color: var(--ts-dark);
+    }
+
+    /* Tiêu đề "Thông tin đặt món" dùng font serif của theme */
+    #cartModal #orderForm h6 {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--ts-dark);
+      letter-spacing: 0.5px;
+    }
+
+    /* Label giống style label trong booking-panel */
+    #cartModal .form-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #666;
+      font-weight: 500;
+    }
+
+    /* Input / select đồng bộ viền vàng nhạt thay vì viền xám Bootstrap */
+    #cartModal .form-control,
+    #cartModal .form-select {
+      background: #9f8c76;
+      border: 1px solid var(--ts-border);
+      border-radius: 0;
+      /* theme dùng góc vuông, không bo tròn */
+      color: var(--ts-dark);
+      font-family: 'Inter', sans-serif;
+    }
+
+    #cartModal .form-control:focus,
+    #cartModal .form-select:focus {
+      border-color: var(--ts-gold);
+      box-shadow: 0 0 0 2px rgba(200, 169, 126, 0.15);
+    }
+
+    #cartModal .form-control::placeholder {
+      color: #aaa;
+    }
+
+    /* Đường kẻ ngăn cách tổng tiền dùng màu border theme thay vì xám Bootstrap */
+    #cartModal .cart-summary {
+      border-color: var(--ts-border) !important;
+    }
+
+    #cartModal .cart-summary strong:first-child {
+      font-family: 'Inter', sans-serif;
+      color: #888;
+    }
+
+    /* Nút xóa món: đổi từ đỏ Bootstrap sang tông trung tính hợp theme */
+    #cartModal .ts-cart-item button[onclick^="removeCartItem"] {
+      color: var(--ts-dark);
+      opacity: 0.4;
+    }
+
+    #cartModal .ts-cart-item button[onclick^="removeCartItem"]:hover {
+      color: #9d3227;
+      /* dùng đúng màu ts-menu-red đã có sẵn trong theme */
+      opacity: 1;
+    }
+
+    /* Footer modal đồng bộ nền ngà thay vì #fafafa xám lạnh */
+    #cartModal .modal-footer {
+      background: #fdfbf7;
+      border-top: 1px solid var(--ts-border);
+    }
+
+    /* Nút "ĐẶT MÓN NGAY" theo tông vàng chủ đạo thay vì màu mặc định của .taste-btn-primary */
+    #cartModal .taste-btn-primary {
+      background: var(--ts-gold) !important;
+      border: 1px solid var(--ts-gold) !important;
+      color: #9f8c76 !important;
+      transition: all 0.4s ease;
+    }
+
+    #cartModal .taste-btn-primary:hover {
+      background: transparent !important;
+      color: var(--ts-gold) !important;
+    }
+
+    /* ── Bố cục masonry 2 cột, tự lấp khoảng trống ── */
+    #restaurantMenuList.ts-rooms-grid {
+      display: block !important;
+      column-count: 2;
+      column-gap: 32px;
+
+      padding: 0 20px;
+      box-sizing: border-box;
+    }
+
+    #restaurantMenuList .ts-room-card {
+      display: inline-block;
+      width: 100%;
+      break-inside: avoid;
+      -webkit-column-break-inside: avoid;
+      page-break-inside: avoid;
+      margin-bottom: 32px;
+    }
+
+    /* Ảnh cao thấp khác nhau để tạo cảm giác bất đối xứng tự nhiên */
+    #restaurantMenuList .ts-room-card:nth-child(4n+1) .menu-card-image-new,
+    #restaurantMenuList .ts-room-card:nth-child(4n+1) .ts-room-card-img {
+      height: 280px !important;
+    }
+
+    #restaurantMenuList .ts-room-card:nth-child(4n+2) .menu-card-image-new,
+    #restaurantMenuList .ts-room-card:nth-child(4n+2) .ts-room-card-img {
+      height: 200px !important;
+    }
+
+    #restaurantMenuList .ts-room-card:nth-child(4n+3) .menu-card-image-new,
+    #restaurantMenuList .ts-room-card:nth-child(4n+3) .ts-room-card-img {
+      height: 240px !important;
+    }
+
+    #restaurantMenuList .ts-room-card:nth-child(4n) .menu-card-image-new,
+    #restaurantMenuList .ts-room-card:nth-child(4n) .ts-room-card-img {
+      height: 320px !important;
+    }
+
+    #restaurantMenuList .ts-room-card-title {
+      font-size: 22px !important;
+    }
+
+    #restaurantMenuList .ts-room-card-desc {
+      font-size: 13px !important;
+      margin-top: 8px !important;
+      margin-bottom: 16px !important;
+    }
+
+    @media (max-width: 767px) {
+      #restaurantMenuList.ts-rooms-grid {
+        column-count: 1;
+        max-width: 100%;
+      }
+
+      #restaurantMenuList .ts-room-card .menu-card-image-new,
+      #restaurantMenuList .ts-room-card .ts-room-card-img {
+        height: 240px !important;
+      }
+    }
+
+    html,
+    body {
+      overflow-x: hidden;
+    }
+
+    /* ── Đồng bộ Restaurant Payment Modal với theme be ── */
+    #restaurantPaymentModal .modal-content {
+      background: #9f8c76;
+      border-radius: 0;
+      border: none;
+    }
+
+    #restaurantPaymentModal .modal-header {
+      background: #9f8c76 !important;
+      color: var(--ts-light) !important;
+      border-bottom: 1px solid var(--ts-border);
+    }
+
+    #restaurantPaymentModal .modal-header .modal-title {
+      font-family: 'Playfair Display', serif;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+
+    #restaurantPaymentModal .modal-body {
+      background: #fdfbf7;
+      color: var(--ts-dark);
+    }
+
+    #restaurantPaymentModal .text-primary {
+      color: var(--ts-gold) !important;
+    }
+
+    #restaurantPaymentModal .form-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #666;
+      font-weight: 500;
+    }
+
+    #restaurantPaymentModal .form-select {
+      background: #fff;
+      border: 1px solid var(--ts-border);
+      border-radius: 0;
+      color: var(--ts-dark);
+    }
+
+    #restaurantPaymentModal .form-select:focus {
+      border-color: var(--ts-gold);
+      box-shadow: 0 0 0 2px rgba(200, 169, 126, 0.15);
+    }
+
+    #restaurantPaymentModal code#rpContent {
+      background: #fff !important;
+      border: 1px solid var(--ts-border);
+      color: var(--ts-dark) !important;
+    }
+
+    #restaurantPaymentModal .card {
+      background: #fff !important;
+      border: 1px solid var(--ts-border) !important;
+      border-radius: 0 !important;
+    }
+
+    #restaurantPaymentModal #rpQRImage {
+      border-color: var(--ts-border) !important;
+    }
+
+    #restaurantPaymentModal .modal-footer {
+      background: #fdfbf7;
+      border-top: 1px solid var(--ts-border);
+    }
+
+    #restaurantPaymentModal .modal-footer .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--ts-border);
+      color: var(--ts-dark);
+    }
+
+    #restaurantPaymentModal .modal-footer .btn-secondary:hover {
+      background: var(--ts-border);
+    }
+
+    /* ── Đổi màu nút Giỏ Hàng nổi ── */
+    #cartFloatingBtn.ts-cart-pill {
+      background: #9f8c76 !important;
+      border-color: #9f8c76 !important;
+    }
+
+    #cartFloatingBtn .ts-cart-pill-inner {
+      color: #fff !important;
+    }
+
+    #cartFloatingBtn .ts-cart-count {
+      background: var(--ts-gold) !important;
+      color: #fff !important;
+    }
+
+    #cartFloatingBtn .ts-cart-divider {
+      background: rgba(255, 255, 255, 0.3) !important;
+    }
   </style>
 </head>
 
@@ -76,21 +403,21 @@
 
     <!-- Text Introduction Section -->
     <section class="ts-text-section">
-      <h2 class="playfair ts-reveal-text">Resort Luxury is a culinary destination. The restaurant's menu is a carefully
-        curated symphony—always celebrating local ingredients—set in an elegant atmosphere.</h2>
+      <h2 class="playfair ts-reveal-text">Resort Luxury là một điểm đến ẩm thực. Thực đơn của nhà hàng là một bản giao
+        hưởng được chọn lọc cẩn thận—luôn tôn vinh nguyên liệu địa phương—được phục vụ trong không gian sang trọng.</h2>
     </section>
 
     <!-- Asymmetrical Image Feature -->
     <section class="ts-asym-section">
       <div class="ts-asym-left">
         <img src="images/food1.png" alt="Culinary Details" style="object-fit: cover;">
-        <p class="ts-reveal-text ts-delay-1">Our master chefs craft every dish organically, showcasing the resort's
-          distinctive handmade character in its flavors, presentation, and service.</p>
+        <p class="ts-reveal-text ts-delay-1">Các đầu bếp chính của chúng tôi chế biến từng món ăn một cách hữu cơ, thể
+          hiện phong cách thủ công đặc trưng của khu nghỉ dưỡng qua hương vị, cách trình bày và dịch vụ.</p>
       </div>
       <div class="ts-asym-right">
         <img src="images/restaurantstory.jpg" alt="Restaurant Ambiance" style="object-fit: cover;">
-        <h3 class="playfair ts-reveal-text ts-delay-1">These culinary experiences are thoughtfully curated throughout
-          the property and were beautifully designed to awaken all your senses.</h3>
+        <h3 class="playfair ts-reveal-text ts-delay-1">Những trải nghiệm ẩm thực này được sắp xếp một cách tỉ mỉ khắp
+          khuôn viên và được thiết kế đẹp mắt để đánh thức tất cả các giác quan của bạn.</h3>
       </div>
     </section>
 
@@ -234,8 +561,7 @@
             console.log('[Restaurant] Menu rendered successfully with', filteredMenuItems.length, 'items');
 
             // Force display and grid layout
-            container.style.display = 'flex';
-            container.style.flexWrap = 'wrap';
+
             container.style.visibility = 'visible';
             container.style.opacity = '1';
             container.style.marginLeft = '-12px';
@@ -1589,7 +1915,7 @@
             <h5 class="modal-title"
               style="font-family: 'Playfair Display', serif; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;">
               Chi Tiết Giỏ Hàng</h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
               onclick="closeCartModal()"></button>
           </div>
           <div class="modal-body">
@@ -1664,12 +1990,12 @@
             </div>
 
             <div class="mb-3">
-              <label class="form-label" style="font-weight: 600;">Phương thức thanh toán</label>
+              <label class="form-label" style="font-weight: 600;">ương thức thanh toán</label>
               <select id="rpPaymentMethod" class="form-select" style="font-size: 16px; padding: 0.75rem;">
                 <option value="QR" selected>💳 Chuyển khoản QR (VietQR)</option>
                 <option value="Cash">💵 Thanh toán tại nhà hàng</option>
               </select>
-            </div>
+            </div>Ph
 
             <!-- QR Payment Section -->
             <div id="rpQRSection">
@@ -1720,9 +2046,7 @@
             </div>
           </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-        </div>
+
       </div>
     </div>
     </div>
