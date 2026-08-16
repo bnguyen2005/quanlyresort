@@ -54,3 +54,4 @@ Migrations/*.Designer.cs
 *.mov
 *.avi
 *.mkv
+!QuanLyResort/wwwroot/customer/video/*.mp4
