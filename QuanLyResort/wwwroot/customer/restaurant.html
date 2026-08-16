@@ -420,6 +420,49 @@
     #cartFloatingBtn .ts-cart-divider {
       background: rgba(255, 255, 255, 0.3) !important;
     }
+
+    /* ── Cho phép cuộn nội dung Payment Modal (modal-taste), tránh tràn màn hình ──
+       Giữ overflow:hidden ở modal-content để bo góc đẹp, cho phần nội dung
+       bên trong (payment-modal-right) tự cuộn riêng. */
+    .modal-taste .modal-dialog {
+      margin: 3vh auto;
+    }
+
+    .modal-taste .modal-content {
+      max-height: 94vh;
+      /* overflow: hidden vẫn giữ nguyên để bo góc, KHÔNG đổi thành auto */
+    }
+
+    .payment-modal-layout {
+      max-height: 94vh;
+    }
+
+    .payment-modal-right {
+      overflow-y: auto;
+      max-height: 94vh;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    @media (max-width: 991px) {
+      .modal-taste .modal-content {
+        max-height: 94vh;
+      }
+
+      .payment-modal-layout {
+        max-height: 94vh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .payment-modal-left {
+        flex-shrink: 0;
+      }
+
+      .payment-modal-right {
+        max-height: none;
+        overflow-y: visible;
+      }
+    }
   </style>
 </head>
 
@@ -2130,8 +2173,6 @@
           </div>
         </div>
       </div>
-    </div>
-    </div>
     </div>
 
     <script>
