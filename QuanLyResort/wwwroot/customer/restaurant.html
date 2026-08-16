@@ -277,85 +277,130 @@
       overflow-x: hidden;
     }
 
-    /* ── Đồng bộ Restaurant Payment Modal với theme be ── */
-    #restaurantPaymentModal .modal-content {
-      background: #9f8c76;
-      border-radius: 0;
-      border: none;
+    /* ── Payment Modal Taste (đồng bộ với My Bookings / Order History) ── */
+    .modal-taste .modal-dialog {
+      max-width: 1000px;
     }
 
-    #restaurantPaymentModal .modal-header {
-      background: #9f8c76 !important;
-      color: var(--ts-light) !important;
-      border-bottom: 1px solid var(--ts-border);
+    .modal-taste .modal-content {
+      background: rgba(10, 10, 10, 0.95);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #fff;
+      border-radius: 20px;
+      overflow: hidden;
     }
 
-    #restaurantPaymentModal .modal-header .modal-title {
-      font-family: 'Playfair Display', serif;
-      font-weight: 600;
-      letter-spacing: 1px;
+    .modal-taste .btn-close {
+      filter: invert(1);
     }
 
-    #restaurantPaymentModal .modal-body {
-      background: #fdfbf7;
-      color: var(--ts-dark);
+    .payment-modal-layout {
+      display: flex;
+      flex-wrap: wrap;
     }
 
-    #restaurantPaymentModal .text-primary {
-      color: var(--ts-gold) !important;
+    .payment-modal-left {
+      flex: 0 0 45%;
+      background: url('images/restaurantmain.jpg') center center;
+      background-size: cover;
+      position: relative;
+      min-height: 400px;
     }
 
-    #restaurantPaymentModal .form-label {
-      font-family: 'Inter', sans-serif;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      color: #666;
-      font-weight: 500;
+    .payment-modal-left::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(to right, rgba(0, 0, 0, 0.2) 0%, rgba(10, 10, 10, 0.95) 100%);
     }
 
-    #restaurantPaymentModal .form-select {
-      background: #fff;
-      border: 1px solid var(--ts-border);
-      border-radius: 0;
-      color: var(--ts-dark);
+    .payment-modal-right {
+      flex: 0 0 55%;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
     }
 
-    #restaurantPaymentModal .form-select:focus {
-      border-color: var(--ts-gold);
-      box-shadow: 0 0 0 2px rgba(200, 169, 126, 0.15);
+    @media (max-width: 991px) {
+
+      .payment-modal-left,
+      .payment-modal-right {
+        flex: 0 0 100%;
+      }
+
+      .payment-modal-left {
+        min-height: 200px;
+        background-position: center 30%;
+      }
+
+      .payment-modal-left::before {
+        background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2) 0%, rgba(10, 10, 10, 0.95) 100%);
+      }
+
+      .payment-modal-right {
+        padding: 25px;
+      }
     }
 
-    #restaurantPaymentModal code#rpContent {
-      background: #fff !important;
-      border: 1px solid var(--ts-border);
-      color: var(--ts-dark) !important;
+    .modal-taste .taste-input-dark {
+      background: rgba(255, 255, 255, 0.05) !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+      color: #fff !important;
     }
 
-    #restaurantPaymentModal .card {
-      background: #fff !important;
-      border: 1px solid var(--ts-border) !important;
-      border-radius: 0 !important;
+    .modal-taste .taste-input-dark:focus {
+      background: rgba(255, 255, 255, 0.1) !important;
+      border-color: #d4af37 !important;
+      box-shadow: 0 0 0 0.25rem rgba(212, 175, 55, 0.25) !important;
     }
 
-    #restaurantPaymentModal #rpQRImage {
-      border-color: var(--ts-border) !important;
+    .modal-taste .taste-input-dark option {
+      background: #1a1a1a;
+      color: #fff;
     }
 
-    #restaurantPaymentModal .modal-footer {
-      background: #fdfbf7;
-      border-top: 1px solid var(--ts-border);
-    }
-
-    #restaurantPaymentModal .modal-footer .btn-secondary {
+    .modal-taste .taste-btn {
       background: transparent;
-      border: 1px solid var(--ts-border);
-      color: var(--ts-dark);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #fff;
+      padding: 12px 30px;
+      border-radius: 30px;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
     }
 
-    #restaurantPaymentModal .modal-footer .btn-secondary:hover {
-      background: var(--ts-border);
+    .modal-taste .taste-btn:hover {
+      border-color: #d4af37;
+      color: #d4af37;
+      background: rgba(212, 175, 55, 0.05);
+      transform: translateY(-2px);
     }
+
+    .modal-taste .taste-btn-primary {
+      background: #d4af37;
+      color: #000;
+      border-color: #d4af37;
+    }
+
+    .modal-taste .taste-btn-primary:hover {
+      background: #f3e5ab;
+      color: #000;
+      border-color: #f3e5ab;
+    }
+
 
     /* ── Đổi màu nút Giỏ Hàng nổi ── */
     #cartFloatingBtn.ts-cart-pill {
@@ -1975,79 +2020,117 @@
     </div>
 
     <!-- Restaurant Payment Modal -->
-    <div class="modal fade" id="restaurantPaymentModal" tabindex="-1">
-      <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content" style="border-radius: 20px;">
-          <div class="modal-header"
-            style="background: linear-gradient(135deg, #c8a97e 0%, #b89968 100%); color: white;">
-            <h5 class="modal-title" style="font-size: 24px; font-weight: 700;">💳 Thanh Toán Đơn Hàng</h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body" style="padding: 30px;">
-            <div class="text-center mb-4">
-              <h6>Mã đơn hàng: <strong id="rpOrderNumber">-</strong></h6>
-              <h4 class="text-primary">Số tiền: <span id="rpAmount">0 ₫</span></h4>
+    <div class="modal fade modal-taste" id="restaurantPaymentModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+          <button type="button" class="btn-close" data-bs-dismiss="modal"
+            style="position: absolute; right: 20px; top: 20px; z-index: 10;"></button>
+          <div class="payment-modal-layout">
+            <div class="payment-modal-left">
+              <!-- Background Image Area -->
             </div>
+            <div class="payment-modal-right">
+              <h4 class="mb-4" style="font-family:'Playfair Display',serif; color:#d4af37; font-size:28px">
+                <i class="fas fa-credit-card me-2"></i> Thanh Toán
+              </h4>
 
-            <div class="mb-3">
-              <label class="form-label" style="font-weight: 600;">ương thức thanh toán</label>
-              <select id="rpPaymentMethod" class="form-select" style="font-size: 16px; padding: 0.75rem;">
-                <option value="QR" selected>💳 Chuyển khoản QR (VietQR)</option>
-                <option value="Cash">💵 Thanh toán tại nhà hàng</option>
-              </select>
-            </div>Ph
-
-            <!-- QR Payment Section -->
-            <div id="rpQRSection">
-              <p class="text-center mb-3">
-                <strong>Nội dung chuyển khoản:</strong><br>
-                <code id="rpContent"
-                  style="background: #f8f9fa; padding: 8px 12px; border-radius: 8px; font-size: 16px; font-weight: 600;">ORDER-</code>
-              </p>
-              <div class="text-center mb-4">
-                <img id="rpQRImage" alt="QR Code"
-                  style="max-width: 300px; border: 4px solid #e9ecef; border-radius: 15px; padding: 15px; display: none;">
+              <div class="mb-4">
+                <div class="d-flex justify-content-between mb-2">
+                  <span style="color:rgba(255,255,255,0.5)">Mã đơn hàng:</span>
+                  <strong id="rpOrderNumber" style="color:#fff">-</strong>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <span style="color:rgba(255,255,255,0.5)">Số tiền:</span>
+                  <h4 id="rpAmount" style="color:#d4af37; font-family:'Playfair Display',serif; margin:0">0 ₫</h4>
+                </div>
               </div>
-              <div class="card" style="background: #f8f9fa; padding: 20px; border-radius: 12px;">
-                <p class="mb-2"><strong>Ngân hàng:</strong> MBBank</p>
-                <p class="mb-2"><strong>Số tài khoản:</strong> <span id="rpBankAccount">0901329227</span></p>
-                <p class="mb-0"><strong>Chủ tài khoản:</strong> <span id="rpBankName">PHAM THANH LAM</span></p>
+
+              <div class="mb-4">
+                <label class="form-label"
+                  style="font-weight: 500; color:rgba(255,255,255,0.7); font-size:13px; text-transform:uppercase; letter-spacing:1px">
+                  Phương thức thanh toán
+                </label>
+                <select id="rpPaymentMethod" class="form-select taste-input-dark"
+                  style="font-size: 15px; padding: 12px 15px; border-radius:10px">
+                  <option value="QR" selected>💳 Chuyển khoản QR (VietQR)</option>
+                  <option value="Cash">💵 Thanh toán tại nhà hàng</option>
+                </select>
               </div>
-            </div>
 
-          </div>
+              <!-- Cash Payment Confirmation Section -->
+              <div id="rpCashSection"
+                style="display: none; padding: 25px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 15px; text-align: center; margin-bottom: 20px;">
+                <i class="fas fa-money-bill-wave" style="font-size: 40px; color:#d4af37; margin-bottom:15px"></i>
+                <h5 style="color: #fff; margin-bottom: 15px;">Thanh toán tại nhà hàng</h5>
+                <p style="color: rgba(255,255,255,0.6); font-size: 14px; margin-bottom: 20px;">
+                  Vui lòng thanh toán bằng tiền mặt hoặc thẻ tại quầy khi nhận món.
+                </p>
+                <div
+                  style="background: rgba(212,175,55,0.05); padding: 20px; border-radius: 12px; border: 1px solid rgba(212,175,55,0.2);">
+                  <div class="d-flex justify-content-between mb-2">
+                    <span style="color:rgba(255,255,255,0.6)">Mã đơn:</span>
+                    <span id="rpCashOrderNumber" style="color: #fff; font-weight: 600;">-</span>
+                  </div>
+                  <div class="d-flex justify-content-between">
+                    <span style="color:rgba(255,255,255,0.6)">Tổng tiền:</span>
+                    <span id="rpCashAmount" style="color: #d4af37; font-weight: 600;">0 ₫</span>
+                  </div>
+                </div>
+              </div>
 
-          <!-- Cash Payment Section -->
-          <div id="rpCashSection"
-            style="display: none; padding: 20px; background: rgba(41,37,36,0.8); border-radius: 12px; text-align: center;">
-            <div style="font-size: 48px; margin-bottom: 16px;">&#128181;</div>
-            <h5 style="color: var(--text-primary); margin-bottom: 12px;">Thanh toán tại nhà hàng</h5>
-            <p style="color: var(--text-secondary); margin-bottom: 20px;">Vui lòng thanh toán trực tiếp tại quầy thanh
-              toán của nhà hàng khi nhận món.</p>
-            <div
-              style="background: var(--bg-primary); padding: 16px; border-radius: 8px; border: 1px solid rgba(212,175,55,0.2);">
-              <p class="mb-1"><strong>Mã đơn hàng:</strong> <span id="rpCashOrderNumber">-</span></p>
-              <p class="mb-0"><strong>Số tiền:</strong> <span id="rpCashAmount"
-                  style="color: #c8a97e; font-size: 18px; font-weight: 700;">0 ₫</span></p>
-            </div>
-            <button type="button" id="rpConfirmCashBtn" class="btn btn-primary mt-3"
-              style="background: #c8a97e; border: none; display: none;">Xác nhận đã thanh toán</button>
-          </div>
+              <!-- QR Section -->
+              <div id="rpQRSection" style="margin-bottom: 20px;">
+                <div
+                  style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 15px; padding: 25px;">
+                  <p class="text-center mb-3" style="color:rgba(255,255,255,0.6); font-size:14px">
+                    Nội dung chuyển khoản:<br>
+                    <code id="rpContent"
+                      style="background: rgba(212,175,55,0.1); color:#d4af37; padding: 8px 15px; border-radius: 8px; font-size: 16px; font-weight: 600; display:inline-block; margin-top:10px; border: 1px solid rgba(212,175,55,0.2)">ORDER-</code>
+                  </p>
+                  <div class="text-center mb-4">
+                    <img id="rpQRImage" alt="QR Code"
+                      style="max-width: 220px; border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; padding: 15px; background:#fff; display: none; margin:0 auto">
+                  </div>
+                  <div class="text-center" style="font-size:14px">
+                    <p class="mb-1" style="color:rgba(255,255,255,0.5)">Ngân hàng: <strong
+                        style="color:#fff">MBBank</strong></p>
+                    <p class="mb-1" style="color:rgba(255,255,255,0.5)">Số tài khoản: <strong id="rpBankAccount"
+                        style="color:#d4af37; font-size:16px">0901329227</strong></p>
+                    <p class="mb-0" style="color:rgba(255,255,255,0.5)">Chủ tài khoản: <strong id="rpBankName"
+                        style="color:#fff">PHAM THANH LAM</strong></p>
+                  </div>
+                </div>
+              </div>
 
-          <div id="rpWaiting" class="text-center mt-4" style="display: block;">
-            <div class="spinner-border text-primary" role="status"></div>
-            <p class="mt-2">Đang chờ thanh toán...</p>
-          </div>
+              <!-- Status Areas -->
+              <div id="rpWaiting" class="text-center mb-4"
+                style="display: block !important; visibility: visible !important; opacity: 1 !important;">
+                <div class="spinner-border" role="status" style="color:#d4af37; width:1.5rem; height:1.5rem"></div>
+                <p class="mt-2 mb-0" style="color:rgba(255,255,255,0.5); font-size:14px">Đang chờ thanh toán...</p>
+              </div>
 
-          <div id="rpSuccess" class="text-center mt-4" style="display: none;">
-            <div class="alert alert-success">
-              <h5>&#9989; Thanh toán thành công!</h5>
-              <p>Đang cập nhật thông tin...</p>
+              <div id="rpSuccess" class="text-center mb-4"
+                style="display: none !important; visibility: hidden !important; opacity: 0 !important;">
+                <div
+                  style="background:rgba(50,205,50,0.1); border:1px solid rgba(50,205,50,0.3); padding:15px; border-radius:12px; color:#32cd32">
+                  <h6 class="mb-1"><i class="fas fa-check-circle me-2"></i>Thanh toán thành công!</h6>
+                  <p class="mb-0" style="color:rgba(255,255,255,0.6); font-size:13px">Đang cập nhật thông tin...</p>
+                </div>
+              </div>
+
+              <div class="mt-auto d-flex gap-3 justify-content-end">
+                <button type="button" class="taste-btn" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="taste-btn taste-btn-primary" onclick="confirmRestaurantCashPayment()"
+                  id="rpConfirmCashBtn" style="display: none;">
+                  <i class="fas fa-check me-2"></i> Xác nhận
+                </button>
+              </div>
+
             </div>
           </div>
         </div>
-
       </div>
+    </div>
     </div>
     </div>
 
