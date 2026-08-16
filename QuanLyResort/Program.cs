@@ -33,7 +33,7 @@ if (builder.Environment.IsDevelopment())
 builder.Services.AddDbContext<ResortDbContext>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-    
+
     // Use SQLite if connection string is SQLite format, otherwise try SQL Server
     // SQLite works on all platforms (Windows, Linux, macOS)
     if (connectionString != null && (connectionString.Contains("Data Source=") || connectionString.Contains(".db")))
@@ -65,7 +65,14 @@ builder.Services.AddDbContext<ResortDbContext>(options =>
         }
         else
         {
-            options.UseSqlServer(connectionString);
+            // ⚠️ QUAN TRỌNG: nếu bạn dùng Render PostgreSQL, connectionString sẽ có
+            // dạng "Host=...;Port=5432;..." — KHÔNG được đưa vào UseSqlServer().
+            // Nếu đúng là bạn dùng Postgres, cài gói Npgsql.EntityFrameworkCore.PostgreSQL
+            // và đổi dòng dưới thành: options.UseNpgsql(connectionString);
+            options.UseSqlServer(connectionString, sql =>
+            {
+                sql.CommandTimeout(20);
+            });
         }
     }
 });
@@ -130,7 +137,7 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = jwtSettings["Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
     };
-    
+
     // Cấu hình JWT cho SignalR
     options.Events = new JwtBearerEvents
     {
@@ -139,7 +146,7 @@ builder.Services.AddAuthentication(options =>
             // SignalR gửi token qua query string hoặc header
             var accessToken = context.Request.Query["access_token"];
             var path = context.HttpContext.Request.Path;
-            
+
             if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/ws/payment"))
             {
                 context.Token = accessToken;
@@ -243,16 +250,16 @@ builder.Services.AddSwaggerGen(c =>
             Array.Empty<string>()
         }
     });
-    
+
     // Ignore obsolete actions and use full type names to avoid conflicts
     c.IgnoreObsoleteActions();
     c.IgnoreObsoleteProperties();
     c.CustomSchemaIds(type => type.FullName?.Replace("+", ".") ?? type.Name);
-    
+
     // Handle circular references
     c.UseAllOfForInheritance();
     c.UseOneOfForPolymorphism();
-    
+
     // Exclude endpoints with IFormFile parameters to avoid Swagger generation errors
     // These endpoints work fine in runtime but Swagger can't generate docs for them properly
     c.DocInclusionPredicate((docName, apiDesc) =>
@@ -262,7 +269,7 @@ builder.Services.AddSwaggerGen(c =>
             // Check by action descriptor display name (more reliable)
             var displayName = apiDesc.ActionDescriptor.DisplayName ?? "";
             var problematicActions = new[] { "UploadRoomImage", "AddImageToGallery", "UploadServiceImage" };
-            
+
             foreach (var problematicAction in problematicActions)
             {
                 if (displayName.Contains(problematicAction))
@@ -270,24 +277,24 @@ builder.Services.AddSwaggerGen(c =>
                     return false; // Exclude these actions
                 }
             }
-            
+
             // Also check by relative path
             var relativePath = apiDesc.RelativePath ?? "";
-            if (relativePath.Contains("UploadRoomImage") || 
-                relativePath.Contains("AddImageToGallery") || 
+            if (relativePath.Contains("UploadRoomImage") ||
+                relativePath.Contains("AddImageToGallery") ||
                 relativePath.Contains("UploadServiceImage"))
             {
                 return false;
             }
-            
+
             // Check for IFormFile parameters (backup check)
             var hasIFormFile = apiDesc.ParameterDescriptions.Any(p =>
             {
                 try
                 {
                     return p.Type == typeof(IFormFile) ||
-                           (p.Type.IsGenericType && 
-                            p.Type.GetGenericTypeDefinition() == typeof(Nullable<>) && 
+                           (p.Type.IsGenericType &&
+                            p.Type.GetGenericTypeDefinition() == typeof(Nullable<>) &&
                             p.Type.GetGenericArguments()[0] == typeof(IFormFile));
                 }
                 catch
@@ -295,7 +302,7 @@ builder.Services.AddSwaggerGen(c =>
                     return false;
                 }
             });
-            
+
             return !hasIFormFile;
         }
         catch
@@ -308,43 +315,53 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-// Seed initial data and ensure database exists (Development and Production)
-using (var scope = app.Services.CreateScope())
+// Bind port NGAY LẬP TỨC — đảm bảo Render port-scan luôn thấy service sống,
+// bất kể DB có kết nối được hay không. Đây là điểm mấu chốt của lỗi "Port scan timeout".
+var renderPort = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrEmpty(renderPort))
 {
+    app.Urls.Add($"http://0.0.0.0:{renderPort}");
+}
+
+// Seed initial data and ensure database exists - chạy NỀN, có timeout,
+// KHÔNG được phép chặn app.Run() phía dưới.
+_ = Task.Run(async () =>
+{
+    using var scope = app.Services.CreateScope();
     var context = scope.ServiceProvider.GetRequiredService<ResortDbContext>();
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-    
+
     try
     {
-        // Always apply migrations to ensure database schema is up to date
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(20));
+
         logger.LogInformation("🔧 Checking database connection...");
-        var canConnect = await context.Database.CanConnectAsync();
-        logger.LogInformation($"   Database can connect: {canConnect}");
-        
-        // Check if using SQLite
+        var canConnect = await context.Database.CanConnectAsync(cts.Token);
+        logger.LogInformation("   Database can connect: {CanConnect}", canConnect);
+
         var isSqlite = context.Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite";
-        logger.LogInformation($"   Database provider: {context.Database.ProviderName}");
-        
+        logger.LogInformation("   Database provider: {Provider}", context.Database.ProviderName);
+
         if (isSqlite)
         {
             // For SQLite, use EnsureCreated to avoid migration issues with AUTOINCREMENT
             logger.LogInformation("📦 Using SQLite - creating database with EnsureCreated...");
-            await context.Database.EnsureCreatedAsync();
+            await context.Database.EnsureCreatedAsync(cts.Token);
             logger.LogInformation("✅ Database created using EnsureCreated");
         }
         else
         {
             // For SQL Server, use migrations
-            var appliedMigrations = await context.Database.GetAppliedMigrationsAsync();
-            var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
-            
-            logger.LogInformation($"   Applied migrations: {appliedMigrations.Count()}");
-            logger.LogInformation($"   Pending migrations: {pendingMigrations.Count()}");
-            
+            var appliedMigrations = await context.Database.GetAppliedMigrationsAsync(cts.Token);
+            var pendingMigrations = await context.Database.GetPendingMigrationsAsync(cts.Token);
+
+            logger.LogInformation("   Applied migrations: {Count}", appliedMigrations.Count());
+            logger.LogInformation("   Pending migrations: {Count}", pendingMigrations.Count());
+
             if (!canConnect || pendingMigrations.Any())
             {
                 logger.LogInformation("📦 Creating/updating database and applying migrations...");
-                await context.Database.MigrateAsync();
+                await context.Database.MigrateAsync(cts.Token);
                 logger.LogInformation("✅ Database created/updated and migrations applied");
             }
             else
@@ -352,12 +369,16 @@ using (var scope = app.Services.CreateScope())
                 logger.LogInformation("✅ Database is up to date");
             }
         }
-        
+
         // Seed initial data (only if tables are empty)
         logger.LogInformation("🌱 Seeding initial data...");
         var seeder = new DataSeeder(context);
         await seeder.SeedAsync();
         logger.LogInformation("✅ Data seeded successfully");
+    }
+    catch (OperationCanceledException)
+    {
+        logger.LogError("❌ DB init timed out sau 20s. Kiểm tra ConnectionStrings__DefaultConnection trên Render (đúng host/port/SSL/loại DB chưa?).");
     }
     catch (Exception ex)
     {
@@ -365,7 +386,7 @@ using (var scope = app.Services.CreateScope())
         // Don't throw - let app start even if seeding fails
         // This allows manual database setup if needed
     }
-}
+});
 
 // Configure the HTTP request pipeline
 
@@ -373,7 +394,7 @@ using (var scope = app.Services.CreateScope())
 // If Swagger generation fails, return a minimal valid Swagger document instead of 500
 app.Use(async (context, next) =>
 {
-    if (context.Request.Path.StartsWithSegments("/swagger") && 
+    if (context.Request.Path.StartsWithSegments("/swagger") &&
         context.Request.Path.Value?.Contains("/swagger.json") == true)
     {
         try
@@ -383,15 +404,15 @@ app.Use(async (context, next) =>
         catch (Exception ex)
         {
             var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
-            
+
             // Log full exception details including inner exception
             logger.LogError(ex, "Error generating Swagger documentation");
-            
+
             if (ex.InnerException != null)
             {
                 logger.LogError(ex.InnerException, "Inner exception details");
             }
-            
+
             // Return a minimal valid Swagger document instead of error
             // This allows Swagger UI to load even if some endpoints fail
             var minimalSwagger = new
@@ -406,7 +427,7 @@ app.Use(async (context, next) =>
                 paths = new { },
                 components = new { }
             };
-            
+
             context.Response.StatusCode = 200;
             context.Response.ContentType = "application/json";
             await context.Response.WriteAsJsonAsync(minimalSwagger);
