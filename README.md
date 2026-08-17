@@ -102,6 +102,120 @@ QuanLyResort/
 | **Kho (Inventory)** | Quản lý hàng tồn kho, nhập hàng, cảnh báo thiếu hụt |
 | **Báo cáo (Reports)** | Doanh thu theo ngày/tháng, Occupancy Rate, RevPAR, Audit Trail |
 
+---
+
+## 📋 Danh Sách Tính Năng Đầy Đủ
+
+### 🔐 Xác thực & Phân quyền (Auth & Authorization)
+- Đăng ký / Đăng nhập với **JWT Bearer Token** (HS256)
+- **Phân quyền RBAC** 6 nhóm: Admin, Manager, FrontDesk, Cashier, Inventory, Customer
+- **Xác thực 2 lớp (2FA / OTP)** qua Email — [`TwoFactorAuthController`]
+- Đổi mật khẩu, quên mật khẩu, refresh token
+
+---
+
+### 🛏️ Quản lý Phòng (Room Management)
+- CRUD loại phòng (`RoomTypesController`) và phòng (`RoomsController`)
+- Kiểm tra tình trạng phòng (**Availability Check**) theo ngày Check-in / Check-out
+- Cập nhật trạng thái phòng: *Available, Occupied, Maintenance, Cleaning*
+- Upload ảnh phòng, quản lý tiện nghi (Amenities)
+
+---
+
+### 📅 Đặt phòng (Booking Management) — *Luồng nghiệp vụ trung tâm*
+- Tạo đặt phòng, kiểm tra ngay lập tức conflict (chống **Double-Booking**)
+- Quản lý vòng đời đặt phòng: *Pending → Confirmed → CheckedIn → CheckedOut → Cancelled*
+- **Check-in & Check-out** có ghi nhận thời gian thực tế
+- Hủy đặt phòng với chính sách tính phí hủy linh hoạt
+- Xem lịch sử đặt phòng theo khách hàng, theo phòng, theo khoảng thời gian
+
+---
+
+### 💳 Thanh toán Đa cổng (Multi-gateway Payment)
+- Tích hợp **PayOS** (VNPay-based) — QR Code, link thanh toán tức thì
+- Tích hợp **MB Bank API** — Kiểm tra lịch sử giao dịch ngân hàng
+- Tích hợp **SePay** — Xử lý thanh toán tự động
+- Tích hợp **VietQR** — Tạo QR chuyển khoản chuẩn VietQR
+- **Webhook xử lý giao dịch** realtime — Tự động cập nhật trạng thái Booking/Invoice khi nhận tiền
+- **Background Service** kiểm tra định kỳ các giao dịch pending
+- Thanh toán từng phần (partial payment), đặt cọc (deposit)
+
+---
+
+### 🧾 Hóa đơn (Invoice Management)
+- Tự động tổng hợp hóa đơn từ: Tiền phòng + Dịch vụ + Đơn nhà hàng
+- Hỗ trợ nhiều phương thức thanh toán (Cash, Transfer, QR)
+- Phát hành hóa đơn điện tử, lưu trữ lịch sử thanh toán
+- Đối soát (Reconciliation) hóa đơn với Audit Log
+
+---
+
+### 🍽️ Nhà hàng & Dịch vụ (F&B & Services)
+- Quản lý thực đơn (Menu) và danh mục món ăn
+- Tạo, cập nhật đơn gọi món (`RestaurantOrdersController`)
+- Tự động gắn hóa đơn nhà hàng vào hóa đơn phòng khi check-out
+- Quản lý danh mục dịch vụ Resort (Spa, Minibar, Laundry, v.v.) [`ServicesController`]
+- Thanh toán riêng hoặc gộp vào hóa đơn tổng (`RestaurantPaymentController`)
+
+---
+
+### 👥 Quản lý Khách hàng & Nhân viên
+- CRUD đầy đủ khách hàng (`CustomerManagementController`) với phân trang, lọc, tìm kiếm
+- Xem lịch sử lưu trú, tổng chi tiêu, phân loại khách VIP
+- CRUD nhân viên (`EmployeeManagementController`): Thêm, phân ca, phân quyền
+- Quản lý tài khoản người dùng tổng hợp (`UserManagementController`)
+
+---
+
+### 📊 Dashboard & Báo cáo (Reports & Analytics)
+- **Dashboard thời gian thực**: Tổng Booking hôm nay, doanh thu, phòng trống, phòng đang sử dụng
+- Biểu đồ doanh thu theo ngày / tuần / tháng / năm
+- **Occupancy Rate** (Tỷ lệ lấp đầy phòng)
+- **RevPAR** (Revenue Per Available Room)
+- Báo cáo dịch vụ nhà hàng, kho, nhân viên
+- Export báo cáo (`ReportsController`)
+
+---
+
+### 🔔 Thông báo & Liên lạc (Notifications & Communication)
+- Thông báo realtime qua **SignalR WebSocket** (`/ws/payment`)
+- Gửi Email xác nhận đặt phòng, thông báo thanh toán (`EmailService`)
+- Gửi SMS thông báo (`SmsService` — Tích hợp cổng SMS)
+- Hệ thống cảnh báo nội bộ (`AlertsController`)
+- Quản lý thông báo trong app cho từng người dùng (`NotificationsController`)
+
+---
+
+### 🤖 AI Chat & Hỗ trợ
+- **AI Chatbot** tích hợp sẵn trong hệ thống (`AIChatController` + `AIChatService`)
+- Hỗ trợ tự động trả lời câu hỏi thường gặp (FAQ) từ khách hàng
+- Quản lý ngân hàng câu hỏi FAQ (`FAQsController`)
+- Hệ thống hỗ trợ ticket (`SupportTicketsController`): Tạo yêu cầu, theo dõi, đóng ticket
+
+---
+
+### 🏪 Kho & Nhà cung cấp (Inventory & Suppliers)
+- Quản lý hàng tồn kho (`InventoryController`): Nhập kho, xuất kho, tồn kho theo thời gian thực
+- Quản lý nhà cung cấp (`SuppliersController`)
+- Cảnh báo hàng tồn kho thấp
+
+---
+
+### 🌐 Hệ thống & Đa ngôn ngữ
+- **Đa ngôn ngữ (i18n)** — `LocalizationController` + `LocalizationService`
+- **Mã giảm giá (Coupons)** — Tạo, áp dụng, kiểm tra hiệu lực (`CouponsController`)
+- **Đánh giá & Nhận xét (Reviews)** — Quản lý review của khách sau lưu trú (`ReviewsController`)
+- **Audit Log** — Ghi lại mọi thao tác nhạy cảm theo chuẩn kiểm toán (`AuditController`)
+- **Health Check API** — Giám sát trạng thái hệ thống, kết nối DB (`HealthCheckController`)
+- **Contact Form** — Biểu mẫu liên hệ từ website (`ContactController`)
+- **PWA Support** — Service Worker, có thể cài đặt như Native App trên mobile
+
+---
+
+> **Tổng cộng: 34 Controllers | 37 Services | 20+ Database Tables**
+
+
+
 ### 🎯 Điểm Kỹ Thuật Nổi Bật
 
 **1. Xử lý Race Condition (Concurrency Safety)**
