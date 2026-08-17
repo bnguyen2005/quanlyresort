@@ -205,14 +205,6 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials(); // nếu frontend gửi cookie/credentials
-    });
-    // Optional permissive policy for quick testing (do NOT use in production)
-    options.AddPolicy("DevAllowAll", policy =>
-    {
-        policy.SetIsOriginAllowed(_ => true)
-              .AllowAnyHeader()
-              .AllowAnyMethod();
-    });
 });
 
 // Add Controllers
