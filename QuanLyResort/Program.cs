@@ -118,7 +118,15 @@ builder.Services.AddSignalR();
 
 // Add JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-var secretKey = jwtSettings["SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey not configured");
+var secretKey = jwtSettings["SecretKey"];
+if (string.IsNullOrWhiteSpace(secretKey))
+    throw new InvalidOperationException(
+        "JWT SecretKey is not configured. " +
+        "Set the environment variable: JwtSettings__SecretKey=<your-secret> " +
+        "or add it to appsettings.Development.json for local development.");
+if (secretKey.Length < 32)
+    throw new InvalidOperationException(
+        $"JWT SecretKey is too short ({secretKey.Length} chars). Minimum 32 characters required for security.");
 
 builder.Services.AddAuthentication(options =>
 {
