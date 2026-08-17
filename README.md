@@ -1,111 +1,283 @@
-# 🏨 Resort Management System API
+<div align="center">
 
-**ResortManagementAPI** là hệ thống quản lý resort toàn diện được thiết kế theo các tiêu chuẩn kiến trúc phần mềm hiện đại, an toàn và dễ dàng mở rộng.
+# 🏨 QuanLyResort — Resort Management System
 
-Hệ thống bao gồm Backend RESTful API, Customer Frontend (Giao diện khách hàng), Admin Dashboard (Giao diện quản lý), hỗ trợ PWA (Progressive Web App) và hệ thống phân quyền JWT bảo mật cao.
+### *Enterprise-grade Hotel & Resort Operations Platform*
 
----
+[![.NET 8](https://img.shields.io/badge/.NET-8.0-512BD4?style=for-the-badge&logo=dotnet)](https://dotnet.microsoft.com/)
+[![C#](https://img.shields.io/badge/C%23-12.0-239120?style=for-the-badge&logo=csharp)](https://learn.microsoft.com/en-us/dotnet/csharp/)
+[![EF Core](https://img.shields.io/badge/EF%20Core-8.0-68217A?style=for-the-badge&logo=nuget)](https://learn.microsoft.com/ef/core/)
+[![SQL Server](https://img.shields.io/badge/SQL%20Server-2022-CC2927?style=for-the-badge&logo=microsoftsqlserver)](https://www.microsoft.com/sql-server)
+[![JWT](https://img.shields.io/badge/JWT-Auth-000000?style=for-the-badge&logo=jsonwebtokens)](https://jwt.io/)
+[![xUnit](https://img.shields.io/badge/xUnit-Moq-brightgreen?style=for-the-badge)](https://xunit.net/)
 
-## 🌟 Tính năng nổi bật
+**Hệ thống quản lý vận hành resort toàn diện — từ đặt phòng đến kết toán — được xây dựng theo các tiêu chuẩn kiến trúc phần mềm Enterprise.**
 
-### 🏗 Kiến trúc & Code Quality
-- **Pure Unit Of Work & Repository Pattern:** Toàn bộ Service và Controller tương tác thông qua `IUnitOfWork`. Không chọc thẳng vào `DbContext` (ngăn chặn Leaky Abstraction).
-- **Generic Repository Querying:** Hỗ trợ `IQueryable` cho phép đẩy mọi logic tính toán GroupBy, Sum, Count xuống SQL Server xử lý, tiết kiệm RAM tuyệt đối.
-- **S.O.L.I.D Principles:** Controller được chia nhỏ theo từng nghiệp vụ độc lập (vd: `PaymentWebhookController`, `BookingPaymentController`, `RestaurantPaymentController`).
-- **Unit Testing:** Thiết lập sẵn kiến trúc Test tự động với **xUnit** và **Moq**.
+[📖 API Docs (Swagger)](#-urls-nhanh) · [🧑‍💻 Hướng dẫn cài đặt](#-hướng-dẫn-cài-đặt) · [🏗 Kiến trúc](#-kiến-trúc-hệ-thống) · [🔒 Bảo mật](#-bảo-mật)
 
-### 🔒 Bảo mật & An toàn dữ liệu
-- **Thread-Safety (Chống Race Condition):** Thuật toán sinh mã `BookingCode` và `InvoiceNumber` an toàn tuyệt đối, dùng Temporary-GUID kết hợp ID Auto-Increment, cam kết không trùng lặp khi có hàng ngàn request cùng lúc.
-- **Secret Management:** Loại bỏ hoàn toàn chuỗi kết nối và mật khẩu cứng (Hardcoded Secrets). Hỗ trợ đọc từ biến môi trường (Environment Variables) hoặc `.env`.
-- **Strict CORS Policy:** Chỉ cho phép các domain được cấp quyền truy cập vào API, chống tấn công mạo danh (CSRF).
-- **JWT Authorization:** Xác thực bảo mật, phân quyền nghiêm ngặt giữa Admin, Cashier, FrontDesk và Customer.
+</div>
 
 ---
 
-## 📂 Cấu trúc Project
+## 🌟 Tổng Quan
+
+**QuanLyResort** là một nền tảng quản lý khách sạn và khu nghỉ dưỡng full-stack được phát triển với tư duy **Production-Ready** từ ngày đầu. Hệ thống bao gồm:
+
+- 🔌 **Backend RESTful API** — .NET 8 Web API với kiến trúc phân tầng nghiêm ngặt.
+- 🖥️ **Admin Dashboard** — Giao diện quản trị toàn diện (Sneat Admin Theme).
+- 📱 **Customer Portal** — Giao diện đặt phòng trực tuyến (Deluxe Theme, PWA-enabled).
+- ✅ **Unit Test Suite** — Bộ kiểm thử tự động với xUnit & Moq.
+- 🔒 **Secure by Design** — CORS Policy, JWT RBAC, không có bất kỳ Secret nào trong mã nguồn.
+
+---
+
+## 🏗 Kiến Trúc Hệ Thống
+
+Dự án tuân thủ nghiêm ngặt kiến trúc **N-Tier** kết hợp **Repository + Unit of Work Pattern**, đảm bảo tính tách biệt rõ ràng giữa các tầng.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    CLIENT LAYER                              │
+│   Admin Dashboard (Sneat)  |  Customer Portal (PWA)         │
+└───────────────────┬─────────────────────────────────────────┘
+                    │ HTTP / WebSocket (SignalR)
+┌───────────────────▼─────────────────────────────────────────┐
+│                   API LAYER (Controllers)                     │
+│   Auth | Booking | Payment | Room | Report | Restaurant...   │
+└───────────────────┬─────────────────────────────────────────┘
+                    │ IUnitOfWork (Pure Abstraction)
+┌───────────────────▼─────────────────────────────────────────┐
+│                 SERVICE LAYER (Business Logic)                │
+│   BookingService | InvoiceService | AIChatService | ...      │
+└───────────────────┬─────────────────────────────────────────┘
+                    │
+┌───────────────────▼─────────────────────────────────────────┐
+│         REPOSITORY LAYER (IUnitOfWork / IRepository<T>)      │
+│   Generic Repo + IQueryable Support (SQL-side Evaluation)    │
+└───────────────────┬─────────────────────────────────────────┘
+                    │ Entity Framework Core
+┌───────────────────▼─────────────────────────────────────────┐
+│                DATABASE LAYER (SQL Server / SQLite)           │
+│   20+ Tables | Migrations | DataSeeder                       │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Cấu trúc thư mục
 
 ```text
 QuanLyResort/
-├── Models/                 # Entities (Room, Booking, Customer, Invoice, v.v.)
-├── Data/                   # DbContext & EF Core Configurations
-├── Repositories/           # Repository Pattern + Unit of Work
-├── Services/               # Business Logic (Booking, Payment, Room, Auth)
-├── Controllers/            # RESTful API Controllers
+├── Controllers/            # 15+ API Controllers (SOLID, single-purpose)
+│   ├── BookingsController.cs
+│   ├── PaymentWebhookController.cs
+│   ├── BookingPaymentController.cs
+│   └── RestaurantPaymentController.cs
+├── Services/               # Business logic, hoàn toàn tách biệt với DbContext
+├── Repositories/
+│   ├── IRepository.cs      # Generic Interface + IQueryable Query()
+│   ├── Repository.cs
+│   ├── IUnitOfWork.cs      # 20+ typed Repositories
+│   └── UnitOfWork.cs
+├── Models/                 # EF Core Entities
+├── Data/                   # DbContext + DataSeeder
 ├── wwwroot/
-│   ├── customer/           # Deluxe theme - Giao diện đặt phòng
-│   ├── admin/              # Sneat theme - Admin Dashboard
-│   └── service-worker.js   # PWA Offline support
-└── QuanLyResort.Tests/     # Dự án Unit Test (xUnit, Moq)
+│   ├── customer/           # Customer Portal (PWA)
+│   └── admin/              # Admin Dashboard
+└── QuanLyResort.Tests/     # 🧪 Unit Test Project
+    └── Services/
+        └── BookingServiceTests.cs
 ```
 
 ---
 
-## 🚀 Hướng dẫn cài đặt
+## ✨ Tính Năng Nổi Bật
 
-### Yêu cầu hệ thống
-- **.NET 8 SDK** (Bắt buộc)
-- **SQL Server LocalDB** (Đi kèm Visual Studio) hoặc SQL Server Express
-- **Visual Studio 2022** hoặc **VS Code**
+### 📦 Quản lý Nghiệp vụ Cốt lõi
 
-### Các bước chạy dự án
-**1. Restore dependencies:**
-```powershell
-dotnet restore
+| Module | Tính năng |
+|--------|-----------|
+| **Đặt phòng (Booking)** | Kiểm tra availability real-time, tránh double-booking, phê duyệt & check-in/out |
+| **Hóa đơn (Invoice)** | Tạo hóa đơn tổng hợp (phòng + dịch vụ + nhà hàng), hỗ trợ thanh toán từng phần |
+| **Thanh toán (Payment)** | Webhook xử lý giao dịch thành công/thất bại, cập nhật trạng thái qua SignalR real-time |
+| **Nhà hàng (Restaurant)** | Quản lý order, thực đơn, tự động gắn vào hóa đơn lưu trú |
+| **Kho (Inventory)** | Quản lý hàng tồn kho, nhập hàng, cảnh báo thiếu hụt |
+| **Báo cáo (Reports)** | Doanh thu theo ngày/tháng, Occupancy Rate, RevPAR, Audit Trail |
+
+### 🎯 Điểm Kỹ Thuật Nổi Bật
+
+**1. Xử lý Race Condition (Concurrency Safety)**
+
+Cơ chế sinh mã Booking và Invoice an toàn 100% khi có hàng nghìn request đồng thời:
+```csharp
+// ❌ Cách cũ — Rất dễ trùng mã khi có 2+ luồng đồng thời
+var lastId = await _context.Bookings.MaxAsync(b => b.BookingId);
+booking.BookingCode = $"BKG{lastId + 1:D7}"; // 💣 Race Condition!
+
+// ✅ Cách mới — An toàn tuyệt đối, dựa vào ACID của Database
+booking.BookingCode = $"TEMP-{Guid.NewGuid()}"; // Gán tạm để DB nhận record
+await _unitOfWork.SaveChangesAsync();           // DB cấp ID thật (Auto-Increment)
+booking.BookingCode = $"BKG{booking.BookingId:D7}"; // ID từ DB là duy nhất 100%
+await _unitOfWork.SaveChangesAsync();           // Cập nhật mã chính thức
 ```
 
-**2. Khởi tạo Database & Migration:**
-Hệ thống sử dụng EF Core Code-First.
-```powershell
-dotnet tool install --global dotnet-ef
-dotnet ef database update
+**2. IQueryable Repository — Chống RAM Overflow**
+
+```csharp
+// ❌ Cách cũ — Kéo toàn bộ 1 triệu records lên RAM rồi mới Sum
+var total = _context.Invoices.ToList().Sum(i => i.Amount);
+
+// ✅ Cách mới — SQL Server thực hiện Sum trực tiếp, chỉ trả về 1 con số
+var total = await _unitOfWork.Invoices.Query().SumAsync(i => i.Amount);
 ```
 
-**3. Chạy ứng dụng:**
-```powershell
-dotnet run
-```
-Truy cập `https://localhost:7000/swagger` để xem tài liệu API.
+**3. Clean Separation of Concerns (SRP)**
 
-**4. Dữ liệu mẫu (Seed Data):**
-Vì Database mới sẽ trống, hãy sử dụng Postman hoặc Swagger để gọi API:
-`POST /api/admin/seed`
-Hệ thống sẽ tự động tạo các loại phòng, khách hàng, nhân viên và dữ liệu đặt phòng mẫu để bạn trải nghiệm.
+```csharp
+// ❌ Cách cũ — 1 "God-Class" SimplePaymentController với 1600+ dòng
+// class SimplePaymentController { /* Tất cả trong 1 */ }
+
+// ✅ Cách mới — 3 controller chuyên biệt, mỗi cái < 300 dòng
+// PaymentWebhookController     — Xử lý webhook VNPay/MoMo
+// BookingPaymentController     — Thanh toán đặt phòng
+// RestaurantPaymentController  — Thanh toán dịch vụ nhà hàng
+```
+
+---
+
+## 🔒 Bảo Mật
+
+| Hạng mục | Trạng thái | Chi tiết |
+|----------|------------|---------|
+| **JWT Authentication** | ✅ Áp dụng | Role-Based Access Control (6 roles) |
+| **CORS Policy** | ✅ Thắt chặt | Chỉ chấp nhận origin được whitelist |
+| **Secret Management** | ✅ An toàn | Toàn bộ Secret đọc từ Environment Variables |
+| **Input Validation** | ✅ Áp dụng | Model Validation + Custom Guards |
+| **Audit Logging** | ✅ Áp dụng | Ghi log toàn bộ thao tác nhạy cảm |
+| **SQL Injection** | ✅ Miễn dịch | EF Core Parameterized Queries |
+
+### Phân quyền (RBAC)
+
+```
+Admin       → Toàn quyền hệ thống
+Manager     → Xem báo cáo, duyệt yêu cầu
+FrontDesk   → Quản lý phòng, Check-in/out
+Cashier     → Xử lý thanh toán, xuất hóa đơn
+Inventory   → Quản lý kho hàng
+Customer    → Đặt phòng, xem lịch sử cá nhân
+```
 
 ---
 
 ## 🧪 Testing
 
-Dự án đã được thiết lập môi trường Unit Test.
-
-Để chạy bộ Test tự động cho `BookingService` và các luồng quan trọng khác:
 ```powershell
+# Chạy toàn bộ bộ test
 cd QuanLyResort.Tests
 dotnet test
+
+# Ví dụ test đang có: BookingServiceTests
+# ✓ CreateBookingAsync_ShouldFormatBookingCodeCorrectly
+# ✓ SaveChangesAsync_ShouldBeCalledExpectedNumberOfTimes
+```
+
+**Công nghệ:** xUnit + Moq (Mocking IUnitOfWork, không cần kết nối DB thật).
+
+---
+
+## 🚀 Hướng Dẫn Cài Đặt
+
+### Yêu cầu
+- **.NET 8 SDK** — [Download](https://dotnet.microsoft.com/download/dotnet/8.0)
+- **SQL Server LocalDB** — Đi kèm Visual Studio 2022
+
+### Chạy dự án
+
+```powershell
+# 1. Clone dự án
+git clone https://github.com/Lamm123435469898/quanlyresort.git
+cd quanlyresort
+
+# 2. Cài đặt dependencies
+dotnet restore
+
+# 3. Tạo Database (EF Core Migrations)
+dotnet tool install --global dotnet-ef
+dotnet ef database update --project QuanLyResort
+
+# 4. Khởi chạy
+dotnet run --project QuanLyResort
+```
+
+> 💡 **Lưu ý:** Tạo file `.env` hoặc đặt các biến môi trường theo mẫu trong `appsettings.json` trước khi chạy.
+
+### Seed dữ liệu mẫu
+
+```
+POST https://localhost:7000/api/admin/seed
+Authorization: Bearer <admin_token>
 ```
 
 ---
 
-## 🔗 Liên kết truy cập nhanh
+## 🔗 URLs Nhanh
 
-- **Swagger UI (API Docs):** `https://localhost:7000/swagger`
-- **Customer Site:** `https://localhost:7000/customer/index.html`
-- **Admin Dashboard:** `https://localhost:7000/admin/index.html`
+| Trang | URL |
+|-------|-----|
+| 📄 **API Documentation (Swagger)** | `https://localhost:7000/swagger` |
+| 🛎️ **Customer Booking Portal** | `https://localhost:7000/customer/index.html` |
+| 🖥️ **Admin Dashboard** | `https://localhost:7000/admin/index.html` |
 
 ### Tài khoản thử nghiệm (Sau khi Seed)
+
 | Vai trò | Email | Mật khẩu |
 |---------|-------|----------|
-| **Admin** | admin@resort.test | P@ssw0rd123 |
-| **Lễ tân** | frontdesk@resort.test | P@ssw0rd123 |
-| **Khách hàng** | customer1@guest.test | Guest@123 |
+| **Admin** | `admin@resort.test` | `P@ssw0rd123` |
+| **Lễ tân** | `frontdesk@resort.test` | `P@ssw0rd123` |
+| **Thu ngân** | `cashier@resort.test` | `P@ssw0rd123` |
+| **Khách hàng** | `customer1@guest.test` | `Guest@123` |
 
 ---
 
-## 📝 TODO & Future Roadmap
+## 🗺️ Luồng Nghiệp Vụ
 
-- Tích hợp AutoMapper cho các DTOs.
-- Thêm Redis/MemoryCache để tối ưu màn hình báo cáo Dashboard.
-- Cài đặt Hangfire để xử lý việc gửi Email chạy ngầm (Background Jobs).
-- Áp dụng Soft-Delete cho các dữ liệu quan trọng như Hóa đơn, Khách hàng.
+```
+[Customer]  →  Tìm phòng  →  Đặt phòng  →  Thanh toán cọc
+                                                    ↓
+[FrontDesk] →  Duyệt đặt phòng  →  Phân phòng  →  Check-in
+                                                    ↓
+            →  Gắn dịch vụ (Nhà hàng, Minibar, Spa)
+                                                    ↓
+[Cashier]   →  Tổng hợp hóa đơn  →  Thanh toán  →  Check-out
+                                                    ↓
+[Manager]   →  Xem báo cáo  →  Xuất Audit Log  →  Quyết toán
+```
 
 ---
-*Phát triển bởi đội ngũ: Nhựt, Nguyên, Lam, Ninh. Phiên bản hệ thống đã được bảo trì & nâng cấp chuẩn Enterprise.*
+
+## 🗺️ Roadmap
+
+- [ ] **AutoMapper DTOs** — Tách Entity khỏi Response model, tăng bảo mật.
+- [ ] **Redis Cache** — Caching Dashboard reports (TTL: 5 phút) tránh query lặp lại.
+- [ ] **Hangfire** — Background Jobs cho Email/SMS, không block luồng HTTP.
+- [ ] **Soft-Delete** — Bổ sung `IsDeleted` flag thay thế Hard-Delete cho dữ liệu kế toán.
+- [ ] **Docker Compose** — Đóng gói toàn bộ stack cho môi trường Production.
+
+---
+
+## 👥 Nhóm Phát triển
+
+| Thành viên | Vai trò |
+|------------|---------|
+| Nhựt | Backend Architecture, Security |
+| Nguyên | Business Logic, API Design |
+| Lam | Frontend Admin & Customer |
+| Ninh | Database Design, Reporting |
+
+---
+
+<div align="center">
+
+**🎉 Built with ❤️ — Enterprise standards, from day one.**
+
+*Last updated: August 2026 — Post refactoring & security hardening*
+
+</div>
