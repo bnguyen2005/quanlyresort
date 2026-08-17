@@ -55,3 +55,38 @@ Migrations/*.Designer.cs
 *.avi
 *.mkv
 !QuanLyResort/wwwroot/customer/video/*.mp4
+
+# Shell scripts (debug/deploy helpers - không cần trong source)
+*.sh
+# Giữ lại docker-entrypoint.sh vì Docker cần nó
+!QuanLyResort/docker-entrypoint.sh
+!QuanLyResort/wwwroot/admin/tasks/*.sh
+
+# Backup files
+*.bak
+
+# Python debug scripts
+*.py
+
+# Patch/fix scripts tạm thời ở root
+fix.csx
+fix.js
+patch.js
+patch.ps1
+
+# Debug & test HTML trong wwwroot (không phải trang thật)
+QuanLyResort/wwwroot/debug-*.html
+QuanLyResort/wwwroot/test-*.html
+QuanLyResort/wwwroot/test.html
+QuanLyResort/wwwroot/clear-cache.html
+QuanLyResort/wwwroot/force-clear-cache.html
+QuanLyResort/wwwroot/quick-api-test.html
+QuanLyResort/wwwroot/simple-audit-test.html
+QuanLyResort/wwwroot/simple-login.html
+QuanLyResort/wwwroot/test-clear-storage.html
+QuanLyResort/wwwroot/admin-credentials.html
+QuanLyResort/wwwroot/THONG-TIN-DANG-NHAP.txt
+QuanLyResort/wwwroot/TEST-ROOM-TYPES-API.html
+QuanLyResort/wwwroot/RENDER-ENV-*.txt
+test-clear-storage.html
+test-advanced-features.sh
