@@ -1,3 +1,4 @@
+﻿using QuanLyResort.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,11 +11,11 @@ namespace QuanLyResort.Controllers;
 [Authorize(Roles = "Admin,Manager,Accounting")]
 public class AuditController : ControllerBase
 {
-    private readonly ResortDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public AuditController(ResortDbContext context)
+    public AuditController(IUnitOfWork unitOfWork)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
     }
 
     /// <summary>
@@ -198,7 +199,7 @@ public class AuditController : ControllerBase
             .ToListAsync();
 
         _context.AuditLogs.RemoveRange(oldLogs);
-        await _context.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         return Ok(new 
         { 
@@ -296,4 +297,5 @@ public class AuditController : ControllerBase
         });
     }
 }
+
 

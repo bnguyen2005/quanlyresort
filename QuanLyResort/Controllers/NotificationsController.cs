@@ -1,3 +1,4 @@
+﻿using QuanLyResort.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,16 +13,16 @@ namespace QuanLyResort.Controllers;
 [Authorize]
 public class NotificationsController : ControllerBase
 {
-    private readonly ResortDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly INotificationService _notificationService;
     private readonly ILogger<NotificationsController> _logger;
 
     public NotificationsController(
-        ResortDbContext context,
+        IUnitOfWork unitOfWork,
         INotificationService notificationService,
         ILogger<NotificationsController> logger)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
         _notificationService = notificationService;
         _logger = logger;
     }
@@ -123,7 +124,7 @@ public class NotificationsController : ControllerBase
                 notification.ReadAt = DateTime.UtcNow;
             }
 
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return Ok(new { message = "Đã đánh dấu tất cả đã đọc", count = notifications.Count });
         }
@@ -147,7 +148,7 @@ public class NotificationsController : ControllerBase
             }
 
             _context.Notifications.Remove(notification);
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return Ok(new { message = "Đã xóa thông báo" });
         }
@@ -158,4 +159,5 @@ public class NotificationsController : ControllerBase
         }
     }
 }
+
 

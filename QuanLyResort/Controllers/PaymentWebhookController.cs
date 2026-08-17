@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using QuanLyResort.Repositories;
+using Microsoft.AspNetCore.Mvc;
 using QuanLyResort.Services;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authorization;
@@ -21,7 +22,7 @@ namespace QuanLyResort.Controllers;
     private readonly SePayService? _sePayService;
     private readonly VietQRService? _vietQRService;
     private readonly ILogger<PaymentWebhookController> _logger;
-    private readonly ResortDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
 
     public PaymentWebhookController(
         IBookingService bookingService,
@@ -29,14 +30,14 @@ namespace QuanLyResort.Controllers;
         SePayService? sePayService,
         VietQRService? vietQRService,
         ILogger<PaymentWebhookController> logger,
-        ResortDbContext context)
+        IUnitOfWork unitOfWork)
     {
         _bookingService = bookingService;
         _payOsService = payOsService;
         _sePayService = sePayService;
         _vietQRService = vietQRService;
         _logger = logger;
-        _context = context;
+        _unitOfWork = unitOfWork;
     }
     /// <summary>
     /// Webhook đơn giản - nhận từ PayOs/VietQR
@@ -473,7 +474,7 @@ namespace QuanLyResort.Controllers;
                     order.Status = "Confirmed";
                 }
                 
-                await _context.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync();
                 
                 _logger.LogInformation("[WEBHOOK] ✅ [WEBHOOK-{WebhookId}] Restaurant order {OrderId} ({OrderNumber}) updated to Paid successfully!", 
                     webhookId, restaurantOrderId.Value, order.OrderNumber);
@@ -735,3 +736,4 @@ namespace QuanLyResort.Controllers;
         return null;
     }
 }
+

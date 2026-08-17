@@ -1,3 +1,4 @@
+﻿using QuanLyResort.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,18 +15,18 @@ namespace QuanLyResort.Controllers;
 public class BookingsController : ControllerBase
 {
     private readonly IBookingService _bookingService;
-    private readonly ResortDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<BookingsController> _logger;
     private readonly INotificationManager _notificationManager;
 
     public BookingsController(
         IBookingService bookingService, 
-        ResortDbContext context, 
+        IUnitOfWork unitOfWork, 
         ILogger<BookingsController> logger,
         INotificationManager notificationManager)
     {
         _bookingService = bookingService;
-        _context = context;
+        _unitOfWork = unitOfWork;
         _logger = logger;
         _notificationManager = notificationManager;
     }
@@ -320,7 +321,7 @@ public class BookingsController : ControllerBase
             booking.SpecialRequests = System.Text.Json.JsonSerializer.Serialize(requestsDict);
             booking.UpdatedAt = DateTime.UtcNow;
             
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
             
             _logger.LogInformation($"[RequestCashPayment] ✅✅✅ SUCCESS: Cash payment request saved for booking {id}. Status='{booking.Status}', SpecialRequests updated");
             
@@ -425,7 +426,7 @@ public class BookingsController : ControllerBase
                         {
                             updatedBooking.SpecialRequests = System.Text.Json.JsonSerializer.Serialize(requestsDict);
                             updatedBooking.UpdatedAt = DateTime.UtcNow;
-                            await _context.SaveChangesAsync();
+                            await _unitOfWork.SaveChangesAsync();
                             _logger.LogInformation($"[ApproveCashPayment] ✅ Updated SpecialRequests for booking {id}");
                         }
                     }
@@ -572,6 +573,7 @@ public class CancelBookingRequest
 {
     public string Reason { get; set; } = string.Empty;
 }
+
 
 
 

@@ -1,3 +1,4 @@
+﻿using QuanLyResort.Repositories;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -19,7 +20,7 @@ public class AIChatService
     private readonly HttpClient _httpClient;
     private readonly IBookingService? _bookingService;
     private readonly IRoomService? _roomService;
-    private readonly ResortDbContext? _context;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly string? _apiKey;
     private readonly string _apiUrl;
     private readonly string _model;
@@ -31,14 +32,14 @@ public class AIChatService
         HttpClient httpClient,
         IBookingService? bookingService = null,
         IRoomService? roomService = null,
-        ResortDbContext? context = null)
+        IUnitOfWork unitOfWork = null)
     {
         _configuration = configuration;
         _logger = logger;
         _httpClient = httpClient;
         _bookingService = bookingService;
         _roomService = roomService;
-        _context = context;
+        _unitOfWork = unitOfWork;
 
         // Clear any existing BaseAddress để tránh conflict với absolute URLs
         if (_httpClient.BaseAddress != null)
@@ -683,4 +684,5 @@ Hãy trả lời ngắn gọn, thân thiện và hữu ích bằng tiếng Việ
         return GetSampleResponse(userMessage);
     }
 }
+
 

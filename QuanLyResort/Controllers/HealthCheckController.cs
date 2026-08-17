@@ -1,3 +1,4 @@
+﻿using QuanLyResort.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,14 +13,14 @@ namespace QuanLyResort.Controllers;
 [Route("api/[controller]")]
 public class HealthCheckController : ControllerBase
 {
-    private readonly ResortDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<HealthCheckController> _logger;
 
     public HealthCheckController(
-        ResortDbContext context,
+        IUnitOfWork unitOfWork,
         ILogger<HealthCheckController> logger)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
         _logger = logger;
     }
 
@@ -83,4 +84,5 @@ public class HealthCheckController : ControllerBase
         }
     }
 }
+
 

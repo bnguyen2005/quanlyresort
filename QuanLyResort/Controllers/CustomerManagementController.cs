@@ -1,3 +1,4 @@
+﻿using QuanLyResort.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,13 +14,13 @@ namespace QuanLyResort.Controllers;
 [Authorize(Roles = "Admin,Manager,FrontDesk,Business,Customer")]
 public class CustomerManagementController : ControllerBase
 {
-    private readonly ResortDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly IAuditService _auditService;
     private readonly ILogger<CustomerManagementController> _logger;
 
-    public CustomerManagementController(ResortDbContext context, IAuditService auditService, ILogger<CustomerManagementController> logger)
+    public CustomerManagementController(IUnitOfWork unitOfWork, IAuditService auditService, ILogger<CustomerManagementController> logger)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
         _auditService = auditService;
         _logger = logger;
     }
@@ -312,7 +313,7 @@ public class CustomerManagementController : ControllerBase
         };
 
         _context.Customers.Add(customer);
-        await _context.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         // Log audit
         await _auditService.LogAsync(
@@ -370,7 +371,7 @@ public class CustomerManagementController : ControllerBase
             customer.Notes = request.Notes;
             customer.UpdatedAt = DateTime.UtcNow;
 
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             // Log audit
             await _auditService.LogAsync(
@@ -441,7 +442,7 @@ public class CustomerManagementController : ControllerBase
             {
                 customer.AvatarUrl = null;
                 customer.UpdatedAt = DateTime.UtcNow;
-                await _context.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync();
 
                 // Xóa file cũ nếu có
                 if (!string.IsNullOrEmpty(oldAvatarUrl) && oldAvatarUrl.StartsWith("/"))
@@ -503,7 +504,7 @@ public class CustomerManagementController : ControllerBase
             var avatarUrl = $"/uploads/avatars/{fileName}";
             customer.AvatarUrl = avatarUrl;
             customer.UpdatedAt = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             await _auditService.LogAsync("Customer", id, "UploadAvatar", User.Identity?.Name ?? "System", oldAvatarUrl, avatarUrl);
 
@@ -531,7 +532,7 @@ public class CustomerManagementController : ControllerBase
         customer.CustomerType = request.NewType;
         customer.UpdatedAt = DateTime.UtcNow;
 
-        await _context.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         // Log audit
         await _auditService.LogAsync(
@@ -561,7 +562,7 @@ public class CustomerManagementController : ControllerBase
         customer.LoyaltyPoints += request.Points;
         customer.UpdatedAt = DateTime.UtcNow;
 
-        await _context.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         // Log audit
         await _auditService.LogAsync(
@@ -603,7 +604,7 @@ public class CustomerManagementController : ControllerBase
         var customerInfo = $"{customer.FullName} ({customer.Email})";
 
         _context.Customers.Remove(customer);
-        await _context.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         // Log audit
         await _auditService.LogAsync(
@@ -758,4 +759,5 @@ public class AddPointsRequest
     public int Points { get; set; }
     public string? Reason { get; set; }
 }
+
 

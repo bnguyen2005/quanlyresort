@@ -1,3 +1,4 @@
+﻿using QuanLyResort.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,12 +14,12 @@ namespace QuanLyResort.Controllers;
 [Authorize(Roles = "Admin,Manager")]
 public class ServicesController : ControllerBase
 {
-    private readonly ResortDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly IAuditService _auditService;
 
-    public ServicesController(ResortDbContext context, IAuditService auditService)
+    public ServicesController(IUnitOfWork unitOfWork, IAuditService auditService)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
         _auditService = auditService;
     }
 
@@ -149,7 +150,7 @@ public class ServicesController : ControllerBase
 
         service.CreatedAt = DateTime.UtcNow;
         _context.Services.Add(service);
-        await _context.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         await _auditService.LogAsync("Service", service.ServiceId, "Create", GetCurrentUsername(), null, System.Text.Json.JsonSerializer.Serialize(service));
 
@@ -186,7 +187,7 @@ public class ServicesController : ControllerBase
 
         try
         {
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
             await _auditService.LogAsync("Service", service.ServiceId, "Update", GetCurrentUsername(), oldData, System.Text.Json.JsonSerializer.Serialize(service));
         }
         catch (DbUpdateConcurrencyException)
@@ -225,7 +226,7 @@ public class ServicesController : ControllerBase
         var oldData = System.Text.Json.JsonSerializer.Serialize(service);
 
         _context.Services.Remove(service);
-        await _context.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         await _auditService.LogAsync("Service", id, "Delete", GetCurrentUsername(), oldData, null);
 
@@ -250,7 +251,7 @@ public class ServicesController : ControllerBase
         service.IsActive = !service.IsActive;
         service.UpdatedAt = DateTime.UtcNow;
 
-        await _context.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
         await _auditService.LogAsync("Service", id, "ToggleActive", GetCurrentUsername(), oldData, System.Text.Json.JsonSerializer.Serialize(service));
 
         return Ok(new { message = $"Service {(service.IsActive ? "activated" : "deactivated")} successfully.", service });
@@ -297,7 +298,7 @@ public class ServicesController : ControllerBase
             {
                 service.ImageUrl = null;
                 service.UpdatedAt = DateTime.UtcNow;
-                await _context.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync();
 
                 // Xóa file cũ nếu có
                 if (!string.IsNullOrEmpty(oldImageUrl) && oldImageUrl.StartsWith("/"))
@@ -359,7 +360,7 @@ public class ServicesController : ControllerBase
             var imageUrl = $"/uploads/services/{fileName}";
             service.ImageUrl = imageUrl;
             service.UpdatedAt = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             await _auditService.LogAsync("Service", id, "UploadImage", GetCurrentUsername(), oldImageUrl, imageUrl);
 
@@ -377,4 +378,5 @@ public class ServicesController : ControllerBase
         return User.Identity?.Name ?? "Unknown";
     }
 }
+
 

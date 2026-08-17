@@ -1,3 +1,4 @@
+﻿using QuanLyResort.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -15,7 +16,7 @@ namespace QuanLyResort.Controllers;
 public class InvoicesController : ControllerBase
 {
     private readonly IInvoiceService _invoiceService;
-    private readonly ResortDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly IAuditService _auditService;
     private readonly IBookingService _bookingService;
     private readonly ILogger<InvoicesController> _logger;
@@ -23,14 +24,14 @@ public class InvoicesController : ControllerBase
 
     public InvoicesController(
         IInvoiceService invoiceService, 
-        ResortDbContext context, 
+        IUnitOfWork unitOfWork, 
         IAuditService auditService, 
         IBookingService bookingService, 
         ILogger<InvoicesController> logger,
         INotificationManager notificationManager)
     {
         _invoiceService = invoiceService;
-        _context = context;
+        _unitOfWork = unitOfWork;
         _auditService = auditService;
         _bookingService = bookingService;
         _logger = logger;
@@ -298,7 +299,7 @@ public class InvoicesController : ControllerBase
         invoice.Status = "Cancelled";
         invoice.UpdatedAt = DateTime.UtcNow;
 
-        await _context.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
         await _auditService.LogAsync("Invoice", id, "Cancel", GetCurrentUsername(), oldData, System.Text.Json.JsonSerializer.Serialize(invoice));
 
         return Ok(new { message = "Invoice cancelled successfully.", invoice });
@@ -316,4 +317,5 @@ public class PaymentRequest
     public string PaymentMethod { get; set; } = string.Empty;
     public string? PaymentReference { get; set; }
 }
+
 

@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using QuanLyResort.Data;
 using QuanLyResort.Models;
 using QuanLyResort.Repositories;
@@ -9,14 +9,11 @@ public class InvoiceService : IInvoiceService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IAuditService _auditService;
-    private readonly ResortDbContext _context;
-
-    public InvoiceService(IUnitOfWork unitOfWork, IAuditService auditService, ResortDbContext context)
+public InvoiceService(IUnitOfWork unitOfWork, IAuditService auditService)
     {
         _unitOfWork = unitOfWork;
         _auditService = auditService;
-        _context = context;
-    }
+}
 
     public async Task<Invoice?> GetInvoiceByIdAsync(int invoiceId)
     {
@@ -85,4 +82,5 @@ public class InvoiceService : IInvoiceService
         return true;
     }
 }
+
 

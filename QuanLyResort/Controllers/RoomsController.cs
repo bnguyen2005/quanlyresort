@@ -1,3 +1,4 @@
+﻿using QuanLyResort.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,16 +14,16 @@ namespace QuanLyResort.Controllers;
 [Route("api/rooms")]
 public class RoomsController : ControllerBase
 {
-    private readonly ResortDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly IAuditService _auditService;
     private readonly ILogger<RoomsController> _logger;
 
     public RoomsController(
-        ResortDbContext context,
+        IUnitOfWork unitOfWork,
         IAuditService auditService,
         ILogger<RoomsController> logger)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
         _auditService = auditService;
         _logger = logger;
     }
@@ -235,7 +236,7 @@ public class RoomsController : ControllerBase
             {
                 room.ImageUrl = null;
                 room.UpdatedAt = DateTime.UtcNow;
-                await _context.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync();
 
                 // Xóa file cũ nếu có
                 if (!string.IsNullOrEmpty(oldImageUrl) && oldImageUrl.StartsWith("/"))
@@ -297,7 +298,7 @@ public class RoomsController : ControllerBase
             var imageUrl = $"/uploads/rooms/{fileName}";
             room.ImageUrl = imageUrl;
             room.UpdatedAt = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             await _auditService.LogAsync("Room", id, "UploadImage", GetCurrentUsername() ?? "Unknown", oldImageUrl, imageUrl);
 
@@ -391,7 +392,7 @@ public class RoomsController : ControllerBase
             // Update room
             room.ImageGallery = System.Text.Json.JsonSerializer.Serialize(gallery);
             room.UpdatedAt = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             await _auditService.LogAsync("Room", id, "AddImageToGallery", GetCurrentUsername() ?? "Unknown", room.ImageGallery, imageUrl);
 
@@ -456,7 +457,7 @@ public class RoomsController : ControllerBase
             // Update room
             room.ImageGallery = gallery.Count > 0 ? System.Text.Json.JsonSerializer.Serialize(gallery) : null;
             room.UpdatedAt = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             await _auditService.LogAsync("Room", id, "RemoveImageFromGallery", GetCurrentUsername() ?? "Unknown", oldGallery, room.ImageGallery);
 
@@ -503,7 +504,7 @@ public class RoomsController : ControllerBase
         room.HousekeepingStatus = "Ready";
 
         _context.Rooms.Add(room);
-        await _context.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         await _auditService.LogAsync("Room", room.RoomId, "Create", GetCurrentUsername(), null, System.Text.Json.JsonSerializer.Serialize(room));
 
@@ -562,7 +563,7 @@ public class RoomsController : ControllerBase
 
         try
         {
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
             await _auditService.LogAsync("Room", room.RoomId, "Update", GetCurrentUsername(), System.Text.Json.JsonSerializer.Serialize(existingRoom), System.Text.Json.JsonSerializer.Serialize(room));
         }
         catch (DbUpdateConcurrencyException)
@@ -605,7 +606,7 @@ public class RoomsController : ControllerBase
             room.Notes = request.Notes;
         }
 
-        await _context.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
         await _auditService.LogAsync("Room", room.RoomId, "UpdateStatus", GetCurrentUsername(), System.Text.Json.JsonSerializer.Serialize(oldStatus), System.Text.Json.JsonSerializer.Serialize(new { room.IsAvailable, room.HousekeepingStatus }), $"Room {room.RoomNumber} status updated");
 
         return Ok(new { message = "Room status updated successfully.", room });
@@ -633,7 +634,7 @@ public class RoomsController : ControllerBase
         }
 
         _context.Rooms.Remove(room);
-        await _context.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         await _auditService.LogAsync("Room", room.RoomId, "Delete", GetCurrentUsername(), System.Text.Json.JsonSerializer.Serialize(room), null, $"Deleted Room: {room.RoomNumber}");
 
@@ -657,3 +658,4 @@ public class RoomStatusUpdateRequest
     public string HousekeepingStatus { get; set; } = "Ready"; // Ready, Clean, Dirty, InProgress, Maintenance
     public string? Notes { get; set; }
 }
+

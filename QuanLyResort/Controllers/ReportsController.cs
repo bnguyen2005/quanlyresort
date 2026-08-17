@@ -1,3 +1,4 @@
+﻿using QuanLyResort.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,12 +13,12 @@ namespace QuanLyResort.Controllers;
 [Authorize(Roles = "Admin,Manager,Accounting")]
 public class ReportsController : ControllerBase
 {
-    private readonly ResortDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<ReportsController> _logger;
 
-    public ReportsController(ResortDbContext context, ILogger<ReportsController> logger)
+    public ReportsController(IUnitOfWork unitOfWork, ILogger<ReportsController> logger)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
         _logger = logger;
     }
 
@@ -604,4 +605,5 @@ public class ReportsController : ControllerBase
         });
     }
 }
+
 

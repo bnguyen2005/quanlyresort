@@ -1,3 +1,4 @@
+﻿using QuanLyResort.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,11 +12,11 @@ namespace QuanLyResort.Controllers;
 [Route("api/[controller]")]
 public class SupportTicketsController : ControllerBase
 {
-    private readonly ResortDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public SupportTicketsController(ResortDbContext context)
+    public SupportTicketsController(IUnitOfWork unitOfWork)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
     }
 
     /// <summary>
@@ -76,7 +77,7 @@ public class SupportTicketsController : ControllerBase
             };
 
             _context.SupportTickets.Add(ticket);
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             // Create initial message
             var initialMessage = new TicketMessage
@@ -90,7 +91,7 @@ public class SupportTicketsController : ControllerBase
             };
 
             _context.TicketMessages.Add(initialMessage);
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return Ok(new
             {
@@ -336,7 +337,7 @@ public class SupportTicketsController : ControllerBase
             }
             ticket.UpdatedAt = DateTime.UtcNow;
 
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return Ok(new { message = "Tin nhắn đã được gửi thành công", messageId = message.MessageId });
         }
@@ -469,7 +470,7 @@ public class SupportTicketsController : ControllerBase
                 ticket.ClosedAt = DateTime.UtcNow;
 
             ticket.UpdatedAt = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return Ok(new { message = "Ticket đã được cập nhật thành công" });
         }
@@ -508,4 +509,5 @@ public class UpdateTicketRequest
     public string? AssignedTo { get; set; }
     public string? ResolutionNotes { get; set; }
 }
+
 

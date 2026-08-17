@@ -11,18 +11,16 @@ public class BookingService : IBookingService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IAuditService _auditService;
     private readonly INotificationService _notificationService;
-    private readonly ResortDbContext _context;
-    private readonly ILogger<BookingService> _logger;
+private readonly ILogger<BookingService> _logger;
 
     public BookingService(IUnitOfWork unitOfWork, IAuditService auditService, 
-        INotificationService notificationService, ResortDbContext context, ILogger<BookingService> logger)
+        INotificationService notificationService, ILogger<BookingService> logger)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
         _auditService = auditService;
         _notificationService = notificationService;
-        _context = context;
-    }
+}
 
     public async Task<Booking> CreateBookingAsync(Booking booking, string createdBy)
     {
@@ -552,5 +550,6 @@ public class BookingService : IBookingService
         return true;
     }
 }
+
 
 

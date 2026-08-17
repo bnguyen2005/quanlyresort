@@ -4,6 +4,7 @@ namespace QuanLyResort.Repositories;
 
 public interface IRepository<T> where T : class
 {
+    IQueryable<T> Query();
     Task<T?> GetByIdAsync(int id);
     Task<IEnumerable<T>> GetAllAsync();
     Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate);

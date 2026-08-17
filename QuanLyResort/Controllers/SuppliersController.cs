@@ -1,3 +1,4 @@
+﻿using QuanLyResort.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,11 +12,11 @@ namespace QuanLyResort.Controllers
     [Authorize(Roles = "Admin,Manager")]
     public class SuppliersController : ControllerBase
     {
-        private readonly ResortDbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public SuppliersController(ResortDbContext context)
+        public SuppliersController(IUnitOfWork unitOfWork)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
         }
 
         // GET: api/suppliers
@@ -77,7 +78,7 @@ namespace QuanLyResort.Controllers
             dto.IsActive = true;
             dto.CreatedAt = DateTime.UtcNow;
             _context.Suppliers.Add(dto);
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
             return CreatedAtAction(nameof(GetSupplier), new { id = dto.SupplierId }, new { message = "Tạo nhà cung cấp thành công", supplierId = dto.SupplierId });
         }
 
@@ -93,7 +94,7 @@ namespace QuanLyResort.Controllers
             s.Phone = dto.Phone;
             s.Email = dto.Email;
             s.Address = dto.Address;
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return Ok(new { message = "Cập nhật nhà cung cấp thành công" });
         }
@@ -107,7 +108,7 @@ namespace QuanLyResort.Controllers
             if (!s.IsActive) return Ok(new { message = "Nhà cung cấp đã ở trạng thái ẩn" });
 
             s.IsActive = false;
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
             return Ok(new { message = "Đã ẩn nhà cung cấp" });
         }
 
@@ -118,10 +119,11 @@ namespace QuanLyResort.Controllers
             var s = await _context.Suppliers.FindAsync(id);
             if (s == null) return NotFound(new { message = "Không tìm thấy nhà cung cấp" });
             s.IsActive = !s.IsActive;
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
             return Ok(new { message = "Đã cập nhật trạng thái", isActive = s.IsActive });
         }
     }
 }
+
 
 

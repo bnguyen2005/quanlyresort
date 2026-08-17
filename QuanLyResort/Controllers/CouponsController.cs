@@ -1,3 +1,4 @@
+﻿using QuanLyResort.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,11 +12,11 @@ namespace QuanLyResort.Controllers;
 [Route("api/[controller]")]
 public class CouponsController : ControllerBase
 {
-    private readonly ResortDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public CouponsController(ResortDbContext context)
+    public CouponsController(IUnitOfWork unitOfWork)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
     }
 
     /// <summary>
@@ -309,7 +310,7 @@ public class CouponsController : ControllerBase
         };
 
         _context.Coupons.Add(coupon);
-        await _context.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         return CreatedAtAction(nameof(GetCouponById), new { id = coupon.CouponId }, coupon);
     }
@@ -426,7 +427,7 @@ public class CouponsController : ControllerBase
         coupon.UpdatedAt = DateTime.UtcNow;
         coupon.UpdatedBy = userEmail;
 
-        await _context.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         return Ok(coupon);
     }
@@ -451,7 +452,7 @@ public class CouponsController : ControllerBase
         coupon.UpdatedAt = DateTime.UtcNow;
         coupon.UpdatedBy = userEmail;
 
-        await _context.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         return Ok(coupon);
     }
@@ -471,7 +472,7 @@ public class CouponsController : ControllerBase
         }
 
         _context.Coupons.Remove(coupon);
-        await _context.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         return NoContent();
     }
@@ -508,4 +509,5 @@ public class UpdateCouponStatusRequest
 {
     public bool IsActive { get; set; }
 }
+
 

@@ -1,3 +1,4 @@
+﻿using QuanLyResort.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -12,11 +13,11 @@ namespace QuanLyResort.Controllers
     [Authorize]
 public class InventoryController : ControllerBase
 {
-    private readonly ResortDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
 
-        public InventoryController(ResortDbContext context)
+        public InventoryController(IUnitOfWork unitOfWork)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
         }
 
         // GET: api/inventory/items
@@ -202,7 +203,7 @@ public class InventoryController : ControllerBase
 
                 Console.WriteLine($"[Inventory] Create item request: {dto.ItemCode} - {dto.ItemName}");
                 _context.InventoryItems.Add(item);
-                await _context.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync();
                 Console.WriteLine($"[Inventory] Created itemId={item.ItemId}");
 
                 // Create initial stock movement if there's initial stock
@@ -220,7 +221,7 @@ public class InventoryController : ControllerBase
                     };
 
                     _context.StockMovements.Add(stockMovement);
-                    await _context.SaveChangesAsync();
+                    await _unitOfWork.SaveChangesAsync();
                 }
 
                 // Log audit
@@ -280,7 +281,7 @@ public class InventoryController : ControllerBase
                 item.Location = dto.Location;
                 item.LastUpdated = DateTime.UtcNow;
 
-                await _context.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync();
                 Console.WriteLine($"[Inventory] Updated item id={id} code: {oldCode} -> {item.ItemCode}");
 
                 // Log audit
@@ -340,7 +341,7 @@ public class InventoryController : ControllerBase
                 };
 
                 _context.StockMovements.Add(stockMovement);
-                await _context.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync();
 
                 // Log audit
                 await LogAuditAsync("StockMovement", stockMovement.MovementId, "Create", null, 
@@ -381,7 +382,7 @@ public class InventoryController : ControllerBase
                 var oldValues = System.Text.Json.JsonSerializer.Serialize(item);
                 item.IsActive = false;
                 item.LastUpdated = DateTime.UtcNow;
-                await _context.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync();
 
                 await LogAuditAsync("InventoryItem", item.ItemId, "SoftDelete", oldValues,
                     System.Text.Json.JsonSerializer.Serialize(item));
@@ -409,7 +410,7 @@ public class InventoryController : ControllerBase
                 var oldValues = System.Text.Json.JsonSerializer.Serialize(item);
                 item.IsActive = !item.IsActive;
                 item.LastUpdated = DateTime.UtcNow;
-                await _context.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync();
                 await LogAuditAsync("InventoryItem", item.ItemId, "ToggleActive", oldValues,
                     System.Text.Json.JsonSerializer.Serialize(item));
                 return Ok(new { message = "Đã cập nhật trạng thái", itemId = id, isActive = item.IsActive });
@@ -559,7 +560,7 @@ public class InventoryController : ControllerBase
                 };
 
                 _context.AuditLogs.Add(auditLog);
-                await _context.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync();
             }
             catch (Exception ex)
             {

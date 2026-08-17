@@ -1,3 +1,4 @@
+﻿using QuanLyResort.Repositories;
 using Microsoft.Extensions.Logging;
 using QuanLyResort.Data;
 using QuanLyResort.Models;
@@ -9,20 +10,20 @@ public class NotificationManager : INotificationManager
     private readonly IEmailService _emailService;
     private readonly ISmsService _smsService;
     private readonly INotificationService _notificationService;
-    private readonly ResortDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<NotificationManager> _logger;
 
     public NotificationManager(
         IEmailService emailService,
         ISmsService smsService,
         INotificationService notificationService,
-        ResortDbContext context,
+        IUnitOfWork unitOfWork,
         ILogger<NotificationManager> logger)
     {
         _emailService = emailService;
         _smsService = smsService;
         _notificationService = notificationService;
-        _context = context;
+        _unitOfWork = unitOfWork;
         _logger = logger;
     }
 
@@ -487,4 +488,5 @@ public class NotificationManager : INotificationManager
 </html>";
     }
 }
+
 

@@ -1,3 +1,4 @@
+﻿using QuanLyResort.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using QuanLyResort.Data;
@@ -9,17 +10,17 @@ namespace QuanLyResort.Services;
 
 public class TwoFactorAuthService : ITwoFactorAuthService
 {
-    private readonly ResortDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly IConfiguration _configuration;
     private readonly ILogger<TwoFactorAuthService> _logger;
     private const string Issuer = "Resort Deluxe";
 
     public TwoFactorAuthService(
-        ResortDbContext context,
+        IUnitOfWork unitOfWork,
         IConfiguration configuration,
         ILogger<TwoFactorAuthService> logger)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
         _configuration = configuration;
         _logger = logger;
     }
@@ -41,7 +42,7 @@ public class TwoFactorAuthService : ITwoFactorAuthService
             user.TwoFactorSecret = base32Secret;
             user.TwoFactorEnabled = false; // Not enabled until verified
 
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             _logger.LogInformation("[2FA] Generated secret for user {UserId}", userId);
             return base32Secret;
@@ -105,7 +106,7 @@ public class TwoFactorAuthService : ITwoFactorAuthService
             var recoveryCodes = await GenerateRecoveryCodesAsync(userId);
             user.TwoFactorRecoveryCodes = recoveryCodes;
 
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             _logger.LogInformation("[2FA] 2FA enabled for user {UserId}", userId);
             return true;
@@ -132,7 +133,7 @@ public class TwoFactorAuthService : ITwoFactorAuthService
             user.TwoFactorRecoveryCodes = null;
             user.TwoFactorEnabledAt = null;
 
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             _logger.LogInformation("[2FA] 2FA disabled for user {UserId}", userId);
             return true;
@@ -172,7 +173,7 @@ public class TwoFactorAuthService : ITwoFactorAuthService
         if (user != null)
         {
             user.TwoFactorRecoveryCodes = recoveryCodes;
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
         }
 
         return recoveryCodes;
@@ -194,7 +195,7 @@ public class TwoFactorAuthService : ITwoFactorAuthService
                 // Remove used recovery code
                 var updatedCodes = codes.Where((c, i) => i != index).ToList();
                 user.TwoFactorRecoveryCodes = updatedCodes.Any() ? string.Join(",", updatedCodes) : null;
-                await _context.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync();
 
                 _logger.LogInformation("[2FA] Recovery code used for user {UserId}", userId);
                 return true;
@@ -238,4 +239,5 @@ public class TwoFactorAuthService : ITwoFactorAuthService
         }
     }
 }
+
 

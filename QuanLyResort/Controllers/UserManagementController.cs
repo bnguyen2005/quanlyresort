@@ -1,3 +1,4 @@
+﻿using QuanLyResort.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,12 +14,12 @@ namespace QuanLyResort.Controllers;
 [Authorize(Roles = "Admin")]
 public class UserManagementController : ControllerBase
 {
-    private readonly ResortDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly IAuditService _auditService;
 
-    public UserManagementController(ResortDbContext context, IAuditService auditService)
+    public UserManagementController(IUnitOfWork unitOfWork, IAuditService auditService)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
         _auditService = auditService;
     }
 
@@ -131,7 +132,7 @@ public class UserManagementController : ControllerBase
         };
 
         _context.Users.Add(user);
-        await _context.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         // Log audit
         await _auditService.LogAsync(
@@ -185,7 +186,7 @@ public class UserManagementController : ControllerBase
         if (request.IsActive.HasValue)
             user.IsActive = request.IsActive.Value;
 
-        await _context.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         // Log audit
         await _auditService.LogAsync(
@@ -222,7 +223,7 @@ public class UserManagementController : ControllerBase
         Console.WriteLine($"[ChangePassword DEBUG] Immediate verify: {verifyResult}");
         
         user.PasswordHash = newHash;
-        await _context.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         // Log audit
         await _auditService.LogAsync(
@@ -258,7 +259,7 @@ public class UserManagementController : ControllerBase
 
         var oldRole = user.Role;
         user.Role = request.NewRole;
-        await _context.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         // Log audit
         await _auditService.LogAsync(
@@ -285,7 +286,7 @@ public class UserManagementController : ControllerBase
             return NotFound(new { message = "User not found" });
 
         user.IsActive = !user.IsActive;
-        await _context.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         // Log audit
         await _auditService.LogAsync(
@@ -317,7 +318,7 @@ public class UserManagementController : ControllerBase
 
         // Soft delete - just deactivate
         user.IsActive = false;
-        await _context.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         // Log audit
         await _auditService.LogAsync(
@@ -346,7 +347,7 @@ public class UserManagementController : ControllerBase
         var userInfo = $"{user.Username} ({user.Email})";
 
         _context.Users.Remove(user);
-        await _context.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         // Log audit
         await _auditService.LogAsync(
@@ -419,4 +420,5 @@ public class ChangeRoleRequest
 {
     public string NewRole { get; set; } = string.Empty;
 }
+
 

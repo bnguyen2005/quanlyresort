@@ -1,3 +1,4 @@
+﻿using QuanLyResort.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,16 +13,16 @@ namespace QuanLyResort.Controllers;
 [Authorize] // Yêu cầu authentication
 public class RoomTypesController : ControllerBase
 {
-    private readonly ResortDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly IAuditService _auditService;
     private readonly ILogger<RoomTypesController> _logger;
 
     public RoomTypesController(
-        ResortDbContext context,
+        IUnitOfWork unitOfWork,
         IAuditService auditService,
         ILogger<RoomTypesController> logger)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
         _auditService = auditService;
         _logger = logger;
     }
@@ -143,7 +144,7 @@ public class RoomTypesController : ControllerBase
         roomType.UpdatedAt = null;
 
         _context.RoomTypes.Add(roomType);
-        await _context.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         // Audit log
         var username = User.Identity?.Name ?? "System";
@@ -215,7 +216,7 @@ public class RoomTypesController : ControllerBase
         roomType.DisplayOrder = updatedRoomType.DisplayOrder;
         roomType.UpdatedAt = DateTime.UtcNow;
 
-        await _context.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         // Audit log
         var username = User.Identity?.Name ?? "System";
@@ -254,7 +255,7 @@ public class RoomTypesController : ControllerBase
         // Soft delete - chỉ set IsActive = false
         roomType.IsActive = false;
         roomType.UpdatedAt = DateTime.UtcNow;
-        await _context.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         // Audit log
         var username = User.Identity?.Name ?? "System";
@@ -293,7 +294,7 @@ public class RoomTypesController : ControllerBase
 
         roomType.IsActive = !roomType.IsActive;
         roomType.UpdatedAt = DateTime.UtcNow;
-        await _context.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         var username = User.Identity?.Name ?? "System";
         await _auditService.LogAsync(
@@ -346,4 +347,5 @@ public class RoomTypesController : ControllerBase
         });
     }
 }
+
 

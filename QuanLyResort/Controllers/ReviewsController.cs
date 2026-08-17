@@ -1,3 +1,4 @@
+﻿using QuanLyResort.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,12 +13,12 @@ namespace QuanLyResort.Controllers;
 [Route("api/reviews")]
 public class ReviewsController : ControllerBase
 {
-    private readonly ResortDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<ReviewsController> _logger;
 
-    public ReviewsController(ResortDbContext context, ILogger<ReviewsController> logger)
+    public ReviewsController(IUnitOfWork unitOfWork, ILogger<ReviewsController> logger)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
         _logger = logger;
     }
 
@@ -215,7 +216,7 @@ public class ReviewsController : ControllerBase
         };
 
         _context.Reviews.Add(review);
-        await _context.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         return CreatedAtAction(nameof(GetReviewById), new { id = review.ReviewId }, new
         {
@@ -250,7 +251,7 @@ public class ReviewsController : ControllerBase
         review.RespondedBy = username;
         review.UpdatedAt = DateTime.UtcNow;
 
-        await _context.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         return Ok(new { message = "Response added successfully.", review });
     }
@@ -270,7 +271,7 @@ public class ReviewsController : ControllerBase
         }
 
         _context.Reviews.Remove(review);
-        await _context.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         return Ok(new { message = "Review deleted successfully." });
     }
@@ -500,7 +501,7 @@ public class ReviewsController : ControllerBase
 
         review.UpdatedAt = DateTime.UtcNow;
 
-        await _context.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         return Ok(new { message = "Review status updated successfully.", review });
     }
@@ -553,4 +554,5 @@ public class UpdateReviewStatusRequest
     public bool? IsApproved { get; set; }
     public bool? IsVisible { get; set; }
 }
+
 

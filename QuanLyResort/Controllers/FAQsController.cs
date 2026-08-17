@@ -1,3 +1,4 @@
+﻿using QuanLyResort.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,11 +11,11 @@ namespace QuanLyResort.Controllers;
 [Route("api/[controller]")]
 public class FAQsController : ControllerBase
 {
-    private readonly ResortDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public FAQsController(ResortDbContext context)
+    public FAQsController(IUnitOfWork unitOfWork)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
     }
 
     /// <summary>
@@ -100,7 +101,7 @@ public class FAQsController : ControllerBase
             if (faqEntity != null)
             {
                 faqEntity.ViewCount++;
-                await _context.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync();
             }
 
             return Ok(faq);
@@ -128,7 +129,7 @@ public class FAQsController : ControllerBase
             }
 
             faq.HelpfulCount++;
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return Ok(new { message = "Cảm ơn phản hồi của bạn!", helpfulCount = faq.HelpfulCount });
         }
@@ -192,7 +193,7 @@ public class FAQsController : ControllerBase
             };
 
             _context.FAQs.Add(faq);
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return Ok(new
             {
@@ -245,7 +246,7 @@ public class FAQsController : ControllerBase
                 faq.IsActive = request.IsActive.Value;
 
             faq.UpdatedAt = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return Ok(new { message = "FAQ đã được cập nhật thành công" });
         }
@@ -272,7 +273,7 @@ public class FAQsController : ControllerBase
             }
 
             _context.FAQs.Remove(faq);
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return Ok(new { message = "FAQ đã được xóa thành công" });
         }
@@ -301,4 +302,5 @@ public class UpdateFAQRequest
     public int? DisplayOrder { get; set; }
     public bool? IsActive { get; set; }
 }
+
 

@@ -1,3 +1,4 @@
+﻿using QuanLyResort.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,12 +13,12 @@ namespace QuanLyResort.Controllers;
 [Authorize(Roles = "Admin,Manager")]
 public class EmployeeManagementController : ControllerBase
 {
-    private readonly ResortDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly IAuditService _auditService;
 
-    public EmployeeManagementController(ResortDbContext context, IAuditService auditService)
+    public EmployeeManagementController(IUnitOfWork unitOfWork, IAuditService auditService)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
         _auditService = auditService;
     }
 
@@ -128,7 +129,7 @@ public class EmployeeManagementController : ControllerBase
         };
 
         _context.Employees.Add(employee);
-        await _context.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         // Log audit
         await _auditService.LogAsync(
@@ -172,7 +173,7 @@ public class EmployeeManagementController : ControllerBase
         employee.DateOfBirth = request.DateOfBirth;
         employee.UpdatedAt = DateTime.UtcNow;
 
-        await _context.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         // Log audit
         await _auditService.LogAsync(
@@ -206,7 +207,7 @@ public class EmployeeManagementController : ControllerBase
         employee.Position = request.NewPosition;
         employee.UpdatedAt = DateTime.UtcNow;
 
-        await _context.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         // Log audit
         await _auditService.LogAsync(
@@ -237,7 +238,7 @@ public class EmployeeManagementController : ControllerBase
         employee.TerminationDate = request.TerminationDate ?? DateTime.UtcNow;
         employee.UpdatedAt = DateTime.UtcNow;
 
-        await _context.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         // Log audit
         await _auditService.LogAsync(
@@ -268,7 +269,7 @@ public class EmployeeManagementController : ControllerBase
         employee.TerminationDate = null;
         employee.UpdatedAt = DateTime.UtcNow;
 
-        await _context.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         // Log audit
         await _auditService.LogAsync(
@@ -308,12 +309,12 @@ public class EmployeeManagementController : ControllerBase
             {
                 user.EmployeeId = null;
             }
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
         }
 
         // Bây giờ mới xóa Employee
         _context.Employees.Remove(employee);
-        await _context.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         // Log audit
         await _auditService.LogAsync(
@@ -452,4 +453,5 @@ public class TerminateEmployeeRequest
     public DateTime? TerminationDate { get; set; }
     public string? Reason { get; set; }
 }
+
 

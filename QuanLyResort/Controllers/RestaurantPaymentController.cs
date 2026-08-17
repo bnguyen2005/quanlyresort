@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using QuanLyResort.Repositories;
+using Microsoft.AspNetCore.Mvc;
 using QuanLyResort.Services;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authorization;
@@ -21,7 +22,7 @@ namespace QuanLyResort.Controllers;
     private readonly SePayService? _sePayService;
     private readonly VietQRService? _vietQRService;
     private readonly ILogger<RestaurantPaymentController> _logger;
-    private readonly ResortDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
 
     public RestaurantPaymentController(
         IBookingService bookingService,
@@ -29,14 +30,14 @@ namespace QuanLyResort.Controllers;
         SePayService? sePayService,
         VietQRService? vietQRService,
         ILogger<RestaurantPaymentController> logger,
-        ResortDbContext context)
+        IUnitOfWork unitOfWork)
     {
         _bookingService = bookingService;
         _payOsService = payOsService;
         _sePayService = sePayService;
         _vietQRService = vietQRService;
         _logger = logger;
-        _context = context;
+        _unitOfWork = unitOfWork;
     }
 
     /// <summary>
@@ -388,3 +389,4 @@ namespace QuanLyResort.Controllers;
         }
     }
 }
+

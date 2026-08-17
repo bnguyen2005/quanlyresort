@@ -1,3 +1,4 @@
+﻿using QuanLyResort.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,16 +14,16 @@ namespace QuanLyResort.Controllers;
 [Route("api/restaurant-orders")]
 public class RestaurantOrdersController : ControllerBase
 {
-    private readonly ResortDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<RestaurantOrdersController> _logger;
     private readonly INotificationManager _notificationManager;
 
     public RestaurantOrdersController(
-        ResortDbContext context, 
+        IUnitOfWork unitOfWork, 
         ILogger<RestaurantOrdersController> logger,
         INotificationManager notificationManager)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
         _logger = logger;
         _notificationManager = notificationManager;
     }
@@ -191,7 +192,7 @@ public class RestaurantOrdersController : ControllerBase
             _logger.LogInformation($"[CreateOrder] Order calculated. TotalAmount: {totalAmount}, Items: {order.OrderItems.Count}");
             
             _context.RestaurantOrders.Add(order);
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
             
             _logger.LogInformation($"[CreateOrder] ✅ Order saved to database. OrderId: {order.OrderId}, OrderNumber: {order.OrderNumber}");
 
@@ -405,7 +406,7 @@ public class RestaurantOrdersController : ControllerBase
             order.Status = request.Status;
             order.UpdatedAt = DateTime.UtcNow;
 
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             _logger.LogInformation($"Order {order.OrderNumber} status updated: {oldStatus} -> {request.Status}");
 
@@ -472,7 +473,7 @@ public class RestaurantOrdersController : ControllerBase
             order.PaymentMethod = paymentMethodToUse;
             order.UpdatedAt = DateTime.UtcNow;
 
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             _logger.LogInformation($"[UpdatePaymentStatus] Order {order.OrderNumber} payment status updated: {oldStatus} -> {request.PaymentStatus}, Method: {paymentMethodToUse}");
 
@@ -611,7 +612,7 @@ public class RestaurantOrdersController : ControllerBase
                 order.PaymentStatus = "AwaitingConfirmation"; // Chờ admin xác nhận
                 order.UpdatedAt = DateTime.UtcNow;
                 
-                await _context.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync();
                 
                 _logger.LogInformation($"Order {order.OrderNumber} cash payment requested by customer, awaiting admin confirmation");
                 
@@ -635,7 +636,7 @@ public class RestaurantOrdersController : ControllerBase
 
             try
             {
-                await _context.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync();
             }
             catch (Exception dbEx)
             {
@@ -748,7 +749,7 @@ public class RestaurantOrdersController : ControllerBase
                 _logger.LogInformation($"[ApproveCashPayment] ✅ Updated order status from Pending to Confirmed");
             }
             
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
             
             _logger.LogInformation($"[ApproveCashPayment] ✅✅✅ SUCCESS: Order {id} (OrderNumber: {order.OrderNumber}) approved! Final Status='{order.Status}', PaymentStatus='{order.PaymentStatus}'");
             
@@ -810,7 +811,7 @@ public class RestaurantOrdersController : ControllerBase
             order.Status = "Cancelled";
             order.UpdatedAt = DateTime.UtcNow;
 
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
             _logger.LogInformation($"[CancelMyOrder] Customer {customerId} cancelled order {id}");
 
             return Ok(new { message = "Hủy đơn hàng thành công", order });
@@ -864,3 +865,4 @@ public class PayOrderRequest
 {
     public string PaymentMethod { get; set; } = string.Empty;
 }
+

@@ -1,3 +1,4 @@
+﻿using QuanLyResort.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -11,11 +12,11 @@ namespace QuanLyResort.Controllers
     [Authorize]
     public class DashboardController : ControllerBase
     {
-        private readonly ResortDbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public DashboardController(ResortDbContext context)
+        public DashboardController(IUnitOfWork unitOfWork)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
         }
 
         // GET: api/dashboard/stats
@@ -530,3 +531,4 @@ namespace QuanLyResort.Controllers
         }
     }
 }
+

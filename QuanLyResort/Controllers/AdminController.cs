@@ -1,3 +1,4 @@
+﻿using QuanLyResort.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,12 +12,12 @@ namespace QuanLyResort.Controllers;
 [Authorize(Roles = "Admin")]
 public class AdminController : ControllerBase
 {
-    private readonly ResortDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly DataSeeder _dataSeeder;
 
-    public AdminController(ResortDbContext context)
+    public AdminController(IUnitOfWork unitOfWork)
     {
-        _context = context;
+        _unitOfWork = unitOfWork;
         _dataSeeder = new DataSeeder(context);
     }
 
@@ -186,7 +187,7 @@ public class AdminController : ControllerBase
                         IsActive = true
                     };
                     _context.Employees.Add(adminEmployee);
-                    await _context.SaveChangesAsync();
+                    await _unitOfWork.SaveChangesAsync();
                 }
 
                 adminUser = new Models.User
@@ -200,7 +201,7 @@ public class AdminController : ControllerBase
                     EmployeeId = adminEmployee.EmployeeId
                 };
                 _context.Users.Add(adminUser);
-                await _context.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync();
 
                 return Ok(new
                 {
@@ -216,7 +217,7 @@ public class AdminController : ControllerBase
                 adminUser.PasswordHash = passwordHash;
                 adminUser.IsActive = true;
                 _context.Users.Update(adminUser);
-                await _context.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync();
 
                 return Ok(new
                 {
@@ -260,7 +261,7 @@ public class AdminController : ControllerBase
                     IsActive = true
                 };
                 _context.Employees.Add(adminEmployee);
-                await _context.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync();
             }
 
             // Xóa admin user cũ nếu có
@@ -270,7 +271,7 @@ public class AdminController : ControllerBase
             if (existingAdmin != null)
             {
                 _context.Users.Remove(existingAdmin);
-                await _context.SaveChangesAsync();
+                await _unitOfWork.SaveChangesAsync();
             }
 
             // Tạo admin user mới
@@ -285,7 +286,7 @@ public class AdminController : ControllerBase
                 EmployeeId = adminEmployee.EmployeeId
             };
             _context.Users.Add(adminUser);
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             return Ok(new
             {
@@ -306,4 +307,5 @@ public class ResetPasswordRequest
 {
     public string? Password { get; set; }
 }
+
 
