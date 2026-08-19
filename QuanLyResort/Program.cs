@@ -205,6 +205,7 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials(); // nếu frontend gửi cookie/credentials
+    });
 });
 
 // Add Controllers
