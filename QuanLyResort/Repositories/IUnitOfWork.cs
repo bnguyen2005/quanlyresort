@@ -1,9 +1,11 @@
 using QuanLyResort.Models;
+using QuanLyResort.Data;
 
 namespace QuanLyResort.Repositories;
 
 public interface IUnitOfWork : IDisposable
 {
+    ResortDbContext Context { get; }
     IRepository<User> Users { get; }
     IRepository<Customer> Customers { get; }
     IRepository<Room> Rooms { get; }

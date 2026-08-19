@@ -13,12 +13,13 @@ namespace QuanLyResort.Controllers;
 public class AdminController : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork;
+    private ResortDbContext _context => _unitOfWork.Context;
     private readonly DataSeeder _dataSeeder;
 
     public AdminController(IUnitOfWork unitOfWork)
     {
         _unitOfWork = unitOfWork;
-        _dataSeeder = new DataSeeder(context);
+        _dataSeeder = new DataSeeder(_unitOfWork.Context);
     }
 
     [HttpPost("seed")]
@@ -27,9 +28,9 @@ public class AdminController : ControllerBase
     {
         try
         {
-            Console.WriteLine("[AdminController] 🌱 Starting data seed...");
+            Console.WriteLine("[AdminController] ?? Starting data seed...");
             await _dataSeeder.SeedAsync();
-            Console.WriteLine("[AdminController] ✅ Data seeded successfully");
+            Console.WriteLine("[AdminController] ? Data seeded successfully");
             
             // Return summary
             var userCount = _context.Users.Count();
@@ -48,7 +49,7 @@ public class AdminController : ControllerBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[AdminController] ❌ Seeding failed: {ex.Message}");
+            Console.WriteLine($"[AdminController] ? Seeding failed: {ex.Message}");
             Console.WriteLine($"[AdminController] Stack trace: {ex.StackTrace}");
             return BadRequest(new { message = $"Seeding failed: {ex.Message}", details = ex.ToString() });
         }
@@ -99,7 +100,7 @@ public class AdminController : ControllerBase
     }
 
     /// <summary>
-    /// Kiểm tra admin user có tồn tại không
+    /// Ki?m tra admin user c� t?n t?i kh�ng
     /// </summary>
     [HttpGet("check-admin")]
     [AllowAnonymous]
@@ -126,7 +127,7 @@ public class AdminController : ControllerBase
             verifyError = ex.Message;
         }
         
-        // Test với hash mới
+        // Test v?i hash m?i
         var newHash = BCrypt.Net.BCrypt.HashPassword(testPassword);
         var verifyNewHash = BCrypt.Net.BCrypt.Verify(testPassword, newHash);
         
@@ -153,7 +154,7 @@ public class AdminController : ControllerBase
     }
 
     /// <summary>
-    /// Reset password cho admin user hoặc tạo mới nếu chưa có
+    /// Reset password cho admin user ho?c t?o m?i n?u chua c�
     /// </summary>
     [HttpPost("reset-admin-password")]
     [AllowAnonymous]
@@ -164,22 +165,22 @@ public class AdminController : ControllerBase
             var newPassword = request?.Password ?? "P@ssw0rd123";
             var passwordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
 
-            // Tìm admin user
+            // T�m admin user
             var adminUser = await _context.Users
                 .FirstOrDefaultAsync(u => u.Email == "admin@resort.test" || u.Username == "admin");
 
             if (adminUser == null)
             {
-                // Tạo admin user mới nếu chưa có
+                // T?o admin user m?i n?u chua c�
                 var adminEmployee = await _context.Employees
                     .FirstOrDefaultAsync(e => e.Email == "admin@resort.test");
 
                 if (adminEmployee == null)
                 {
-                    // Tạo employee trước
+                    // T?o employee tru?c
                     adminEmployee = new Models.Employee
                     {
-                        FullName = "Nguyễn Văn Admin",
+                        FullName = "Nguy?n Van Admin",
                         Email = "admin@resort.test",
                         PhoneNumber = "0901234567",
                         Position = "Administrator",
@@ -196,7 +197,7 @@ public class AdminController : ControllerBase
                     Email = "admin@resort.test",
                     PasswordHash = passwordHash,
                     Role = "Admin",
-                    FullName = "Nguyễn Văn Admin",
+                    FullName = "Nguy?n Van Admin",
                     IsActive = true,
                     EmployeeId = adminEmployee.EmployeeId
                 };
@@ -213,7 +214,7 @@ public class AdminController : ControllerBase
             }
             else
             {
-                // Reset password cho admin user hiện có
+                // Reset password cho admin user hi?n c�
                 adminUser.PasswordHash = passwordHash;
                 adminUser.IsActive = true;
                 _context.Users.Update(adminUser);
@@ -245,7 +246,7 @@ public class AdminController : ControllerBase
         {
             var passwordHash = BCrypt.Net.BCrypt.HashPassword("P@ssw0rd123");
 
-            // Đảm bảo có employee
+            // �?m b?o c� employee
             var adminEmployee = await _context.Employees
                 .FirstOrDefaultAsync(e => e.Email == "admin@resort.test");
 
@@ -253,7 +254,7 @@ public class AdminController : ControllerBase
             {
                 adminEmployee = new Models.Employee
                 {
-                    FullName = "Nguyễn Văn Admin",
+                    FullName = "Nguy?n Van Admin",
                     Email = "admin@resort.test",
                     PhoneNumber = "0901234567",
                     Position = "Administrator",
@@ -264,7 +265,7 @@ public class AdminController : ControllerBase
                 await _unitOfWork.SaveChangesAsync();
             }
 
-            // Xóa admin user cũ nếu có
+            // X�a admin user cu n?u c�
             var existingAdmin = await _context.Users
                 .FirstOrDefaultAsync(u => u.Email == "admin@resort.test" || u.Username == "admin");
             
@@ -274,14 +275,14 @@ public class AdminController : ControllerBase
                 await _unitOfWork.SaveChangesAsync();
             }
 
-            // Tạo admin user mới
+            // T?o admin user m?i
             var adminUser = new Models.User
             {
                 Username = "admin",
                 Email = "admin@resort.test",
                 PasswordHash = passwordHash,
                 Role = "Admin",
-                FullName = "Nguyễn Văn Admin",
+                FullName = "Nguy?n Van Admin",
                 IsActive = true,
                 EmployeeId = adminEmployee.EmployeeId
             };

@@ -1,4 +1,4 @@
-﻿using QuanLyResort.Repositories;
+using QuanLyResort.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +15,7 @@ namespace QuanLyResort.Controllers;
 public class RestaurantOrdersController : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork;
+    private ResortDbContext _context => _unitOfWork.Context;
     private readonly ILogger<RestaurantOrdersController> _logger;
     private readonly INotificationManager _notificationManager;
 
@@ -29,11 +30,11 @@ public class RestaurantOrdersController : ControllerBase
     }
 
     /// <summary>
-    /// Customer đặt món ăn
+    /// Customer d?t m�n an
     /// POST /api/restaurant-orders
     /// </summary>
     [HttpPost]
-    [AllowAnonymous] // Customer có thể đặt không cần login (walk-in)
+    [AllowAnonymous] // Customer c� th? d?t kh�ng c?n login (walk-in)
     public async Task<IActionResult> CreateOrder([FromBody] CreateRestaurantOrderRequest request)
     {
         try
@@ -48,31 +49,31 @@ public class RestaurantOrdersController : ControllerBase
                     .SelectMany(x => x.Value!.Errors.Select(e => $"{x.Key}: {e.ErrorMessage}"))
                     .ToList();
                 _logger.LogWarning($"[CreateOrder] ModelState validation failed: {string.Join("; ", errors)}");
-                return BadRequest(new { message = "Dữ liệu không hợp lệ", errors });
+                return BadRequest(new { message = "D? li?u kh�ng h?p l?", errors });
             }
             
             // Validate Items list
             if (request.Items == null || !request.Items.Any())
             {
                 _logger.LogWarning("[CreateOrder] Validation failed: No items in order");
-                return BadRequest(new { message = "Đơn hàng phải có ít nhất 1 món" });
+                return BadRequest(new { message = "�on h�ng ph?i c� �t nh?t 1 m�n" });
             }
 
-            // Validate và lọc items có Quantity = 0 hoặc <= 0
+            // Validate v� l?c items c� Quantity = 0 ho?c <= 0
             var invalidItems = request.Items.Where(item => item.Quantity <= 0).ToList();
             if (invalidItems.Any())
             {
                 var invalidServiceIds = string.Join(", ", invalidItems.Select(i => i.ServiceId));
                 _logger.LogWarning($"[CreateOrder] Validation failed: Items with quantity <= 0: {invalidServiceIds}");
-                return BadRequest(new { message = $"Các món có ID {invalidServiceIds} có số lượng bằng 0 hoặc không hợp lệ. Không thể đặt hàng với số lượng = 0. Vui lòng chọn số lượng lớn hơn 0." });
+                return BadRequest(new { message = $"C�c m�n c� ID {invalidServiceIds} c� s? lu?ng b?ng 0 ho?c kh�ng h?p l?. Kh�ng th? d?t h�ng v?i s? lu?ng = 0. Vui l�ng ch?n s? lu?ng l?n hon 0." });
             }
 
-            // Lấy danh sách items hợp lệ (Quantity > 0)
+            // L?y danh s�ch items h?p l? (Quantity > 0)
             var validItems = request.Items.Where(item => item.Quantity > 0).ToList();
             if (!validItems.Any())
             {
                 _logger.LogWarning("[CreateOrder] Validation failed: All items have quantity <= 0");
-                return BadRequest(new { message = "Tất cả món trong đơn hàng đều có số lượng bằng 0 hoặc không hợp lệ. Không thể đặt hàng. Vui lòng chọn số lượng lớn hơn 0." });
+                return BadRequest(new { message = "T?t c? m�n trong don h�ng d?u c� s? lu?ng b?ng 0 ho?c kh�ng h?p l?. Kh�ng th? d?t h�ng. Vui l�ng ch?n s? lu?ng l?n hon 0." });
             }
 
             // Validate CustomerId if provided
@@ -81,7 +82,7 @@ public class RestaurantOrdersController : ControllerBase
                 var customerExists = await _context.Customers.AnyAsync(c => c.CustomerId == request.CustomerId.Value);
                 if (!customerExists)
                 {
-                    return BadRequest(new { message = "CustomerId không tồn tại" });
+                    return BadRequest(new { message = "CustomerId kh�ng t?n t?i" });
                 }
             }
 
@@ -91,7 +92,7 @@ public class RestaurantOrdersController : ControllerBase
                 var bookingExists = await _context.Bookings.AnyAsync(b => b.BookingId == request.BookingId.Value);
                 if (!bookingExists)
                 {
-                    return BadRequest(new { message = "BookingId không tồn tại" });
+                    return BadRequest(new { message = "BookingId kh�ng t?n t?i" });
                 }
             }
 
@@ -99,7 +100,7 @@ public class RestaurantOrdersController : ControllerBase
             var validPaymentMethods = new[] { "Cash", "Card", "QR", "RoomCharge", "BankTransfer" };
             if (!string.IsNullOrEmpty(request.PaymentMethod) && !validPaymentMethods.Contains(request.PaymentMethod))
             {
-                return BadRequest(new { message = $"PaymentMethod không hợp lệ. Chỉ chấp nhận: {string.Join(", ", validPaymentMethods)}" });
+                return BadRequest(new { message = $"PaymentMethod kh�ng h?p l?. Ch? ch?p nh?n: {string.Join(", ", validPaymentMethods)}" });
             }
 
             // Generate order number
@@ -129,7 +130,7 @@ public class RestaurantOrdersController : ControllerBase
                 CreatedAt = DateTime.UtcNow
             };
 
-            // Calculate total and add items (chỉ xử lý các item hợp lệ)
+            // Calculate total and add items (ch? x? l� c�c item h?p l?)
             decimal totalAmount = 0;
             foreach (var item in validItems)
             {
@@ -137,28 +138,28 @@ public class RestaurantOrdersController : ControllerBase
                 if (item.Quantity <= 0)
                 {
                     _logger.LogError($"[CreateOrder] Critical: Item {item.ServiceId} has quantity <= 0 after filtering");
-                    return BadRequest(new { message = $"Số lượng món ID {item.ServiceId} phải lớn hơn 0. Không thể đặt hàng với số lượng = 0." });
+                    return BadRequest(new { message = $"S? lu?ng m�n ID {item.ServiceId} ph?i l?n hon 0. Kh�ng th? d?t h�ng v?i s? lu?ng = 0." });
                 }
 
                 var service = await _context.Services.FindAsync(item.ServiceId);
                 if (service == null)
                 {
-                    return BadRequest(new { message = $"Món ăn ID {item.ServiceId} không tồn tại" });
+                    return BadRequest(new { message = $"M�n an ID {item.ServiceId} kh�ng t?n t?i" });
                 }
                 
                 if (service.ServiceType != "Restaurant")
                 {
-                    return BadRequest(new { message = $"Dịch vụ ID {item.ServiceId} không phải là món ăn nhà hàng" });
+                    return BadRequest(new { message = $"D?ch v? ID {item.ServiceId} kh�ng ph?i l� m�n an nh� h�ng" });
                 }
                 
                 if (!service.IsActive)
                 {
-                    return BadRequest(new { message = $"Món ăn ID {item.ServiceId} đã bị vô hiệu hóa" });
+                    return BadRequest(new { message = $"M�n an ID {item.ServiceId} d� b? v� hi?u h�a" });
                 }
 
                 if (service.Price < 0)
                 {
-                    return BadRequest(new { message = $"Giá món ăn ID {item.ServiceId} không hợp lệ" });
+                    return BadRequest(new { message = $"Gi� m�n an ID {item.ServiceId} kh�ng h?p l?" });
                 }
 
                 var unitPrice = service.Price;
@@ -166,7 +167,7 @@ public class RestaurantOrdersController : ControllerBase
 
                 if (subTotal < 0)
                 {
-                    return BadRequest(new { message = $"Tổng tiền món ID {item.ServiceId} không hợp lệ" });
+                    return BadRequest(new { message = $"T?ng ti?n m�n ID {item.ServiceId} kh�ng h?p l?" });
                 }
 
                 order.OrderItems.Add(new RestaurantOrderItem
@@ -184,7 +185,7 @@ public class RestaurantOrdersController : ControllerBase
             // Validate total amount
             if (totalAmount < 0)
             {
-                return BadRequest(new { message = "Tổng tiền đơn hàng không hợp lệ" });
+                return BadRequest(new { message = "T?ng ti?n don h�ng kh�ng h?p l?" });
             }
 
             order.TotalAmount = totalAmount;
@@ -194,7 +195,7 @@ public class RestaurantOrdersController : ControllerBase
             _context.RestaurantOrders.Add(order);
             await _unitOfWork.SaveChangesAsync();
             
-            _logger.LogInformation($"[CreateOrder] ✅ Order saved to database. OrderId: {order.OrderId}, OrderNumber: {order.OrderNumber}");
+            _logger.LogInformation($"[CreateOrder] ? Order saved to database. OrderId: {order.OrderId}, OrderNumber: {order.OrderNumber}");
 
             // Load order with items and service info
             var createdOrder = await _context.RestaurantOrders
@@ -205,14 +206,14 @@ public class RestaurantOrdersController : ControllerBase
 
             if (createdOrder == null)
             {
-                _logger.LogError($"[CreateOrder] ⚠️ Created order not found after save! OrderId: {order.OrderId}");
+                _logger.LogError($"[CreateOrder] ?? Created order not found after save! OrderId: {order.OrderId}");
             }
             else
             {
-                _logger.LogInformation($"[CreateOrder] ✅ Order loaded successfully. OrderId: {createdOrder.OrderId}, Items: {createdOrder.OrderItems?.Count ?? 0}");
+                _logger.LogInformation($"[CreateOrder] ? Order loaded successfully. OrderId: {createdOrder.OrderId}, Items: {createdOrder.OrderItems?.Count ?? 0}");
             }
 
-            _logger.LogInformation($"[CreateOrder] ✅ Restaurant order created: {order.OrderNumber} by CustomerId: {request.CustomerId}");
+            _logger.LogInformation($"[CreateOrder] ? Restaurant order created: {order.OrderNumber} by CustomerId: {request.CustomerId}");
 
             // Send order confirmation notification
             if (request.CustomerId.HasValue && createdOrder != null)
@@ -232,12 +233,12 @@ public class RestaurantOrdersController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating restaurant order");
-            return StatusCode(500, new { message = "Lỗi khi tạo đơn đặt món", error = ex.Message });
+            return StatusCode(500, new { message = "L?i khi t?o don d?t m�n", error = ex.Message });
         }
     }
 
     /// <summary>
-    /// Lấy danh sách đơn đặt món của customer
+    /// L?y danh s�ch don d?t m�n c?a customer
     /// GET /api/restaurant-orders/my
     /// </summary>
     [HttpGet("my")]
@@ -264,12 +265,12 @@ public class RestaurantOrdersController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting customer orders");
-            return StatusCode(500, new { message = "Lỗi khi tải đơn đặt món", error = ex.Message });
+            return StatusCode(500, new { message = "L?i khi t?i don d?t m�n", error = ex.Message });
         }
     }
 
     /// <summary>
-    /// Lấy tất cả đơn đặt món (admin)
+    /// L?y t?t c? don d?t m�n (admin)
     /// GET /api/restaurant-orders
     /// </summary>
     [HttpGet]
@@ -310,12 +311,12 @@ public class RestaurantOrdersController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting all orders");
-            return StatusCode(500, new { message = "Lỗi khi tải danh sách đơn", error = ex.Message });
+            return StatusCode(500, new { message = "L?i khi t?i danh s�ch don", error = ex.Message });
         }
     }
 
     /// <summary>
-    /// Lấy chi tiết đơn đặt món
+    /// L?y chi ti?t don d?t m�n
     /// GET /api/restaurant-orders/{id}
     /// </summary>
     [HttpGet("{id}")]
@@ -324,7 +325,7 @@ public class RestaurantOrdersController : ControllerBase
     {
         try
         {
-            _logger.LogInformation($"[GetOrderById] 📥 Request to get order {id}");
+            _logger.LogInformation($"[GetOrderById] ?? Request to get order {id}");
             
             var order = await _context.RestaurantOrders
                 .Include(o => o.OrderItems)
@@ -335,40 +336,40 @@ public class RestaurantOrdersController : ControllerBase
 
             if (order == null)
             {
-                _logger.LogWarning($"[GetOrderById] ❌ Order {id} not found");
-                return NotFound(new { message = "Đơn đặt món không tồn tại" });
+                _logger.LogWarning($"[GetOrderById] ? Order {id} not found");
+                return NotFound(new { message = "�on d?t m�n kh�ng t?n t?i" });
             }
 
             // Check authorization: customer can only view their own orders, admin/staff can view all
             var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
             var customerIdClaim = User.FindFirst("CustomerId")?.Value;
             
-            _logger.LogInformation($"[GetOrderById] 👤 User role: {userRole}, CustomerId claim: {customerIdClaim}, Order CustomerId: {order.CustomerId}");
+            _logger.LogInformation($"[GetOrderById] ?? User role: {userRole}, CustomerId claim: {customerIdClaim}, Order CustomerId: {order.CustomerId}");
 
             // If authenticated as customer, check if this is their order
             if (userRole == "Customer" && !string.IsNullOrEmpty(customerIdClaim))
             {
                 if (int.TryParse(customerIdClaim, out int customerId) && order.CustomerId != customerId)
                 {
-                    _logger.LogWarning($"[GetOrderById] 🚫 Forbidden: Customer {customerId} trying to access order {id} (belongs to {order.CustomerId})");
+                    _logger.LogWarning($"[GetOrderById] ?? Forbidden: Customer {customerId} trying to access order {id} (belongs to {order.CustomerId})");
                     return Forbid();
                 }
             }
             // If not authenticated but order has customerId, allow if order was created by walk-in (customerId is null)
             // Or if order has customerId but user is not logged in, still allow (could be shared link)
 
-            _logger.LogInformation($"[GetOrderById] ✅ Returning order {id} - Status: '{order.Status}', PaymentStatus: '{order.PaymentStatus}', OrderNumber: '{order.OrderNumber}', CustomerId: {order.CustomerId}");
+            _logger.LogInformation($"[GetOrderById] ? Returning order {id} - Status: '{order.Status}', PaymentStatus: '{order.PaymentStatus}', OrderNumber: '{order.OrderNumber}', CustomerId: {order.CustomerId}");
             return Ok(order);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"[GetOrderById] ❌ Exception getting order {id}");
-            return StatusCode(500, new { message = "Lỗi khi tải chi tiết đơn", error = ex.Message });
+            _logger.LogError(ex, $"[GetOrderById] ? Exception getting order {id}");
+            return StatusCode(500, new { message = "L?i khi t?i chi ti?t don", error = ex.Message });
         }
     }
 
     /// <summary>
-    /// Cập nhật trạng thái đơn đặt món (admin)
+    /// C?p nh?t tr?ng th�i don d?t m�n (admin)
     /// PATCH /api/restaurant-orders/{id}/status
     /// </summary>
     [HttpPatch("{id}/status")]
@@ -380,26 +381,26 @@ public class RestaurantOrdersController : ControllerBase
             var order = await _context.RestaurantOrders.FindAsync(id);
             if (order == null)
             {
-                return NotFound(new { message = "Đơn đặt món không tồn tại" });
+                return NotFound(new { message = "�on d?t m�n kh�ng t?n t?i" });
             }
 
             // Validate status
             var validStatuses = new[] { "Pending", "Confirmed", "Preparing", "Ready", "Delivered", "Cancelled" };
             if (string.IsNullOrEmpty(request.Status) || !validStatuses.Contains(request.Status))
             {
-                return BadRequest(new { message = $"Status không hợp lệ. Chỉ chấp nhận: {string.Join(", ", validStatuses)}" });
+                return BadRequest(new { message = $"Status kh�ng h?p l?. Ch? ch?p nh?n: {string.Join(", ", validStatuses)}" });
             }
 
             // Business rule: Cannot change status if order is already cancelled
             if (order.Status == "Cancelled" && request.Status != "Cancelled")
             {
-                return BadRequest(new { message = "Không thể thay đổi trạng thái của đơn hàng đã bị hủy" });
+                return BadRequest(new { message = "Kh�ng th? thay d?i tr?ng th�i c?a don h�ng d� b? h?y" });
             }
 
             // Business rule: Cannot cancel if already delivered
             if (order.Status == "Delivered" && request.Status == "Cancelled")
             {
-                return BadRequest(new { message = "Không thể hủy đơn hàng đã được giao" });
+                return BadRequest(new { message = "Kh�ng th? h?y don h�ng d� du?c giao" });
             }
 
             var oldStatus = order.Status;
@@ -410,17 +411,17 @@ public class RestaurantOrdersController : ControllerBase
 
             _logger.LogInformation($"Order {order.OrderNumber} status updated: {oldStatus} -> {request.Status}");
 
-            return Ok(new { message = "Cập nhật trạng thái thành công", order });
+            return Ok(new { message = "C?p nh?t tr?ng th�i th�nh c�ng", order });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating order status");
-            return StatusCode(500, new { message = "Lỗi khi cập nhật trạng thái", error = ex.Message });
+            return StatusCode(500, new { message = "L?i khi c?p nh?t tr?ng th�i", error = ex.Message });
         }
     }
 
     /// <summary>
-    /// Cập nhật trạng thái thanh toán đơn đặt món (admin)
+    /// C?p nh?t tr?ng th�i thanh to�n don d?t m�n (admin)
     /// PATCH /api/restaurant-orders/{id}/payment-status
     /// </summary>
     [HttpPatch("{id}/payment-status")]
@@ -432,7 +433,7 @@ public class RestaurantOrdersController : ControllerBase
             var order = await _context.RestaurantOrders.FindAsync(id);
             if (order == null)
             {
-                return NotFound(new { message = "Đơn đặt món không tồn tại" });
+                return NotFound(new { message = "�on d?t m�n kh�ng t?n t?i" });
             }
 
             var validStatuses = new[] { "Unpaid", "Paid", "Refunded", "AwaitingConfirmation" };
@@ -440,7 +441,7 @@ public class RestaurantOrdersController : ControllerBase
 
             if (string.IsNullOrEmpty(request.PaymentStatus) || !validStatuses.Contains(request.PaymentStatus))
             {
-                return BadRequest(new { message = $"PaymentStatus không hợp lệ. Chỉ chấp nhận: {string.Join(", ", validStatuses)}" });
+                return BadRequest(new { message = $"PaymentStatus kh�ng h?p l?. Ch? ch?p nh?n: {string.Join(", ", validStatuses)}" });
             }
 
             string? paymentMethodToUse = request.PaymentMethod ?? order.PaymentMethod;
@@ -449,22 +450,22 @@ public class RestaurantOrdersController : ControllerBase
             {
                 if (string.IsNullOrEmpty(paymentMethodToUse))
                 {
-                    return BadRequest(new { message = "Vui lòng chọn phương thức thanh toán khi đánh dấu đơn đã thanh toán." });
+                    return BadRequest(new { message = "Vui l�ng ch?n phuong th?c thanh to�n khi d�nh d?u don d� thanh to�n." });
                 }
 
                 if (!validMethods.Contains(paymentMethodToUse))
                 {
-                    return BadRequest(new { message = $"PaymentMethod không hợp lệ. Chỉ chấp nhận: {string.Join(", ", validMethods)}" });
+                    return BadRequest(new { message = $"PaymentMethod kh�ng h?p l?. Ch? ch?p nh?n: {string.Join(", ", validMethods)}" });
                 }
             }
             else if (request.PaymentStatus == "AwaitingConfirmation")
             {
-                // AwaitingConfirmation chỉ áp dụng cho tiền mặt
+                // AwaitingConfirmation ch? �p d?ng cho ti?n m?t
                 paymentMethodToUse = "Cash";
             }
             else
             {
-                // Với Unpaid/Refunded, có thể bỏ trống phương thức
+                // V?i Unpaid/Refunded, c� th? b? tr?ng phuong th?c
                 paymentMethodToUse = null;
             }
 
@@ -479,19 +480,19 @@ public class RestaurantOrdersController : ControllerBase
 
             return Ok(new
             {
-                message = "Cập nhật trạng thái thanh toán thành công",
+                message = "C?p nh?t tr?ng th�i thanh to�n th�nh c�ng",
                 order
             });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating payment status");
-            return StatusCode(500, new { message = "Lỗi khi cập nhật trạng thái thanh toán", error = ex.Message });
+            return StatusCode(500, new { message = "L?i khi c?p nh?t tr?ng th�i thanh to�n", error = ex.Message });
         }
     }
 
     /// <summary>
-    /// Thanh toán đơn đặt món
+    /// Thanh to�n don d?t m�n
     /// POST /api/restaurant-orders/{id}/pay
     /// </summary>
     [HttpPost("{id}/pay")]
@@ -511,7 +512,7 @@ public class RestaurantOrdersController : ControllerBase
             if (order == null)
             {
                 _logger.LogWarning($"[PayOrder] Order {id} not found");
-                return NotFound(new { message = "Đơn đặt món không tồn tại" });
+                return NotFound(new { message = "�on d?t m�n kh�ng t?n t?i" });
             }
 
             // Check authorization
@@ -522,44 +523,44 @@ public class RestaurantOrdersController : ControllerBase
             _logger.LogInformation($"[PayOrder] Order {id}, User role: {userRole}, CustomerId claim: {customerIdClaim}, Order CustomerId: {order.CustomerId}, PaymentMethod: {request.PaymentMethod}");
 
             // Authorization check:
-            // - Customer chỉ có thể thanh toán đơn hàng của chính họ (CustomerId khớp)
-            // - Admin/Manager/FrontDesk có thể thanh toán bất kỳ đơn hàng nào
-            // - Walk-in orders (CustomerId = null) không thể thanh toán online (cần thanh toán tại nhà hàng)
+            // - Customer ch? c� th? thanh to�n don h�ng c?a ch�nh h? (CustomerId kh?p)
+            // - Admin/Manager/FrontDesk c� th? thanh to�n b?t k? don h�ng n�o
+            // - Walk-in orders (CustomerId = null) kh�ng th? thanh to�n online (c?n thanh to�n t?i nh� h�ng)
             if (userRole == "Customer")
             {
-                // Customer không thể thanh toán đơn hàng của người khác
+                // Customer kh�ng th? thanh to�n don h�ng c?a ngu?i kh�c
                 if (string.IsNullOrEmpty(customerIdClaim))
                 {
                     _logger.LogWarning($"[PayOrder] Customer without CustomerId claim trying to pay order {id}");
-                    return StatusCode(403, new { message = "Không tìm thấy thông tin khách hàng trong token" });
+                    return StatusCode(403, new { message = "Kh�ng t�m th?y th�ng tin kh�ch h�ng trong token" });
                 }
                 
-                // Walk-in orders (CustomerId = null) không thể thanh toán online
+                // Walk-in orders (CustomerId = null) kh�ng th? thanh to�n online
                 if (order.CustomerId == null)
                 {
                     _logger.LogWarning($"[PayOrder] Customer {customerIdClaim} trying to pay walk-in order {id}");
-                    return BadRequest(new { message = "Đơn hàng này là đơn tại quầy, vui lòng thanh toán trực tiếp tại nhà hàng" });
+                    return BadRequest(new { message = "�on h�ng n�y l� don t?i qu?y, vui l�ng thanh to�n tr?c ti?p t?i nh� h�ng" });
                 }
                 
-                // Kiểm tra CustomerId khớp
+                // Ki?m tra CustomerId kh?p
                 if (int.TryParse(customerIdClaim, out int customerId) && order.CustomerId != customerId)
                 {
                     _logger.LogWarning($"[PayOrder] Customer {customerId} trying to pay order {id} belonging to customer {order.CustomerId}");
-                    return StatusCode(403, new { message = "Bạn chỉ có thể thanh toán đơn hàng của chính bạn" });
+                    return StatusCode(403, new { message = "B?n ch? c� th? thanh to�n don h�ng c?a ch�nh b?n" });
                 }
                 
-                // CustomerId null hoặc không parse được
+                // CustomerId null ho?c kh�ng parse du?c
                 if (!int.TryParse(customerIdClaim, out _))
                 {
                     _logger.LogWarning($"[PayOrder] Invalid CustomerId claim: {customerIdClaim}");
-                    return StatusCode(403, new { message = "Token không hợp lệ" });
+                    return StatusCode(403, new { message = "Token kh�ng h?p l?" });
                 }
             }
-            // Admin/Manager/FrontDesk có thể thanh toán bất kỳ đơn hàng nào (không cần check thêm)
+            // Admin/Manager/FrontDesk c� th? thanh to�n b?t k? don h�ng n�o (kh�ng c?n check th�m)
 
             if (order.PaymentStatus == "Paid")
             {
-                return BadRequest(new { message = "Đơn hàng đã được thanh toán" });
+                return BadRequest(new { message = "�on h�ng d� du?c thanh to�n" });
             }
 
             // Validate PaymentMethod - use default if empty
@@ -573,19 +574,19 @@ public class RestaurantOrdersController : ControllerBase
             if (!validPaymentMethods.Contains(request.PaymentMethod))
             {
                 _logger.LogWarning($"[PayOrder] Invalid PaymentMethod: {request.PaymentMethod} for order {id}");
-                return BadRequest(new { message = $"PaymentMethod không hợp lệ. Chỉ chấp nhận: {string.Join(", ", validPaymentMethods)}" });
+                return BadRequest(new { message = $"PaymentMethod kh�ng h?p l?. Ch? ch?p nh?n: {string.Join(", ", validPaymentMethods)}" });
             }
 
             // Business rule: Cannot pay if order is cancelled
             if (order.Status == "Cancelled")
             {
-                return BadRequest(new { message = "Không thể thanh toán đơn hàng đã bị hủy" });
+                return BadRequest(new { message = "Kh�ng th? thanh to�n don h�ng d� b? h?y" });
             }
 
-            // Nếu là Customer và PaymentMethod là Cash, chỉ lưu yêu cầu (chờ admin xác nhận)
+            // N?u l� Customer v� PaymentMethod l� Cash, ch? luu y�u c?u (ch? admin x�c nh?n)
             if (userRole == "Customer" && request.PaymentMethod == "Cash")
             {
-                // Lưu thông tin yêu cầu thanh toán tiền mặt vào SpecialRequests
+                // Luu th�ng tin y�u c?u thanh to�n ti?n m?t v�o SpecialRequests
                 var specialRequests = order.SpecialRequests;
                 Dictionary<string, object>? requestsDict = null;
                 
@@ -609,7 +610,7 @@ public class RestaurantOrdersController : ControllerBase
                 
                 order.SpecialRequests = System.Text.Json.JsonSerializer.Serialize(requestsDict);
                 order.PaymentMethod = request.PaymentMethod;
-                order.PaymentStatus = "AwaitingConfirmation"; // Chờ admin xác nhận
+                order.PaymentStatus = "AwaitingConfirmation"; // Ch? admin x�c nh?n
                 order.UpdatedAt = DateTime.UtcNow;
                 
                 await _unitOfWork.SaveChangesAsync();
@@ -617,13 +618,13 @@ public class RestaurantOrdersController : ControllerBase
                 _logger.LogInformation($"Order {order.OrderNumber} cash payment requested by customer, awaiting admin confirmation");
                 
                 return Ok(new { 
-                    message = "Yêu cầu thanh toán tiền mặt đã được gửi. Vui lòng chờ admin xác nhận.", 
+                    message = "Y�u c?u thanh to�n ti?n m?t d� du?c g?i. Vui l�ng ch? admin x�c nh?n.", 
                     order,
                     awaitingConfirmation = true
                 });
             }
             
-            // Admin/Manager/FrontDesk hoặc PaymentMethod khác Cash: xử lý thanh toán ngay
+            // Admin/Manager/FrontDesk ho?c PaymentMethod kh�c Cash: x? l� thanh to�n ngay
             order.PaymentMethod = request.PaymentMethod;
             order.PaymentStatus = "Paid";
             order.UpdatedAt = DateTime.UtcNow;
@@ -641,7 +642,7 @@ public class RestaurantOrdersController : ControllerBase
             catch (Exception dbEx)
             {
                 _logger.LogError(dbEx, $"[PayOrder] Database error when saving order {id}. OrderNumber: {order.OrderNumber}, PaymentStatus: {order.PaymentStatus}, Status: {order.Status}");
-                return StatusCode(500, new { message = "Lỗi khi lưu thông tin thanh toán", error = dbEx.Message });
+                return StatusCode(500, new { message = "L?i khi luu th�ng tin thanh to�n", error = dbEx.Message });
             }
 
             _logger.LogInformation($"Order {order.OrderNumber} paid via {request.PaymentMethod}");
@@ -660,17 +661,17 @@ public class RestaurantOrdersController : ControllerBase
                 });
             }
 
-            return Ok(new { message = "Thanh toán thành công", order });
+            return Ok(new { message = "Thanh to�n th�nh c�ng", order });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error paying order");
-            return StatusCode(500, new { message = "Lỗi khi thanh toán", error = ex.Message });
+            return StatusCode(500, new { message = "L?i khi thanh to�n", error = ex.Message });
         }
     }
     
     /// <summary>
-    /// Admin xác nhận thanh toán tiền mặt cho restaurant order
+    /// Admin x�c nh?n thanh to�n ti?n m?t cho restaurant order
     /// POST /api/restaurant-orders/{id}/approve-cash-payment
     /// </summary>
     [HttpPost("{id}/approve-cash-payment")]
@@ -682,7 +683,7 @@ public class RestaurantOrdersController : ControllerBase
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value ?? "system";
             var userRole = User.FindFirst(ClaimTypes.Role)?.Value ?? "Unknown";
             
-            _logger.LogInformation($"[ApproveCashPayment] 🔄 Admin {userEmail} (Role: {userRole}) approving cash payment for order {id}");
+            _logger.LogInformation($"[ApproveCashPayment] ?? Admin {userEmail} (Role: {userRole}) approving cash payment for order {id}");
             
             var order = await _context.RestaurantOrders
                 .Include(o => o.OrderItems)
@@ -691,31 +692,31 @@ public class RestaurantOrdersController : ControllerBase
             
             if (order == null)
             {
-                _logger.LogWarning($"[ApproveCashPayment] ❌ Order {id} not found");
-                return NotFound(new { message = "Không tìm thấy đơn hàng" });
+                _logger.LogWarning($"[ApproveCashPayment] ? Order {id} not found");
+                return NotFound(new { message = "Kh�ng t�m th?y don h�ng" });
             }
             
-            _logger.LogInformation($"[ApproveCashPayment] 📋 Order {id} current status: Status='{order.Status}', PaymentStatus='{order.PaymentStatus}', OrderNumber='{order.OrderNumber}', CustomerId={order.CustomerId}");
+            _logger.LogInformation($"[ApproveCashPayment] ?? Order {id} current status: Status='{order.Status}', PaymentStatus='{order.PaymentStatus}', OrderNumber='{order.OrderNumber}', CustomerId={order.CustomerId}");
             
             if (order.PaymentStatus == "Paid")
             {
-                _logger.LogWarning($"[ApproveCashPayment] ⚠️ Order {id} already paid");
-                return BadRequest(new { message = "Đơn hàng đã được thanh toán" });
+                _logger.LogWarning($"[ApproveCashPayment] ?? Order {id} already paid");
+                return BadRequest(new { message = "�on h�ng d� du?c thanh to�n" });
             }
             
             if (order.PaymentStatus != "AwaitingConfirmation")
             {
-                _logger.LogWarning($"[ApproveCashPayment] ⚠️ Order {id} PaymentStatus is '{order.PaymentStatus}', expected 'AwaitingConfirmation'");
-                return BadRequest(new { message = "Đơn hàng này không có yêu cầu thanh toán tiền mặt đang chờ xác nhận" });
+                _logger.LogWarning($"[ApproveCashPayment] ?? Order {id} PaymentStatus is '{order.PaymentStatus}', expected 'AwaitingConfirmation'");
+                return BadRequest(new { message = "�on h�ng n�y kh�ng c� y�u c?u thanh to�n ti?n m?t dang ch? x�c nh?n" });
             }
             
-            _logger.LogInformation($"[ApproveCashPayment] 💰 Processing payment for order {id}...");
+            _logger.LogInformation($"[ApproveCashPayment] ?? Processing payment for order {id}...");
             
-            // Xác nhận thanh toán
+            // X�c nh?n thanh to�n
             order.PaymentStatus = "Paid";
             order.UpdatedAt = DateTime.UtcNow;
             
-            // Cập nhật SpecialRequests để ghi nhận admin đã approve
+            // C?p nh?t SpecialRequests d? ghi nh?n admin d� approve
             var specialRequests = order.SpecialRequests;
             Dictionary<string, object>? requestsDict = null;
             
@@ -728,7 +729,7 @@ public class RestaurantOrdersController : ControllerBase
             }
             catch (Exception ex)
             {
-                _logger.LogWarning($"[ApproveCashPayment] ⚠️ Error parsing SpecialRequests: {ex.Message}");
+                _logger.LogWarning($"[ApproveCashPayment] ?? Error parsing SpecialRequests: {ex.Message}");
             }
             
             if (requestsDict == null)
@@ -746,12 +747,12 @@ public class RestaurantOrdersController : ControllerBase
             if (order.Status == "Pending")
             {
                 order.Status = "Confirmed";
-                _logger.LogInformation($"[ApproveCashPayment] ✅ Updated order status from Pending to Confirmed");
+                _logger.LogInformation($"[ApproveCashPayment] ? Updated order status from Pending to Confirmed");
             }
             
             await _unitOfWork.SaveChangesAsync();
             
-            _logger.LogInformation($"[ApproveCashPayment] ✅✅✅ SUCCESS: Order {id} (OrderNumber: {order.OrderNumber}) approved! Final Status='{order.Status}', PaymentStatus='{order.PaymentStatus}'");
+            _logger.LogInformation($"[ApproveCashPayment] ??? SUCCESS: Order {id} (OrderNumber: {order.OrderNumber}) approved! Final Status='{order.Status}', PaymentStatus='{order.PaymentStatus}'");
             
             // Send payment confirmation notification after admin approval
             if (order.PaymentStatus == "Paid" && order.CustomerId.HasValue)
@@ -767,17 +768,17 @@ public class RestaurantOrdersController : ControllerBase
                 });
             }
             
-            return Ok(new { message = "Xác nhận thanh toán tiền mặt thành công", order });
+            return Ok(new { message = "X�c nh?n thanh to�n ti?n m?t th�nh c�ng", order });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"[ApproveCashPayment] ❌ Exception approving cash payment for order {id}");
-            return StatusCode(500, new { message = "Lỗi khi xác nhận thanh toán", error = ex.Message });
+            _logger.LogError(ex, $"[ApproveCashPayment] ? Exception approving cash payment for order {id}");
+            return StatusCode(500, new { message = "L?i khi x�c nh?n thanh to�n", error = ex.Message });
         }
     }
 
     /// <summary>
-    /// Hủy đơn đặt món (Customer)
+    /// H?y don d?t m�n (Customer)
     /// POST /api/restaurant-orders/{id}/cancel
     /// </summary>
     [HttpPost("{id}/cancel")]
@@ -789,13 +790,13 @@ public class RestaurantOrdersController : ControllerBase
             var customerIdClaim = User.FindFirst("CustomerId")?.Value;
             if (string.IsNullOrEmpty(customerIdClaim) || !int.TryParse(customerIdClaim, out int customerId))
             {
-                return Unauthorized(new { message = "Vui lòng đăng nhập để hủy đơn" });
+                return Unauthorized(new { message = "Vui l�ng dang nh?p d? h?y don" });
             }
 
             var order = await _context.RestaurantOrders.FindAsync(id);
             if (order == null)
             {
-                return NotFound(new { message = "Đơn đặt món không tồn tại" });
+                return NotFound(new { message = "�on d?t m�n kh�ng t?n t?i" });
             }
 
             if (order.CustomerId != customerId)
@@ -805,7 +806,7 @@ public class RestaurantOrdersController : ControllerBase
 
             if (order.Status != "Pending")
             {
-                return BadRequest(new { message = "Chỉ có thể hủy đơn hàng đang ở trạng thái Chờ xử lý" });
+                return BadRequest(new { message = "Ch? c� th? h?y don h�ng dang ? tr?ng th�i Ch? x? l�" });
             }
 
             order.Status = "Cancelled";
@@ -814,12 +815,12 @@ public class RestaurantOrdersController : ControllerBase
             await _unitOfWork.SaveChangesAsync();
             _logger.LogInformation($"[CancelMyOrder] Customer {customerId} cancelled order {id}");
 
-            return Ok(new { message = "Hủy đơn hàng thành công", order });
+            return Ok(new { message = "H?y don h�ng th�nh c�ng", order });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, $"[CancelMyOrder] Error cancelling order {id}");
-            return StatusCode(500, new { message = "Lỗi khi hủy đơn hàng", error = ex.Message });
+            return StatusCode(500, new { message = "L?i khi h?y don h�ng", error = ex.Message });
         }
     }
 }

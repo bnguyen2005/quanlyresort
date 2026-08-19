@@ -1,4 +1,4 @@
-﻿using QuanLyResort.Repositories;
+using QuanLyResort.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +15,7 @@ namespace QuanLyResort.Controllers;
 public class ServicesController : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork;
+    private ResortDbContext _context => _unitOfWork.Context;
     private readonly IAuditService _auditService;
 
     public ServicesController(IUnitOfWork unitOfWork, IAuditService auditService)
@@ -24,7 +25,7 @@ public class ServicesController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy danh sách menu nhà hàng (public endpoint)
+    /// L?y danh s�ch menu nh� h�ng (public endpoint)
     /// GET /api/services/restaurant/menu
     /// </summary>
     [HttpGet("restaurant/menu")]
@@ -65,7 +66,7 @@ public class ServicesController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy danh sách dịch vụ
+    /// L?y danh s�ch d?ch v?
     /// GET /api/services
     /// </summary>
     [HttpGet]
@@ -94,7 +95,7 @@ public class ServicesController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy chi tiết dịch vụ
+    /// L?y chi ti?t d?ch v?
     /// GET /api/services/{id}
     /// </summary>
     [HttpGet("{id}")]
@@ -111,7 +112,7 @@ public class ServicesController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy thống kê dịch vụ
+    /// L?y th?ng k� d?ch v?
     /// GET /api/services/statistics
     /// </summary>
     [HttpGet("statistics")]
@@ -137,7 +138,7 @@ public class ServicesController : ControllerBase
     }
 
     /// <summary>
-    /// Tạo dịch vụ mới
+    /// T?o d?ch v? m?i
     /// POST /api/services
     /// </summary>
     [HttpPost]
@@ -158,7 +159,7 @@ public class ServicesController : ControllerBase
     }
 
     /// <summary>
-    /// Cập nhật dịch vụ
+    /// C?p nh?t d?ch v?
     /// PUT /api/services/{id}
     /// </summary>
     [HttpPut("{id}")]
@@ -203,7 +204,7 @@ public class ServicesController : ControllerBase
     }
 
     /// <summary>
-    /// Xóa dịch vụ
+    /// X�a d?ch v?
     /// DELETE /api/services/{id}
     /// </summary>
     [HttpDelete("{id}")]
@@ -234,7 +235,7 @@ public class ServicesController : ControllerBase
     }
 
     /// <summary>
-    /// Toggle trạng thái hoạt động của dịch vụ
+    /// Toggle tr?ng th�i ho?t d?ng c?a d?ch v?
     /// PATCH /api/services/{id}/toggle-active
     /// </summary>
     [HttpPatch("{id}/toggle-active")]
@@ -258,7 +259,7 @@ public class ServicesController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy danh sách các loại dịch vụ
+    /// L?y danh s�ch c�c lo?i d?ch v?
     /// GET /api/services/types
     /// </summary>
     [HttpGet("types")]
@@ -275,7 +276,7 @@ public class ServicesController : ControllerBase
     }
 
     /// <summary>
-    /// Upload hình ảnh cho dịch vụ
+    /// Upload h�nh ?nh cho d?ch v?
     /// POST /api/services/{id}/upload-image
     /// </summary>
     [HttpPost("{id}/upload-image")]
@@ -290,17 +291,17 @@ public class ServicesController : ControllerBase
                 return NotFound(new { message = "Service not found." });
             }
 
-            // Lưu oldImageUrl để dùng cho cả hai trường hợp (xóa và upload mới)
+            // Luu oldImageUrl d? d�ng cho c? hai tru?ng h?p (x�a v� upload m?i)
             var oldImageUrl = service.ImageUrl;
 
-            // Nếu không có file, xóa image URL
+            // N?u kh�ng c� file, x�a image URL
             if (file == null || file.Length == 0)
             {
                 service.ImageUrl = null;
                 service.UpdatedAt = DateTime.UtcNow;
                 await _unitOfWork.SaveChangesAsync();
 
-                // Xóa file cũ nếu có
+                // X�a file cu n?u c�
                 if (!string.IsNullOrEmpty(oldImageUrl) && oldImageUrl.StartsWith("/"))
                 {
                     var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", oldImageUrl.TrimStart('/'));
@@ -329,7 +330,7 @@ public class ServicesController : ControllerBase
                 return BadRequest(new { message = "File size exceeds 5MB limit." });
             }
 
-            // Tạo thư mục uploads nếu chưa có
+            // T?o thu m?c uploads n?u chua c�
             var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "services");
             if (!Directory.Exists(uploadsFolder))
             {
@@ -346,7 +347,7 @@ public class ServicesController : ControllerBase
                 await file.CopyToAsync(stream);
             }
 
-            // Xóa file cũ nếu có (oldImageUrl đã được khai báo ở đầu hàm)
+            // X�a file cu n?u c� (oldImageUrl d� du?c khai b�o ? d?u h�m)
             if (!string.IsNullOrEmpty(oldImageUrl) && oldImageUrl.StartsWith("/"))
             {
                 var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", oldImageUrl.TrimStart('/'));

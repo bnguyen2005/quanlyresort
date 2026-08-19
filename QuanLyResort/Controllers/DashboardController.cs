@@ -1,4 +1,4 @@
-﻿using QuanLyResort.Repositories;
+using QuanLyResort.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +13,7 @@ namespace QuanLyResort.Controllers
     public class DashboardController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
+    private ResortDbContext _context => _unitOfWork.Context;
 
         public DashboardController(IUnitOfWork unitOfWork)
         {
@@ -31,15 +32,15 @@ namespace QuanLyResort.Controllers
                 var thisMonth = new DateTime(today.Year, today.Month, 1);
                 var lastMonth = thisMonth.AddMonths(-1);
 
-                // Today's bookings - đặt phòng được tạo hôm nay (không phải check-in hôm nay)
+                // Today's bookings - d?t ph�ng du?c t?o h�m nay (kh�ng ph?i check-in h�m nay)
                 var todayBookings = await _context.Bookings
                     .Where(b => b.CreatedAt.Date == today && b.Status != "Cancelled")
                     .CountAsync();
 
-                // Today's revenue - tính từ:
-                // 1. Invoices đã thanh toán hôm nay (PaidDate = today, Status = Paid)
-                // 2. Bookings có Status = "Paid" và UpdatedAt = today (đã thanh toán qua PayOs)
-                // 3. Charges đã thanh toán hôm nay (ChargeDate = today)
+                // Today's revenue - t�nh t?:
+                // 1. Invoices d� thanh to�n h�m nay (PaidDate = today, Status = Paid)
+                // 2. Bookings c� Status = "Paid" v� UpdatedAt = today (d� thanh to�n qua PayOs)
+                // 3. Charges d� thanh to�n h�m nay (ChargeDate = today)
                 var todayInvoicesList = await _context.Invoices
                     .Where(i => i.PaidDate.HasValue && 
                                i.PaidDate.Value.Date == today && 
@@ -47,7 +48,7 @@ namespace QuanLyResort.Controllers
                     .Select(i => i.PaidAmount > 0 ? i.PaidAmount : i.TotalAmount)
                     .ToListAsync();
                 
-                // Bookings đã thanh toán hôm nay (Status = "Paid" sau khi webhook xử lý)
+                // Bookings d� thanh to�n h�m nay (Status = "Paid" sau khi webhook x? l�)
                 var todayPaidBookingsList = await _context.Bookings
                     .Where(b => b.UpdatedAt.HasValue && 
                                b.UpdatedAt.Value.Date == today && 
@@ -57,7 +58,7 @@ namespace QuanLyResort.Controllers
                     .Select(b => b.EstimatedTotalAmount!.Value)
                     .ToListAsync();
                 
-                // Charges (dịch vụ) đã thanh toán hôm nay
+                // Charges (d?ch v?) d� thanh to�n h�m nay
                 var todayChargesList = await _context.Charges
                     .Where(c => c.ChargeDate.Date == today)
                     .Select(c => c.TotalAmount)
@@ -67,7 +68,7 @@ namespace QuanLyResort.Controllers
                                   (todayPaidBookingsList.Sum(b => (decimal?)b) ?? 0) +
                                   (todayChargesList.Sum(c => (decimal?)c) ?? 0);
 
-                // Today's check-ins - bookings có CheckInDate = today và đã check-in
+                // Today's check-ins - bookings c� CheckInDate = today v� d� check-in
                 var todayCheckIns = await _context.Bookings
                     .Where(b => b.CheckInDate.Date == today && 
                                (b.Status == "CheckedIn" || b.Status == "Confirmed"))
@@ -88,10 +89,10 @@ namespace QuanLyResort.Controllers
 
                 var occupancyRate = totalRooms > 0 ? (double)occupiedRooms / totalRooms * 100 : 0;
 
-                // This month vs last month revenue - tính từ:
-                // 1. Invoices đã thanh toán (PaidDate, Status = Paid)
-                // 2. Bookings đã thanh toán (Status = Paid, UpdatedAt trong tháng)
-                // 3. Charges trong tháng
+                // This month vs last month revenue - t�nh t?:
+                // 1. Invoices d� thanh to�n (PaidDate, Status = Paid)
+                // 2. Bookings d� thanh to�n (Status = Paid, UpdatedAt trong th�ng)
+                // 3. Charges trong th�ng
                 var thisMonthInvoicesList = await _context.Invoices
                     .Where(i => i.PaidDate.HasValue && 
                                i.PaidDate.Value >= thisMonth && 
@@ -190,7 +191,7 @@ namespace QuanLyResort.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Lỗi khi tải thống kê dashboard", error = ex.Message });
+                return StatusCode(500, new { message = "L?i khi t?i th?ng k� dashboard", error = ex.Message });
             }
         }
 
@@ -202,9 +203,9 @@ namespace QuanLyResort.Controllers
             {
                 var startDate = DateTime.Today.AddDays(-days);
                 
-                // Tính từ:
-                // 1. Invoices đã thanh toán (PaidDate)
-                // 2. Bookings đã thanh toán (Status = Paid, UpdatedAt)
+                // T�nh t?:
+                // 1. Invoices d� thanh to�n (PaidDate)
+                // 2. Bookings d� thanh to�n (Status = Paid, UpdatedAt)
                 // 3. Charges (ChargeDate)
                 var dailyInvoices = await _context.Invoices
                     .Where(i => i.PaidDate.HasValue && 
@@ -275,7 +276,7 @@ namespace QuanLyResort.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Lỗi khi tải xu hướng doanh thu", error = ex.Message });
+                return StatusCode(500, new { message = "L?i khi t?i xu hu?ng doanh thu", error = ex.Message });
             }
         }
 
@@ -313,7 +314,7 @@ namespace QuanLyResort.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Lỗi khi tải xu hướng lấp đầy", error = ex.Message });
+                return StatusCode(500, new { message = "L?i khi t?i xu hu?ng l?p d?y", error = ex.Message });
             }
         }
 
@@ -325,19 +326,19 @@ namespace QuanLyResort.Controllers
             {
                 var thisMonthStart = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
                 
-                // Tính toán TotalSpent từ Invoices đã thanh toán (Status = "Paid")
-                // Load invoices trước, sau đó tính tổng trên client side (SQLite không hỗ trợ Sum decimal)
+                // T�nh to�n TotalSpent t? Invoices d� thanh to�n (Status = "Paid")
+                // Load invoices tru?c, sau d� t�nh t?ng tr�n client side (SQLite kh�ng h? tr? Sum decimal)
                 var invoiceQuery = _context.Invoices
                     .Where(i => i.Status == "Paid" && i.CustomerId > 0);
                 
                 if (thisMonth)
                 {
-                    // Chỉ lấy invoices trong tháng này
+                    // Ch? l?y invoices trong th�ng n�y
                     invoiceQuery = invoiceQuery.Where(i => i.PaidDate.HasValue && 
                                                            i.PaidDate.Value >= thisMonthStart);
                 }
                 
-                // Load invoices (không tính Sum ở đây vì SQLite không hỗ trợ)
+                // Load invoices (kh�ng t�nh Sum ? d�y v� SQLite kh�ng h? tr?)
                 var invoices = await invoiceQuery
                     .Select(i => new
                     {
@@ -347,7 +348,7 @@ namespace QuanLyResort.Controllers
                     })
                     .ToListAsync();
 
-                // Tính tổng chi tiêu và số lượng đặt phòng cho mỗi customer trên client side
+                // T�nh t?ng chi ti�u v� s? lu?ng d?t ph�ng cho m?i customer tr�n client side
                 var customerStats = invoices
                     .GroupBy(i => i.CustomerId)
                     .Select(g => new
@@ -359,7 +360,7 @@ namespace QuanLyResort.Controllers
                     })
                     .ToList();
 
-                // Lấy thông tin customers từ Customer table
+                // L?y th�ng tin customers t? Customer table
                 var customerIds = customerStats.Select(s => s.CustomerId).ToList();
                 var customers = await _context.Customers
                     .Where(c => customerIds.Contains(c.CustomerId))
@@ -372,7 +373,7 @@ namespace QuanLyResort.Controllers
                     })
                     .ToListAsync();
 
-                // Combine data và sắp xếp theo TotalSpent giảm dần
+                // Combine data v� s?p x?p theo TotalSpent gi?m d?n
                 var topCustomers = customers
                     .Join(customerStats,
                         c => c.customerId,
@@ -395,7 +396,7 @@ namespace QuanLyResort.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Lỗi khi tải top khách hàng", error = ex.Message });
+                return StatusCode(500, new { message = "L?i khi t?i top kh�ch h�ng", error = ex.Message });
             }
         }
 
@@ -424,7 +425,7 @@ namespace QuanLyResort.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Lỗi khi tải hoạt động gần đây", error = ex.Message });
+                return StatusCode(500, new { message = "L?i khi t?i ho?t d?ng g?n d�y", error = ex.Message });
             }
         }
 
@@ -461,7 +462,7 @@ namespace QuanLyResort.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Lỗi khi tải trạng thái phòng", error = ex.Message });
+                return StatusCode(500, new { message = "L?i khi t?i tr?ng th�i ph�ng", error = ex.Message });
             }
         }
 
@@ -493,7 +494,7 @@ namespace QuanLyResort.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Lỗi khi tải doanh thu dịch vụ", error = ex.Message });
+                return StatusCode(500, new { message = "L?i khi t?i doanh thu d?ch v?", error = ex.Message });
             }
         }
 
@@ -503,28 +504,28 @@ namespace QuanLyResort.Controllers
             {
                 "Booking" => action switch
                 {
-                    "Create" => $"Tạo đặt phòng mới #{entityId}",
-                    "Update" => $"Cập nhật đặt phòng #{entityId}",
-                    "Delete" => $"Hủy đặt phòng #{entityId}",
-                    _ => $"{action} đặt phòng #{entityId}"
+                    "Create" => $"T?o d?t ph�ng m?i #{entityId}",
+                    "Update" => $"C?p nh?t d?t ph�ng #{entityId}",
+                    "Delete" => $"H?y d?t ph�ng #{entityId}",
+                    _ => $"{action} d?t ph�ng #{entityId}"
                 },
                 "Customer" => action switch
                 {
-                    "Create" => $"Thêm khách hàng mới #{entityId}",
-                    "Update" => $"Cập nhật thông tin khách hàng #{entityId}",
-                    _ => $"{action} khách hàng #{entityId}"
+                    "Create" => $"Th�m kh�ch h�ng m?i #{entityId}",
+                    "Update" => $"C?p nh?t th�ng tin kh�ch h�ng #{entityId}",
+                    _ => $"{action} kh�ch h�ng #{entityId}"
                 },
                 "Room" => action switch
                 {
-                    "Create" => $"Thêm phòng mới #{entityId}",
-                    "Update" => $"Cập nhật phòng #{entityId}",
-                    _ => $"{action} phòng #{entityId}"
+                    "Create" => $"Th�m ph�ng m?i #{entityId}",
+                    "Update" => $"C?p nh?t ph�ng #{entityId}",
+                    _ => $"{action} ph�ng #{entityId}"
                 },
                 "Invoice" => action switch
                 {
-                    "Create" => $"Tạo hóa đơn #{entityId}",
-                    "Update" => $"Cập nhật hóa đơn #{entityId}",
-                    _ => $"{action} hóa đơn #{entityId}"
+                    "Create" => $"T?o h�a don #{entityId}",
+                    "Update" => $"C?p nh?t h�a don #{entityId}",
+                    _ => $"{action} h�a don #{entityId}"
                 },
                 _ => $"{action} {entityName} #{entityId}"
             };

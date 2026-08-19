@@ -1,4 +1,4 @@
-﻿using QuanLyResort.Repositories;
+using QuanLyResort.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +15,7 @@ namespace QuanLyResort.Controllers;
 public class RoomsController : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork;
+    private ResortDbContext _context => _unitOfWork.Context;
     private readonly IAuditService _auditService;
     private readonly ILogger<RoomsController> _logger;
 
@@ -29,7 +30,7 @@ public class RoomsController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy danh sách tất cả phòng với filter
+    /// L?y danh s�ch t?t c? ph�ng v?i filter
     /// GET /api/rooms?status=Available&roomTypeId=1
     /// </summary>
     [HttpGet]
@@ -99,7 +100,7 @@ public class RoomsController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy chi tiết phòng
+    /// L?y chi ti?t ph�ng
     /// GET /api/rooms/{id}
     /// </summary>
     [HttpGet("{id}")]
@@ -144,7 +145,7 @@ public class RoomsController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy thống kê phòng
+    /// L?y th?ng k� ph�ng
     /// GET /api/rooms/statistics
     /// </summary>
     [HttpGet("statistics")]
@@ -195,7 +196,7 @@ public class RoomsController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy danh sách tầng
+    /// L?y danh s�ch t?ng
     /// GET /api/rooms/floors
     /// </summary>
     [HttpGet("floors")]
@@ -212,7 +213,7 @@ public class RoomsController : ControllerBase
     }
 
     /// <summary>
-    /// Upload hình ảnh cho phòng
+    /// Upload h�nh ?nh cho ph�ng
     /// POST /api/rooms/{id}/upload-image
     /// </summary>
     [HttpPost("{id:int}/upload-image")]
@@ -228,17 +229,17 @@ public class RoomsController : ControllerBase
                 return NotFound(new { message = "Room not found." });
             }
 
-            // Lưu oldImageUrl để dùng cho cả hai trường hợp (xóa và upload mới)
+            // Luu oldImageUrl d? d�ng cho c? hai tru?ng h?p (x�a v� upload m?i)
             var oldImageUrl = room.ImageUrl;
 
-            // Nếu không có file, xóa image URL
+            // N?u kh�ng c� file, x�a image URL
             if (file == null || file.Length == 0)
             {
                 room.ImageUrl = null;
                 room.UpdatedAt = DateTime.UtcNow;
                 await _unitOfWork.SaveChangesAsync();
 
-                // Xóa file cũ nếu có
+                // X�a file cu n?u c�
                 if (!string.IsNullOrEmpty(oldImageUrl) && oldImageUrl.StartsWith("/"))
                 {
                     var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", oldImageUrl.TrimStart('/'));
@@ -267,7 +268,7 @@ public class RoomsController : ControllerBase
                 return BadRequest(new { message = "File size exceeds 5MB limit." });
             }
 
-            // Tạo thư mục uploads nếu chưa có
+            // T?o thu m?c uploads n?u chua c�
             var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "rooms");
             if (!Directory.Exists(uploadsFolder))
             {
@@ -284,7 +285,7 @@ public class RoomsController : ControllerBase
                 await file.CopyToAsync(stream);
             }
 
-            // Xóa file cũ nếu có (oldImageUrl đã được khai báo ở đầu hàm)
+            // X�a file cu n?u c� (oldImageUrl d� du?c khai b�o ? d?u h�m)
             if (!string.IsNullOrEmpty(oldImageUrl) && oldImageUrl.StartsWith("/"))
             {
                 var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", oldImageUrl.TrimStart('/'));
@@ -312,7 +313,7 @@ public class RoomsController : ControllerBase
     }
 
     /// <summary>
-    /// Thêm hình ảnh vào gallery của phòng
+    /// Th�m h�nh ?nh v�o gallery c?a ph�ng
     /// POST /api/rooms/{id}/gallery/add
     /// </summary>
     [HttpPost("{id:int}/gallery/add")]
@@ -365,10 +366,10 @@ public class RoomsController : ControllerBase
             // Check max 5 images
             if (gallery.Count >= 5)
             {
-                return BadRequest(new { message = "Gallery đã đầy. Tối đa 5 hình ảnh. Vui lòng xóa một hình ảnh trước khi thêm mới." });
+                return BadRequest(new { message = "Gallery d� d?y. T?i da 5 h�nh ?nh. Vui l�ng x�a m?t h�nh ?nh tru?c khi th�m m?i." });
             }
 
-            // Tạo thư mục uploads nếu chưa có
+            // T?o thu m?c uploads n?u chua c�
             var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "rooms", "gallery");
             if (!Directory.Exists(uploadsFolder))
             {
@@ -406,7 +407,7 @@ public class RoomsController : ControllerBase
     }
 
     /// <summary>
-    /// Xóa hình ảnh khỏi gallery của phòng
+    /// X�a h�nh ?nh kh?i gallery c?a ph�ng
     /// DELETE /api/rooms/{id}/gallery/remove?imageUrl=...
     /// </summary>
     [HttpDelete("{id:int}/gallery/remove")]
@@ -471,7 +472,7 @@ public class RoomsController : ControllerBase
     }
 
     /// <summary>
-    /// Tạo phòng mới
+    /// T?o ph�ng m?i
     /// POST /api/rooms
     /// </summary>
     [HttpPost]
@@ -516,7 +517,7 @@ public class RoomsController : ControllerBase
     }
 
     /// <summary>
-    /// Cập nhật thông tin phòng
+    /// C?p nh?t th�ng tin ph�ng
     /// PUT /api/rooms/{id}
     /// </summary>
     [HttpPut("{id}")]
@@ -582,7 +583,7 @@ public class RoomsController : ControllerBase
     }
 
     /// <summary>
-    /// Cập nhật trạng thái phòng
+    /// C?p nh?t tr?ng th�i ph�ng
     /// PATCH /api/rooms/{id}/status
     /// </summary>
     [HttpPatch("{id}/status")]
@@ -613,7 +614,7 @@ public class RoomsController : ControllerBase
     }
 
     /// <summary>
-    /// Xóa phòng
+    /// X�a ph�ng
     /// DELETE /api/rooms/{id}
     /// </summary>
     [HttpDelete("{id}")]

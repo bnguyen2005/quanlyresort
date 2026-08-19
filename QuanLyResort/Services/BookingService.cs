@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using QuanLyResort.Data;
 using QuanLyResort.Models;
@@ -9,6 +9,7 @@ namespace QuanLyResort.Services;
 public class BookingService : IBookingService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private ResortDbContext _context => _unitOfWork.Context;
     private readonly IAuditService _auditService;
     private readonly INotificationService _notificationService;
 private readonly ILogger<BookingService> _logger;
@@ -24,8 +25,8 @@ private readonly ILogger<BookingService> _logger;
 
     public async Task<Booking> CreateBookingAsync(Booking booking, string createdBy)
     {
-        // Gán BookingCode tạm thời để pass qua DB validation (NOT NULL)
-        // Sau khi có ID thật từ DB, sẽ update lại thành BKG{Id:D7} để đảm bảo 100% không bị trùng
+        // G�n BookingCode t?m th?i d? pass qua DB validation (NOT NULL)
+        // Sau khi c� ID th?t t? DB, s? update l?i th�nh BKG{Id:D7} d? d?m b?o 100% kh�ng b? tr�ng
         booking.BookingCode = $"TEMP-{Guid.NewGuid():N}";
         booking.Status = "Pending";
         booking.CreatedBy = createdBy;
@@ -46,7 +47,7 @@ private readonly ILogger<BookingService> _logger;
         decimal roomPrice = 0;
         string? priceSource = null;
         
-        _logger.LogInformation($"🔍 [CreateBookingAsync] Looking for room price. RequestedRoomType: '{requestedType}', Nights: {nights}");
+        _logger.LogInformation($"?? [CreateBookingAsync] Looking for room price. RequestedRoomType: '{requestedType}', Nights: {nights}");
         
         // Priority 1: Try to find from RoomType table by TypeName (exact match first)
         var roomTypes = await _context.RoomTypes
@@ -60,7 +61,7 @@ private readonly ILogger<BookingService> _logger;
         {
             roomPrice = roomTypes.FirstOrDefault()?.BasePrice ?? 0;
             priceSource = $"RoomType.BasePrice (exact: {requestedType})";
-            _logger.LogInformation($"✅ Found via Priority 1: {roomPrice} from RoomType '{roomTypes.FirstOrDefault()?.TypeName}'");
+            _logger.LogInformation($"? Found via Priority 1: {roomPrice} from RoomType '{roomTypes.FirstOrDefault()?.TypeName}'");
         }
         
         // Priority 1b: Try partial match if exact match failed
@@ -76,7 +77,7 @@ private readonly ILogger<BookingService> _logger;
             {
                 roomPrice = roomTypes.FirstOrDefault()?.BasePrice ?? 0;
                 priceSource = $"RoomType.BasePrice (partial: {requestedType})";
-                _logger.LogInformation($"✅ Found via Priority 1b: {roomPrice} from RoomType '{roomTypes.FirstOrDefault()?.TypeName}'");
+                _logger.LogInformation($"? Found via Priority 1b: {roomPrice} from RoomType '{roomTypes.FirstOrDefault()?.TypeName}'");
             }
         }
         
@@ -92,7 +93,7 @@ private readonly ILogger<BookingService> _logger;
             {
                 roomPrice = rooms.FirstOrDefault()?.PricePerNight ?? 0;
                 priceSource = $"Room.PricePerNight (RoomType: {requestedType})";
-                _logger.LogInformation($"✅ Found via Priority 2: {roomPrice} from Room '{rooms.FirstOrDefault()?.RoomNumber}'");
+                _logger.LogInformation($"? Found via Priority 2: {roomPrice} from Room '{rooms.FirstOrDefault()?.RoomNumber}'");
             }
         }
         
@@ -115,7 +116,7 @@ private readonly ILogger<BookingService> _logger;
                 if (roomPrice > 0)
                 {
                     priceSource = $"Room.PricePerNight (via RoomTypeNavigation: {requestedType})";
-                    _logger.LogInformation($"✅ Found via Priority 3 (Room price): {roomPrice}");
+                    _logger.LogInformation($"? Found via Priority 3 (Room price): {roomPrice}");
                 }
                 else
                 {
@@ -124,7 +125,7 @@ private readonly ILogger<BookingService> _logger;
                     if (roomPrice > 0)
                     {
                         priceSource = $"RoomType.BasePrice (via RoomTypeNavigation: {requestedType})";
-                        _logger.LogInformation($"✅ Found via Priority 3 (BasePrice): {roomPrice}");
+                        _logger.LogInformation($"? Found via Priority 3 (BasePrice): {roomPrice}");
                     }
                 }
             }
@@ -135,28 +136,28 @@ private readonly ILogger<BookingService> _logger;
         {
             var allRoomTypes = await _context.RoomTypes.Select(rt => new { rt.TypeName, rt.TypeCode, rt.BasePrice }).ToListAsync();
             var allRoomTypesStr = string.Join(", ", allRoomTypes.Select(rt => $"{rt.TypeName} ({rt.TypeCode}): {rt.BasePrice}"));
-            _logger.LogWarning($"⚠️ Warning: Could not find room price for RequestedRoomType: '{requestedType}'. Available RoomTypes: {allRoomTypesStr}");
+            _logger.LogWarning($"?? Warning: Could not find room price for RequestedRoomType: '{requestedType}'. Available RoomTypes: {allRoomTypesStr}");
         }
         
         // Calculate estimated total amount
         booking.EstimatedTotalAmount = roomPrice > 0 ? roomPrice * nights : 0;
         
-        _logger.LogInformation($"💰 [CreateBookingAsync] Final calculation: RoomPrice={roomPrice}, Nights={nights}, EstimatedTotalAmount={booking.EstimatedTotalAmount}");
+        _logger.LogInformation($"?? [CreateBookingAsync] Final calculation: RoomPrice={roomPrice}, Nights={nights}, EstimatedTotalAmount={booking.EstimatedTotalAmount}");
         
         // If EstimatedTotalAmount is still 0, this is a serious issue
         if (booking.EstimatedTotalAmount == 0)
         {
-            _logger.LogError($"❌ ERROR: Booking EstimatedTotalAmount is 0! RequestedRoomType: '{requestedType}', RoomPrice: {roomPrice}, Nights: {nights}");
+            _logger.LogError($"? ERROR: Booking EstimatedTotalAmount is 0! RequestedRoomType: '{requestedType}', RoomPrice: {roomPrice}, Nights: {nights}");
         }
 
         await _unitOfWork.Bookings.AddAsync(booking);
         await _unitOfWork.SaveChangesAsync();
 
-        // Update lại BookingCode chuẩn theo BookingId để tránh 100% race condition
+        // Update l?i BookingCode chu?n theo BookingId d? tr�nh 100% race condition
         booking.BookingCode = $"BKG{booking.BookingId:D7}";
         await _unitOfWork.SaveChangesAsync();
 
-        // Tạo invoice sơ bộ khi đặt phòng để admin có thể xem và quản lý
+        // T?o invoice so b? khi d?t ph�ng d? admin c� th? xem v� qu?n l�
         try
         {
             var subTotal = booking.EstimatedTotalAmount ?? 0;
@@ -175,7 +176,7 @@ private readonly ILogger<BookingService> _logger;
                 TotalAmount = totalAmount,
                 PaidAmount = 0,
                 BalanceDue = totalAmount,
-                Status = "Issued", // Chưa thanh toán
+                Status = "Issued", // Chua thanh to�n
                 IssueDate = DateTime.UtcNow,
                 IssuedBy = createdBy
             };
@@ -183,13 +184,13 @@ private readonly ILogger<BookingService> _logger;
             await _unitOfWork.Invoices.AddAsync(invoice);
             await _unitOfWork.SaveChangesAsync();
 
-            // Update lại InvoiceNumber chuẩn theo InvoiceId
+            // Update l?i InvoiceNumber chu?n theo InvoiceId
             invoice.InvoiceNumber = $"INV{invoice.InvoiceId:D7}";
             await _unitOfWork.SaveChangesAsync();
         }
         catch (Exception ex)
         {
-            // Log lỗi nhưng không fail booking creation
+            // Log l?i nhung kh�ng fail booking creation
             _logger.LogInformation($"Warning: Failed to create invoice for booking {booking.BookingCode}: {ex.Message}");
         }
 
@@ -225,9 +226,9 @@ private readonly ILogger<BookingService> _logger;
 
     public async Task<IEnumerable<Booking>> GetAllBookingsAsync()
     {
-        // Trả về TẤT CẢ bookings, bao gồm cả walk-in customers (CustomerId = null)
+        // Tr? v? T?T C? bookings, bao g?m c? walk-in customers (CustomerId = null)
         return await _context.Bookings
-            .Include(b => b.Customer)  // Include Customer nếu có, null nếu walk-in
+            .Include(b => b.Customer)  // Include Customer n?u c�, null n?u walk-in
             .Include(b => b.Room)
             .OrderByDescending(b => b.CreatedAt)
             .ToListAsync();
@@ -459,40 +460,40 @@ private readonly ILogger<BookingService> _logger;
 
     public async Task<bool> ProcessOnlinePaymentAsync(int bookingId, string performedBy)
     {
-        _logger.LogInformation($"[ProcessOnlinePaymentAsync] 🔄 Processing payment for booking {bookingId} by {performedBy}");
+        _logger.LogInformation($"[ProcessOnlinePaymentAsync] ?? Processing payment for booking {bookingId} by {performedBy}");
         
         var booking = await GetBookingByIdAsync(bookingId);
         if (booking == null)
         {
-            _logger.LogWarning($"[ProcessOnlinePaymentAsync] ❌ Booking {bookingId} not found");
+            _logger.LogWarning($"[ProcessOnlinePaymentAsync] ? Booking {bookingId} not found");
             return false;
         }
 
-        _logger.LogInformation($"[ProcessOnlinePaymentAsync] 📋 Booking {bookingId} current status: '{booking.Status}', BookingCode: '{booking.BookingCode}'");
+        _logger.LogInformation($"[ProcessOnlinePaymentAsync] ?? Booking {bookingId} current status: '{booking.Status}', BookingCode: '{booking.BookingCode}'");
 
-        // Không cho phép thanh toán nếu đã thanh toán rồi
+        // Kh�ng cho ph�p thanh to�n n?u d� thanh to�n r?i
         if (booking.Status == "Paid")
         {
-            _logger.LogWarning($"[ProcessOnlinePaymentAsync] ⚠️ Booking {bookingId} already paid");
+            _logger.LogWarning($"[ProcessOnlinePaymentAsync] ?? Booking {bookingId} already paid");
             return false;
         }
 
-        // Chỉ cho phép thanh toán nếu booking đang ở trạng thái Pending hoặc Confirmed
+        // Ch? cho ph�p thanh to�n n?u booking dang ? tr?ng th�i Pending ho?c Confirmed
         if (booking.Status != "Pending" && booking.Status != "Confirmed")
         {
-            _logger.LogWarning($"[ProcessOnlinePaymentAsync] ⚠️ Booking {bookingId} status is '{booking.Status}', cannot process payment");
+            _logger.LogWarning($"[ProcessOnlinePaymentAsync] ?? Booking {bookingId} status is '{booking.Status}', cannot process payment");
             return false;
         }
 
         var oldStatus = booking.Status;
-        _logger.LogInformation($"[ProcessOnlinePaymentAsync] 💰 Updating booking {bookingId} status from '{oldStatus}' to 'Paid'");
+        _logger.LogInformation($"[ProcessOnlinePaymentAsync] ?? Updating booking {bookingId} status from '{oldStatus}' to 'Paid'");
         
         booking.Status = "Paid";
         booking.UpdatedAt = DateTime.UtcNow;
 
         Invoice? createdInvoice = null;
         
-        // Tạo invoice nếu chưa có
+        // T?o invoice n?u chua c�
         if (booking.Invoice == null)
         {
             var subTotal = booking.EstimatedTotalAmount ?? 0;
@@ -529,7 +530,7 @@ private readonly ILogger<BookingService> _logger;
         }
         else
         {
-            // Nếu đã có invoice, cập nhật trạng thái thanh toán
+            // N?u d� c� invoice, c?p nh?t tr?ng th�i thanh to�n
             var existingInvoice = booking.Invoice;
             existingInvoice.PaidAmount = existingInvoice.TotalAmount;
             existingInvoice.BalanceDue = 0;
@@ -542,7 +543,7 @@ private readonly ILogger<BookingService> _logger;
         _unitOfWork.Bookings.Update(booking);
         await _unitOfWork.SaveChangesAsync();
         
-        _logger.LogInformation($"[ProcessOnlinePaymentAsync] ✅✅✅ SUCCESS: Booking {bookingId} status updated to 'Paid'. Invoice: {createdInvoice?.InvoiceNumber ?? "N/A"}");
+        _logger.LogInformation($"[ProcessOnlinePaymentAsync] ??? SUCCESS: Booking {bookingId} status updated to 'Paid'. Invoice: {createdInvoice?.InvoiceNumber ?? "N/A"}");
 
         await _auditService.LogAsync("Booking", bookingId, "PayOnline", performedBy, 
             oldStatus, "Paid", $"Online payment processed successfully. Invoice: {createdInvoice?.InvoiceNumber ?? "N/A"}");

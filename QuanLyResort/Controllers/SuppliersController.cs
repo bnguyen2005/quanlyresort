@@ -1,4 +1,4 @@
-Ôªøusing QuanLyResort.Repositories;
+using QuanLyResort.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +13,7 @@ namespace QuanLyResort.Controllers
     public class SuppliersController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
+    private ResortDbContext _context => _unitOfWork.Context;
 
         public SuppliersController(IUnitOfWork unitOfWork)
         {
@@ -52,7 +53,7 @@ namespace QuanLyResort.Controllers
         public async Task<ActionResult<object>> GetSupplier(int id)
         {
             var s = await _context.Suppliers.FindAsync(id);
-            if (s == null) return NotFound(new { message = "Kh√¥ng t√¨m th·∫•y nh√† cung c·∫•p" });
+            if (s == null) return NotFound(new { message = "KhÙng tÏm th?y nh‡ cung c?p" });
 
             return Ok(new {
                 s.SupplierId,
@@ -71,7 +72,7 @@ namespace QuanLyResort.Controllers
         {
             if (string.IsNullOrWhiteSpace(dto.SupplierName))
             {
-                return BadRequest(new { message = "T√™n nh√† cung c·∫•p l√† b·∫Øt bu·ªôc" });
+                return BadRequest(new { message = "TÍn nh‡ cung c?p l‡ b?t bu?c" });
             }
 
             dto.SupplierId = 0;
@@ -79,7 +80,7 @@ namespace QuanLyResort.Controllers
             dto.CreatedAt = DateTime.UtcNow;
             _context.Suppliers.Add(dto);
             await _unitOfWork.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetSupplier), new { id = dto.SupplierId }, new { message = "T·∫°o nh√† cung c·∫•p th√†nh c√¥ng", supplierId = dto.SupplierId });
+            return CreatedAtAction(nameof(GetSupplier), new { id = dto.SupplierId }, new { message = "T?o nh‡ cung c?p th‡nh cÙng", supplierId = dto.SupplierId });
         }
 
         // PUT: api/suppliers/5
@@ -87,7 +88,7 @@ namespace QuanLyResort.Controllers
         public async Task<ActionResult<object>> UpdateSupplier(int id, [FromBody] Supplier dto)
         {
             var s = await _context.Suppliers.FindAsync(id);
-            if (s == null) return NotFound(new { message = "Kh√¥ng t√¨m th·∫•y nh√† cung c·∫•p" });
+            if (s == null) return NotFound(new { message = "KhÙng tÏm th?y nh‡ cung c?p" });
 
             s.SupplierName = dto.SupplierName;
             s.ContactPerson = dto.ContactPerson;
@@ -96,7 +97,7 @@ namespace QuanLyResort.Controllers
             s.Address = dto.Address;
             await _unitOfWork.SaveChangesAsync();
 
-            return Ok(new { message = "C·∫≠p nh·∫≠t nh√† cung c·∫•p th√†nh c√¥ng" });
+            return Ok(new { message = "C?p nh?t nh‡ cung c?p th‡nh cÙng" });
         }
 
         // DELETE (soft): api/suppliers/5
@@ -104,12 +105,12 @@ namespace QuanLyResort.Controllers
         public async Task<ActionResult<object>> SoftDeleteSupplier(int id)
         {
             var s = await _context.Suppliers.FindAsync(id);
-            if (s == null) return NotFound(new { message = "Kh√¥ng t√¨m th·∫•y nh√† cung c·∫•p" });
-            if (!s.IsActive) return Ok(new { message = "Nh√† cung c·∫•p ƒë√£ ·ªü tr·∫°ng th√°i ·∫©n" });
+            if (s == null) return NotFound(new { message = "KhÙng tÏm th?y nh‡ cung c?p" });
+            if (!s.IsActive) return Ok(new { message = "Nh‡ cung c?p d„ ? tr?ng th·i ?n" });
 
             s.IsActive = false;
             await _unitOfWork.SaveChangesAsync();
-            return Ok(new { message = "ƒê√£ ·∫©n nh√† cung c·∫•p" });
+            return Ok(new { message = "–„ ?n nh‡ cung c?p" });
         }
 
         // PATCH: api/suppliers/5/toggle-active
@@ -117,10 +118,10 @@ namespace QuanLyResort.Controllers
         public async Task<ActionResult<object>> ToggleActive(int id)
         {
             var s = await _context.Suppliers.FindAsync(id);
-            if (s == null) return NotFound(new { message = "Kh√¥ng t√¨m th·∫•y nh√† cung c·∫•p" });
+            if (s == null) return NotFound(new { message = "KhÙng tÏm th?y nh‡ cung c?p" });
             s.IsActive = !s.IsActive;
             await _unitOfWork.SaveChangesAsync();
-            return Ok(new { message = "ƒê√£ c·∫≠p nh·∫≠t tr·∫°ng th√°i", isActive = s.IsActive });
+            return Ok(new { message = "–„ c?p nh?t tr?ng th·i", isActive = s.IsActive });
         }
     }
 }

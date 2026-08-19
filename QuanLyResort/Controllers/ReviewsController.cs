@@ -1,4 +1,4 @@
-﻿using QuanLyResort.Repositories;
+using QuanLyResort.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +14,7 @@ namespace QuanLyResort.Controllers;
 public class ReviewsController : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork;
+    private ResortDbContext _context => _unitOfWork.Context;
     private readonly ILogger<ReviewsController> _logger;
 
     public ReviewsController(IUnitOfWork unitOfWork, ILogger<ReviewsController> logger)
@@ -23,7 +24,7 @@ public class ReviewsController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy danh sách tất cả đánh giá (công khai)
+    /// L?y danh s�ch t?t c? d�nh gi� (c�ng khai)
     /// GET /api/reviews?roomId=1&rating=5&limit=10
     /// </summary>
     [HttpGet]
@@ -62,8 +63,8 @@ public class ReviewsController : ControllerBase
                 r.RespondedBy,
                 r.CreatedAt,
                 CustomerName = r.Customer != null ? 
-                    (r.Customer.FullName ?? "Khách hàng") : 
-                    "Khách hàng",
+                    (r.Customer.FullName ?? "Kh�ch h�ng") : 
+                    "Kh�ch h�ng",
                 CustomerFullName = r.Customer != null ? r.Customer.FullName : null,
                 CustomerAvatarUrl = r.Customer != null ? r.Customer.AvatarUrl : null,
                 RoomNumber = r.Room != null ? r.Room.RoomNumber : null,
@@ -126,7 +127,7 @@ public class ReviewsController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy đánh giá theo ID
+    /// L?y d�nh gi� theo ID
     /// GET /api/reviews/{id}
     /// </summary>
     [HttpGet("{id}")]
@@ -147,8 +148,8 @@ public class ReviewsController : ControllerBase
                 r.RespondedBy,
                 r.CreatedAt,
                 CustomerName = r.Customer != null ? 
-                    (r.Customer.FullName ?? "Khách hàng") : 
-                    "Khách hàng",
+                    (r.Customer.FullName ?? "Kh�ch h�ng") : 
+                    "Kh�ch h�ng",
                 RoomNumber = r.Room != null ? r.Room.RoomNumber : null
             })
             .FirstOrDefaultAsync();
@@ -162,7 +163,7 @@ public class ReviewsController : ControllerBase
     }
 
     /// <summary>
-    /// Tạo đánh giá mới (yêu cầu đăng nhập)
+    /// T?o d�nh gi� m?i (y�u c?u dang nh?p)
     /// POST /api/reviews
     /// </summary>
     [HttpPost]
@@ -199,7 +200,7 @@ public class ReviewsController : ControllerBase
             
             if (existingReview != null)
             {
-                return BadRequest(new { message = "Bạn đã đánh giá phòng này rồi. Bạn có thể chỉnh sửa đánh giá của mình." });
+                return BadRequest(new { message = "B?n d� d�nh gi� ph�ng n�y r?i. B?n c� th? ch?nh s?a d�nh gi� c?a m�nh." });
             }
         }
 
@@ -224,12 +225,12 @@ public class ReviewsController : ControllerBase
             review.Rating,
             review.Comment,
             review.CreatedAt,
-            message = "Đánh giá của bạn đã được gửi thành công!"
+            message = "��nh gi� c?a b?n d� du?c g?i th�nh c�ng!"
         });
     }
 
     /// <summary>
-    /// Admin phản hồi đánh giá
+    /// Admin ph?n h?i d�nh gi�
     /// PUT /api/reviews/{id}/response
     /// </summary>
     [HttpPut("{id}/response")]
@@ -257,7 +258,7 @@ public class ReviewsController : ControllerBase
     }
 
     /// <summary>
-    /// Xóa đánh giá (Admin only)
+    /// X�a d�nh gi� (Admin only)
     /// DELETE /api/reviews/{id}
     /// </summary>
     [HttpDelete("{id}")]
@@ -277,7 +278,7 @@ public class ReviewsController : ControllerBase
     }
 
     /// <summary>
-    /// Kiểm tra customer đã từng check-out phòng này chưa
+    /// Ki?m tra customer d� t?ng check-out ph�ng n�y chua
     /// GET /api/reviews/can-review/{roomId}
     /// </summary>
     [HttpGet("can-review/{roomId}")]
@@ -306,7 +307,7 @@ public class ReviewsController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy danh sách phòng customer đã check-out (có thể đánh giá)
+    /// L?y danh s�ch ph�ng customer d� check-out (c� th? d�nh gi�)
     /// GET /api/reviews/reviewable-rooms
     /// </summary>
     [HttpGet("reviewable-rooms")]
@@ -360,7 +361,7 @@ public class ReviewsController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy tất cả đánh giá cho admin (bao gồm cả chưa approved)
+    /// L?y t?t c? d�nh gi� cho admin (bao g?m c? chua approved)
     /// GET /api/reviews/admin?status=all&roomId=1&rating=5
     /// </summary>
     [HttpGet("admin")]
@@ -450,15 +451,15 @@ public class ReviewsController : ControllerBase
                     r.CreatedAt,
                     r.UpdatedAt,
                     CustomerName = r.Customer != null ? 
-                        (r.Customer.FullName ?? "Khách hàng") : 
-                        "Khách hàng",
+                        (r.Customer.FullName ?? "Kh�ch h�ng") : 
+                        "Kh�ch h�ng",
                     CustomerEmail = r.Customer != null ? r.Customer.Email : null,
                     RoomNumber = r.Room != null ? r.Room.RoomNumber : null,
                     RoomType = r.Room != null ? r.Room.RoomType : null
                 })
                 .ToListAsync();
 
-            // Console.WriteLine($"{logPrefix} [{timestamp}] ✅ Found {reviews.Count} reviews");
+            // Console.WriteLine($"{logPrefix} [{timestamp}] ? Found {reviews.Count} reviews");
             // Console.WriteLine($"{logPrefix} [{timestamp}] ========== END (SUCCESS) ==========");
             
             return Ok(new
@@ -471,12 +472,12 @@ public class ReviewsController : ControllerBase
         {
             // Only log errors, not verbose debug info
             _logger.LogError(ex, "Error getting reviews for admin");
-            return StatusCode(500, new { message = "Lỗi khi tải đánh giá", error = ex.Message });
+            return StatusCode(500, new { message = "L?i khi t?i d�nh gi�", error = ex.Message });
         }
     }
 
     /// <summary>
-    /// Cập nhật trạng thái đánh giá (approve/hide/delete)
+    /// C?p nh?t tr?ng th�i d�nh gi� (approve/hide/delete)
     /// PUT /api/reviews/{id}/status
     /// </summary>
     [HttpPut("{id}/status")]

@@ -1,4 +1,4 @@
-﻿using QuanLyResort.Repositories;
+using QuanLyResort.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +13,7 @@ namespace QuanLyResort.Controllers;
 public class SupportTicketsController : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork;
+    private ResortDbContext _context => _unitOfWork.Context;
 
     public SupportTicketsController(IUnitOfWork unitOfWork)
     {
@@ -20,7 +21,7 @@ public class SupportTicketsController : ControllerBase
     }
 
     /// <summary>
-    /// Tạo ticket mới (public - khách hàng hoặc khách vãng lai)
+    /// T?o ticket m?i (public - kh�ch h�ng ho?c kh�ch v�ng lai)
     /// </summary>
     [HttpPost]
     [AllowAnonymous]
@@ -30,7 +31,7 @@ public class SupportTicketsController : ControllerBase
         {
             if (string.IsNullOrWhiteSpace(request.Subject) || string.IsNullOrWhiteSpace(request.Description))
             {
-                return BadRequest(new { message = "Tiêu đề và nội dung không được để trống" });
+                return BadRequest(new { message = "Ti�u d? v� n?i dung kh�ng du?c d? tr?ng" });
             }
 
             // Generate ticket number
@@ -49,7 +50,7 @@ public class SupportTicketsController : ControllerBase
                         .FirstOrDefaultAsync(u => u.Email != null && u.Email.ToLower() == userEmail.ToLower());
                     if (user == null)
                     {
-                        // Thử tìm bằng username
+                        // Th? t�m b?ng username
                         user = await _context.Users
                             .FirstOrDefaultAsync(u => u.Username != null && u.Username.ToLower() == userEmail.ToLower());
                     }
@@ -85,7 +86,7 @@ public class SupportTicketsController : ControllerBase
                 TicketId = ticket.TicketId,
                 Content = request.Description.Trim(),
                 SenderType = customerId.HasValue ? "Customer" : "Customer",
-                SenderName = request.ContactName ?? "Khách hàng",
+                SenderName = request.ContactName ?? "Kh�ch h�ng",
                 SenderEmail = request.ContactEmail ?? userEmail,
                 CreatedAt = DateTime.UtcNow
             };
@@ -95,7 +96,7 @@ public class SupportTicketsController : ControllerBase
 
             return Ok(new
             {
-                message = "Ticket đã được tạo thành công",
+                message = "Ticket d� du?c t?o th�nh c�ng",
                 ticket = new
                 {
                     ticket.TicketId,
@@ -109,12 +110,12 @@ public class SupportTicketsController : ControllerBase
         catch (Exception ex)
         {
             Console.WriteLine($"[SupportTicketsController] Error: {ex.Message}");
-            return StatusCode(500, new { message = "Lỗi khi tạo ticket", error = ex.Message });
+            return StatusCode(500, new { message = "L?i khi t?o ticket", error = ex.Message });
         }
     }
 
     /// <summary>
-    /// Lấy danh sách tickets của khách hàng (cần đăng nhập)
+    /// L?y danh s�ch tickets c?a kh�ch h�ng (c?n dang nh?p)
     /// </summary>
     [HttpGet("my")]
     [Authorize(Roles = "Customer")]
@@ -128,10 +129,10 @@ public class SupportTicketsController : ControllerBase
             if (string.IsNullOrEmpty(userEmail))
             {
                 Console.WriteLine("[SupportTicketsController] No user email found");
-                return Unauthorized(new { message = "Không tìm thấy thông tin người dùng" });
+                return Unauthorized(new { message = "Kh�ng t�m th?y th�ng tin ngu?i d�ng" });
             }
 
-            // Tìm user với email (case-insensitive)
+            // T�m user v?i email (case-insensitive)
             var user = await _context.Users
                 .FirstOrDefaultAsync(u => u.Email != null && u.Email.ToLower() == userEmail.ToLower());
             Console.WriteLine($"[SupportTicketsController] User found: {user != null}, CustomerId: {user?.CustomerId}, Email in DB: {user?.Email}");
@@ -139,7 +140,7 @@ public class SupportTicketsController : ControllerBase
             if (user == null)
             {
                 Console.WriteLine($"[SupportTicketsController] User not found in database for email: {userEmail}");
-                // Thử tìm với username nếu email không tìm thấy
+                // Th? t�m v?i username n?u email kh�ng t�m th?y
                 var userByUsername = await _context.Users
                     .FirstOrDefaultAsync(u => u.Username != null && u.Username.ToLower() == userEmail.ToLower());
                 if (userByUsername != null)
@@ -150,15 +151,15 @@ public class SupportTicketsController : ControllerBase
                 else
                 {
                     Console.WriteLine("[SupportTicketsController] User not found by email or username");
-                    return NotFound(new { message = "Không tìm thấy thông tin người dùng" });
+                    return NotFound(new { message = "Kh�ng t�m th?y th�ng tin ngu?i d�ng" });
                 }
             }
 
             if (!user.CustomerId.HasValue)
             {
                 Console.WriteLine("[SupportTicketsController] User has no CustomerId - returning empty list");
-                // Trả về danh sách rỗng thay vì NotFound nếu user chưa có CustomerId
-                // (có thể là user mới tạo chưa có customer record)
+                // Tr? v? danh s�ch r?ng thay v� NotFound n?u user chua c� CustomerId
+                // (c� th? l� user m?i t?o chua c� customer record)
                 return Ok(new List<object>());
             }
 
@@ -187,12 +188,12 @@ public class SupportTicketsController : ControllerBase
         {
             Console.WriteLine($"[SupportTicketsController] Error in GetMyTickets: {ex.Message}");
             Console.WriteLine($"[SupportTicketsController] Stack trace: {ex.StackTrace}");
-            return StatusCode(500, new { message = "Lỗi khi tải tickets", error = ex.Message });
+            return StatusCode(500, new { message = "L?i khi t?i tickets", error = ex.Message });
         }
     }
 
     /// <summary>
-    /// Lấy chi tiết ticket (khách hàng chỉ xem được ticket của mình)
+    /// L?y chi ti?t ticket (kh�ch h�ng ch? xem du?c ticket c?a m�nh)
     /// </summary>
     [HttpGet("{id}")]
     [Authorize]
@@ -208,20 +209,20 @@ public class SupportTicketsController : ControllerBase
                 .Include(t => t.Customer)
                 .AsQueryable();
 
-            // Customer chỉ xem được ticket của mình
+            // Customer ch? xem du?c ticket c?a m�nh
             if (userRole == "Customer")
             {
                 var user = await _context.Users
                     .FirstOrDefaultAsync(u => u.Email != null && u.Email.ToLower() == userEmail.ToLower());
                 if (user == null && !string.IsNullOrEmpty(userEmail))
                 {
-                    // Thử tìm bằng username
+                    // Th? t�m b?ng username
                     user = await _context.Users
                         .FirstOrDefaultAsync(u => u.Username != null && u.Username.ToLower() == userEmail.ToLower());
                 }
                 if (user == null || !user.CustomerId.HasValue)
                 {
-                    return Unauthorized(new { message = "Không tìm thấy thông tin khách hàng" });
+                    return Unauthorized(new { message = "Kh�ng t�m th?y th�ng tin kh�ch h�ng" });
                 }
                 query = query.Where(t => t.CustomerId == user.CustomerId.Value);
             }
@@ -229,7 +230,7 @@ public class SupportTicketsController : ControllerBase
             var ticket = await query.FirstOrDefaultAsync(t => t.TicketId == id);
             if (ticket == null)
             {
-                return NotFound(new { message = "Ticket không tồn tại hoặc bạn không có quyền xem" });
+                return NotFound(new { message = "Ticket kh�ng t?n t?i ho?c b?n kh�ng c� quy?n xem" });
             }
 
             return Ok(new
@@ -273,12 +274,12 @@ public class SupportTicketsController : ControllerBase
         catch (Exception ex)
         {
             Console.WriteLine($"[SupportTicketsController] Error: {ex.Message}");
-            return StatusCode(500, new { message = "Lỗi khi tải ticket", error = ex.Message });
+            return StatusCode(500, new { message = "L?i khi t?i ticket", error = ex.Message });
         }
     }
 
     /// <summary>
-    /// Thêm message vào ticket
+    /// Th�m message v�o ticket
     /// </summary>
     [HttpPost("{id}/messages")]
     [Authorize]
@@ -288,7 +289,7 @@ public class SupportTicketsController : ControllerBase
         {
             if (string.IsNullOrWhiteSpace(request.Content))
             {
-                return BadRequest(new { message = "Nội dung tin nhắn không được để trống" });
+                return BadRequest(new { message = "N?i dung tin nh?n kh�ng du?c d? tr?ng" });
             }
 
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
@@ -297,23 +298,23 @@ public class SupportTicketsController : ControllerBase
             var ticket = await _context.SupportTickets.FindAsync(id);
             if (ticket == null)
             {
-                return NotFound(new { message = "Ticket không tồn tại" });
+                return NotFound(new { message = "Ticket kh�ng t?n t?i" });
             }
 
-            // Check permission: Customer chỉ có thể reply ticket của mình
+            // Check permission: Customer ch? c� th? reply ticket c?a m�nh
             if (userRole == "Customer")
             {
                 var user = await _context.Users
                     .FirstOrDefaultAsync(u => u.Email != null && u.Email.ToLower() == userEmail.ToLower());
                 if (user == null && !string.IsNullOrEmpty(userEmail))
                 {
-                    // Thử tìm bằng username
+                    // Th? t�m b?ng username
                     user = await _context.Users
                         .FirstOrDefaultAsync(u => u.Username != null && u.Username.ToLower() == userEmail.ToLower());
                 }
                 if (user == null || !user.CustomerId.HasValue || ticket.CustomerId != user.CustomerId.Value)
                 {
-                    return Forbid("Bạn không có quyền thêm tin nhắn vào ticket này");
+                    return Forbid("B?n kh�ng c� quy?n th�m tin nh?n v�o ticket n�y");
                 }
             }
 
@@ -339,19 +340,19 @@ public class SupportTicketsController : ControllerBase
 
             await _unitOfWork.SaveChangesAsync();
 
-            return Ok(new { message = "Tin nhắn đã được gửi thành công", messageId = message.MessageId });
+            return Ok(new { message = "Tin nh?n d� du?c g?i th�nh c�ng", messageId = message.MessageId });
         }
         catch (Exception ex)
         {
             Console.WriteLine($"[SupportTicketsController] Error: {ex.Message}");
-            return StatusCode(500, new { message = "Lỗi khi gửi tin nhắn", error = ex.Message });
+            return StatusCode(500, new { message = "L?i khi g?i tin nh?n", error = ex.Message });
         }
     }
 
     // ========== ADMIN/STAFF ENDPOINTS ==========
 
     /// <summary>
-    /// Lấy tất cả tickets (Admin/Staff only)
+    /// L?y t?t c? tickets (Admin/Staff only)
     /// </summary>
     [HttpGet]
     [Authorize(Roles = "Admin,Manager,FrontDesk")]
@@ -424,20 +425,20 @@ public class SupportTicketsController : ControllerBase
                 })
                 .ToListAsync();
 
-            // Console.WriteLine($"{logPrefix} [{timestamp}] ✅ Found {tickets.Count} tickets");
+            // Console.WriteLine($"{logPrefix} [{timestamp}] ? Found {tickets.Count} tickets");
             // Console.WriteLine($"{logPrefix} [{timestamp}] ========== END (SUCCESS) ==========");
             return Ok(tickets);
         }
         catch (Exception ex)
         {
             // Only log errors, not verbose debug info
-            Console.WriteLine($"[SupportTicketsController.GetAllTickets] ❌ Error: {ex.Message}");
-            return StatusCode(500, new { message = "Lỗi khi tải tickets", error = ex.Message });
+            Console.WriteLine($"[SupportTicketsController.GetAllTickets] ? Error: {ex.Message}");
+            return StatusCode(500, new { message = "L?i khi t?i tickets", error = ex.Message });
         }
     }
 
     /// <summary>
-    /// Cập nhật ticket (Admin/Staff only)
+    /// C?p nh?t ticket (Admin/Staff only)
     /// </summary>
     [HttpPut("{id}")]
     [Authorize(Roles = "Admin,Manager,FrontDesk")]
@@ -448,7 +449,7 @@ public class SupportTicketsController : ControllerBase
             var ticket = await _context.SupportTickets.FindAsync(id);
             if (ticket == null)
             {
-                return NotFound(new { message = "Ticket không tồn tại" });
+                return NotFound(new { message = "Ticket kh�ng t?n t?i" });
             }
 
             if (!string.IsNullOrWhiteSpace(request.Status))
@@ -472,12 +473,12 @@ public class SupportTicketsController : ControllerBase
             ticket.UpdatedAt = DateTime.UtcNow;
             await _unitOfWork.SaveChangesAsync();
 
-            return Ok(new { message = "Ticket đã được cập nhật thành công" });
+            return Ok(new { message = "Ticket d� du?c c?p nh?t th�nh c�ng" });
         }
         catch (Exception ex)
         {
             Console.WriteLine($"[SupportTicketsController] Error: {ex.Message}");
-            return StatusCode(500, new { message = "Lỗi khi cập nhật ticket", error = ex.Message });
+            return StatusCode(500, new { message = "L?i khi c?p nh?t ticket", error = ex.Message });
         }
     }
 }

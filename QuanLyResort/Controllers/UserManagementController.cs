@@ -1,4 +1,4 @@
-﻿using QuanLyResort.Repositories;
+using QuanLyResort.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +15,7 @@ namespace QuanLyResort.Controllers;
 public class UserManagementController : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork;
+    private ResortDbContext _context => _unitOfWork.Context;
     private readonly IAuditService _auditService;
 
     public UserManagementController(IUnitOfWork unitOfWork, IAuditService auditService)
@@ -24,7 +25,7 @@ public class UserManagementController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy danh sách tất cả users
+    /// L?y danh s�ch t?t c? users
     /// </summary>
     [HttpGet]
     public async Task<IActionResult> GetAllUsers([FromQuery] string? role = null, [FromQuery] bool? isActive = null)
@@ -71,7 +72,7 @@ public class UserManagementController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy thông tin user theo ID
+    /// L?y th�ng tin user theo ID
     /// </summary>
     [HttpGet("{id}")]
     public async Task<IActionResult> GetUser(int id)
@@ -105,7 +106,7 @@ public class UserManagementController : ControllerBase
     }
 
     /// <summary>
-    /// Tạo user mới
+    /// T?o user m?i
     /// </summary>
     [HttpPost]
     public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest request)
@@ -156,7 +157,7 @@ public class UserManagementController : ControllerBase
     }
 
     /// <summary>
-    /// Cập nhật thông tin user
+    /// C?p nh?t th�ng tin user
     /// </summary>
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateUser(int id, [FromBody] UpdateUserRequest request)
@@ -203,7 +204,7 @@ public class UserManagementController : ControllerBase
     }
 
     /// <summary>
-    /// Đổi mật khẩu user
+    /// �?i m?t kh?u user
     /// </summary>
     [HttpPost("{id}/change-password")]
     public async Task<IActionResult> ChangePassword(int id, [FromBody] ChangePasswordRequest request)
@@ -248,7 +249,7 @@ public class UserManagementController : ControllerBase
     }
 
     /// <summary>
-    /// Đổi role của user
+    /// �?i role c?a user
     /// </summary>
     [HttpPost("{id}/change-role")]
     public async Task<IActionResult> ChangeRole(int id, [FromBody] ChangeRoleRequest request)
@@ -269,14 +270,14 @@ public class UserManagementController : ControllerBase
             User.Identity?.Name ?? "System",
             $"{{\"Role\": \"{oldRole}\"}}",
             $"{{\"Role\": \"{request.NewRole}\"}}",
-            $"Changed role for user {user.Username}: {oldRole} → {request.NewRole}"
+            $"Changed role for user {user.Username}: {oldRole} ? {request.NewRole}"
         );
 
         return Ok(new { message = "Role changed successfully", user });
     }
 
     /// <summary>
-    /// Khóa/Mở khóa user
+    /// Kh�a/M? kh�a user
     /// </summary>
     [HttpPost("{id}/toggle-active")]
     public async Task<IActionResult> ToggleActive(int id)
@@ -307,7 +308,7 @@ public class UserManagementController : ControllerBase
     }
 
     /// <summary>
-    /// Xóa user (soft delete - chỉ deactivate)
+    /// X�a user (soft delete - ch? deactivate)
     /// </summary>
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteUser(int id)
@@ -335,7 +336,7 @@ public class UserManagementController : ControllerBase
     }
 
     /// <summary>
-    /// Xóa user vĩnh viễn (hard delete)
+    /// X�a user vinh vi?n (hard delete)
     /// </summary>
     [HttpDelete("{id}/permanent")]
     public async Task<IActionResult> PermanentDeleteUser(int id)
@@ -364,23 +365,23 @@ public class UserManagementController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy danh sách roles có sẵn
+    /// L?y danh s�ch roles c� s?n
     /// </summary>
     [HttpGet("roles")]
     public IActionResult GetRoles()
     {
         var roles = new[]
         {
-            new { value = "Admin", label = "Quản trị viên", description = "Quyền cao nhất, quản lý toàn bộ hệ thống" },
-            new { value = "Manager", label = "Quản lý", description = "Quản lý resort, xem báo cáo" },
-            new { value = "Business", label = "Kinh doanh", description = "Quản lý đặt phòng, khách hàng" },
-            new { value = "FrontDesk", label = "Lễ tân", description = "Check-in, check-out, đặt phòng" },
-            new { value = "Cashier", label = "Thu ngân", description = "Thanh toán, hóa đơn" },
-            new { value = "Accounting", label = "Kế toán", description = "Báo cáo tài chính" },
-            new { value = "Inventory", label = "Kho", description = "Quản lý kho, nhập xuất" },
-            new { value = "Housekeeping", label = "Dọn phòng", description = "Quản lý dọn dẹp phòng" },
-            new { value = "Maintenance", label = "Kỹ thuật", description = "Sửa chữa, bảo trì" },
-            new { value = "Customer", label = "Khách hàng", description = "Khách hàng sử dụng dịch vụ" }
+            new { value = "Admin", label = "Qu?n tr? vi�n", description = "Quy?n cao nh?t, qu?n l� to�n b? h? th?ng" },
+            new { value = "Manager", label = "Qu?n l�", description = "Qu?n l� resort, xem b�o c�o" },
+            new { value = "Business", label = "Kinh doanh", description = "Qu?n l� d?t ph�ng, kh�ch h�ng" },
+            new { value = "FrontDesk", label = "L? t�n", description = "Check-in, check-out, d?t ph�ng" },
+            new { value = "Cashier", label = "Thu ng�n", description = "Thanh to�n, h�a don" },
+            new { value = "Accounting", label = "K? to�n", description = "B�o c�o t�i ch�nh" },
+            new { value = "Inventory", label = "Kho", description = "Qu?n l� kho, nh?p xu?t" },
+            new { value = "Housekeeping", label = "D?n ph�ng", description = "Qu?n l� d?n d?p ph�ng" },
+            new { value = "Maintenance", label = "K? thu?t", description = "S?a ch?a, b?o tr�" },
+            new { value = "Customer", label = "Kh�ch h�ng", description = "Kh�ch h�ng s? d?ng d?ch v?" }
         };
 
         return Ok(roles);

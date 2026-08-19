@@ -1,4 +1,4 @@
-﻿using QuanLyResort.Repositories;
+using QuanLyResort.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +13,7 @@ namespace QuanLyResort.Controllers;
 public class CouponsController : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork;
+    private ResortDbContext _context => _unitOfWork.Context;
 
     public CouponsController(IUnitOfWork unitOfWork)
     {
@@ -29,7 +30,7 @@ public class CouponsController : ControllerBase
         // 1. Validate input format
         if (string.IsNullOrWhiteSpace(code))
         {
-            return BadRequest(new { message = "Mã giảm giá không được để trống" });
+            return BadRequest(new { message = "M� gi?m gi� kh�ng du?c d? tr?ng" });
         }
 
         // Normalize code: uppercase, trim, remove spaces
@@ -38,12 +39,12 @@ public class CouponsController : ControllerBase
         // Validate format: alphanumeric, 3-50 characters
         if (normalizedCode.Length < 3 || normalizedCode.Length > 50)
         {
-            return BadRequest(new { message = "Mã giảm giá phải có từ 3 đến 50 ký tự" });
+            return BadRequest(new { message = "M� gi?m gi� ph?i c� t? 3 d?n 50 k� t?" });
         }
 
         if (!System.Text.RegularExpressions.Regex.IsMatch(normalizedCode, @"^[A-Z0-9]+$"))
         {
-            return BadRequest(new { message = "Mã giảm giá chỉ được chứa chữ cái và số" });
+            return BadRequest(new { message = "M� gi?m gi� ch? du?c ch?a ch? c�i v� s?" });
         }
 
         // 2. Find coupon in database
@@ -52,7 +53,7 @@ public class CouponsController : ControllerBase
 
         if (coupon == null)
         {
-            return NotFound(new { message = "Mã giảm giá không tồn tại" });
+            return NotFound(new { message = "M� gi?m gi� kh�ng t?n t?i" });
         }
 
         // 3. Validate coupon status and dates
@@ -62,7 +63,7 @@ public class CouponsController : ControllerBase
         if (!coupon.IsActive)
         {
             return BadRequest(new { 
-                message = "Mã giảm giá đã bị tắt",
+                message = "M� gi?m gi� d� b? t?t",
                 code = coupon.Code,
                 isActive = false
             });
@@ -71,7 +72,7 @@ public class CouponsController : ControllerBase
         if (now < coupon.StartDate)
         {
             return BadRequest(new { 
-                message = $"Mã giảm giá chưa có hiệu lực. Mã sẽ có hiệu lực từ {coupon.StartDate.ToString(dateFormat)}",
+                message = $"M� gi?m gi� chua c� hi?u l?c. M� s? c� hi?u l?c t? {coupon.StartDate.ToString(dateFormat)}",
                 code = coupon.Code,
                 startDate = coupon.StartDate,
                 endDate = coupon.EndDate
@@ -81,7 +82,7 @@ public class CouponsController : ControllerBase
         if (now > coupon.EndDate)
         {
             return BadRequest(new { 
-                message = $"Mã giảm giá đã hết hạn (hết hạn: {coupon.EndDate.ToString(dateFormat)})",
+                message = $"M� gi?m gi� d� h?t h?n (h?t h?n: {coupon.EndDate.ToString(dateFormat)})",
                 code = coupon.Code,
                 endDate = coupon.EndDate
             });
@@ -91,7 +92,7 @@ public class CouponsController : ControllerBase
         if (coupon.MaxUses.HasValue && coupon.UsesCount >= coupon.MaxUses.Value)
         {
             return BadRequest(new { 
-                message = $"Mã giảm giá đã hết lượt sử dụng ({coupon.UsesCount}/{coupon.MaxUses})",
+                message = $"M� gi?m gi� d� h?t lu?t s? d?ng ({coupon.UsesCount}/{coupon.MaxUses})",
                 code = coupon.Code,
                 usesCount = coupon.UsesCount,
                 maxUses = coupon.MaxUses
@@ -101,12 +102,12 @@ public class CouponsController : ControllerBase
         // 5. Validate coupon value
         if (coupon.Value <= 0)
         {
-            return BadRequest(new { message = "Mã giảm giá có giá trị không hợp lệ" });
+            return BadRequest(new { message = "M� gi?m gi� c� gi� tr? kh�ng h?p l?" });
         }
 
         if (coupon.Type.ToLower() == "percent" && (coupon.Value < 1 || coupon.Value > 100))
         {
-            return BadRequest(new { message = "Mã giảm giá phần trăm phải từ 1% đến 100%" });
+            return BadRequest(new { message = "M� gi?m gi� ph?n tram ph?i t? 1% d?n 100%" });
         }
 
         // 6. Return validated coupon info (without sensitive data)
@@ -194,7 +195,7 @@ public class CouponsController : ControllerBase
 
         if (coupon == null)
         {
-            return NotFound(new { message = "Không tìm thấy mã giảm giá" });
+            return NotFound(new { message = "Kh�ng t�m th?y m� gi?m gi�" });
         }
 
         return Ok(coupon);
@@ -212,7 +213,7 @@ public class CouponsController : ControllerBase
         // Validate
         if (string.IsNullOrWhiteSpace(request.Code))
         {
-            return BadRequest(new { message = "Mã giảm giá không được để trống" });
+            return BadRequest(new { message = "M� gi?m gi� kh�ng du?c d? tr?ng" });
         }
 
         // Check if code already exists
@@ -221,7 +222,7 @@ public class CouponsController : ControllerBase
 
         if (existingCoupon != null)
         {
-            return BadRequest(new { message = "Mã giảm giá đã tồn tại" });
+            return BadRequest(new { message = "M� gi?m gi� d� t?n t?i" });
         }
 
         // Validate type and value
@@ -229,24 +230,24 @@ public class CouponsController : ControllerBase
         {
             if (request.Value < 1 || request.Value > 100)
             {
-                return BadRequest(new { message = "Giá trị phần trăm phải từ 1 đến 100" });
+                return BadRequest(new { message = "Gi� tr? ph?n tram ph?i t? 1 d?n 100" });
             }
         }
         else if (request.Type.ToLower() == "amount")
         {
             if (request.Value <= 0)
             {
-                return BadRequest(new { message = "Số tiền giảm phải lớn hơn 0" });
+                return BadRequest(new { message = "S? ti?n gi?m ph?i l?n hon 0" });
             }
         }
         else
         {
-            return BadRequest(new { message = "Loại giảm giá không hợp lệ (phải là 'percent' hoặc 'amount')" });
+            return BadRequest(new { message = "Lo?i gi?m gi� kh�ng h?p l? (ph?i l� 'percent' ho?c 'amount')" });
         }
 
         if (request.EndDate <= request.StartDate)
         {
-            return BadRequest(new { message = "Ngày kết thúc phải sau ngày bắt đầu" });
+            return BadRequest(new { message = "Ng�y k?t th�c ph?i sau ng�y b?t d?u" });
         }
 
         // Convert dates to UTC if they are Unspecified or Local
@@ -326,7 +327,7 @@ public class CouponsController : ControllerBase
 
         if (coupon == null)
         {
-            return NotFound(new { message = "Không tìm thấy mã giảm giá" });
+            return NotFound(new { message = "Kh�ng t�m th?y m� gi?m gi�" });
         }
 
         var userEmail = User.FindFirst(ClaimTypes.Email)?.Value ?? "System";
@@ -339,7 +340,7 @@ public class CouponsController : ControllerBase
 
             if (existingCoupon != null)
             {
-                return BadRequest(new { message = "Mã giảm giá đã tồn tại" });
+                return BadRequest(new { message = "M� gi?m gi� d� t?n t?i" });
             }
 
             coupon.Code = request.Code.ToUpper().Trim();
@@ -443,7 +444,7 @@ public class CouponsController : ControllerBase
 
         if (coupon == null)
         {
-            return NotFound(new { message = "Không tìm thấy mã giảm giá" });
+            return NotFound(new { message = "Kh�ng t�m th?y m� gi?m gi�" });
         }
 
         var userEmail = User.FindFirst(ClaimTypes.Email)?.Value ?? "System";
@@ -468,7 +469,7 @@ public class CouponsController : ControllerBase
 
         if (coupon == null)
         {
-            return NotFound(new { message = "Không tìm thấy mã giảm giá" });
+            return NotFound(new { message = "Kh�ng t�m th?y m� gi?m gi�" });
         }
 
         _context.Coupons.Remove(coupon);

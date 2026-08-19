@@ -1,4 +1,4 @@
-﻿using QuanLyResort.Repositories;
+using QuanLyResort.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -7,13 +7,14 @@ using QuanLyResort.Data;
 namespace QuanLyResort.Controllers;
 
 /// <summary>
-/// Controller để kiểm tra health của service
+/// Controller d? ki?m tra health c?a service
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class HealthCheckController : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork;
+    private ResortDbContext _context => _unitOfWork.Context;
     private readonly ILogger<HealthCheckController> _logger;
 
     public HealthCheckController(
@@ -25,8 +26,8 @@ public class HealthCheckController : ControllerBase
     }
 
     /// <summary>
-    /// Health check endpoint - Render sẽ gọi endpoint này để kiểm tra service có hoạt động không
-    /// Public endpoint - không cần authentication
+    /// Health check endpoint - Render s? g?i endpoint n�y d? ki?m tra service c� ho?t d?ng kh�ng
+    /// Public endpoint - kh�ng c?n authentication
     /// </summary>
     [HttpGet]
     [AllowAnonymous]
@@ -34,12 +35,12 @@ public class HealthCheckController : ControllerBase
     {
         try
         {
-            // Kiểm tra database connection
+            // Ki?m tra database connection
             var canConnect = await _context.Database.CanConnectAsync();
             
             if (!canConnect)
             {
-                _logger.LogWarning("[Health Check] ⚠️ Database connection failed");
+                _logger.LogWarning("[Health Check] ?? Database connection failed");
                 return StatusCode(503, new
                 {
                     status = "unhealthy",
@@ -48,14 +49,14 @@ public class HealthCheckController : ControllerBase
                 });
             }
 
-            // Test một query đơn giản để đảm bảo database thực sự hoạt động
+            // Test m?t query don gi?n d? d?m b?o database th?c s? ho?t d?ng
             try
             {
                 await _context.Database.ExecuteSqlRawAsync("SELECT 1");
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "[Health Check] ⚠️ Database query test failed");
+                _logger.LogWarning(ex, "[Health Check] ?? Database query test failed");
                 return StatusCode(503, new
                 {
                     status = "unhealthy",
@@ -64,7 +65,7 @@ public class HealthCheckController : ControllerBase
                 });
             }
 
-            _logger.LogInformation("[Health Check] ✅ Service is healthy");
+            _logger.LogInformation("[Health Check] ? Service is healthy");
             return Ok(new
             {
                 status = "healthy",
@@ -74,7 +75,7 @@ public class HealthCheckController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "[Health Check] ❌ Health check failed");
+            _logger.LogError(ex, "[Health Check] ? Health check failed");
             return StatusCode(503, new
             {
                 status = "unhealthy",

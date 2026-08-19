@@ -1,4 +1,4 @@
-﻿using QuanLyResort.Repositories;
+using QuanLyResort.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +12,7 @@ namespace QuanLyResort.Controllers;
 public class FAQsController : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork;
+    private ResortDbContext _context => _unitOfWork.Context;
 
     public FAQsController(IUnitOfWork unitOfWork)
     {
@@ -19,7 +20,7 @@ public class FAQsController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy danh sách FAQ (public - không cần đăng nhập)
+    /// L?y danh s�ch FAQ (public - kh�ng c?n dang nh?p)
     /// </summary>
     [HttpGet]
     [AllowAnonymous]
@@ -64,12 +65,12 @@ public class FAQsController : ControllerBase
         catch (Exception ex)
         {
             Console.WriteLine($"[FAQsController] Error: {ex.Message}");
-            return StatusCode(500, new { message = "Lỗi khi tải FAQ", error = ex.Message });
+            return StatusCode(500, new { message = "L?i khi t?i FAQ", error = ex.Message });
         }
     }
 
     /// <summary>
-    /// Lấy FAQ theo ID (public)
+    /// L?y FAQ theo ID (public)
     /// </summary>
     [HttpGet("{id}")]
     [AllowAnonymous]
@@ -93,10 +94,10 @@ public class FAQsController : ControllerBase
 
             if (faq == null)
             {
-                return NotFound(new { message = "FAQ không tồn tại" });
+                return NotFound(new { message = "FAQ kh�ng t?n t?i" });
             }
 
-            // Tăng view count
+            // Tang view count
             var faqEntity = await _context.FAQs.FindAsync(id);
             if (faqEntity != null)
             {
@@ -109,12 +110,12 @@ public class FAQsController : ControllerBase
         catch (Exception ex)
         {
             Console.WriteLine($"[FAQsController] Error: {ex.Message}");
-            return StatusCode(500, new { message = "Lỗi khi tải FAQ", error = ex.Message });
+            return StatusCode(500, new { message = "L?i khi t?i FAQ", error = ex.Message });
         }
     }
 
     /// <summary>
-    /// Đánh giá FAQ hữu ích (public)
+    /// ��nh gi� FAQ h?u �ch (public)
     /// </summary>
     [HttpPost("{id}/helpful")]
     [AllowAnonymous]
@@ -125,23 +126,23 @@ public class FAQsController : ControllerBase
             var faq = await _context.FAQs.FindAsync(id);
             if (faq == null || !faq.IsActive)
             {
-                return NotFound(new { message = "FAQ không tồn tại" });
+                return NotFound(new { message = "FAQ kh�ng t?n t?i" });
             }
 
             faq.HelpfulCount++;
             await _unitOfWork.SaveChangesAsync();
 
-            return Ok(new { message = "Cảm ơn phản hồi của bạn!", helpfulCount = faq.HelpfulCount });
+            return Ok(new { message = "C?m on ph?n h?i c?a b?n!", helpfulCount = faq.HelpfulCount });
         }
         catch (Exception ex)
         {
             Console.WriteLine($"[FAQsController] Error: {ex.Message}");
-            return StatusCode(500, new { message = "Lỗi khi cập nhật", error = ex.Message });
+            return StatusCode(500, new { message = "L?i khi c?p nh?t", error = ex.Message });
         }
     }
 
     /// <summary>
-    /// Lấy danh sách categories (public)
+    /// L?y danh s�ch categories (public)
     /// </summary>
     [HttpGet("categories")]
     [AllowAnonymous]
@@ -161,14 +162,14 @@ public class FAQsController : ControllerBase
         catch (Exception ex)
         {
             Console.WriteLine($"[FAQsController] Error: {ex.Message}");
-            return StatusCode(500, new { message = "Lỗi khi tải danh mục", error = ex.Message });
+            return StatusCode(500, new { message = "L?i khi t?i danh m?c", error = ex.Message });
         }
     }
 
     // ========== ADMIN ENDPOINTS ==========
 
     /// <summary>
-    /// Tạo FAQ mới (Admin only)
+    /// T?o FAQ m?i (Admin only)
     /// </summary>
     [HttpPost]
     [Authorize(Roles = "Admin,Manager")]
@@ -178,7 +179,7 @@ public class FAQsController : ControllerBase
         {
             if (string.IsNullOrWhiteSpace(request.Question) || string.IsNullOrWhiteSpace(request.Answer))
             {
-                return BadRequest(new { message = "Câu hỏi và câu trả lời không được để trống" });
+                return BadRequest(new { message = "C�u h?i v� c�u tr? l?i kh�ng du?c d? tr?ng" });
             }
 
             var faq = new FAQ
@@ -197,7 +198,7 @@ public class FAQsController : ControllerBase
 
             return Ok(new
             {
-                message = "FAQ đã được tạo thành công",
+                message = "FAQ d� du?c t?o th�nh c�ng",
                 faq = new
                 {
                     faq.FAQId,
@@ -211,12 +212,12 @@ public class FAQsController : ControllerBase
         catch (Exception ex)
         {
             Console.WriteLine($"[FAQsController] Error: {ex.Message}");
-            return StatusCode(500, new { message = "Lỗi khi tạo FAQ", error = ex.Message });
+            return StatusCode(500, new { message = "L?i khi t?o FAQ", error = ex.Message });
         }
     }
 
     /// <summary>
-    /// Cập nhật FAQ (Admin only)
+    /// C?p nh?t FAQ (Admin only)
     /// </summary>
     [HttpPut("{id}")]
     [Authorize(Roles = "Admin,Manager")]
@@ -227,7 +228,7 @@ public class FAQsController : ControllerBase
             var faq = await _context.FAQs.FindAsync(id);
             if (faq == null)
             {
-                return NotFound(new { message = "FAQ không tồn tại" });
+                return NotFound(new { message = "FAQ kh�ng t?n t?i" });
             }
 
             if (!string.IsNullOrWhiteSpace(request.Question))
@@ -248,17 +249,17 @@ public class FAQsController : ControllerBase
             faq.UpdatedAt = DateTime.UtcNow;
             await _unitOfWork.SaveChangesAsync();
 
-            return Ok(new { message = "FAQ đã được cập nhật thành công" });
+            return Ok(new { message = "FAQ d� du?c c?p nh?t th�nh c�ng" });
         }
         catch (Exception ex)
         {
             Console.WriteLine($"[FAQsController] Error: {ex.Message}");
-            return StatusCode(500, new { message = "Lỗi khi cập nhật FAQ", error = ex.Message });
+            return StatusCode(500, new { message = "L?i khi c?p nh?t FAQ", error = ex.Message });
         }
     }
 
     /// <summary>
-    /// Xóa FAQ (Admin only)
+    /// X�a FAQ (Admin only)
     /// </summary>
     [HttpDelete("{id}")]
     [Authorize(Roles = "Admin,Manager")]
@@ -269,18 +270,18 @@ public class FAQsController : ControllerBase
             var faq = await _context.FAQs.FindAsync(id);
             if (faq == null)
             {
-                return NotFound(new { message = "FAQ không tồn tại" });
+                return NotFound(new { message = "FAQ kh�ng t?n t?i" });
             }
 
             _context.FAQs.Remove(faq);
             await _unitOfWork.SaveChangesAsync();
 
-            return Ok(new { message = "FAQ đã được xóa thành công" });
+            return Ok(new { message = "FAQ d� du?c x�a th�nh c�ng" });
         }
         catch (Exception ex)
         {
             Console.WriteLine($"[FAQsController] Error: {ex.Message}");
-            return StatusCode(500, new { message = "Lỗi khi xóa FAQ", error = ex.Message });
+            return StatusCode(500, new { message = "L?i khi x�a FAQ", error = ex.Message });
         }
     }
 }

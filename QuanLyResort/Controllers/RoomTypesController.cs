@@ -1,4 +1,4 @@
-﻿using QuanLyResort.Repositories;
+using QuanLyResort.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,10 +10,11 @@ namespace QuanLyResort.Controllers;
 
 [ApiController]
 [Route("api/room-types")]
-[Authorize] // Yêu cầu authentication
+[Authorize] // Y�u c?u authentication
 public class RoomTypesController : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork;
+    private ResortDbContext _context => _unitOfWork.Context;
     private readonly IAuditService _auditService;
     private readonly ILogger<RoomTypesController> _logger;
 
@@ -28,11 +29,11 @@ public class RoomTypesController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy danh sách tất cả loại phòng
+    /// L?y danh s�ch t?t c? lo?i ph�ng
     /// GET /api/room-types
     /// </summary>
     [HttpGet]
-    [AllowAnonymous] // Khách vãng lai cũng có thể xem
+    [AllowAnonymous] // Kh�ch v�ng lai cung c� th? xem
     public async Task<IActionResult> GetAllRoomTypes([FromQuery] bool includeInactive = false)
     {
         var query = _context.RoomTypes.AsQueryable();
@@ -51,7 +52,7 @@ public class RoomTypesController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy thông tin chi tiết một loại phòng
+    /// L?y th�ng tin chi ti?t m?t lo?i ph�ng
     /// GET /api/room-types/{id}
     /// </summary>
     [HttpGet("{id}")]
@@ -63,18 +64,18 @@ public class RoomTypesController : ControllerBase
             _logger.LogInformation($"[RoomTypes] Getting room type by ID: {id}");
             
             var roomType = await _context.RoomTypes
-                .Include(rt => rt.Rooms) // Include rooms để xem có bao nhiêu phòng thuộc loại này
+                .Include(rt => rt.Rooms) // Include rooms d? xem c� bao nhi�u ph�ng thu?c lo?i n�y
                 .FirstOrDefaultAsync(rt => rt.RoomTypeId == id);
 
             if (roomType == null)
             {
                 _logger.LogWarning($"[RoomTypes] Room type {id} not found");
-                return NotFound(new { message = "Không tìm thấy loại phòng" });
+                return NotFound(new { message = "Kh�ng t�m th?y lo?i ph�ng" });
             }
 
             _logger.LogInformation($"[RoomTypes] Found room type: {roomType.TypeName}, Rooms count: {roomType.Rooms?.Count ?? 0}");
 
-            // Thêm thống kê số phòng
+            // Th�m th?ng k� s? ph�ng
             var stats = new
             {
                 totalRooms = roomType.Rooms?.Count ?? 0,
@@ -83,7 +84,7 @@ public class RoomTypesController : ControllerBase
 
             _logger.LogInformation($"[RoomTypes] Returning stats: Total={stats.totalRooms}, Available={stats.availableRooms}");
 
-            // Tạo response object để tránh circular reference
+            // T?o response object d? tr�nh circular reference
             var response = new
             {
                 roomType = new
@@ -114,12 +115,12 @@ public class RoomTypesController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, $"[RoomTypes] Error getting room type {id}");
-            return StatusCode(500, new { message = "Lỗi server khi lấy thông tin loại phòng", error = ex.Message });
+            return StatusCode(500, new { message = "L?i server khi l?y th�ng tin lo?i ph�ng", error = ex.Message });
         }
     }
 
     /// <summary>
-    /// Tạo loại phòng mới
+    /// T?o lo?i ph�ng m?i
     /// POST /api/room-types
     /// </summary>
     [HttpPost]
@@ -131,13 +132,13 @@ public class RoomTypesController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        // Kiểm tra TypeCode đã tồn tại chưa
+        // Ki?m tra TypeCode d� t?n t?i chua
         var existingCode = await _context.RoomTypes
             .AnyAsync(rt => rt.TypeCode.ToLower() == roomType.TypeCode.ToLower());
 
         if (existingCode)
         {
-            return BadRequest(new { message = $"Mã loại phòng '{roomType.TypeCode}' đã tồn tại" });
+            return BadRequest(new { message = $"M� lo?i ph�ng '{roomType.TypeCode}' d� t?n t?i" });
         }
 
         roomType.CreatedAt = DateTime.UtcNow;
@@ -155,7 +156,7 @@ public class RoomTypesController : ControllerBase
             username,
             null,
             Newtonsoft.Json.JsonConvert.SerializeObject(roomType),
-            $"Tạo loại phòng mới: {roomType.TypeName}"
+            $"T?o lo?i ph�ng m?i: {roomType.TypeName}"
         );
 
         _logger.LogInformation($"[RoomTypes] Created new room type: {roomType.TypeName} by {username}");
@@ -168,7 +169,7 @@ public class RoomTypesController : ControllerBase
     }
 
     /// <summary>
-    /// Cập nhật loại phòng
+    /// C?p nh?t lo?i ph�ng
     /// PUT /api/room-types/{id}
     /// </summary>
     [HttpPut("{id}")]
@@ -183,20 +184,20 @@ public class RoomTypesController : ControllerBase
         var roomType = await _context.RoomTypes.FindAsync(id);
         if (roomType == null)
         {
-            return NotFound(new { message = "Không tìm thấy loại phòng" });
+            return NotFound(new { message = "Kh�ng t�m th?y lo?i ph�ng" });
         }
 
-        // Kiểm tra TypeCode trùng (ngoại trừ chính nó)
+        // Ki?m tra TypeCode tr�ng (ngo?i tr? ch�nh n�)
         var duplicateCode = await _context.RoomTypes
             .AnyAsync(rt => rt.TypeCode.ToLower() == updatedRoomType.TypeCode.ToLower() 
                          && rt.RoomTypeId != id);
 
         if (duplicateCode)
         {
-            return BadRequest(new { message = $"Mã loại phòng '{updatedRoomType.TypeCode}' đã tồn tại" });
+            return BadRequest(new { message = $"M� lo?i ph�ng '{updatedRoomType.TypeCode}' d� t?n t?i" });
         }
 
-        // Lưu old values cho audit
+        // Luu old values cho audit
         var oldValues = Newtonsoft.Json.JsonConvert.SerializeObject(roomType);
 
         // Update properties
@@ -227,7 +228,7 @@ public class RoomTypesController : ControllerBase
             username,
             oldValues,
             Newtonsoft.Json.JsonConvert.SerializeObject(roomType),
-            $"Cập nhật loại phòng: {roomType.TypeName}"
+            $"C?p nh?t lo?i ph�ng: {roomType.TypeName}"
         );
 
         _logger.LogInformation($"[RoomTypes] Updated room type: {roomType.TypeName} by {username}");
@@ -236,7 +237,7 @@ public class RoomTypesController : ControllerBase
     }
 
     /// <summary>
-    /// Xóa loại phòng (soft delete - set IsActive = false)
+    /// X�a lo?i ph�ng (soft delete - set IsActive = false)
     /// DELETE /api/room-types/{id}
     /// </summary>
     [HttpDelete("{id}")]
@@ -249,10 +250,10 @@ public class RoomTypesController : ControllerBase
 
         if (roomType == null)
         {
-            return NotFound(new { message = "Không tìm thấy loại phòng" });
+            return NotFound(new { message = "Kh�ng t�m th?y lo?i ph�ng" });
         }
 
-        // Soft delete - chỉ set IsActive = false
+        // Soft delete - ch? set IsActive = false
         roomType.IsActive = false;
         roomType.UpdatedAt = DateTime.UtcNow;
         await _unitOfWork.SaveChangesAsync();
@@ -266,20 +267,20 @@ public class RoomTypesController : ControllerBase
             username,
             Newtonsoft.Json.JsonConvert.SerializeObject(roomType),
             null,
-            $"Xóa mềm loại phòng: {roomType.TypeName}"
+            $"X�a m?m lo?i ph�ng: {roomType.TypeName}"
         );
 
         _logger.LogInformation($"[RoomTypes] Soft deleted room type: {roomType.TypeName} by {username}");
 
         return Ok(new { 
-            message = "Đã xóa mềm loại phòng thành công",
+            message = "�� x�a m?m lo?i ph�ng th�nh c�ng",
             isActive = roomType.IsActive,
             roomCount = roomType.Rooms.Count
         });
     }
 
     /// <summary>
-    /// Kích hoạt/vô hiệu hóa loại phòng
+    /// K�ch ho?t/v� hi?u h�a lo?i ph�ng
     /// PATCH /api/room-types/{id}/toggle-active
     /// </summary>
     [HttpPatch("{id}/toggle-active")]
@@ -289,7 +290,7 @@ public class RoomTypesController : ControllerBase
         var roomType = await _context.RoomTypes.FindAsync(id);
         if (roomType == null)
         {
-            return NotFound(new { message = "Không tìm thấy loại phòng" });
+            return NotFound(new { message = "Kh�ng t�m th?y lo?i ph�ng" });
         }
 
         roomType.IsActive = !roomType.IsActive;
@@ -304,18 +305,18 @@ public class RoomTypesController : ControllerBase
             username,
             null,
             null,
-            $"Thay đổi trạng thái loại phòng '{roomType.TypeName}' thành {(roomType.IsActive ? "Active" : "Inactive")}"
+            $"Thay d?i tr?ng th�i lo?i ph�ng '{roomType.TypeName}' th�nh {(roomType.IsActive ? "Active" : "Inactive")}"
         );
 
         return Ok(new
         {
-            message = $"Đã {(roomType.IsActive ? "kích hoạt" : "vô hiệu hóa")} loại phòng",
+            message = $"�� {(roomType.IsActive ? "k�ch ho?t" : "v� hi?u h�a")} lo?i ph�ng",
             isActive = roomType.IsActive
         });
     }
 
     /// <summary>
-    /// Lấy thống kê loại phòng
+    /// L?y th?ng k� lo?i ph�ng
     /// GET /api/room-types/statistics
     /// </summary>
     [HttpGet("statistics")]

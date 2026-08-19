@@ -1,4 +1,4 @@
-﻿using QuanLyResort.Repositories;
+using QuanLyResort.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +17,7 @@ public class InvoicesController : ControllerBase
 {
     private readonly IInvoiceService _invoiceService;
     private readonly IUnitOfWork _unitOfWork;
+    private ResortDbContext _context => _unitOfWork.Context;
     private readonly IAuditService _auditService;
     private readonly IBookingService _bookingService;
     private readonly ILogger<InvoicesController> _logger;
@@ -87,14 +88,14 @@ public class InvoicesController : ControllerBase
 
             var invoices = await query.OrderByDescending(i => i.IssueDate).ToListAsync();
             
-            // Console.WriteLine($"{logPrefix} [{timestamp}] ✅ Found {invoices.Count} invoices");
+            // Console.WriteLine($"{logPrefix} [{timestamp}] ? Found {invoices.Count} invoices");
             // Console.WriteLine($"{logPrefix} [{timestamp}] ========== END (SUCCESS) ==========");
             return Ok(invoices);
         }
         catch (Exception ex)
         {
             // Only log errors, not verbose debug info
-            Console.WriteLine($"[InvoicesController.GetAllInvoices] ❌ Error: {ex.Message}");
+            Console.WriteLine($"[InvoicesController.GetAllInvoices] ? Error: {ex.Message}");
             return StatusCode(500, new { message = "Failed to load invoices", error = ex.Message });
         }
     }
@@ -139,7 +140,7 @@ public class InvoicesController : ControllerBase
             
             Console.WriteLine($"{logPrefix} [{timestamp}] Paid: {paidInvoices}, Pending: {pendingInvoices}, Cancelled: {cancelledInvoices}");
             
-            // SQLite không hỗ trợ SumAsync trên decimal trực tiếp -> chuyển sang client-side aggregation
+            // SQLite kh�ng h? tr? SumAsync tr�n decimal tr?c ti?p -> chuy?n sang client-side aggregation
             var paidInvoicesList = await _context.Invoices
                 .Where(i => i.Status == "Paid")
                 .Select(i => i.TotalAmount)
@@ -167,10 +168,10 @@ public class InvoicesController : ControllerBase
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"{logPrefix} [{timestamp}] ❌ ========== ERROR ==========");
-            Console.WriteLine($"{logPrefix} [{timestamp}] ❌ Error message: {ex.Message}");
-            Console.WriteLine($"{logPrefix} [{timestamp}] ❌ Stack trace: {ex.StackTrace}");
-            Console.WriteLine($"{logPrefix} [{timestamp}] ❌ Inner exception: {ex.InnerException?.Message}");
+            Console.WriteLine($"{logPrefix} [{timestamp}] ? ========== ERROR ==========");
+            Console.WriteLine($"{logPrefix} [{timestamp}] ? Error message: {ex.Message}");
+            Console.WriteLine($"{logPrefix} [{timestamp}] ? Stack trace: {ex.StackTrace}");
+            Console.WriteLine($"{logPrefix} [{timestamp}] ? Inner exception: {ex.InnerException?.Message}");
             Console.WriteLine($"{logPrefix} [{timestamp}] ========== END (ERROR) ==========");
             return StatusCode(500, new { message = "Failed to load invoice statistics", error = ex.Message });
         }
@@ -185,18 +186,18 @@ public class InvoicesController : ControllerBase
             var userEmail = User.FindFirst(ClaimTypes.Email)?.Value ?? "System";
             var userRole = User.FindFirst(ClaimTypes.Role)?.Value ?? "Unknown";
             
-            _logger.LogInformation($"[ProcessPayment] 🔄 Admin {userEmail} (Role: {userRole}) processing payment for invoice {id}");
+            _logger.LogInformation($"[ProcessPayment] ?? Admin {userEmail} (Role: {userRole}) processing payment for invoice {id}");
             
             // Get invoice to check booking
             var invoice = await _invoiceService.GetInvoiceByIdAsync(id);
             if (invoice == null)
             {
-                _logger.LogWarning($"[ProcessPayment] ❌ Invoice {id} not found");
+                _logger.LogWarning($"[ProcessPayment] ? Invoice {id} not found");
                 return NotFound(new { message = "Invoice not found" });
             }
             
             var bookingId = invoice.BookingId;
-            _logger.LogInformation($"[ProcessPayment] 📋 Invoice {id} linked to booking {bookingId}, current invoice status: '{invoice.Status}'");
+            _logger.LogInformation($"[ProcessPayment] ?? Invoice {id} linked to booking {bookingId}, current invoice status: '{invoice.Status}'");
             
             // Process invoice payment
             var success = await _invoiceService.ProcessPaymentAsync(id, request.Amount, 
@@ -204,46 +205,46 @@ public class InvoicesController : ControllerBase
 
             if (!success)
             {
-                _logger.LogWarning($"[ProcessPayment] ❌ Failed to process payment for invoice {id}");
+                _logger.LogWarning($"[ProcessPayment] ? Failed to process payment for invoice {id}");
                 return NotFound(new { message = "Invoice not found" });
             }
             
             // Reload invoice to get updated status
             invoice = await _invoiceService.GetInvoiceByIdAsync(id);
-            _logger.LogInformation($"[ProcessPayment] ✅ Invoice {id} payment processed. New status: '{invoice?.Status}'");
+            _logger.LogInformation($"[ProcessPayment] ? Invoice {id} payment processed. New status: '{invoice?.Status}'");
             
-            // Nếu invoice đã được paid và có booking, update booking status
+            // N?u invoice d� du?c paid v� c� booking, update booking status
             if (invoice != null && invoice.Status == "Paid" && bookingId > 0)
             {
-                _logger.LogInformation($"[ProcessPayment] 💰 Invoice {id} is now Paid. Updating booking {bookingId} status...");
+                _logger.LogInformation($"[ProcessPayment] ?? Invoice {id} is now Paid. Updating booking {bookingId} status...");
                 
                 // Check booking current status
                 var booking = await _context.Bookings.FindAsync(bookingId);
                 if (booking != null)
                 {
-                    _logger.LogInformation($"[ProcessPayment] 📋 Booking {bookingId} current status: '{booking.Status}'");
+                    _logger.LogInformation($"[ProcessPayment] ?? Booking {bookingId} current status: '{booking.Status}'");
                     
-                    // Chỉ update booking nếu chưa paid
+                    // Ch? update booking n?u chua paid
                     if (booking.Status != "Paid")
                     {
                         var bookingPaymentSuccess = await _bookingService.ProcessOnlinePaymentAsync(bookingId, userEmail);
                         if (bookingPaymentSuccess)
                         {
-                            _logger.LogInformation($"[ProcessPayment] ✅✅✅ SUCCESS: Booking {bookingId} status updated to 'Paid'");
+                            _logger.LogInformation($"[ProcessPayment] ??? SUCCESS: Booking {bookingId} status updated to 'Paid'");
                         }
                         else
                         {
-                            _logger.LogWarning($"[ProcessPayment] ⚠️ Failed to update booking {bookingId} status");
+                            _logger.LogWarning($"[ProcessPayment] ?? Failed to update booking {bookingId} status");
                         }
                     }
                     else
                     {
-                        _logger.LogInformation($"[ProcessPayment] ℹ️ Booking {bookingId} already paid, skipping update");
+                        _logger.LogInformation($"[ProcessPayment] ?? Booking {bookingId} already paid, skipping update");
                     }
                 }
                 else
                 {
-                    _logger.LogWarning($"[ProcessPayment] ⚠️ Booking {bookingId} not found");
+                    _logger.LogWarning($"[ProcessPayment] ?? Booking {bookingId} not found");
                 }
             }
 
@@ -253,7 +254,7 @@ public class InvoicesController : ControllerBase
             {
                 var finalBooking = await _bookingService.GetBookingByIdAsync(bookingId);
                 finalBookingStatus = finalBooking?.Status ?? "Unknown";
-                _logger.LogInformation($"[ProcessPayment] ✅✅✅ FINAL: Invoice {id} paid, Booking {bookingId} final status: '{finalBookingStatus}'");
+                _logger.LogInformation($"[ProcessPayment] ??? FINAL: Invoice {id} paid, Booking {bookingId} final status: '{finalBookingStatus}'");
             }
             
             // Send payment confirmation notification
@@ -281,8 +282,8 @@ public class InvoicesController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"[ProcessPayment] ❌ Exception processing payment for invoice {id}");
-            return StatusCode(500, new { message = "Lỗi khi xử lý thanh toán", error = ex.Message });
+            _logger.LogError(ex, $"[ProcessPayment] ? Exception processing payment for invoice {id}");
+            return StatusCode(500, new { message = "L?i khi x? l� thanh to�n", error = ex.Message });
         }
     }
 

@@ -1,4 +1,4 @@
-﻿using QuanLyResort.Repositories;
+using QuanLyResort.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +14,7 @@ namespace QuanLyResort.Controllers;
 public class EmployeeManagementController : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork;
+    private ResortDbContext _context => _unitOfWork.Context;
     private readonly IAuditService _auditService;
 
     public EmployeeManagementController(IUnitOfWork unitOfWork, IAuditService auditService)
@@ -23,7 +24,7 @@ public class EmployeeManagementController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy danh sách tất cả nhân viên
+    /// L?y danh s�ch t?t c? nh�n vi�n
     /// </summary>
     [HttpGet]
     public async Task<IActionResult> GetAllEmployees(
@@ -68,7 +69,7 @@ public class EmployeeManagementController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy thông tin nhân viên theo ID
+    /// L?y th�ng tin nh�n vi�n theo ID
     /// </summary>
     [HttpGet("{id}")]
     public async Task<IActionResult> GetEmployee(int id)
@@ -103,7 +104,7 @@ public class EmployeeManagementController : ControllerBase
     }
 
     /// <summary>
-    /// Tạo nhân viên mới
+    /// T?o nh�n vi�n m?i
     /// </summary>
     [HttpPost]
     [Authorize(Roles = "Admin")]
@@ -146,7 +147,7 @@ public class EmployeeManagementController : ControllerBase
     }
 
     /// <summary>
-    /// Cập nhật thông tin nhân viên
+    /// C?p nh?t th�ng tin nh�n vi�n
     /// </summary>
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateEmployee(int id, [FromBody] UpdateEmployeeRequest request)
@@ -190,7 +191,7 @@ public class EmployeeManagementController : ControllerBase
     }
 
     /// <summary>
-    /// Đổi phòng ban/chức vụ
+    /// �?i ph�ng ban/ch?c v?
     /// </summary>
     [HttpPost("{id}/transfer")]
     [Authorize(Roles = "Admin")]
@@ -217,14 +218,14 @@ public class EmployeeManagementController : ControllerBase
             User.Identity?.Name ?? "System",
             $"{{\"Department\": \"{oldDept}\", \"Position\": \"{oldPos}\"}}",
             $"{{\"Department\": \"{request.NewDepartment}\", \"Position\": \"{request.NewPosition}\"}}",
-            $"Transferred {employee.FullName}: {oldDept}/{oldPos} → {request.NewDepartment}/{request.NewPosition}"
+            $"Transferred {employee.FullName}: {oldDept}/{oldPos} ? {request.NewDepartment}/{request.NewPosition}"
         );
 
         return Ok(new { message = "Employee transferred successfully", employee });
     }
 
     /// <summary>
-    /// Chấm dứt hợp đồng (nghỉ việc)
+    /// Ch?m d?t h?p d?ng (ngh? vi?c)
     /// </summary>
     [HttpPost("{id}/terminate")]
     [Authorize(Roles = "Admin")]
@@ -255,7 +256,7 @@ public class EmployeeManagementController : ControllerBase
     }
 
     /// <summary>
-    /// Kích hoạt lại nhân viên
+    /// K�ch ho?t l?i nh�n vi�n
     /// </summary>
     [HttpPost("{id}/reactivate")]
     [Authorize(Roles = "Admin")]
@@ -286,7 +287,7 @@ public class EmployeeManagementController : ControllerBase
     }
 
     /// <summary>
-    /// Xóa nhân viên vĩnh viễn
+    /// X�a nh�n vi�n vinh vi?n
     /// </summary>
     [HttpDelete("{id}")]
     [Authorize(Roles = "Admin")]
@@ -298,7 +299,7 @@ public class EmployeeManagementController : ControllerBase
 
         var employeeInfo = $"{employee.FullName} ({employee.Email})";
 
-        // Xử lý foreign key constraint: Set EmployeeId = null trong Users trước
+        // X? l� foreign key constraint: Set EmployeeId = null trong Users tru?c
         var relatedUsers = await _context.Users
             .Where(u => u.EmployeeId == id)
             .ToListAsync();
@@ -312,7 +313,7 @@ public class EmployeeManagementController : ControllerBase
             await _unitOfWork.SaveChangesAsync();
         }
 
-        // Bây giờ mới xóa Employee
+        // B�y gi? m?i x�a Employee
         _context.Employees.Remove(employee);
         await _unitOfWork.SaveChangesAsync();
 
@@ -331,29 +332,29 @@ public class EmployeeManagementController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy danh sách phòng ban
+    /// L?y danh s�ch ph�ng ban
     /// </summary>
     [HttpGet("departments")]
     public IActionResult GetDepartments()
     {
         var departments = new[]
         {
-            new { value = "Management", label = "Ban Giám Đốc", description = "Quản lý cấp cao" },
+            new { value = "Management", label = "Ban Gi�m �?c", description = "Qu?n l� c?p cao" },
             new { value = "Business", label = "Kinh Doanh", description = "Kinh doanh & marketing" },
-            new { value = "FrontDesk", label = "Lễ Tân", description = "Tiếp đón khách" },
-            new { value = "Finance", label = "Tài Chính", description = "Kế toán & thu ngân" },
-            new { value = "Operations", label = "Vận Hành", description = "Kho & logistics" },
-            new { value = "Housekeeping", label = "Buồng Phòng", description = "Dọn dẹp & vệ sinh" },
-            new { value = "Maintenance", label = "Kỹ Thuật", description = "Sửa chữa & bảo trì" },
-            new { value = "Kitchen", label = "Bếp", description = "Nhà hàng & ẩm thực" },
-            new { value = "Security", label = "Bảo Vệ", description = "An ninh" }
+            new { value = "FrontDesk", label = "L? T�n", description = "Ti?p d�n kh�ch" },
+            new { value = "Finance", label = "T�i Ch�nh", description = "K? to�n & thu ng�n" },
+            new { value = "Operations", label = "V?n H�nh", description = "Kho & logistics" },
+            new { value = "Housekeeping", label = "Bu?ng Ph�ng", description = "D?n d?p & v? sinh" },
+            new { value = "Maintenance", label = "K? Thu?t", description = "S?a ch?a & b?o tr�" },
+            new { value = "Kitchen", label = "B?p", description = "Nh� h�ng & ?m th?c" },
+            new { value = "Security", label = "B?o V?", description = "An ninh" }
         };
 
         return Ok(departments);
     }
 
     /// <summary>
-    /// Lấy danh sách chức vụ
+    /// L?y danh s�ch ch?c v?
     /// </summary>
     [HttpGet("positions")]
     public IActionResult GetPositions()
@@ -382,7 +383,7 @@ public class EmployeeManagementController : ControllerBase
     }
 
     /// <summary>
-    /// Thống kê nhân viên
+    /// Th?ng k� nh�n vi�n
     /// </summary>
     [HttpGet("statistics")]
     public async Task<IActionResult> GetStatistics()

@@ -1,4 +1,4 @@
-﻿using QuanLyResort.Repositories;
+using QuanLyResort.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using QuanLyResort.Data;
@@ -11,6 +11,7 @@ namespace QuanLyResort.Services;
 public class TwoFactorAuthService : ITwoFactorAuthService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private ResortDbContext _context => _unitOfWork.Context;
     private readonly IConfiguration _configuration;
     private readonly ILogger<TwoFactorAuthService> _logger;
     private const string Issuer = "Resort Deluxe";
@@ -65,7 +66,7 @@ public class TwoFactorAuthService : ITwoFactorAuthService
             var secretBytes = Base32Encoding.ToBytes(user.TwoFactorSecret);
             var totp = new Totp(secretBytes);
 
-            // Verify code (allow time window of ±1 step = 30 seconds)
+            // Verify code (allow time window of �1 step = 30 seconds)
             var isValid = totp.VerifyTotp(code, out var timeStepMatched, new VerificationWindow(1, 1));
 
             if (isValid)

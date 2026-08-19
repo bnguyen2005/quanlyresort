@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using QuanLyResort.Data;
 using QuanLyResort.Models;
 using QuanLyResort.Repositories;
@@ -8,6 +8,7 @@ namespace QuanLyResort.Services;
 public class InvoiceService : IInvoiceService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private ResortDbContext _context => _unitOfWork.Context;
     private readonly IAuditService _auditService;
 public InvoiceService(IUnitOfWork unitOfWork, IAuditService auditService)
     {

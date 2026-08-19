@@ -39,6 +39,7 @@ public class UnitOfWork : IUnitOfWork
         TicketMessages = new Repository<TicketMessage>(_context);
     }
 
+    public ResortDbContext Context => _context;
     public IRepository<User> Users { get; private set; }
     public IRepository<Customer> Customers { get; private set; }
     public IRepository<Room> Rooms { get; private set; }

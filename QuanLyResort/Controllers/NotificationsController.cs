@@ -1,4 +1,4 @@
-﻿using QuanLyResort.Repositories;
+using QuanLyResort.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +14,7 @@ namespace QuanLyResort.Controllers;
 public class NotificationsController : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork;
+    private ResortDbContext _context => _unitOfWork.Context;
     private readonly INotificationService _notificationService;
     private readonly ILogger<NotificationsController> _logger;
 
@@ -59,7 +60,7 @@ public class NotificationsController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting notifications");
-            return StatusCode(500, new { message = "Lỗi khi lấy thông báo", error = ex.Message });
+            return StatusCode(500, new { message = "L?i khi l?y th�ng b�o", error = ex.Message });
         }
     }
 
@@ -83,7 +84,7 @@ public class NotificationsController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting unread count");
-            return StatusCode(500, new { message = "Lỗi khi lấy số thông báo chưa đọc", error = ex.Message });
+            return StatusCode(500, new { message = "L?i khi l?y s? th�ng b�o chua d?c", error = ex.Message });
         }
     }
 
@@ -94,12 +95,12 @@ public class NotificationsController : ControllerBase
         try
         {
             await _notificationService.MarkAsReadAsync(id);
-            return Ok(new { message = "Đã đánh dấu đã đọc" });
+            return Ok(new { message = "�� d�nh d?u d� d?c" });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error marking notification as read");
-            return StatusCode(500, new { message = "Lỗi khi đánh dấu đã đọc", error = ex.Message });
+            return StatusCode(500, new { message = "L?i khi d�nh d?u d� d?c", error = ex.Message });
         }
     }
 
@@ -126,12 +127,12 @@ public class NotificationsController : ControllerBase
 
             await _unitOfWork.SaveChangesAsync();
 
-            return Ok(new { message = "Đã đánh dấu tất cả đã đọc", count = notifications.Count });
+            return Ok(new { message = "�� d�nh d?u t?t c? d� d?c", count = notifications.Count });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error marking all notifications as read");
-            return StatusCode(500, new { message = "Lỗi khi đánh dấu tất cả đã đọc", error = ex.Message });
+            return StatusCode(500, new { message = "L?i khi d�nh d?u t?t c? d� d?c", error = ex.Message });
         }
     }
 
@@ -144,18 +145,18 @@ public class NotificationsController : ControllerBase
             var notification = await _context.Notifications.FindAsync(id);
             if (notification == null)
             {
-                return NotFound(new { message = "Thông báo không tồn tại" });
+                return NotFound(new { message = "Th�ng b�o kh�ng t?n t?i" });
             }
 
             _context.Notifications.Remove(notification);
             await _unitOfWork.SaveChangesAsync();
 
-            return Ok(new { message = "Đã xóa thông báo" });
+            return Ok(new { message = "�� x�a th�ng b�o" });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting notification");
-            return StatusCode(500, new { message = "Lỗi khi xóa thông báo", error = ex.Message });
+            return StatusCode(500, new { message = "L?i khi x�a th�ng b�o", error = ex.Message });
         }
     }
 }

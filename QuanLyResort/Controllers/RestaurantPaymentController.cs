@@ -1,4 +1,4 @@
-﻿using QuanLyResort.Repositories;
+using QuanLyResort.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using QuanLyResort.Services;
 using System.Text.RegularExpressions;
@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 namespace QuanLyResort.Controllers;
 
 /// <summary>
-/// Controller đơn giản cho thanh toán - tạo PayOs payment link và xử lý webhook
+/// Controller don gi?n cho thanh to�n - t?o PayOs payment link v� x? l� webhook
 /// </summary>
 [ApiController]
     [Route("api/simplepayment")]
@@ -23,6 +23,7 @@ namespace QuanLyResort.Controllers;
     private readonly VietQRService? _vietQRService;
     private readonly ILogger<RestaurantPaymentController> _logger;
     private readonly IUnitOfWork _unitOfWork;
+    private ResortDbContext _context => _unitOfWork.Context;
 
     public RestaurantPaymentController(
         IBookingService bookingService,
@@ -41,7 +42,7 @@ namespace QuanLyResort.Controllers;
     }
 
     /// <summary>
-    /// Tạo PayOs payment link cho restaurant order
+    /// T?o PayOs payment link cho restaurant order
     /// </summary>
     [HttpPost("create-link-restaurant")]
     [Authorize]
@@ -49,7 +50,7 @@ namespace QuanLyResort.Controllers;
     {
         try
         {
-            _logger.LogInformation("[BACKEND] 🔄 [CreateRestaurantLink] Creating PayOs payment link for restaurant order {OrderId}", request.OrderId);
+            _logger.LogInformation("[BACKEND] ?? [CreateRestaurantLink] Creating PayOs payment link for restaurant order {OrderId}", request.OrderId);
 
             // Get restaurant order
             var order = await _context.RestaurantOrders
@@ -58,10 +59,10 @@ namespace QuanLyResort.Controllers;
             
             if (order == null)
             {
-                return NotFound(new { message = $"Restaurant order {request.OrderId} không tồn tại" });
+                return NotFound(new { message = $"Restaurant order {request.OrderId} kh�ng t?n t?i" });
             }
 
-            // Check authorization - customer chỉ có thể thanh toán đơn của mình
+            // Check authorization - customer ch? c� th? thanh to�n don c?a m�nh
             var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
             var customerIdClaim = User.FindFirst("CustomerId")?.Value;
             
@@ -69,29 +70,29 @@ namespace QuanLyResort.Controllers;
             {
                 if (order.CustomerId == null)
                 {
-                    return BadRequest(new { message = "Đơn hàng này là đơn tại quầy, vui lòng thanh toán trực tiếp tại nhà hàng" });
+                    return BadRequest(new { message = "�on h�ng n�y l� don t?i qu?y, vui l�ng thanh to�n tr?c ti?p t?i nh� h�ng" });
                 }
                 
                 if (string.IsNullOrEmpty(customerIdClaim) || !int.TryParse(customerIdClaim, out int customerId) || order.CustomerId != customerId)
                 {
-                    return StatusCode(403, new { message = "Bạn chỉ có thể thanh toán đơn hàng của chính bạn" });
+                    return StatusCode(403, new { message = "B?n ch? c� th? thanh to�n don h�ng c?a ch�nh b?n" });
                 }
             }
 
             // Check if already paid
             if (order.PaymentStatus == "Paid")
             {
-                return BadRequest(new { message = "Đơn hàng này đã được thanh toán" });
+                return BadRequest(new { message = "�on h�ng n�y d� du?c thanh to�n" });
             }
 
             // Get amount
             var amount = order.TotalAmount;
             if (amount <= 0)
             {
-                return BadRequest(new { message = "Số tiền thanh toán không hợp lệ" });
+                return BadRequest(new { message = "S? ti?n thanh to�n kh�ng h?p l?" });
             }
 
-            // Tạo orderCode unique - dùng format khác với booking để tránh conflict
+            // T?o orderCode unique - d�ng format kh�c v?i booking d? tr�nh conflict
             // Restaurant order: orderCode = 20000000 + orderId * 10000 + timestamp
             var timestamp = (int)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1)).TotalSeconds);
             var orderCode = 20000000L + request.OrderId * 10000L + (timestamp % 10000);
@@ -115,26 +116,26 @@ namespace QuanLyResort.Controllers;
 
             if (paymentLink == null)
             {
-                _logger.LogError("[BACKEND] ❌ [CreateRestaurantLink] PayOs service returned null");
+                _logger.LogError("[BACKEND] ? [CreateRestaurantLink] PayOs service returned null");
                 return StatusCode(500, new { 
-                    message = "Không thể tạo mã thanh toán. Vui lòng thử lại.",
+                    message = "Kh�ng th? t?o m� thanh to�n. Vui l�ng th? l?i.",
                     error = "PayOs service returned null"
                 });
             }
 
             if (paymentLink.Data == null)
             {
-                // Nếu lỗi "Đơn thanh toán đã tồn tại", thử lấy payment link hiện có
-                if (paymentLink.Desc?.Contains("đã tồn tại") == true || 
+                // N?u l?i "�on thanh to�n d� t?n t?i", th? l?y payment link hi?n c�
+                if (paymentLink.Desc?.Contains("d� t?n t?i") == true || 
                     paymentLink.Desc?.Contains("already exists") == true ||
                     paymentLink.Code == "03")
                 {
-                    _logger.LogWarning("[BACKEND] ⚠️ [CreateRestaurantLink] Payment link already exists for orderCode {OrderCode}. Trying to get existing link...", orderCode);
+                    _logger.LogWarning("[BACKEND] ?? [CreateRestaurantLink] Payment link already exists for orderCode {OrderCode}. Trying to get existing link...", orderCode);
                     
                     var existingLink = await _payOsService.GetPaymentLinkByOrderCodeAsync(orderCode);
                     if (existingLink?.Data != null)
                     {
-                        _logger.LogInformation("[BACKEND] ✅ [CreateRestaurantLink] Found existing payment link: PaymentLinkId={PaymentLinkId}", 
+                        _logger.LogInformation("[BACKEND] ? [CreateRestaurantLink] Found existing payment link: PaymentLinkId={PaymentLinkId}", 
                             existingLink.Data.PaymentLinkId);
                         
                         return Ok(new
@@ -153,45 +154,45 @@ namespace QuanLyResort.Controllers;
                     }
                 }
                 
-                _logger.LogError("[BACKEND] ❌ [CreateRestaurantLink] PayOs returned error. Code: {Code}, Desc: {Desc}", 
+                _logger.LogError("[BACKEND] ? [CreateRestaurantLink] PayOs returned error. Code: {Code}, Desc: {Desc}", 
                     paymentLink.Code, paymentLink.Desc);
                 return StatusCode(500, new { 
-                    message = $"Không thể tạo mã thanh toán. {paymentLink.Desc ?? "Vui lòng thử lại."}",
+                    message = $"Kh�ng th? t?o m� thanh to�n. {paymentLink.Desc ?? "Vui l�ng th? l?i."}",
                     code = paymentLink.Code,
                     desc = paymentLink.Desc,
                     error = "PayOs API returned error"
                 });
             }
 
-            _logger.LogInformation("[BACKEND] ✅ [CreateRestaurantLink] Payment link created: PaymentLinkId={PaymentLinkId}", 
+            _logger.LogInformation("[BACKEND] ? [CreateRestaurantLink] Payment link created: PaymentLinkId={PaymentLinkId}", 
                 paymentLink.Data.PaymentLinkId);
             
             // Log QR code details
             var hasQrCode = !string.IsNullOrEmpty(paymentLink.Data.QrCode);
-            _logger.LogInformation("[BACKEND] 🔍 [CreateRestaurantLink] QR Code in response: {HasQR}, Length: {Length}", 
+            _logger.LogInformation("[BACKEND] ?? [CreateRestaurantLink] QR Code in response: {HasQR}, Length: {Length}", 
                 hasQrCode, paymentLink.Data.QrCode?.Length ?? 0);
             
             // Log account information
-            _logger.LogInformation("[BACKEND] 🏦 [CreateRestaurantLink] Account Number: {AccountNumber}, Account Name: {AccountName}", 
+            _logger.LogInformation("[BACKEND] ?? [CreateRestaurantLink] Account Number: {AccountNumber}, Account Name: {AccountName}", 
                 paymentLink.Data.AccountNumber, paymentLink.Data.AccountName);
             
-            // Validate account number - phải là 0901329227 (MB Bank)
+            // Validate account number - ph?i l� 0901329227 (MB Bank)
             const string expectedAccountNumber = "0901329227";
             if (!string.IsNullOrEmpty(paymentLink.Data.AccountNumber) && 
                 paymentLink.Data.AccountNumber != expectedAccountNumber)
             {
-                _logger.LogWarning("[BACKEND] ⚠️ [CreateRestaurantLink] Account Number mismatch! Expected: {Expected}, Got: {Actual}", 
+                _logger.LogWarning("[BACKEND] ?? [CreateRestaurantLink] Account Number mismatch! Expected: {Expected}, Got: {Actual}", 
                     expectedAccountNumber, paymentLink.Data.AccountNumber);
             }
             else if (paymentLink.Data.AccountNumber == expectedAccountNumber)
             {
-                _logger.LogInformation("[BACKEND] ✅ [CreateRestaurantLink] Account Number verified: {AccountNumber} (MB Bank)", 
+                _logger.LogInformation("[BACKEND] ? [CreateRestaurantLink] Account Number verified: {AccountNumber} (MB Bank)", 
                     paymentLink.Data.AccountNumber);
             }
             
             if (!hasQrCode)
             {
-                _logger.LogWarning("[BACKEND] ⚠️ [CreateRestaurantLink] PayOs did not return QR code. CheckoutUrl: {CheckoutUrl}", 
+                _logger.LogWarning("[BACKEND] ?? [CreateRestaurantLink] PayOs did not return QR code. CheckoutUrl: {CheckoutUrl}", 
                     paymentLink.Data.CheckoutUrl);
             }
 
@@ -211,14 +212,14 @@ namespace QuanLyResort.Controllers;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "[BACKEND] ❌ [CreateRestaurantLink] Exception creating payment link: {Message}", ex.Message);
+            _logger.LogError(ex, "[BACKEND] ? [CreateRestaurantLink] Exception creating payment link: {Message}", ex.Message);
             if (ex.InnerException != null)
             {
-                _logger.LogError(ex.InnerException, "[BACKEND] ❌ [CreateRestaurantLink] Inner exception: {Message}", ex.InnerException.Message);
+                _logger.LogError(ex.InnerException, "[BACKEND] ? [CreateRestaurantLink] Inner exception: {Message}", ex.InnerException.Message);
             }
-            _logger.LogError("[BACKEND] ❌ [CreateRestaurantLink] Stack trace: {StackTrace}", ex.StackTrace);
+            _logger.LogError("[BACKEND] ? [CreateRestaurantLink] Stack trace: {StackTrace}", ex.StackTrace);
             return StatusCode(500, new { 
-                message = "Lỗi tạo mã thanh toán", 
+                message = "L?i t?o m� thanh to�n", 
                 error = ex.Message,
                 innerError = ex.InnerException?.Message,
                 stackTrace = ex.StackTrace
@@ -227,7 +228,7 @@ namespace QuanLyResort.Controllers;
     }
 
     /// <summary>
-    /// Tạo QR code động cho restaurant order bằng SePay API
+    /// T?o QR code d?ng cho restaurant order b?ng SePay API
     /// </summary>
     [HttpPost("create-qr-restaurant")]
     [Authorize]
@@ -237,11 +238,11 @@ namespace QuanLyResort.Controllers;
         {
             if (_sePayService == null)
             {
-                _logger.LogWarning("[BACKEND] ⚠️ [CreateRestaurantQRCode] SePayService chưa được cấu hình");
-                return BadRequest(new { message = "SePay service chưa được cấu hình. Vui lòng cấu hình SePay API credentials." });
+                _logger.LogWarning("[BACKEND] ?? [CreateRestaurantQRCode] SePayService chua du?c c?u h�nh");
+                return BadRequest(new { message = "SePay service chua du?c c?u h�nh. Vui l�ng c?u h�nh SePay API credentials." });
             }
 
-            _logger.LogInformation("[BACKEND] 🔄 [CreateRestaurantQRCode] Tạo QR code SePay cho restaurant order {OrderId}", request.OrderId);
+            _logger.LogInformation("[BACKEND] ?? [CreateRestaurantQRCode] T?o QR code SePay cho restaurant order {OrderId}", request.OrderId);
 
             // Get restaurant order
             var order = await _context.RestaurantOrders
@@ -250,36 +251,36 @@ namespace QuanLyResort.Controllers;
 
             if (order == null)
             {
-                return NotFound(new { message = $"Restaurant order {request.OrderId} không tồn tại" });
+                return NotFound(new { message = $"Restaurant order {request.OrderId} kh�ng t?n t?i" });
             }
 
             // Check if already paid
             if (order.Status == "Paid" || order.Status == "Completed")
             {
-                return BadRequest(new { message = "Đơn hàng này đã được thanh toán" });
+                return BadRequest(new { message = "�on h�ng n�y d� du?c thanh to�n" });
             }
 
             // Get amount
             var amount = order.TotalAmount;
             if (amount <= 0)
             {
-                return BadRequest(new { message = "Số tiền thanh toán không hợp lệ" });
+                return BadRequest(new { message = "S? ti?n thanh to�n kh�ng h?p l?" });
             }
 
-            // Tạo đơn hàng và QR code qua SePay API
-            // Duration: 24 giờ (86400 giây)
+            // T?o don h�ng v� QR code qua SePay API
+            // Duration: 24 gi? (86400 gi�y)
             var sepayOrder = await _sePayService.CreateRestaurantOrderAsync(request.OrderId, amount, durationSeconds: 86400);
 
             if (sepayOrder == null)
             {
-                _logger.LogError("[BACKEND] ❌ [CreateRestaurantQRCode] SePay service returned null");
+                _logger.LogError("[BACKEND] ? [CreateRestaurantQRCode] SePay service returned null");
                 return StatusCode(500, new { 
-                    message = "Không thể tạo QR code. Vui lòng kiểm tra cấu hình SePay API hoặc thử lại sau.",
+                    message = "Kh�ng th? t?o QR code. Vui l�ng ki?m tra c?u h�nh SePay API ho?c th? l?i sau.",
                     error = "SePay service returned null"
                 });
             }
 
-            _logger.LogInformation("[BACKEND] ✅ [CreateRestaurantQRCode] QR code tạo thành công: OrderId={OrderId}, OrderCode={OrderCode}", 
+            _logger.LogInformation("[BACKEND] ? [CreateRestaurantQRCode] QR code t?o th�nh c�ng: OrderId={OrderId}, OrderCode={OrderCode}", 
                 sepayOrder.OrderId, sepayOrder.OrderCode);
 
             return Ok(new
@@ -300,16 +301,16 @@ namespace QuanLyResort.Controllers;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "[BACKEND] ❌ [CreateRestaurantQRCode] Lỗi khi tạo QR code cho restaurant order {OrderId}", request.OrderId);
+            _logger.LogError(ex, "[BACKEND] ? [CreateRestaurantQRCode] L?i khi t?o QR code cho restaurant order {OrderId}", request.OrderId);
             return StatusCode(500, new { 
-                message = "Lỗi khi tạo QR code. Vui lòng thử lại.",
+                message = "L?i khi t?o QR code. Vui l�ng th? l?i.",
                 error = ex.Message
             });
         }
     }
 
     /// <summary>
-    /// Tạo QR code động cho restaurant order bằng VietQR (Miễn phí)
+    /// T?o QR code d?ng cho restaurant order b?ng VietQR (Mi?n ph�)
     /// </summary>
     [HttpPost("create-qr-restaurant-vietqr")]
     [Authorize]
@@ -319,11 +320,11 @@ namespace QuanLyResort.Controllers;
         {
             if (_vietQRService == null)
             {
-                _logger.LogWarning("[BACKEND] ⚠️ [CreateRestaurantQRCodeVietQR] VietQRService chưa được cấu hình");
-                return BadRequest(new { message = "VietQR service chưa được cấu hình. Vui lòng cấu hình bank account number." });
+                _logger.LogWarning("[BACKEND] ?? [CreateRestaurantQRCodeVietQR] VietQRService chua du?c c?u h�nh");
+                return BadRequest(new { message = "VietQR service chua du?c c?u h�nh. Vui l�ng c?u h�nh bank account number." });
             }
 
-            _logger.LogInformation("[BACKEND] 🔄 [CreateRestaurantQRCodeVietQR] Tạo QR code VietQR cho restaurant order {OrderId}", request.OrderId);
+            _logger.LogInformation("[BACKEND] ?? [CreateRestaurantQRCodeVietQR] T?o QR code VietQR cho restaurant order {OrderId}", request.OrderId);
 
             // Get restaurant order
             var order = await _context.RestaurantOrders
@@ -332,35 +333,35 @@ namespace QuanLyResort.Controllers;
 
             if (order == null)
             {
-                return NotFound(new { message = $"Restaurant order {request.OrderId} không tồn tại" });
+                return NotFound(new { message = $"Restaurant order {request.OrderId} kh�ng t?n t?i" });
             }
 
             // Check if already paid
             if (order.Status == "Paid" || order.Status == "Completed")
             {
-                return BadRequest(new { message = "Đơn hàng này đã được thanh toán" });
+                return BadRequest(new { message = "�on h�ng n�y d� du?c thanh to�n" });
             }
 
             // Get amount
             var amount = order.TotalAmount;
             if (amount <= 0)
             {
-                return BadRequest(new { message = "Số tiền thanh toán không hợp lệ" });
+                return BadRequest(new { message = "S? ti?n thanh to�n kh�ng h?p l?" });
             }
 
-            // Tạo QR code URL bằng VietQR (miễn phí)
+            // T?o QR code URL b?ng VietQR (mi?n ph�)
             var qrCodeUrl = _vietQRService.CreateRestaurantOrderQRCode(request.OrderId, amount);
 
             if (string.IsNullOrEmpty(qrCodeUrl))
             {
-                _logger.LogError("[BACKEND] ❌ [CreateRestaurantQRCodeVietQR] VietQR service returned null");
+                _logger.LogError("[BACKEND] ? [CreateRestaurantQRCodeVietQR] VietQR service returned null");
                 return StatusCode(500, new { 
-                    message = "Không thể tạo QR code. Vui lòng kiểm tra cấu hình bank account number.",
+                    message = "Kh�ng th? t?o QR code. Vui l�ng ki?m tra c?u h�nh bank account number.",
                     error = "VietQR service returned null"
                 });
             }
 
-            _logger.LogInformation("[BACKEND] ✅ [CreateRestaurantQRCodeVietQR] QR code tạo thành công: OrderId={OrderId}, Amount={Amount:N0} VND", 
+            _logger.LogInformation("[BACKEND] ? [CreateRestaurantQRCodeVietQR] QR code t?o th�nh c�ng: OrderId={OrderId}, Amount={Amount:N0} VND", 
                 request.OrderId, amount);
 
             return Ok(new
@@ -368,7 +369,7 @@ namespace QuanLyResort.Controllers;
                 success = true,
                 orderId = $"ORDER{request.OrderId}",
                 orderCode = $"ORDER{request.OrderId}",
-                qrCode = (string?)null, // VietQR không có base64, chỉ có URL
+                qrCode = (string?)null, // VietQR kh�ng c� base64, ch? c� URL
                 qrCodeUrl = qrCodeUrl, // URL to QR code image
                 amount = (long)amount,
                 accountNumber = _vietQRService.GetBankAccountNumber(),
@@ -381,9 +382,9 @@ namespace QuanLyResort.Controllers;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "[BACKEND] ❌ [CreateRestaurantQRCodeVietQR] Lỗi khi tạo QR code cho restaurant order {OrderId}", request.OrderId);
+            _logger.LogError(ex, "[BACKEND] ? [CreateRestaurantQRCodeVietQR] L?i khi t?o QR code cho restaurant order {OrderId}", request.OrderId);
             return StatusCode(500, new { 
-                message = "Lỗi khi tạo QR code. Vui lòng thử lại.",
+                message = "L?i khi t?o QR code. Vui l�ng th? l?i.",
                 error = ex.Message
             });
         }

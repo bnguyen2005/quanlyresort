@@ -1,4 +1,4 @@
-﻿using QuanLyResort.Repositories;
+using QuanLyResort.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +14,7 @@ namespace QuanLyResort.Controllers
 public class InventoryController : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork;
+    private ResortDbContext _context => _unitOfWork.Context;
 
         public InventoryController(IUnitOfWork unitOfWork)
     {
@@ -66,7 +67,7 @@ public class InventoryController : ControllerBase
                 var totalItems = await query.CountAsync();
                 Console.WriteLine($"[Inventory] totalItems after filters={totalItems}");
                 
-                // Show newest items first so vừa tạo sẽ xuất hiện ngay đầu danh sách
+                // Show newest items first so v?a t?o s? xu?t hi?n ngay d?u danh s�ch
                 var items = await query
                     .OrderByDescending(i => i.ItemId)
                     .Skip((page - 1) * pageSize)
@@ -111,7 +112,7 @@ public class InventoryController : ControllerBase
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Lỗi khi tải danh sách hàng tồn kho", error = ex.Message });
+                return StatusCode(500, new { message = "L?i khi t?i danh s�ch h�ng t?n kho", error = ex.Message });
             }
         }
 
@@ -129,7 +130,7 @@ public class InventoryController : ControllerBase
 
                 if (item == null)
                 {
-                    return NotFound(new { message = "Không tìm thấy sản phẩm" });
+                    return NotFound(new { message = "Kh�ng t�m th?y s?n ph?m" });
                 }
 
                 return Ok(new
@@ -163,7 +164,7 @@ public class InventoryController : ControllerBase
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Lỗi khi tải thông tin sản phẩm", error = ex.Message });
+                return StatusCode(500, new { message = "L?i khi t?i th�ng tin s?n ph?m", error = ex.Message });
             }
         }
 
@@ -180,7 +181,7 @@ public class InventoryController : ControllerBase
 
                 if (existingItem != null)
                 {
-                    return BadRequest(new { message = "Mã sản phẩm đã tồn tại" });
+                    return BadRequest(new { message = "M� s?n ph?m d� t?n t?i" });
                 }
 
                 var item = new InventoryItem
@@ -230,11 +231,11 @@ public class InventoryController : ControllerBase
 
                 var newTotal = await _context.InventoryItems.CountAsync();
                 return CreatedAtAction(nameof(GetInventoryItem), new { id = item.ItemId }, 
-                    new { message = "Tạo sản phẩm thành công", itemId = item.ItemId, totalItems = newTotal });
+                    new { message = "T?o s?n ph?m th�nh c�ng", itemId = item.ItemId, totalItems = newTotal });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Lỗi khi tạo sản phẩm", error = ex.Message });
+                return StatusCode(500, new { message = "L?i khi t?o s?n ph?m", error = ex.Message });
             }
         }
 
@@ -249,7 +250,7 @@ public class InventoryController : ControllerBase
                 var item = await _context.InventoryItems.FindAsync(id);
                 if (item == null)
                 {
-                    return NotFound(new { message = "Không tìm thấy sản phẩm" });
+                    return NotFound(new { message = "Kh�ng t�m th?y s?n ph?m" });
                 }
 
                 var oldValues = System.Text.Json.JsonSerializer.Serialize(item);
@@ -264,7 +265,7 @@ public class InventoryController : ControllerBase
                         .AnyAsync(i => i.ItemCode == dto.ItemCode && i.ItemId != id);
                     if (duplicate)
                     {
-                        return BadRequest(new { message = "Mã sản phẩm đã tồn tại" });
+                        return BadRequest(new { message = "M� s?n ph?m d� t?n t?i" });
                     }
                     item.ItemCode = dto.ItemCode.Trim();
                 }
@@ -288,11 +289,11 @@ public class InventoryController : ControllerBase
                 await LogAuditAsync("InventoryItem", item.ItemId, "Update", oldValues, 
                     System.Text.Json.JsonSerializer.Serialize(item));
 
-                return Ok(new { message = "Cập nhật sản phẩm thành công", itemId = item.ItemId });
+                return Ok(new { message = "C?p nh?t s?n ph?m th�nh c�ng", itemId = item.ItemId });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Lỗi khi cập nhật sản phẩm", error = ex.Message });
+                return StatusCode(500, new { message = "L?i khi c?p nh?t s?n ph?m", error = ex.Message });
             }
         }
 
@@ -306,7 +307,7 @@ public class InventoryController : ControllerBase
                 var item = await _context.InventoryItems.FindAsync(id);
                 if (item == null)
                 {
-                    return NotFound(new { message = "Không tìm thấy sản phẩm" });
+                    return NotFound(new { message = "Kh�ng t�m th?y s?n ph?m" });
                 }
 
                 var oldStock = item.CurrentStock;
@@ -321,7 +322,7 @@ public class InventoryController : ControllerBase
 
                 if (newStock < 0)
                 {
-                    return BadRequest(new { message = "Số lượng tồn kho không thể âm" });
+                    return BadRequest(new { message = "S? lu?ng t?n kho kh�ng th? �m" });
                 }
 
                 // Update stock
@@ -349,7 +350,7 @@ public class InventoryController : ControllerBase
 
                 return Ok(new 
                 { 
-                    message = "Cập nhật tồn kho thành công",
+                    message = "C?p nh?t t?n kho th�nh c�ng",
                     oldStock,
                     newStock = item.CurrentStock,
                     movementId = stockMovement.MovementId
@@ -357,7 +358,7 @@ public class InventoryController : ControllerBase
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Lỗi khi cập nhật tồn kho", error = ex.Message });
+                return StatusCode(500, new { message = "L?i khi c?p nh?t t?n kho", error = ex.Message });
             }
         }
 
@@ -371,12 +372,12 @@ public class InventoryController : ControllerBase
                 var item = await _context.InventoryItems.FindAsync(id);
                 if (item == null)
                 {
-                    return NotFound(new { message = "Không tìm thấy sản phẩm" });
+                    return NotFound(new { message = "Kh�ng t�m th?y s?n ph?m" });
                 }
 
                 if (!item.IsActive)
                 {
-                    return Ok(new { message = "Sản phẩm đã ở trạng thái ẩn", itemId = id });
+                    return Ok(new { message = "S?n ph?m d� ? tr?ng th�i ?n", itemId = id });
                 }
 
                 var oldValues = System.Text.Json.JsonSerializer.Serialize(item);
@@ -387,11 +388,11 @@ public class InventoryController : ControllerBase
                 await LogAuditAsync("InventoryItem", item.ItemId, "SoftDelete", oldValues,
                     System.Text.Json.JsonSerializer.Serialize(item));
 
-                return Ok(new { message = "Đã ẩn sản phẩm", itemId = id });
+                return Ok(new { message = "�� ?n s?n ph?m", itemId = id });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Lỗi khi xóa sản phẩm", error = ex.Message });
+                return StatusCode(500, new { message = "L?i khi x�a s?n ph?m", error = ex.Message });
             }
         }
 
@@ -405,7 +406,7 @@ public class InventoryController : ControllerBase
                 var item = await _context.InventoryItems.FindAsync(id);
                 if (item == null)
                 {
-                    return NotFound(new { message = "Không tìm thấy sản phẩm" });
+                    return NotFound(new { message = "Kh�ng t�m th?y s?n ph?m" });
                 }
                 var oldValues = System.Text.Json.JsonSerializer.Serialize(item);
                 item.IsActive = !item.IsActive;
@@ -413,11 +414,11 @@ public class InventoryController : ControllerBase
                 await _unitOfWork.SaveChangesAsync();
                 await LogAuditAsync("InventoryItem", item.ItemId, "ToggleActive", oldValues,
                     System.Text.Json.JsonSerializer.Serialize(item));
-                return Ok(new { message = "Đã cập nhật trạng thái", itemId = id, isActive = item.IsActive });
+                return Ok(new { message = "�� c?p nh?t tr?ng th�i", itemId = id, isActive = item.IsActive });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Lỗi khi cập nhật trạng thái", error = ex.Message });
+                return StatusCode(500, new { message = "L?i khi c?p nh?t tr?ng th�i", error = ex.Message });
             }
         }
 
@@ -443,7 +444,7 @@ public class InventoryController : ControllerBase
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Lỗi khi tải danh mục", error = ex.Message });
+                return StatusCode(500, new { message = "L?i khi t?i danh m?c", error = ex.Message });
             }
         }
 
@@ -470,7 +471,7 @@ public class InventoryController : ControllerBase
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Lỗi khi tải nhà cung cấp", error = ex.Message });
+                return StatusCode(500, new { message = "L?i khi t?i nh� cung c?p", error = ex.Message });
             }
         }
 
@@ -483,7 +484,7 @@ public class InventoryController : ControllerBase
                 var totalItems = await _context.InventoryItems.CountAsync(i => i.IsActive);
                 var lowStockItems = await _context.InventoryItems
                     .CountAsync(i => i.IsActive && i.CurrentStock <= i.MinimumStock);
-                // SQLite không hỗ trợ Sum trên biểu thức decimal phức tạp -> chuyển sang client
+                // SQLite kh�ng h? tr? Sum tr�n bi?u th?c decimal ph?c t?p -> chuy?n sang client
                 var totalValue = _context.InventoryItems
                     .Where(i => i.IsActive)
                     .Select(i => new { i.CurrentStock, i.UnitPrice })
@@ -507,7 +508,7 @@ public class InventoryController : ControllerBase
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Lỗi khi tải thống kê", error = ex.Message });
+                return StatusCode(500, new { message = "L?i khi t?i th?ng k�", error = ex.Message });
             }
         }
 
@@ -540,7 +541,7 @@ public class InventoryController : ControllerBase
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Lỗi khi tải cảnh báo tồn kho", error = ex.Message });
+                return StatusCode(500, new { message = "L?i khi t?i c?nh b�o t?n kho", error = ex.Message });
             }
         }
 

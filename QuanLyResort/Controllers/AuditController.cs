@@ -1,4 +1,4 @@
-﻿using QuanLyResort.Repositories;
+using QuanLyResort.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +12,7 @@ namespace QuanLyResort.Controllers;
 public class AuditController : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork;
+    private ResortDbContext _context => _unitOfWork.Context;
 
     public AuditController(IUnitOfWork unitOfWork)
     {
@@ -19,8 +20,8 @@ public class AuditController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy danh sách audit logs với filter
-    /// GET /api/audit-log hoặc /api/audit-log/logs
+    /// L?y danh s�ch audit logs v?i filter
+    /// GET /api/audit-log ho?c /api/audit-log/logs
     /// </summary>
     [HttpGet]
     [HttpGet("logs")]
@@ -76,7 +77,7 @@ public class AuditController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy audit logs theo entity cụ thể
+    /// L?y audit logs theo entity c? th?
     /// </summary>
     [HttpGet("entity/{entityName}/{entityId}")]
     public async Task<IActionResult> GetEntityAuditLogs(string entityName, int entityId)
@@ -90,7 +91,7 @@ public class AuditController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy thống kê hoạt động theo user
+    /// L?y th?ng k� ho?t d?ng theo user
     /// </summary>
     [HttpGet("user-activity")]
     public async Task<IActionResult> GetUserActivity(
@@ -124,7 +125,7 @@ public class AuditController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy thống kê theo entity
+    /// L?y th?ng k� theo entity
     /// </summary>
     [HttpGet("entity-statistics")]
     public async Task<IActionResult> GetEntityStatistics(
@@ -157,7 +158,7 @@ public class AuditController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy danh sách action types
+    /// L?y danh s�ch action types
     /// </summary>
     [HttpGet("action-types")]
     public async Task<IActionResult> GetActionTypes()
@@ -172,7 +173,7 @@ public class AuditController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy danh sách entity types
+    /// L?y danh s�ch entity types
     /// </summary>
     [HttpGet("entity-types")]
     public async Task<IActionResult> GetEntityTypes()
@@ -187,7 +188,7 @@ public class AuditController : ControllerBase
     }
 
     /// <summary>
-    /// Xóa logs cũ (Admin only)
+    /// X�a logs cu (Admin only)
     /// </summary>
     [HttpDelete("cleanup")]
     [Authorize(Roles = "Admin")]
