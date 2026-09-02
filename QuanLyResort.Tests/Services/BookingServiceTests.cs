@@ -4,6 +4,8 @@ using QuanLyResort.Services;
 using QuanLyResort.Models;
 using QuanLyResort.Repositories;
 using Microsoft.Extensions.Logging;
+using QuanLyResort.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace QuanLyResort.Tests.Services
 {
@@ -22,12 +24,29 @@ namespace QuanLyResort.Tests.Services
             _mockAuditService = new Mock<IAuditService>();
             _mockLogger = new Mock<ILogger<BookingService>>();
 
+            // Setup mock for DbContext using InMemory
+            var options = new Microsoft.EntityFrameworkCore.DbContextOptionsBuilder<ResortDbContext>()
+                .UseInMemoryDatabase(databaseName: "Test_ResortDb_" + System.Guid.NewGuid().ToString())
+                .Options;
+            var context = new ResortDbContext(options);
+            
+            // Seed a RoomType to avoid empty matches in test
+            context.RoomTypes.Add(new RoomType { RoomTypeId = 1, TypeName = "Standard Room", TypeCode = "STD" });
+            context.SaveChanges();
+
+            _mockUnitOfWork.Setup(u => u.Context).Returns(context);
+
             // Setup mock for Bookings & Invoices repository
             var mockBookingRepo = new Mock<IRepository<Booking>>();
             var mockInvoiceRepo = new Mock<IRepository<Invoice>>();
             
             _mockUnitOfWork.Setup(u => u.Bookings).Returns(mockBookingRepo.Object);
             _mockUnitOfWork.Setup(u => u.Invoices).Returns(mockInvoiceRepo.Object);
+            
+            var mockRoomRepo = new Mock<IRepository<Room>>();
+            mockRoomRepo.Setup(r => r.FindAsync(It.IsAny<System.Linq.Expressions.Expression<System.Func<Room, bool>>>()))
+                .ReturnsAsync(new List<Room>());
+            _mockUnitOfWork.Setup(u => u.Rooms).Returns(mockRoomRepo.Object);
             
             // Simulate DbContext assigning an ID when SaveChanges is called
             _mockUnitOfWork.Setup(u => u.SaveChangesAsync())

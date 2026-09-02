@@ -90,3 +90,16 @@ QuanLyResort/wwwroot/TEST-ROOM-TYPES-API.html
 QuanLyResort/wwwroot/RENDER-ENV-*.txt
 test-clear-storage.html
 test-advanced-features.sh
+
+# File rac / tam - khong push len GitHub
+CV_Defense_Guide.txt
+TECHNICAL-DEEP-DIVE.md
+latency.txt
+payload.cs
+test.txt
+scripts/hd.txt
+*.tmp
+*.bak
+
+# Test results
+**/TestResults/
