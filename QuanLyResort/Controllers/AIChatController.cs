@@ -127,6 +127,75 @@ public class AIChatController : ControllerBase
             timestamp = DateTime.UtcNow
         });
     }
+
+    /// <summary>
+    /// Debug endpoint - xem cấu hình AI và test gọi Groq trực tiếp
+    /// XÓA endpoint này sau khi debug xong
+    /// </summary>
+    [HttpGet("debug")]
+    [AllowAnonymous]
+    public async Task<IActionResult> Debug([FromServices] IConfiguration config)
+    {
+        var aiConfig = config.GetSection("AIChat");
+        var apiKey = aiConfig["ApiKey"] ?? "";
+        var provider = aiConfig["Provider"] ?? "unknown";
+        var model = aiConfig["Model"] ?? "unknown";
+        var apiUrl = aiConfig["ApiUrl"] ?? "unknown";
+
+        // Test gọi Groq trực tiếp
+        string groqTestResult = "not tested";
+        string groqStatusCode = "";
+        string groqResponse = "";
+
+        if (!string.IsNullOrEmpty(apiKey) && provider == "groq")
+        {
+            try
+            {
+                using var http = new System.Net.Http.HttpClient();
+                http.DefaultRequestHeaders.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiKey);
+
+                var testBody = System.Text.Json.JsonSerializer.Serialize(new
+                {
+                    model = model,
+                    messages = new[] { new { role = "user", content = "Say hello in 5 words" } },
+                    max_tokens = 20
+                });
+
+                var resp = await http.PostAsync(
+                    "https://api.groq.com/openai/v1/chat/completions",
+                    new System.Net.Http.StringContent(testBody, System.Text.Encoding.UTF8, "application/json")
+                );
+
+                groqStatusCode = ((int)resp.StatusCode).ToString();
+                groqResponse = await resp.Content.ReadAsStringAsync();
+                groqTestResult = resp.IsSuccessStatusCode ? "SUCCESS" : "FAILED";
+            }
+            catch (Exception ex)
+            {
+                groqTestResult = "EXCEPTION";
+                groqResponse = ex.Message;
+            }
+        }
+
+        return Ok(new
+        {
+            config = new
+            {
+                provider,
+                model,
+                apiUrl,
+                apiKeySet = !string.IsNullOrEmpty(apiKey),
+                apiKeyPrefix = apiKey.Length > 10 ? apiKey.Substring(0, 10) + "..." : "(empty)"
+            },
+            groqTest = new
+            {
+                result = groqTestResult,
+                statusCode = groqStatusCode,
+                responsePreview = groqResponse.Length > 300 ? groqResponse.Substring(0, 300) : groqResponse
+            }
+        });
+    }
 }
 
 /// <summary>
