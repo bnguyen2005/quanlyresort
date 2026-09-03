@@ -221,7 +221,6 @@
         flex-direction: column;
         gap: 20px;
         background: transparent;
-        scroll-behavior: smooth;
       }
       .ai-chat-messages::-webkit-scrollbar { width: 4px; }
       .ai-chat-messages::-webkit-scrollbar-track { background: transparent; }
@@ -262,6 +261,7 @@
         padding: 15px 20px;
         border-radius: 0;
         word-wrap: break-word;
+        white-space: pre-wrap;
         line-height: 1.6;
         font-size: 14px;
         font-family: 'Inter';
@@ -451,7 +451,11 @@
     }
 
     messagesContainer.appendChild(messageDiv);
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    
+    // Sử dụng setTimeout để đảm bảo trình duyệt cuộn sau khi DOM render xong
+    setTimeout(() => {
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }, 50);
 
     // Hiển thị typing indicator cho AI response
     if (type === 'user') {
@@ -474,7 +478,9 @@
       </div>
     `;
     messagesContainer.appendChild(typing);
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    setTimeout(() => {
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }, 50);
   }
 
   function escapeHtml(text) {
