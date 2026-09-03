@@ -1,4 +1,4 @@
-using QuanLyResort.Repositories;
+ï»¿using QuanLyResort.Repositories;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
@@ -10,8 +10,8 @@ using QuanLyResort.Data;
 namespace QuanLyResort.Services;
 
 /// <summary>
-/// Service d? tuong tác v?i AI Chat API
-/// H? tr? OpenAI ho?c các AI service khác
+/// Service d? tuong tï¿½c v?i AI Chat API
+/// H? tr? OpenAI ho?c cï¿½c AI service khï¿½c
 /// </summary>
 public class AIChatService
 {
@@ -42,14 +42,14 @@ public class AIChatService
         _roomService = roomService;
         _unitOfWork = unitOfWork;
 
-        // Clear any existing BaseAddress d? tránh conflict v?i absolute URLs
+        // Clear any existing BaseAddress d? trï¿½nh conflict v?i absolute URLs
         if (_httpClient.BaseAddress != null)
         {
             _logger.LogWarning("[AI Chat] ?? HttpClient has BaseAddress: {BaseAddress}, clearing it", _httpClient.BaseAddress);
             _httpClient.BaseAddress = null;
         }
         
-        // Clear default headers d? tránh conflict
+        // Clear default headers d? trï¿½nh conflict
         _httpClient.DefaultRequestHeaders.Clear();
 
         var aiConfig = _configuration.GetSection("AIChat");
@@ -67,7 +67,7 @@ public class AIChatService
         {
             _apiUrl = aiConfig["ApiUrl"] ?? "https://api.groq.com/openai/v1/chat/completions";
             _model = aiConfig["Model"] ?? "llama-3.1-8b-instant"; // Groq free model
-            // Groq s? d?ng format gi?ng OpenAI, nhung URL ph?i chính xác
+            // Groq s? d?ng format gi?ng OpenAI, nhung URL ph?i chï¿½nh xï¿½c
         }
         else if (_provider == "huggingface")
         {
@@ -111,16 +111,16 @@ public class AIChatService
     }
 
     /// <summary>
-    /// G?i message d?n AI và nh?n response
+    /// G?i message d?n AI vï¿½ nh?n response
     /// </summary>
     public async Task<string> SendMessageAsync(string userMessage, string? conversationContext = null, int? customerId = null)
     {
         try
         {
-            // Fetch real data t? database d?a trên user message
+            // Fetch real data t? database d?a trï¿½n user message
             var realData = await FetchRealDataAsync(userMessage, customerId);
             
-            // N?u không có API key ho?c provider là "sample", tr? v? response m?u v?i d? li?u th?t
+            // N?u khï¿½ng cï¿½ API key ho?c provider lï¿½ "sample", tr? v? response m?u v?i d? li?u th?t
             if (string.IsNullOrEmpty(_apiKey) || _provider == "sample")
             {
                 _logger.LogInformation("[AI Chat] ?? Using sample response mode with real data");
@@ -128,39 +128,39 @@ public class AIChatService
             }
 
             // T?o system prompt cho resort context v?i d? li?u th?t
-            var systemPrompt = $@"B?n là tr? lý AI thân thi?n c?a Resort Deluxe. 
-B?n giúp khách hàng v?i các câu h?i v?:
-- Ð?t phòng và booking
-- D?ch v? resort (nhà hàng, spa, h? boi, v.v.)
-- Thanh toán và hóa don
-- Chính sách h?y và d?i
-- Thông tin v? phòng và ti?n nghi
+            var systemPrompt = $@"B?n lï¿½ tr? lï¿½ AI thï¿½n thi?n c?a Resort Deluxe. 
+B?n giï¿½p khï¿½ch hï¿½ng v?i cï¿½c cï¿½u h?i v?:
+- ï¿½?t phï¿½ng vï¿½ booking
+- D?ch v? resort (nhï¿½ hï¿½ng, spa, h? boi, v.v.)
+- Thanh toï¿½n vï¿½ hï¿½a don
+- Chï¿½nh sï¿½ch h?y vï¿½ d?i
+- Thï¿½ng tin v? phï¿½ng vï¿½ ti?n nghi
 - Hu?ng d?n s? d?ng website
 
 D? li?u th?t t? website:
 {realData}
 
-Hãy tr? l?i ng?n g?n, thân thi?n và h?u ích b?ng ti?ng Vi?t, d?a trên d? li?u th?t ? trên.";
+Hï¿½y tr? l?i ng?n g?n, thï¿½n thi?n vï¿½ h?u ï¿½ch b?ng ti?ng Vi?t, d?a trï¿½n d? li?u th?t ? trï¿½n.";
 
             var messages = new List<object>
             {
                 new { role = "system", content = systemPrompt }
             };
 
-            // Thêm context n?u có
+            // Thï¿½m context n?u cï¿½
             if (!string.IsNullOrEmpty(conversationContext))
             {
                 messages.Add(new { role = "assistant", content = conversationContext });
             }
 
-            // Thêm user message
+            // Thï¿½m user message
             messages.Add(new { role = "user", content = userMessage });
 
-            // T?o request body tùy theo provider
+            // T?o request body tï¿½y theo provider
             object requestBody;
             if (_provider == "cohere")
             {
-                // Cohere có format khác
+                // Cohere cï¿½ format khï¿½c
                 requestBody = new
                 {
                     message = userMessage,
@@ -171,7 +171,7 @@ Hãy tr? l?i ng?n g?n, thân thi?n và h?u ích b?ng ti?ng Vi?t, d?a trên d? li?u th
             }
             else if (_provider == "huggingface")
             {
-                // Hugging Face có format khác
+                // Hugging Face cï¿½ format khï¿½c
                 requestBody = new
                 {
                     inputs = userMessage,
@@ -211,19 +211,19 @@ Hãy tr? l?i ng?n g?n, thân thi?n và h?u ích b?ng ti?ng Vi?t, d?a trên d? li?u th
             _logger.LogInformation("[AI Chat] ?? Request method: POST");
             _logger.LogInformation("[AI Chat] ?? Full URL: {Url}", _apiUrl);
 
-            // Ð?m b?o không có BaseAddress conflict - s? d?ng absolute URI
+            // ï¿½?m b?o khï¿½ng cï¿½ BaseAddress conflict - s? d?ng absolute URI
             Uri requestUri;
             if (Uri.TryCreate(_apiUrl, UriKind.Absolute, out requestUri))
             {
-                // URL dã là absolute, s? d?ng tr?c ti?p
+                // URL dï¿½ lï¿½ absolute, s? d?ng tr?c ti?p
             }
             else
             {
-                // N?u URL không absolute, t?o absolute URI
+                // N?u URL khï¿½ng absolute, t?o absolute URI
                 requestUri = new Uri(_apiUrl, UriKind.Absolute);
             }
 
-            // T?o HttpRequestMessage v?i POST method rõ ràng
+            // T?o HttpRequestMessage v?i POST method rï¿½ rï¿½ng
             var request = new HttpRequestMessage(HttpMethod.Post, requestUri)
             {
                 Content = content
@@ -244,28 +244,28 @@ Hãy tr? l?i ng?n g?n, thân thi?n và h?u ích b?ng ti?ng Vi?t, d?a trên d? li?u th
                 _logger.LogError("[AI Chat] ? API Error - Request URL: {Url}", _apiUrl);
                 _logger.LogError("[AI Chat] ? API Error - API Key configured: {HasKey}", !string.IsNullOrEmpty(_apiKey));
                 
-                // X? lý các l?i c? th?
+                // X? lï¿½ cï¿½c l?i c? th?
                 if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                 {
-                    _logger.LogError("[AI Chat] ? Unauthorized (401) - API Key có th? không h?p l? ho?c dã h?t h?n");
+                    _logger.LogError("[AI Chat] ? Unauthorized (401) - API Key cï¿½ th? khï¿½ng h?p l? ho?c dï¿½ h?t h?n");
                     _logger.LogError("[AI Chat] ? Check API Key in configuration");
-                    return "Xin l?i, API key không h?p l?. Vui lòng liên h? qu?n tr? viên d? c?p nh?t c?u hình.";
+                    return "Xin l?i, API key khï¿½ng h?p l?. Vui lï¿½ng liï¿½n h? qu?n tr? viï¿½n d? c?p nh?t c?u hï¿½nh.";
                 }
                 
                 if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
                 {
                     _logger.LogError("[AI Chat] ? Rate limit exceeded (429)");
-                    return "Xin l?i, h? th?ng dang quá t?i. Vui lòng th? l?i sau vài phút.";
+                    return "Xin l?i, h? th?ng dang quï¿½ t?i. Vui lï¿½ng th? l?i sau vï¿½i phï¿½t.";
                 }
                 
                 _logger.LogError("[AI Chat] ? Other error: {StatusCode}", response.StatusCode);
-                return "Xin l?i, tôi g?p s? c? khi x? lý câu h?i c?a b?n. Vui lòng th? l?i sau ho?c liên h? b? ph?n h? tr?.";
+                return "Xin l?i, tï¿½i g?p s? c? khi x? lï¿½ cï¿½u h?i c?a b?n. Vui lï¿½ng th? l?i sau ho?c liï¿½n h? b? ph?n h? tr?.";
             }
 
             _logger.LogInformation("[AI Chat] ?? Response content length: {Length}", responseContent.Length);
             _logger.LogInformation("[AI Chat] ?? Response preview: {Preview}", responseContent.Substring(0, Math.Min(200, responseContent.Length)));
 
-            // Parse response tùy theo provider
+            // Parse response tï¿½y theo provider
             string? aiResponse = null;
             
             if (_provider == "cohere")
@@ -300,7 +300,7 @@ Hãy tr? l?i ng?n g?n, thân thi?n và h?u ích b?ng ti?ng Vi?t, d?a trên d? li?u th
             _logger.LogInformation("[AI Chat] ? Successfully parsed AI response");
             _logger.LogInformation("[AI Chat] ? Response length: {Length}", aiResponse?.Length ?? 0);
 
-            return aiResponse ?? "Xin l?i, tôi không th? t?o ph?n h?i. Vui lòng th? l?i.";
+            return aiResponse ?? "Xin l?i, tï¿½i khï¿½ng th? t?o ph?n h?i. Vui lï¿½ng th? l?i.";
         }
         catch (Exception ex)
         {
@@ -312,63 +312,63 @@ Hãy tr? l?i ng?n g?n, thân thi?n và h?u ích b?ng ti?ng Vi?t, d?a trên d? li?u th
             {
                 _logger.LogError("[AI Chat] ? Inner exception: {Inner}", ex.InnerException.Message);
             }
-            return "Xin l?i, dã x?y ra l?i khi x? lý câu h?i c?a b?n. Vui lòng th? l?i sau.";
+            return "Xin l?i, dï¿½ x?y ra l?i khi x? lï¿½ cï¿½u h?i c?a b?n. Vui lï¿½ng th? l?i sau.";
         }
     }
 
     /// <summary>
-    /// Tr? v? response m?u khi không có API key
+    /// Tr? v? response m?u khi khï¿½ng cï¿½ API key
     /// </summary>
     private string GetSampleResponse(string userMessage)
     {
         var lowerMessage = userMessage.ToLower();
 
-        if (lowerMessage.Contains("d?t phòng") || lowerMessage.Contains("booking"))
+        if (lowerMessage.Contains("d?t phï¿½ng") || lowerMessage.Contains("booking"))
         {
-            return "Ð? d?t phòng, b?n có th?:\n" +
-                   "1. Ch?n phòng trên trang 'Phòng' c?a website\n" +
-                   "2. Ch?n ngày check-in và check-out\n" +
-                   "3. Ði?n thông tin và xác nh?n d?t phòng\n" +
-                   "4. Thanh toán qua PayOs ho?c chuy?n kho?n\n\n" +
-                   "N?u c?n h? tr?, vui lòng liên h? hotline: 1900-xxxx";
+            return "ï¿½? d?t phï¿½ng, b?n cï¿½ th?:\n" +
+                   "1. Ch?n phï¿½ng trï¿½n trang 'Phï¿½ng' c?a website\n" +
+                   "2. Ch?n ngï¿½y check-in vï¿½ check-out\n" +
+                   "3. ï¿½i?n thï¿½ng tin vï¿½ xï¿½c nh?n d?t phï¿½ng\n" +
+                   "4. Thanh toï¿½n qua PayOs ho?c chuy?n kho?n\n\n" +
+                   "N?u c?n h? tr?, vui lï¿½ng liï¿½n h? hotline: 1900-xxxx";
         }
 
-        if (lowerMessage.Contains("giá") || lowerMessage.Contains("phí"))
+        if (lowerMessage.Contains("giï¿½") || lowerMessage.Contains("phï¿½"))
         {
-            return "Giá phòng t?i Resort Deluxe dao d?ng t? 500.000? - 2.000.000?/dêm tùy lo?i phòng.\n" +
-                   "B?n có th? xem chi ti?t giá trên trang 'Phòng' ho?c liên h? d? du?c tu v?n c? th?.";
+            return "Giï¿½ phï¿½ng t?i Resort Deluxe dao d?ng t? 500.000? - 2.000.000?/dï¿½m tï¿½y lo?i phï¿½ng.\n" +
+                   "B?n cï¿½ th? xem chi ti?t giï¿½ trï¿½n trang 'Phï¿½ng' ho?c liï¿½n h? d? du?c tu v?n c? th?.";
         }
 
-        if (lowerMessage.Contains("d?ch v?") || lowerMessage.Contains("nhà hàng") || lowerMessage.Contains("spa"))
+        if (lowerMessage.Contains("d?ch v?") || lowerMessage.Contains("nhï¿½ hï¿½ng") || lowerMessage.Contains("spa"))
         {
             return "Resort Deluxe cung c?p nhi?u d?ch v?:\n" +
-                   "??? Nhà hàng v?i menu da d?ng\n" +
-                   "?? Spa và massage\n" +
-                   "?? H? boi ngoài tr?i\n" +
-                   "??? Phòng gym\n" +
+                   "??? Nhï¿½ hï¿½ng v?i menu da d?ng\n" +
+                   "?? Spa vï¿½ massage\n" +
+                   "?? H? boi ngoï¿½i tr?i\n" +
+                   "??? Phï¿½ng gym\n" +
                    "?? Khu vui choi\n\n" +
-                   "B?n có th? d?t d?ch v? qua website ho?c liên h? l? tân.";
+                   "B?n cï¿½ th? d?t d?ch v? qua website ho?c liï¿½n h? l? tï¿½n.";
         }
 
         if (lowerMessage.Contains("h?y") || lowerMessage.Contains("d?i"))
         {
-            return "Chính sách h?y/d?i:\n" +
-                   "• H?y tru?c 24h: Mi?n phí\n" +
-                   "• H?y trong 24h: Phí 50%\n" +
-                   "• Không d?n: Phí 100%\n\n" +
-                   "Ð? h?y/d?i booking, vui lòng vào trang 'Ð?t phòng c?a tôi' ho?c liên h? hotline.";
+            return "Chï¿½nh sï¿½ch h?y/d?i:\n" +
+                   "ï¿½ H?y tru?c 24h: Mi?n phï¿½\n" +
+                   "ï¿½ H?y trong 24h: Phï¿½ 50%\n" +
+                   "ï¿½ Khï¿½ng d?n: Phï¿½ 100%\n\n" +
+                   "ï¿½? h?y/d?i booking, vui lï¿½ng vï¿½o trang 'ï¿½?t phï¿½ng c?a tï¿½i' ho?c liï¿½n h? hotline.";
         }
 
-        return "Xin chào! Tôi là tr? lý AI c?a Resort Deluxe. Tôi có th? giúp b?n:\n" +
-               "• Tu v?n d?t phòng\n" +
-               "• Thông tin v? d?ch v?\n" +
-               "• Hu?ng d?n thanh toán\n" +
-               "• Chính sách h?y/d?i\n\n" +
-               "B?n có câu h?i gì không?";
+        return "Xin chï¿½o! Tï¿½i lï¿½ tr? lï¿½ AI c?a Resort Deluxe. Tï¿½i cï¿½ th? giï¿½p b?n:\n" +
+               "ï¿½ Tu v?n d?t phï¿½ng\n" +
+               "ï¿½ Thï¿½ng tin v? d?ch v?\n" +
+               "ï¿½ Hu?ng d?n thanh toï¿½n\n" +
+               "ï¿½ Chï¿½nh sï¿½ch h?y/d?i\n\n" +
+               "B?n cï¿½ cï¿½u h?i gï¿½ khï¿½ng?";
     }
 
     /// <summary>
-    /// L?y d? li?u th?t t? database d?a trên user message
+    /// L?y d? li?u th?t t? database d?a trï¿½n user message
     /// </summary>
     private async Task<string> FetchRealDataAsync(string userMessage, int? customerId = null)
     {
@@ -377,10 +377,10 @@ Hãy tr? l?i ng?n g?n, thân thi?n và h?u ích b?ng ti?ng Vi?t, d?a trên d? li?u th
 
         try
         {
-            // Detect intent: H?i v? phòng
-            if (lowerMessage.Contains("phòng") || lowerMessage.Contains("room") || 
-                lowerMessage.Contains("giá") || lowerMessage.Contains("price") ||
-                lowerMessage.Contains("còn tr?ng") || lowerMessage.Contains("available"))
+            // Detect intent: H?i v? phï¿½ng
+            if (lowerMessage.Contains("phï¿½ng") || lowerMessage.Contains("room") || 
+                lowerMessage.Contains("giï¿½") || lowerMessage.Contains("price") ||
+                lowerMessage.Contains("cï¿½n tr?ng") || lowerMessage.Contains("available"))
             {
                 _logger.LogInformation("[AI Chat] ?? Detected room-related query, fetching room data...");
 
@@ -392,17 +392,17 @@ Hãy tr? l?i ng?n g?n, thân thi?n và h?u ích b?ng ti?ng Vi?t, d?a trên d? li?u th
                         var rooms = await _roomService.GetAvailableRoomsAsync();
                         if (rooms != null && rooms.Any())
                         {
-                            dataContext.AppendLine($"\n?? Phòng còn tr?ng: {rooms.Count()} phòng");
+                            dataContext.AppendLine($"\n?? Phï¿½ng cï¿½n tr?ng: {rooms.Count()} phï¿½ng");
                             foreach (var room in rooms.Take(10))
                             {
                                 var price = room.PricePerNight > 0 
-                                    ? $"{room.PricePerNight:N0} VND/dêm" 
-                                    : "Liên h?";
-                                dataContext.AppendLine($"  • Phòng {room.RoomNumber} ({room.RoomType}): {price}");
+                                    ? $"{room.PricePerNight:N0} VND/dï¿½m" 
+                                    : "Liï¿½n h?";
+                                dataContext.AppendLine($"  ï¿½ Phï¿½ng {room.RoomNumber} ({room.RoomType}): {price}");
                             }
                             if (rooms.Count() > 10)
                             {
-                                dataContext.AppendLine($"  ... và {rooms.Count() - 10} phòng khác");
+                                dataContext.AppendLine($"  ... vï¿½ {rooms.Count() - 10} phï¿½ng khï¿½c");
                             }
                         }
                     }
@@ -412,7 +412,7 @@ Hãy tr? l?i ng?n g?n, thân thi?n và h?u ích b?ng ti?ng Vi?t, d?a trên d? li?u th
                     }
                 }
 
-                // L?y room types và prices
+                // L?y room types vï¿½ prices
                 if (_context != null)
                 {
                     try
@@ -424,10 +424,10 @@ Hãy tr? l?i ng?n g?n, thân thi?n và h?u ích b?ng ti?ng Vi?t, d?a trên d? li?u th
                         
                         if (roomTypes.Any())
                         {
-                            dataContext.AppendLine($"\n?? Lo?i phòng và giá:");
+                            dataContext.AppendLine($"\n?? Lo?i phï¿½ng vï¿½ giï¿½:");
                             foreach (var rt in roomTypes)
                             {
-                                dataContext.AppendLine($"  • {rt.TypeName}: {rt.BasePrice:N0} VND/dêm");
+                                dataContext.AppendLine($"  ï¿½ {rt.TypeName}: {rt.BasePrice:N0} VND/dï¿½m");
                                 if (!string.IsNullOrEmpty(rt.Description))
                                 {
                                     var shortDesc = rt.Description.Length > 100 
@@ -446,7 +446,7 @@ Hãy tr? l?i ng?n g?n, thân thi?n và h?u ích b?ng ti?ng Vi?t, d?a trên d? li?u th
             }
 
             // Detect intent: H?i v? booking
-            if ((lowerMessage.Contains("booking") || lowerMessage.Contains("d?t phòng") || 
+            if ((lowerMessage.Contains("booking") || lowerMessage.Contains("d?t phï¿½ng") || 
                  lowerMessage.Contains("don d?t") || lowerMessage.Contains("reservation")) &&
                 customerId.HasValue && _bookingService != null)
             {
@@ -460,22 +460,22 @@ Hãy tr? l?i ng?n g?n, thân thi?n và h?u ích b?ng ti?ng Vi?t, d?a trên d? li?u th
                         dataContext.AppendLine($"\n?? Booking c?a b?n: {bookings.Count()} booking");
                         foreach (var booking in bookings.Take(5).OrderByDescending(b => b.CreatedAt))
                         {
-                            var status = booking.Status ?? "Chua xác d?nh";
+                            var status = booking.Status ?? "Chua xï¿½c d?nh";
                             var amount = booking.EstimatedTotalAmount > 0 
                                 ? $"{booking.EstimatedTotalAmount:N0} VND" 
-                                : "Chua tính";
+                                : "Chua tï¿½nh";
                             var checkIn = booking.CheckInDate.ToString("dd/MM/yyyy");
                             var checkOut = booking.CheckOutDate.ToString("dd/MM/yyyy");
-                            dataContext.AppendLine($"  • {booking.BookingCode}: {status}, {checkIn} - {checkOut}, {amount}");
+                            dataContext.AppendLine($"  ï¿½ {booking.BookingCode}: {status}, {checkIn} - {checkOut}, {amount}");
                         }
                         if (bookings.Count() > 5)
                         {
-                            dataContext.AppendLine($"  ... và {bookings.Count() - 5} booking khác");
+                            dataContext.AppendLine($"  ... vï¿½ {bookings.Count() - 5} booking khï¿½c");
                         }
                     }
                     else
                     {
-                        dataContext.AppendLine($"\n?? B?n chua có booking nào");
+                        dataContext.AppendLine($"\n?? B?n chua cï¿½ booking nï¿½o");
                     }
                 }
                 catch (Exception ex)
@@ -484,9 +484,9 @@ Hãy tr? l?i ng?n g?n, thân thi?n và h?u ích b?ng ti?ng Vi?t, d?a trên d? li?u th
                 }
             }
 
-            // Detect intent: H?i v? nhà hàng / menu
-            if (lowerMessage.Contains("nhà hàng") || lowerMessage.Contains("restaurant") || 
-                lowerMessage.Contains("menu") || lowerMessage.Contains("món an") ||
+            // Detect intent: H?i v? nhï¿½ hï¿½ng / menu
+            if (lowerMessage.Contains("nhï¿½ hï¿½ng") || lowerMessage.Contains("restaurant") || 
+                lowerMessage.Contains("menu") || lowerMessage.Contains("mï¿½n an") ||
                 lowerMessage.Contains("d? an") || lowerMessage.Contains("th?c an"))
             {
                 _logger.LogInformation("[AI Chat] ?? Detected restaurant-related query, fetching menu data...");
@@ -503,14 +503,14 @@ Hãy tr? l?i ng?n g?n, thân thi?n và h?u ích b?ng ti?ng Vi?t, d?a trên d? li?u th
 
                         if (menuItems.Any())
                         {
-                            dataContext.AppendLine($"\n??? Menu nhà hàng: {menuItems.Count} món");
+                            dataContext.AppendLine($"\n??? Menu nhï¿½ hï¿½ng: {menuItems.Count} mï¿½n");
                             foreach (var item in menuItems)
                             {
                                 var price = item.Price > 0 
                                     ? $"{item.Price:N0} VND" 
-                                    : "Liên h?";
+                                    : "Liï¿½n h?";
                                 var unit = !string.IsNullOrEmpty(item.Unit) ? $" / {item.Unit}" : "";
-                                dataContext.AppendLine($"  • {item.ServiceName}: {price}{unit}");
+                                dataContext.AppendLine($"  ï¿½ {item.ServiceName}: {price}{unit}");
                                 if (!string.IsNullOrEmpty(item.Description) && item.Description.Length <= 80)
                                 {
                                     dataContext.AppendLine($"    ({item.Description})");
@@ -518,7 +518,7 @@ Hãy tr? l?i ng?n g?n, thân thi?n và h?u ích b?ng ti?ng Vi?t, d?a trên d? li?u th
                             }
                             if (menuItems.Count == 20)
                             {
-                                dataContext.AppendLine($"  ... và nhi?u món khác");
+                                dataContext.AppendLine($"  ... vï¿½ nhi?u mï¿½n khï¿½c");
                             }
                         }
                     }
@@ -529,9 +529,9 @@ Hãy tr? l?i ng?n g?n, thân thi?n và h?u ích b?ng ti?ng Vi?t, d?a trên d? li?u th
                 }
             }
 
-            // Detect intent: H?i v? dánh giá / reviews
-            if (lowerMessage.Contains("dánh giá") || lowerMessage.Contains("review") || 
-                lowerMessage.Contains("nh?n xét") || lowerMessage.Contains("comment") ||
+            // Detect intent: H?i v? dï¿½nh giï¿½ / reviews
+            if (lowerMessage.Contains("dï¿½nh giï¿½") || lowerMessage.Contains("review") || 
+                lowerMessage.Contains("nh?n xï¿½t") || lowerMessage.Contains("comment") ||
                 lowerMessage.Contains("sao") || lowerMessage.Contains("rating"))
             {
                 _logger.LogInformation("[AI Chat] ?? Detected review-related query, fetching reviews data...");
@@ -540,7 +540,7 @@ Hãy tr? l?i ng?n g?n, thân thi?n và h?u ích b?ng ti?ng Vi?t, d?a trên d? li?u th
                 {
                     try
                     {
-                        // L?y reviews m?i nh?t và có rating cao
+                        // L?y reviews m?i nh?t vï¿½ cï¿½ rating cao
                         var recentReviews = await _context.Reviews
                             .Include(r => r.Customer)
                             .Include(r => r.Room)
@@ -551,12 +551,12 @@ Hãy tr? l?i ng?n g?n, thân thi?n và h?u ích b?ng ti?ng Vi?t, d?a trên d? li?u th
                             {
                                 r.Rating,
                                 r.Comment,
-                                CustomerName = r.Customer != null ? (r.Customer.FullName ?? "Khách hàng") : "Khách hàng",
+                                CustomerName = r.Customer != null ? (r.Customer.FullName ?? "Khï¿½ch hï¿½ng") : "Khï¿½ch hï¿½ng",
                                 RoomNumber = r.Room != null ? r.Room.RoomNumber : null
                             })
                             .ToListAsync();
 
-                        // Tính toán th?ng kê
+                        // Tï¿½nh toï¿½n th?ng kï¿½
                         var stats = await _context.Reviews
                             .Where(r => r.IsVisible && r.IsApproved)
                             .GroupBy(r => r.Rating)
@@ -574,37 +574,37 @@ Hãy tr? l?i ng?n g?n, thân thi?n và h?u ích b?ng ti?ng Vi?t, d?a trên d? li?u th
 
                         if (totalReviews > 0)
                         {
-                            dataContext.AppendLine($"\n? Ðánh giá c?a khách hàng:");
-                            dataContext.AppendLine($"  • T?ng s? dánh giá: {totalReviews}");
-                            dataContext.AppendLine($"  • Ði?m trung bình: {avgRating:F1}/5.0 sao");
+                            dataContext.AppendLine($"\n? ï¿½ï¿½nh giï¿½ c?a khï¿½ch hï¿½ng:");
+                            dataContext.AppendLine($"  ï¿½ T?ng s? dï¿½nh giï¿½: {totalReviews}");
+                            dataContext.AppendLine($"  ï¿½ ï¿½i?m trung bï¿½nh: {avgRating:F1}/5.0 sao");
                             
-                            // Th?ng kê theo sao
+                            // Th?ng kï¿½ theo sao
                             foreach (var stat in stats.OrderByDescending(s => s.Rating))
                             {
                                 var stars = new string('?', stat.Rating);
-                                dataContext.AppendLine($"  • {stars} ({stat.Rating} sao): {stat.Count} dánh giá");
+                                dataContext.AppendLine($"  ï¿½ {stars} ({stat.Rating} sao): {stat.Count} dï¿½nh giï¿½");
                             }
 
                             // M?t s? reviews m?i nh?t
                             if (recentReviews.Any())
                             {
-                                dataContext.AppendLine($"\n  ?? M?t s? dánh giá g?n dây:");
+                                dataContext.AppendLine($"\n  ?? M?t s? dï¿½nh giï¿½ g?n dï¿½y:");
                                 foreach (var review in recentReviews.Take(5))
                                 {
                                     var stars = new string('?', review.Rating);
                                     var roomInfo = !string.IsNullOrEmpty(review.RoomNumber) 
-                                        ? $" (Phòng {review.RoomNumber})" 
+                                        ? $" (Phï¿½ng {review.RoomNumber})" 
                                         : "";
                                     var comment = !string.IsNullOrEmpty(review.Comment) && review.Comment.Length > 60
                                         ? review.Comment.Substring(0, 60) + "..."
                                         : review.Comment ?? "";
-                                    dataContext.AppendLine($"    • {stars} {review.CustomerName}{roomInfo}: {comment}");
+                                    dataContext.AppendLine($"    ï¿½ {stars} {review.CustomerName}{roomInfo}: {comment}");
                                 }
                             }
                         }
                         else
                         {
-                            dataContext.AppendLine($"\n? Chua có dánh giá nào");
+                            dataContext.AppendLine($"\n? Chua cï¿½ dï¿½nh giï¿½ nï¿½o");
                         }
                     }
                     catch (Exception ex)
@@ -636,48 +636,48 @@ Hãy tr? l?i ng?n g?n, thân thi?n và h?u ích b?ng ti?ng Vi?t, d?a trên d? li?u th
         var lowerMessage = userMessage.ToLower();
         var response = new StringBuilder();
 
-        if (lowerMessage.Contains("phòng") || lowerMessage.Contains("room") || 
-            lowerMessage.Contains("giá") || lowerMessage.Contains("price") ||
-            lowerMessage.Contains("còn tr?ng") || lowerMessage.Contains("available"))
+        if (lowerMessage.Contains("phï¿½ng") || lowerMessage.Contains("room") || 
+            lowerMessage.Contains("giï¿½") || lowerMessage.Contains("price") ||
+            lowerMessage.Contains("cï¿½n tr?ng") || lowerMessage.Contains("available"))
         {
             if (!string.IsNullOrEmpty(realData))
             {
-                response.AppendLine("Thông tin phòng t? h? th?ng:");
+                response.AppendLine("Thï¿½ng tin phï¿½ng t? h? th?ng:");
                 response.AppendLine(realData);
-                response.AppendLine("\nB?n có th? xem chi ti?t và d?t phòng trên trang 'Phòng' c?a website.");
+                response.AppendLine("\nB?n cï¿½ th? xem chi ti?t vï¿½ d?t phï¿½ng trï¿½n trang 'Phï¿½ng' c?a website.");
             }
             else
             {
-                response.AppendLine("Hi?n t?i tôi không th? l?y thông tin phòng t? h? th?ng.");
-                response.AppendLine("Vui lòng xem trên trang 'Phòng' c?a website ho?c liên h? hotline: 1900-xxxx");
+                response.AppendLine("Hi?n t?i tï¿½i khï¿½ng th? l?y thï¿½ng tin phï¿½ng t? h? th?ng.");
+                response.AppendLine("Vui lï¿½ng xem trï¿½n trang 'Phï¿½ng' c?a website ho?c liï¿½n h? hotline: 1900-xxxx");
             }
             return response.ToString();
         }
 
-        if ((lowerMessage.Contains("booking") || lowerMessage.Contains("d?t phòng") || 
+        if ((lowerMessage.Contains("booking") || lowerMessage.Contains("d?t phï¿½ng") || 
              lowerMessage.Contains("don d?t")) && !string.IsNullOrEmpty(realData))
         {
-            response.AppendLine("Thông tin booking c?a b?n:");
+            response.AppendLine("Thï¿½ng tin booking c?a b?n:");
             response.AppendLine(realData);
-            response.AppendLine("\nB?n có th? xem chi ti?t trên trang 'Ð?t phòng c?a tôi'.");
+            response.AppendLine("\nB?n cï¿½ th? xem chi ti?t trï¿½n trang 'ï¿½?t phï¿½ng c?a tï¿½i'.");
             return response.ToString();
         }
 
-        if ((lowerMessage.Contains("nhà hàng") || lowerMessage.Contains("restaurant") || 
-             lowerMessage.Contains("menu") || lowerMessage.Contains("món an")) && !string.IsNullOrEmpty(realData))
+        if ((lowerMessage.Contains("nhï¿½ hï¿½ng") || lowerMessage.Contains("restaurant") || 
+             lowerMessage.Contains("menu") || lowerMessage.Contains("mï¿½n an")) && !string.IsNullOrEmpty(realData))
         {
-            response.AppendLine("Thông tin menu nhà hàng:");
+            response.AppendLine("Thï¿½ng tin menu nhï¿½ hï¿½ng:");
             response.AppendLine(realData);
-            response.AppendLine("\nB?n có th? xem chi ti?t và d?t món trên trang 'Nhà hàng' c?a website.");
+            response.AppendLine("\nB?n cï¿½ th? xem chi ti?t vï¿½ d?t mï¿½n trï¿½n trang 'Nhï¿½ hï¿½ng' c?a website.");
             return response.ToString();
         }
 
-        if ((lowerMessage.Contains("dánh giá") || lowerMessage.Contains("review") || 
-             lowerMessage.Contains("nh?n xét") || lowerMessage.Contains("sao")) && !string.IsNullOrEmpty(realData))
+        if ((lowerMessage.Contains("dï¿½nh giï¿½") || lowerMessage.Contains("review") || 
+             lowerMessage.Contains("nh?n xï¿½t") || lowerMessage.Contains("sao")) && !string.IsNullOrEmpty(realData))
         {
-            response.AppendLine("Thông tin dánh giá:");
+            response.AppendLine("Thï¿½ng tin dï¿½nh giï¿½:");
             response.AppendLine(realData);
-            response.AppendLine("\nB?n có th? xem t?t c? dánh giá trên trang 'Ðánh giá' c?a website.");
+            response.AppendLine("\nB?n cï¿½ th? xem t?t c? dï¿½nh giï¿½ trï¿½n trang 'ï¿½ï¿½nh giï¿½' c?a website.");
             return response.ToString();
         }
 
