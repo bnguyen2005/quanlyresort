@@ -226,14 +226,30 @@ NGUYÊN TẮC TRẢ LỜI:
             else
             {
                 var doc = JsonDocument.Parse(responseContent);
-                aiResponse = doc.RootElement
+                var messageElem = doc.RootElement
                     .GetProperty("choices")[0]
-                    .GetProperty("message")
-                    .GetProperty("content")
-                    .GetString();
+                    .GetProperty("message");
+
+                if (messageElem.TryGetProperty("content", out var contentProp))
+                {
+                    aiResponse = contentProp.GetString();
+                }
+
+                // Hỗ trợ mô hình reasoning (như deepseek-r1 hoặc gpt-oss) khi content nằm ở reasoning_content
+                if (string.IsNullOrWhiteSpace(aiResponse) && messageElem.TryGetProperty("reasoning_content", out var reasoningProp))
+                {
+                    aiResponse = reasoningProp.GetString();
+                }
             }
 
-            return aiResponse ?? GetSampleResponseWithRealData(userMessage, realData);
+            // Nếu phản hồi từ AI rỗng (độ dài 0), tự động fallback sang phản hồi dữ liệu thật
+            if (string.IsNullOrWhiteSpace(aiResponse))
+            {
+                _logger.LogWarning("[AI Chat] ⚠️ Phản hồi từ AI rỗng, tự động kích hoạt phản hồi dự phòng với dữ liệu thật từ DB");
+                return GetSampleResponseWithRealData(userMessage, realData);
+            }
+
+            return aiResponse;
         }
         catch (Exception ex)
         {
@@ -324,15 +340,20 @@ NGUYÊN TẮC TRẢ LỜI:
             // 1. DỮ LIỆU CÁC HẠNG PHÒNG & GIÁ NIÊM YẾT (Load khi hỏi phòng hoặc hỏi chung)
             if (isRoomQuery || isGeneralQuery)
             {
+                bool hasRoomTypesData = false;
+
+                // 1.1 Danh sách các hạng phòng từ bảng RoomTypes
                 try
                 {
                     var roomTypes = await _context.RoomTypes
+                        .AsNoTracking()
                         .Where(rt => rt.IsActive)
-                        .OrderBy(rt => rt.BasePrice)
+                        .OrderBy(rt => rt.DisplayOrder)
                         .ToListAsync();
 
                     if (roomTypes.Any())
                     {
+                        hasRoomTypesData = true;
                         dataContext.AppendLine("=== CÁC HẠNG PHÒNG VÀ GIÁ NIÊM YẾT TẠI RESORT ===");
                         foreach (var rt in roomTypes)
                         {
@@ -346,9 +367,18 @@ NGUYÊN TẮC TRẢ LỜI:
                             if (!string.IsNullOrEmpty(rt.Description)) dataContext.AppendLine($"  - Mô tả: {rt.Description}");
                         }
                     }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "[AI Chat] Lỗi lấy danh sách hạng phòng từ DB (RoomTypes): {Message}", ex.Message);
+                }
 
-                    // Danh sách phòng thực tế đang còn trống
+                // 1.2 Danh sách phòng thực tế đang còn trống từ bảng Rooms
+                try
+                {
                     var availableRooms = await _context.Rooms
+                        .AsNoTracking()
+                        .Include(r => r.RoomTypeNavigation)
                         .Where(r => r.IsAvailable)
                         .OrderBy(r => r.RoomNumber)
                         .Take(12)
@@ -356,17 +386,39 @@ NGUYÊN TẮC TRẢ LỜI:
 
                     if (availableRooms.Any())
                     {
+                        // Nếu chưa có thông tin hạng phòng ở bước 1.1, tự động tổng hợp từ bảng Rooms
+                        if (!hasRoomTypesData)
+                        {
+                            dataContext.AppendLine("=== CÁC HẠNG PHÒNG HIỆN CÓ TẠI RESORT ===");
+                            var groupedRooms = availableRooms
+                                .GroupBy(r => !string.IsNullOrEmpty(r.RoomType) ? r.RoomType : (r.RoomTypeNavigation?.TypeName ?? "Standard"))
+                                .ToList();
+
+                            foreach (var group in groupedRooms)
+                            {
+                                var sample = group.First();
+                                var price = sample.PricePerNight > 0 
+                                    ? $"{sample.PricePerNight:N0} VND/đêm" 
+                                    : (sample.RoomTypeNavigation?.BasePrice > 0 ? $"{sample.RoomTypeNavigation.BasePrice:N0} VND/đêm" : "Liên hệ");
+                                dataContext.AppendLine($"• Hạng {group.Key}: Giá từ {price} (Tối đa {sample.MaxOccupancy} người)");
+                            }
+                        }
+
                         dataContext.AppendLine($"\n=== PHÒNG THỰC TẾ ĐANG CÒN TRỐNG ({availableRooms.Count} phòng) ===");
                         foreach (var r in availableRooms)
                         {
-                            var price = r.PricePerNight > 0 ? $"{r.PricePerNight:N0} VND/đêm" : "Theo giá hạng";
-                            dataContext.AppendLine($"• Phòng {r.RoomNumber} - Hạng {r.RoomType} - Tầng {r.Floor} - Giá: {price}");
+                            var typeName = !string.IsNullOrEmpty(r.RoomType) ? r.RoomType : (r.RoomTypeNavigation?.TypeName ?? "Standard");
+                            var price = r.PricePerNight > 0 
+                                ? $"{r.PricePerNight:N0} VND/đêm" 
+                                : (r.RoomTypeNavigation?.BasePrice > 0 ? $"{r.RoomTypeNavigation.BasePrice:N0} VND/đêm" : "Theo giá hạng");
+                            var floorStr = !string.IsNullOrEmpty(r.Floor) ? $" - Tầng {r.Floor}" : "";
+                            dataContext.AppendLine($"• Phòng {r.RoomNumber} - Hạng {typeName}{floorStr} - Giá: {price}");
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "[AI Chat] Lỗi lấy danh sách phòng từ DB");
+                    _logger.LogWarning(ex, "[AI Chat] Lỗi lấy danh sách phòng trống từ DB (Rooms): {Message}", ex.Message);
                 }
             }
 
