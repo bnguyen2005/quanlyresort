@@ -294,7 +294,7 @@ const PageLoader = {
         };
 
         this._wheelHandler = (e) => {
-            if (e.target.closest('.owl-carousel')) return;
+            if (e.target.closest('.owl-carousel') || e.target.closest('#aiChatModal') || e.target.closest('.ai-chat-modal')) return;
 
             const currentTrack = document.getElementById('page-content');
             const isVertical = document.body.classList.contains('layout-vertical') || (currentTrack && currentTrack.getAttribute('data-layout') === 'vertical');

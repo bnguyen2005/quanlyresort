@@ -1005,10 +1005,12 @@
         }, { passive: true });
 
         document.addEventListener('wheel', function (e) {
+          if (e.target.closest('#aiChatModal') || e.target.closest('.ai-chat-modal')) return;
           if (window.__zoomTransitionLock) e.preventDefault();
         }, { passive: false, capture: true });
 
         document.addEventListener('touchmove', function (e) {
+          if (e.target.closest('#aiChatModal') || e.target.closest('.ai-chat-modal')) return;
           if (window.__zoomTransitionLock) e.preventDefault();
         }, { passive: false, capture: true });
 
@@ -2313,6 +2315,7 @@
         document.addEventListener('roomDataLoaded', resetSliderState);
 
         window.addEventListener('wheel', function (e) {
+          if (e.target.closest('#aiChatModal') || e.target.closest('.ai-chat-modal')) return;
           // QUAN TRỌNG: nếu đang trong lúc hiệu ứng zoom chuyển trang -> KHÔNG can thiệp gì cả,
           // để __setZoomScrollLock toàn quyền xử lý, tránh việc script này vô tình gọi lenis.start()
           if (window.__zoomTransitionLock) return;

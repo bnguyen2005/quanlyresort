@@ -164,6 +164,8 @@
         display: flex;
         flex-direction: column;
         height: 100%;
+        min-height: 0;
+        overflow: hidden;
       }
       .ai-chat-header {
         padding: 20px;
@@ -174,6 +176,7 @@
         background: #000;
         color: white;
         position: relative;
+        flex-shrink: 0;
       }
       .ai-chat-header-info {
         display: flex;
@@ -214,17 +217,36 @@
         transform: rotate(90deg);
       }
       .ai-chat-messages {
-        flex: 1;
-        overflow-y: auto;
+        flex: 1 1 0%;
+        min-height: 0;
+        max-height: 100%;
+        overflow-y: auto !important;
+        overflow-x: hidden;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-y;
         padding: 25px 20px;
         display: flex;
         flex-direction: column;
         gap: 20px;
         background: transparent;
+        scrollbar-width: thin;
+        scrollbar-color: var(--gold, #C8A97E) rgba(0, 0, 0, 0.08);
       }
-      .ai-chat-messages::-webkit-scrollbar { width: 4px; }
-      .ai-chat-messages::-webkit-scrollbar-track { background: transparent; }
-      .ai-chat-messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); }
+      .ai-chat-messages::-webkit-scrollbar {
+        width: 6px;
+      }
+      .ai-chat-messages::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 4px;
+      }
+      .ai-chat-messages::-webkit-scrollbar-thumb {
+        background: var(--gold, #C8A97E);
+        border-radius: 4px;
+      }
+      .ai-chat-messages::-webkit-scrollbar-thumb:hover {
+        background: #b89568;
+      }
       .ai-chat-message {
         display: flex;
         gap: 12px;
@@ -284,6 +306,7 @@
         display: flex;
         gap: 15px;
         background: #000;
+        flex-shrink: 0;
       }
       .ai-chat-input {
         flex: 1;
@@ -408,6 +431,15 @@
       }
     });
 
+    // Cô lập sự kiện cuộn chuột và touch trên khung chat để không bị các script cuộn toàn trang (page-loader, lenis) can thiệp
+    modal.addEventListener('wheel', (e) => {
+      e.stopPropagation();
+    }, { passive: true });
+
+    modal.addEventListener('touchmove', (e) => {
+      e.stopPropagation();
+    }, { passive: true });
+
     document.body.appendChild(modal);
   }
 
@@ -415,6 +447,12 @@
     const modal = document.getElementById(CHAT_MODAL_ID);
     if (modal) {
       modal.classList.add('show');
+      const messagesContainer = modal.querySelector('#aiChatMessages');
+      if (messagesContainer) {
+        setTimeout(() => {
+          messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }, 80);
+      }
       const input = modal.querySelector('#aiChatInput');
       if (input) input.focus();
     }

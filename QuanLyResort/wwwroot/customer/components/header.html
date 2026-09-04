@@ -638,8 +638,52 @@
     color: var(--ts-dark) !important;
   }
 
+  #aiChatModal .ai-chat-modal-content {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  #aiChatModal .ai-chat-header {
+    flex-shrink: 0 !important;
+  }
+
+  #aiChatModal .ai-chat-input-container {
+    flex-shrink: 0 !important;
+  }
+
   #aiChatModal .ai-chat-messages {
     background: transparent !important;
+    flex: 1 1 0% !important;
+    min-height: 0 !important;
+    max-height: 100% !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior: contain !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-y !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: var(--ts-gold, #c5a880) rgba(0, 0, 0, 0.05) !important;
+  }
+
+  #aiChatModal .ai-chat-messages::-webkit-scrollbar {
+    width: 6px !important;
+  }
+
+  #aiChatModal .ai-chat-messages::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.04) !important;
+    border-radius: 4px !important;
+  }
+
+  #aiChatModal .ai-chat-messages::-webkit-scrollbar-thumb {
+    background: var(--ts-gold, #c5a880) !important;
+    border-radius: 4px !important;
+  }
+
+  #aiChatModal .ai-chat-messages::-webkit-scrollbar-thumb:hover {
+    background: #9f8c76 !important;
   }
 
   #aiChatModal .ai-message .ai-chat-bubble {
