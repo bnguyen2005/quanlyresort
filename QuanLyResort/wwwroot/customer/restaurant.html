@@ -2283,7 +2283,10 @@
     document.addEventListener('DOMContentLoaded', async () => {
       try {
         const res = await fetch(`components/header.html?_=${Date.now()}`);
-        if (res.ok) document.getElementById('site-header').innerHTML = await res.text();
+        if (res.ok) {
+          document.getElementById('site-header').innerHTML = await res.text();
+          if (typeof updateNavbarAuth === 'function') updateNavbarAuth();
+        }
       } catch (e) { console.error('Error loading header', e); }
     });
   </script>

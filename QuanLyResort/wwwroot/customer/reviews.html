@@ -233,7 +233,10 @@
     document.addEventListener('DOMContentLoaded', async function () {
       try {
         var res = await fetch('components/header.html?_=' + Date.now());
-        if (res.ok) document.getElementById('site-header').innerHTML = await res.text();
+        if (res.ok) {
+          document.getElementById('site-header').innerHTML = await res.text();
+          if (typeof updateNavbarAuth === 'function') updateNavbarAuth();
+        }
       } catch (e) { }
     });
   </script>

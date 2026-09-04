@@ -67,6 +67,7 @@ window.addEventListener('load', () => {
 });
 
 // Update navbar khi có thay đổi localStorage
+// Update navbar khi có thay đổi localStorage
 window.addEventListener('storage', (e) => {
   if (e.key === 'token' || e.key === 'user') {
     console.log('[Navbar Auth] Storage change detected');
@@ -80,7 +81,16 @@ localStorage.setItem = function(key, value) {
   originalSetItem.apply(this, arguments);
   if (key === 'token' || key === 'user') {
     console.log('[Navbar Auth] LocalStorage setItem detected:', key);
-    setTimeout(() => updateNavbarAuth(), 100);
+    setTimeout(() => updateNavbarAuth(), 50);
+  }
+};
+
+const originalRemoveItem = localStorage.removeItem;
+localStorage.removeItem = function(key) {
+  originalRemoveItem.apply(this, arguments);
+  if (key === 'token' || key === 'user') {
+    console.log('[Navbar Auth] LocalStorage removeItem detected:', key);
+    setTimeout(() => updateNavbarAuth(), 50);
   }
 };
 
@@ -89,12 +99,16 @@ console.log('[Navbar Auth] Script loaded, updating navbar immediately');
 updateNavbarAuth();
 
 // Sử dụng MutationObserver để theo dõi khi navbar được thêm vào DOM
+let authMutationDebounce = null;
 const observer = new MutationObserver((mutations) => {
-  const navbarMenu = document.querySelector('#ftco-nav .navbar-nav.ml-auto');
-  if (navbarMenu) {
-    console.log('[Navbar Auth] Navbar detected via MutationObserver');
-    updateNavbarAuth();
-    observer.disconnect(); // Ngừng observe sau khi tìm thấy
+  const hasNavbar = document.getElementById('ts-auth-nav') || 
+                    document.querySelector('.ts-nav-list.main-nav') || 
+                    document.querySelector('#ftco-nav .navbar-nav.ml-auto');
+  if (hasNavbar) {
+    if (authMutationDebounce) clearTimeout(authMutationDebounce);
+    authMutationDebounce = setTimeout(() => {
+      updateNavbarAuth();
+    }, 50);
   }
 });
 
@@ -114,10 +128,16 @@ window.addEventListener('userLoggedIn', (e) => {
   updateNavbarAuth();
 });
 
+// Listen for PJAX complete event
+document.addEventListener('pjax:complete', () => {
+  console.log('[Navbar Auth] PJAX complete event detected');
+  updateNavbarAuth();
+});
+
 // Listen for header loaded event (from load-header.js)
 window.addEventListener('headerLoaded', (e) => {
   console.log('[Navbar Auth] Header loaded event detected');
-  setTimeout(() => updateNavbarAuth(), 100);
+  setTimeout(() => updateNavbarAuth(), 50);
 });
 
 /**
@@ -127,28 +147,28 @@ function updateNavbarAuth(retryCount = 0) {
   const token = localStorage.getItem('token');
   const userStr = localStorage.getItem('user');
   
-  console.log('[Navbar Auth] Updating navbar...', { hasToken: !!token, hasUser: !!userStr, retry: retryCount });
+  const hasToken = token && token !== 'undefined' && token !== 'null' && token.trim() !== '';
+  const hasUser = userStr && userStr !== 'undefined' && userStr !== 'null' && userStr.trim() !== '';
+  
+  console.log('[Navbar Auth] Updating navbar...', { hasToken: !!hasToken, hasUser: !!hasUser, retry: retryCount });
   
   // Tìm navbar menu (Ưu tiên Taste Header mới, sau đó fallback về Header cũ)
+  const tasteAuthNav = document.getElementById('ts-auth-nav');
   const navbarMenu = document.querySelector('.ts-nav-list.main-nav') || document.querySelector('#ftco-nav .navbar-nav.ml-auto');
   
-  if (!navbarMenu) {
+  if (!tasteAuthNav && !navbarMenu) {
     console.warn('[Navbar Auth] Navbar menu not found, retry:', retryCount);
     
-    // Retry sau 100ms nếu navbar chưa render (tối đa 10 lần = 1 giây)
-    if (retryCount < 10) {
+    // Retry sau 100ms nếu navbar chưa render (tối đa 20 lần = 2 giây)
+    if (retryCount < 20) {
       setTimeout(() => updateNavbarAuth(retryCount + 1), 100);
     } else {
-      console.error('[Navbar Auth] Navbar menu not found after 10 retries');
+      console.error('[Navbar Auth] Navbar menu not found after 20 retries');
     }
     return;
   }
   
-  // Debug: Đếm số auth items hiện tại
-  const currentAuthItems = navbarMenu.querySelectorAll('.nav-item.auth-item, .user-dropdown, .auth-item-taste');
-  console.log('[Navbar Auth] Current auth items count:', currentAuthItems.length);
-  
-  if (token && userStr) {
+  if (hasToken && hasUser) {
     // User đã đăng nhập
     try {
       const user = JSON.parse(userStr);
@@ -169,28 +189,20 @@ function updateNavbarAuth(retryCount = 0) {
  * Hiển thị nav cho user đã đăng nhập
  */
 function showAuthenticatedNav(navbarMenu, user) {
-  const isTasteHeader = navbarMenu.classList.contains('main-nav');
+  const tasteAuthNav = document.getElementById('ts-auth-nav');
+  const isTasteHeader = !!tasteAuthNav || (navbarMenu && navbarMenu.classList.contains('main-nav'));
 
   // XÓA TẤT CẢ auth items cũ (tránh duplicate)
-  navbarMenu.querySelectorAll('.nav-item.auth-item, .user-dropdown, .auth-item-taste').forEach(item => item.remove());
-  
-  // Tìm và xóa các menu item login/register mặc định (đặc biệt trong Taste header)
-  const tsAuthLinks = navbarMenu.querySelectorAll('a[href*="login.html"], a[href*="register.html"], a[href*="account.html"]');
-  tsAuthLinks.forEach(link => {
-    if (link.parentElement && link.parentElement.tagName === 'LI') {
-      link.parentElement.remove();
-    }
-  });
+  document.querySelectorAll('.nav-item.auth-item, .user-dropdown, .auth-item-taste').forEach(item => item.remove());
 
   if (isTasteHeader) {
     const displayName = user.name || user.fullName || user.email || 'Khách hàng';
-    const tasteAuthNav = document.getElementById('ts-auth-nav');
     
     if (tasteAuthNav) {
       tasteAuthNav.innerHTML = ''; // Clear old items
       const authHtml = `
         <li style="margin-top: 15px;">
-          <span style="font-size: 11px; letter-spacing: 2px; color: var(--ts-gold); text-transform: uppercase; font-family: 'Inter', sans-serif;">Tài khoản của tôi</span>
+          <span style="font-size: 11px; letter-spacing: 2px; color: var(--ts-gold, #c5a880); text-transform: uppercase; font-family: 'Inter', sans-serif;">Tài khoản của tôi</span>
         </li>
         <li><a href="account.html" onclick="document.body.classList.remove('menu-open')">${displayName}</a></li>
         <li><a href="my-bookings.html" onclick="document.body.classList.remove('menu-open')">Đặt Phòng Của Tôi <span id="taste-unpaid-badge" style="display:none; background:#ffffff; color:#8a2017; font-size:14px; padding:2px 10px; border-radius:20px; margin-left:10px; font-weight:bold; vertical-align: middle;"></span></a></li>
@@ -208,7 +220,7 @@ function showAuthenticatedNav(navbarMenu, user) {
 
     // Update badge cho Taste
     setTimeout(() => { updateUnpaidBadge(); }, 500);
-  } else {
+  } else if (navbarMenu) {
     // Logic cũ cho header Bootstrap
     const userDropdown = createUserDropdown(user);
     navbarMenu.appendChild(userDropdown);
@@ -220,21 +232,13 @@ function showAuthenticatedNav(navbarMenu, user) {
  * Hiển thị nav cho guest (chưa đăng nhập)
  */
 function showGuestNav(navbarMenu) {
-  const isTasteHeader = navbarMenu.classList.contains('main-nav');
+  const tasteAuthNav = document.getElementById('ts-auth-nav');
+  const isTasteHeader = !!tasteAuthNav || (navbarMenu && navbarMenu.classList.contains('main-nav'));
 
   // XÓA TẤT CẢ auth items cũ
-  navbarMenu.querySelectorAll('.nav-item.auth-item, .user-dropdown, .auth-item-taste').forEach(item => item.remove());
-  
-  // Tìm và xóa các menu item mặc định để render lại cho chuẩn
-  const tsAuthLinks = navbarMenu.querySelectorAll('a[href*="login.html"], a[href*="register.html"], a[href*="account.html"]');
-  tsAuthLinks.forEach(link => {
-    if (link.parentElement && link.parentElement.tagName === 'LI') {
-      link.parentElement.remove();
-    }
-  });
+  document.querySelectorAll('.nav-item.auth-item, .user-dropdown, .auth-item-taste').forEach(item => item.remove());
   
   if (isTasteHeader) {
-    const tasteAuthNav = document.getElementById('ts-auth-nav');
     if (tasteAuthNav) {
       tasteAuthNav.innerHTML = '';
       const authHtml = `
@@ -243,7 +247,11 @@ function showGuestNav(navbarMenu) {
       `;
       tasteAuthNav.insertAdjacentHTML('beforeend', authHtml);
     }
-  } else {
+    const topAuthContainer = document.getElementById('ts-header-auth-container');
+    if (topAuthContainer) {
+      topAuthContainer.innerHTML = '';
+    }
+  } else if (navbarMenu) {
     // Bootstrap logic
     const hasLogin = navbarMenu.querySelector('a[href="/customer/login.html"], a[href="login.html"]');
     const hasRegister = navbarMenu.querySelector('a[href="/customer/register.html"], a[href="register.html"]');

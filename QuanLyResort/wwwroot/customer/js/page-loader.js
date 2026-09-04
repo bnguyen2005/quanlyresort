@@ -882,6 +882,9 @@ const PageLoader = {
 
         // Notify page scripts
         document.dispatchEvent(new CustomEvent('pjax:complete'));
+        if (typeof updateNavbarAuth === 'function') {
+            updateNavbarAuth();
+        }
 
         if (typeof jQuery !== 'undefined' && jQuery.fn.owlCarousel) {
             jQuery('.owl-carousel:not([data-initialized="true"])').each(function () {

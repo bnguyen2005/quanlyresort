@@ -423,6 +423,48 @@
     margin: 0 0 clamp(20px, 4vh, 60px) 0;
   }
 
+  .ts-menu-nav-row {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    align-items: flex-start;
+    gap: 30px;
+    margin-bottom: clamp(20px, 4vh, 60px);
+  }
+
+  .ts-nav-list.auth-nav {
+    text-align: right;
+  }
+
+  .ts-nav-list.auth-nav a {
+    color: rgba(255, 255, 255, 0.75);
+    font-size: clamp(20px, 3.5vh, 38px);
+    transition: color 0.3s ease, transform 0.3s ease;
+  }
+
+  .ts-nav-list.auth-nav a:hover {
+    color: var(--ts-gold, #c5a880);
+    transform: translateX(-4px);
+  }
+
+  @media (max-width: 900px) {
+    .ts-menu-nav-row {
+      flex-direction: column;
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+    .ts-nav-list.auth-nav {
+      text-align: left !important;
+      margin-top: 10px !important;
+      padding-top: 15px !important;
+      border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
+      width: 100%;
+    }
+    .ts-nav-list.auth-nav a:hover {
+      transform: translateX(4px);
+    }
+  }
+
   .ts-nav-list.main-nav li {
     margin: 15px 0;
     transform: translateX(30px);
@@ -815,7 +857,7 @@
       <img src="images/logomain.png" alt="Tandjung Sari">
     </div>
 
-    <div style="display: flex; justify-content: space-between; width: 100%; align-items: flex-start;">
+    <div class="ts-menu-nav-row">
       <!-- Nav List -->
       <ul class="ts-nav-list main-nav" style="margin-bottom: 0;">
         <li><a href="index.html" onclick="document.body.classList.remove('menu-open')">Trang chủ</a></li>
@@ -826,8 +868,9 @@
 
       <!-- Auth Nav (Right Side) -->
       <ul class="ts-nav-list auth-nav main-nav" id="ts-auth-nav"
-        style="text-align: right; list-style: none; padding: 0; margin: 0;">
-        <!-- JS will inject auth items here -->
+        style="list-style: none; padding: 0; margin: 0;">
+        <li><a href="login.html" onclick="document.body.classList.remove('menu-open')">Sign In</a></li>
+        <li><a href="register.html" onclick="document.body.classList.remove('menu-open')">Register</a></li>
       </ul>
     </div>
 
@@ -863,16 +906,9 @@
     if (panel) panel.classList.toggle('active');
   }
 
-
-  // Simple auth sync for the new menu
-  document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => {
-      const userStr = localStorage.getItem('user');
-      if (userStr) {
-        if (document.getElementById('ts-auth-link')) document.getElementById('ts-auth-link').style.display = 'none';
-        if (document.getElementById('ts-profile-link')) document.getElementById('ts-profile-link').style.display = 'inline-block';
-      }
-
+  // Simple auth sync & nav interactions for the new menu
+  (function initHeaderInteractions() {
+    function setupNav() {
       // Auto-highlight active nav item based on URL
       const currentPath = window.location.pathname;
       const navLinks = document.querySelectorAll('.ts-nav-list.main-nav a');
@@ -888,6 +924,16 @@
           document.body.classList.remove('menu-open');
         });
       });
-    }, 500);
-  });
+
+      if (typeof updateNavbarAuth === 'function') {
+        updateNavbarAuth();
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', setupNav);
+    } else {
+      setupNav();
+    }
+  })();
 </script>
