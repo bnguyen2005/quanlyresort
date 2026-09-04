@@ -1,13 +1,15 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.EntityFrameworkCore;
+using QuanLyResort.Repositories;
 using QuanLyResort.Services;
 using System.Security.Claims;
 
 namespace QuanLyResort.Controllers;
 
 /// <summary>
-/// Controller để xử lý AI Chat requests
+/// Controller xử lý AI Chat requests và cung cấp thông tin thời gian thực từ hệ thống Resort
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
@@ -31,8 +33,8 @@ public class AIChatController : ControllerBase
     }
 
     /// <summary>
-    /// Gửi message đến AI và nhận response
-    /// Public endpoint - không cần authentication, nhưng có rate limit 20 req/phút mỗi IP
+    /// Gửi câu hỏi đến AI và nhận phản hồi được làm giàu dữ liệu từ Database
+    /// Public endpoint - không bắt buộc đăng nhập, có rate limit 20 req/phút mỗi IP
     /// </summary>
     [HttpPost("send")]
     [AllowAnonymous]
@@ -64,15 +66,12 @@ public class AIChatController : ControllerBase
         {
             if (string.IsNullOrWhiteSpace(request.Message))
             {
-                return BadRequest(new { error = "Message không được để trống" });
+                return BadRequest(new { error = "Tin nhắn không được để trống" });
             }
 
-            _logger.LogInformation("[AI Chat Controller] 📨 Received chat request");
-            _logger.LogInformation("[AI Chat Controller] 📨 Message length: {Length}", request.Message?.Length ?? 0);
-            _logger.LogInformation("[AI Chat Controller] 📨 Message preview: {Message}", request.Message?.Substring(0, Math.Min(50, request.Message?.Length ?? 0)) ?? "");
-            _logger.LogInformation("[AI Chat Controller] 📨 Has context: {HasContext}", !string.IsNullOrEmpty(request.Context));
+            _logger.LogInformation("[AI Chat Controller] 📨 Nhận câu hỏi: '{Message}'", request.Message);
 
-            // Get customer ID from JWT token if available
+            // Lấy CustomerId từ JWT token nếu khách đã đăng nhập
             int? customerId = null;
             var customerIdClaim = User.FindFirst("CustomerId")?.Value;
             if (string.IsNullOrEmpty(customerIdClaim))
@@ -82,13 +81,12 @@ public class AIChatController : ControllerBase
             if (!string.IsNullOrEmpty(customerIdClaim) && int.TryParse(customerIdClaim, out var id))
             {
                 customerId = id;
-                _logger.LogInformation("[AI Chat Controller] 📨 Customer ID from token: {CustomerId}", customerId);
+                _logger.LogInformation("[AI Chat Controller] 👤 Khách hàng xác thực: CustomerId={CustomerId}", customerId);
             }
 
             var response = await _aiChatService.SendMessageAsync(request.Message, request.Context, customerId);
-            
-            _logger.LogInformation("[AI Chat Controller] ✅ Got response from service");
-            _logger.LogInformation("[AI Chat Controller] ✅ Response length: {Length}", response?.Length ?? 0);
+
+            _logger.LogInformation("[AI Chat Controller] ✅ Đã phản hồi thành công (Độ dài: {Length} ký tự)", response?.Length ?? 0);
 
             return Ok(new
             {
@@ -99,10 +97,10 @@ public class AIChatController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "[AI Chat] ❌ Error processing chat message: {Message}", ex.Message);
+            _logger.LogError(ex, "[AI Chat] ❌ Lỗi xử lý tin nhắn chat: {Message}", ex.Message);
             
             var errorMessage = ex.Message.Contains("Unauthorized") || ex.Message.Contains("401")
-                ? "API key không hợp lệ hoặc đã hết hạn"
+                ? "API Key AI hiện chưa hợp lệ hoặc đã hết hạn"
                 : "Đã xảy ra lỗi khi xử lý tin nhắn";
                 
             return StatusCode(500, new { 
@@ -124,17 +122,19 @@ public class AIChatController : ControllerBase
         {
             status = "active",
             service = "AI Chat",
+            hasDb = _aiChatService.HasDbConnection,
             timestamp = DateTime.UtcNow
         });
     }
 
     /// <summary>
-    /// Debug endpoint - xem cấu hình AI và test gọi Groq trực tiếp
-    /// XÓA endpoint này sau khi debug xong
+    /// Debug endpoint - kiểm tra cấu hình AI, kiểm tra kết nối Database và khả năng trích xuất dữ liệu thực tế
     /// </summary>
     [HttpGet("debug")]
     [AllowAnonymous]
-    public async Task<IActionResult> Debug([FromServices] IConfiguration config)
+    public async Task<IActionResult> Debug(
+        [FromServices] IConfiguration config,
+        [FromServices] IUnitOfWork? unitOfWork = null)
     {
         var aiConfig = config.GetSection("AIChat");
         var apiKey = aiConfig["ApiKey"] ?? "";
@@ -142,7 +142,36 @@ public class AIChatController : ControllerBase
         var model = aiConfig["Model"] ?? "unknown";
         var apiUrl = aiConfig["ApiUrl"] ?? "unknown";
 
-        // Test gọi Groq trực tiếp
+        // 1. Kiểm tra truy xuất Database thực tế
+        bool dbConnected = false;
+        int roomTypesCount = 0;
+        int roomsCount = 0;
+        int servicesCount = 0;
+        int faqsCount = 0;
+        int reviewsCount = 0;
+        string dbSampleDataPreview = "";
+
+        try
+        {
+            if (unitOfWork?.Context != null)
+            {
+                dbConnected = await unitOfWork.Context.Database.CanConnectAsync();
+                roomTypesCount = await unitOfWork.Context.RoomTypes.CountAsync();
+                roomsCount = await unitOfWork.Context.Rooms.CountAsync();
+                servicesCount = await unitOfWork.Context.Services.CountAsync();
+                faqsCount = await unitOfWork.Context.FAQs.CountAsync();
+                reviewsCount = await unitOfWork.Context.Reviews.CountAsync();
+
+                // Test gọi trích xuất dữ liệu thật
+                dbSampleDataPreview = await _aiChatService.FetchRealDataAsync("giá phòng và thực đơn nhà hàng");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "[AI Chat Debug] Lỗi khi kiểm tra Database");
+        }
+
+        // 2. Test gọi Groq trực tiếp nếu cấu hình
         string groqTestResult = "not tested";
         string groqStatusCode = "";
         string groqResponse = "";
@@ -187,6 +216,18 @@ public class AIChatController : ControllerBase
                 apiUrl,
                 apiKeySet = !string.IsNullOrEmpty(apiKey),
                 apiKeyPrefix = apiKey.Length > 10 ? apiKey.Substring(0, 10) + "..." : "(empty)"
+            },
+            database = new
+            {
+                connected = dbConnected,
+                roomTypesCount,
+                roomsCount,
+                servicesCount,
+                faqsCount,
+                reviewsCount,
+                realDataFetchedSuccessfully = !string.IsNullOrEmpty(dbSampleDataPreview),
+                realDataPreviewLength = dbSampleDataPreview.Length,
+                realDataPreview = dbSampleDataPreview.Length > 500 ? dbSampleDataPreview.Substring(0, 500) + "..." : dbSampleDataPreview
             },
             groqTest = new
             {
