@@ -32,7 +32,16 @@ if (builder.Environment.IsDevelopment())
 // Add Database Context
 builder.Services.AddDbContext<ResortDbContext>(options =>
 {
-    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? "";
+    
+    // Convert Render's postgresql:// URL to ADO.NET connection string
+    if (connectionString.StartsWith("postgres://") || connectionString.StartsWith("postgresql://"))
+    {
+        var uri = new Uri(connectionString);
+        var userInfo = uri.UserInfo.Split(':');
+        connectionString = $"Host={uri.Host};Database={uri.LocalPath.Substring(1)};Username={userInfo[0]};Password={userInfo[1]};Port={uri.Port}";
+    }
+
     options.UseNpgsql(connectionString, pgOptions => 
     {
         pgOptions.CommandTimeout(60);
