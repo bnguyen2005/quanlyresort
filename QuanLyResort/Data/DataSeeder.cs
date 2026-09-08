@@ -325,11 +325,11 @@ public class DataSeeder
                     CustomerId = customers[0].CustomerId, 
                     RoomId = rooms[0].RoomId,
                     RequestedRoomType = "Standard", 
-                    CheckInDate = DateTime.Today.AddDays(-2), 
-                    CheckOutDate = DateTime.Today.AddDays(1), 
+                    CheckInDate = DateTime.UtcNow.AddDays(-2), 
+                    CheckOutDate = DateTime.UtcNow.AddDays(1), 
                     NumberOfGuests = 2, 
                     Status = "CheckedIn",
-                    ActualCheckInTime = DateTime.Today.AddDays(-2).AddHours(14),
+                    ActualCheckInTime = DateTime.UtcNow.AddDays(-2).AddHours(14),
                     EstimatedTotalAmount = 15000, // 3 nights × 5000
                     Source = "Direct",
                     CreatedBy = "Customer"
@@ -340,8 +340,8 @@ public class DataSeeder
                     CustomerId = customers[1].CustomerId, 
                     RoomId = rooms[2].RoomId,
                     RequestedRoomType = "Deluxe", 
-                    CheckInDate = DateTime.Today, 
-                    CheckOutDate = DateTime.Today.AddDays(3), 
+                    CheckInDate = DateTime.UtcNow, 
+                    CheckOutDate = DateTime.UtcNow.AddDays(3), 
                     NumberOfGuests = 2, 
                     Status = "Assigned",
                     EstimatedTotalAmount = 24000, // 3 nights × 8000
@@ -353,8 +353,8 @@ public class DataSeeder
                     BookingCode = "BKG2025003", 
                     CustomerId = customers[2].CustomerId,
                     RequestedRoomType = "Suite", 
-                    CheckInDate = DateTime.Today.AddDays(5), 
-                    CheckOutDate = DateTime.Today.AddDays(8), 
+                    CheckInDate = DateTime.UtcNow.AddDays(5), 
+                    CheckOutDate = DateTime.UtcNow.AddDays(8), 
                     NumberOfGuests = 4, 
                     Status = "Confirmed",
                     EstimatedTotalAmount = 45000, // 3 nights × 15000
@@ -386,7 +386,7 @@ public class DataSeeder
                     InvoiceNumber = "INV2025001",
                     BookingId = b1.BookingId,
                     CustomerId = b1.CustomerId,
-                    IssueDate = DateTime.Today,
+                    IssueDate = DateTime.UtcNow,
                     SubTotal = totalB1,
                     TaxAmount = 0,
                     DiscountAmount = 0,
@@ -394,7 +394,7 @@ public class DataSeeder
                     PaidAmount = totalB1,
                     BalanceDue = 0,
                     Status = "Paid",
-                    PaidDate = DateTime.Today,
+                    PaidDate = DateTime.UtcNow,
                     IssuedBy = "cashier@resort.test"
                 });
 
@@ -408,7 +408,7 @@ public class DataSeeder
                         InvoiceNumber = "INV2025002",
                         BookingId = b2.BookingId,
                         CustomerId = b2.CustomerId,
-                        IssueDate = DateTime.Today,
+                        IssueDate = DateTime.UtcNow,
                         SubTotal = est2,
                         TaxAmount = 0,
                         DiscountAmount = 0,
@@ -485,7 +485,7 @@ public class DataSeeder
                         Amount = 5000,  // Fixed: 5,000 VND/đêm
                         Quantity = 3,
                         TotalAmount = 15000,  // Fixed: 15,000 VND (3 nights × 5,000)
-                        ChargeDate = DateTime.Today.AddDays(-2),
+                        ChargeDate = DateTime.UtcNow.AddDays(-2),
                         CreatedBy = "frontdesk@resort.test"
                     },
                     new Charge
@@ -498,7 +498,7 @@ public class DataSeeder
                         Quantity = 4,
                         TotalAmount = 6000, // 4 people × 1500
                         OutletName = "Main Restaurant",
-                        ChargeDate = DateTime.Today.AddDays(-1),
+                        ChargeDate = DateTime.UtcNow.AddDays(-1),
                         CreatedBy = "frontdesk@resort.test"
                     }
                 };
@@ -662,4 +662,5 @@ public class DataSeeder
         }
     }
 }
+
 
