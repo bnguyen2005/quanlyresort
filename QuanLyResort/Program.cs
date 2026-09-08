@@ -39,7 +39,8 @@ builder.Services.AddDbContext<ResortDbContext>(options =>
     {
         var uri = new Uri(connectionString);
         var userInfo = uri.UserInfo.Split(':');
-        connectionString = $"Host={uri.Host};Database={uri.LocalPath.Substring(1)};Username={userInfo[0]};Password={userInfo[1]};Port={uri.Port}";
+        var port = uri.Port > 0 ? uri.Port : 5432; // Default to 5432 if port is missing in URL
+        connectionString = $"Host={uri.Host};Database={uri.LocalPath.Substring(1)};Username={userInfo[0]};Password={userInfo[1]};Port={port}";
     }
 
     options.UseNpgsql(connectionString, pgOptions => 
