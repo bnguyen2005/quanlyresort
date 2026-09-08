@@ -95,6 +95,7 @@ public class ResortDbContext : DbContext
         modelBuilder.Entity<Booking>(entity =>
         {
             entity.HasIndex(e => e.BookingCode).IsUnique();
+            entity.HasIndex(e => e.CreatedAt); // Optimization for GetAllBookings
             
             entity.HasOne(b => b.Customer)
                 .WithMany(c => c.Bookings)

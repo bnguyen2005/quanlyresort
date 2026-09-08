@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -58,9 +59,15 @@ public class Room
 
     public DateTime? UpdatedAt { get; set; }
 
+    public bool IsDeleted { get; set; } = false;
+
     // Navigation properties
     public RoomType? RoomTypeNavigation { get; set; } // Link to RoomType model
+    [JsonIgnore]
     public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
+    [JsonIgnore]
     public ICollection<Charge> Charges { get; set; } = new List<Charge>();
 }
+
+
 

@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using QuanLyResort.Data;
@@ -13,43 +14,37 @@ public class BookingService : IBookingService
     private readonly IAuditService _auditService;
     private readonly INotificationService _notificationService;
 private readonly ILogger<BookingService> _logger;
+    private readonly Microsoft.Extensions.Caching.Memory.IMemoryCache _cache;
 
-    public BookingService(IUnitOfWork unitOfWork, IAuditService auditService, 
-        INotificationService notificationService, ILogger<BookingService> logger)
+    public BookingService(IUnitOfWork unitOfWork, IAuditService auditService, INotificationService notificationService, ILogger<BookingService> logger, Microsoft.Extensions.Caching.Memory.IMemoryCache cache)
     {
         _unitOfWork = unitOfWork;
         _logger = logger;
         _auditService = auditService;
         _notificationService = notificationService;
+        _cache = cache;
 }
 
     public async Task<Booking> CreateBookingAsync(Booking booking, string createdBy)
     {
-        // Gán BookingCode t?m th?i d? pass qua DB validation (NOT NULL)
-        // Sau khi có ID th?t t? DB, s? update l?i thành BKG{Id:D7} d? d?m b?o 100% không b? trùng
-        booking.BookingCode = $"TEMP-{Guid.NewGuid():N}";
+        // 1. Sinh mã tr?c ti?p ? Memory d? không ph?i Update
+        var timestamp = DateTime.UtcNow.ToString("yyMMddHHmmss");
+        var rand = Random.Shared.Next(100, 999);
+        
+        booking.BookingCode = $"BKG{timestamp}{rand}";
         booking.Status = "Pending";
         booking.CreatedBy = createdBy;
         booking.CreatedAt = DateTime.UtcNow;
 
-        // Calculate estimated total
         var nights = (booking.CheckOutDate - booking.CheckInDate).Days;
-        if (nights <= 0)
-        {
-            nights = 1; // Minimum 1 night
-        }
+        if (nights <= 0) nights = 1;
         
-        // Normalize RequestedRoomType for matching
         var requestedType = booking.RequestedRoomType?.Trim() ?? "";
         var requestedTypeLower = requestedType.ToLower();
-        
-        // Try multiple ways to find room price
         decimal roomPrice = 0;
-        string? priceSource = null;
         
-        _logger.LogInformation($"?? [CreateBookingAsync] Looking for room price. RequestedRoomType: '{requestedType}', Nights: {nights}");
+        _logger.LogInformation($"? [CreateBookingAsync] Looking for room price. RequestedRoomType: '{requestedType}', Nights: {nights}");
         
-        // Priority 1: Try to find from RoomType table by TypeName (exact match first)
         var roomTypes = await _context.RoomTypes
             .Where(rt => rt.TypeName.ToLower() == requestedTypeLower ||
                          rt.TypeCode.ToLower() == requestedTypeLower ||
@@ -60,12 +55,8 @@ private readonly ILogger<BookingService> _logger;
         if (roomTypes.Any())
         {
             roomPrice = roomTypes.FirstOrDefault()?.BasePrice ?? 0;
-            priceSource = $"RoomType.BasePrice (exact: {requestedType})";
-            _logger.LogInformation($"? Found via Priority 1: {roomPrice} from RoomType '{roomTypes.FirstOrDefault()?.TypeName}'");
         }
-        
-        // Priority 1b: Try partial match if exact match failed
-        if (roomPrice <= 0)
+        else
         {
             roomTypes = await _context.RoomTypes
                 .Where(rt => rt.TypeName.ToLower().Contains(requestedTypeLower) ||
@@ -73,93 +64,29 @@ private readonly ILogger<BookingService> _logger;
                              rt.TypeName.ToLower().Replace(" room", "").Contains(requestedTypeLower))
                 .ToListAsync();
             
-            if (roomTypes.Any())
-            {
-                roomPrice = roomTypes.FirstOrDefault()?.BasePrice ?? 0;
-                priceSource = $"RoomType.BasePrice (partial: {requestedType})";
-                _logger.LogInformation($"? Found via Priority 1b: {roomPrice} from RoomType '{roomTypes.FirstOrDefault()?.TypeName}'");
-            }
+            if (roomTypes.Any()) roomPrice = roomTypes.FirstOrDefault()?.BasePrice ?? 0;
         }
         
-        // Priority 2: If not found, try to find from Rooms table by RoomType string field
         if (roomPrice <= 0)
         {
-            var rooms = await _unitOfWork.Rooms.FindAsync(r => 
-                r.RoomType.ToLower() == requestedTypeLower ||
-                r.RoomType.ToLower().Contains(requestedTypeLower) ||
-                requestedTypeLower.Contains(r.RoomType.ToLower()));
-            
-            if (rooms.Any())
-            {
-                roomPrice = rooms.FirstOrDefault()?.PricePerNight ?? 0;
-                priceSource = $"Room.PricePerNight (RoomType: {requestedType})";
-                _logger.LogInformation($"? Found via Priority 2: {roomPrice} from Room '{rooms.FirstOrDefault()?.RoomNumber}'");
-            }
-        }
-        
-        // Priority 3: Try to get from RoomType via RoomTypeNavigation
-        if (roomPrice <= 0)
-        {
-            var matchingRooms = await _context.Rooms
-                .Include(r => r.RoomTypeNavigation)
-                .Where(r => r.RoomTypeNavigation != null && 
-                           (r.RoomTypeNavigation.TypeName.ToLower() == requestedTypeLower ||
-                            r.RoomTypeNavigation.TypeName.ToLower().Contains(requestedTypeLower.Replace(" room", "")) ||
-                            r.RoomTypeNavigation.TypeName.ToLower().Replace(" room", "") == requestedTypeLower ||
-                            requestedTypeLower.Contains(r.RoomTypeNavigation.TypeName.ToLower().Replace(" room", ""))))
+            var rooms = await _context.Rooms
+                .Where(r => r.RoomType.ToLower() == requestedTypeLower ||
+                            r.RoomType.ToLower().Contains(requestedTypeLower) ||
+                            requestedTypeLower.Contains(r.RoomType.ToLower()))
                 .ToListAsync();
             
-            if (matchingRooms.Any())
-            {
-                // Try room price first
-                roomPrice = matchingRooms.FirstOrDefault()?.PricePerNight ?? 0;
-                if (roomPrice > 0)
-                {
-                    priceSource = $"Room.PricePerNight (via RoomTypeNavigation: {requestedType})";
-                    _logger.LogInformation($"? Found via Priority 3 (Room price): {roomPrice}");
-                }
-                else
-                {
-                    // Try RoomType base price
-                    roomPrice = matchingRooms.FirstOrDefault()?.RoomTypeNavigation?.BasePrice ?? 0;
-                    if (roomPrice > 0)
-                    {
-                        priceSource = $"RoomType.BasePrice (via RoomTypeNavigation: {requestedType})";
-                        _logger.LogInformation($"? Found via Priority 3 (BasePrice): {roomPrice}");
-                    }
-                }
-            }
+            if (rooms.Any()) roomPrice = rooms.FirstOrDefault()?.PricePerNight ?? 0;
         }
         
-        // If still no price found, log warning with all available room types for debugging
-        if (roomPrice <= 0)
-        {
-            var allRoomTypes = await _context.RoomTypes.Select(rt => new { rt.TypeName, rt.TypeCode, rt.BasePrice }).ToListAsync();
-            var allRoomTypesStr = string.Join(", ", allRoomTypes.Select(rt => $"{rt.TypeName} ({rt.TypeCode}): {rt.BasePrice}"));
-            _logger.LogWarning($"?? Warning: Could not find room price for RequestedRoomType: '{requestedType}'. Available RoomTypes: {allRoomTypesStr}");
-        }
-        
-        // Calculate estimated total amount
         booking.EstimatedTotalAmount = roomPrice > 0 ? roomPrice * nights : 0;
         
-        _logger.LogInformation($"?? [CreateBookingAsync] Final calculation: RoomPrice={roomPrice}, Nights={nights}, EstimatedTotalAmount={booking.EstimatedTotalAmount}");
-        
-        // If EstimatedTotalAmount is still 0, this is a serious issue
-        if (booking.EstimatedTotalAmount == 0)
-        {
-            _logger.LogError($"? ERROR: Booking EstimatedTotalAmount is 0! RequestedRoomType: '{requestedType}', RoomPrice: {roomPrice}, Nights: {nights}");
-        }
-
-        await _unitOfWork.Bookings.AddAsync(booking);
-        await _unitOfWork.SaveChangesAsync();
-
-        // Update l?i BookingCode chu?n theo BookingId d? tránh 100% race condition
-        booking.BookingCode = $"BKG{booking.BookingId:D7}";
-        await _unitOfWork.SaveChangesAsync();
-
-        // T?o invoice so b? khi d?t phòng d? admin có th? xem và qu?n lý
+        // 2. B?C TRONG TRANSACTION Ð? Ð?M B?O TOÀN V?N D? LI?U VÀ GI?M SAVECHANGES
+        using var transaction = await _context.Database.BeginTransactionAsync();
         try
         {
+            await _unitOfWork.Bookings.AddAsync(booking);
+            await _unitOfWork.SaveChangesAsync(); // Luu Booking d? l?y BookingId
+            
             var subTotal = booking.EstimatedTotalAmount ?? 0;
             var taxRate = 10.0m;
             var taxAmount = subTotal * (taxRate / 100);
@@ -167,7 +94,7 @@ private readonly ILogger<BookingService> _logger;
 
             var invoice = new Invoice
             {
-                InvoiceNumber = $"TEMP-INV-{Guid.NewGuid():N}",
+                InvoiceNumber = $"INV{timestamp}{rand}",
                 BookingId = booking.BookingId,
                 CustomerId = booking.CustomerId,
                 SubTotal = subTotal,
@@ -176,22 +103,22 @@ private readonly ILogger<BookingService> _logger;
                 TotalAmount = totalAmount,
                 PaidAmount = 0,
                 BalanceDue = totalAmount,
-                Status = "Issued", // Chua thanh toán
+                Status = "Issued",
                 IssueDate = DateTime.UtcNow,
                 IssuedBy = createdBy
             };
 
             await _unitOfWork.Invoices.AddAsync(invoice);
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(); // Luu Invoice
 
-            // Update l?i InvoiceNumber chu?n theo InvoiceId
-            invoice.InvoiceNumber = $"INV{invoice.InvoiceId:D7}";
-            await _unitOfWork.SaveChangesAsync();
+            await transaction.CommitAsync();
+            _logger.LogInformation($"? Transaction committed successfully for Booking {booking.BookingCode}");
         }
         catch (Exception ex)
         {
-            // Log l?i nhung không fail booking creation
-            _logger.LogInformation($"Warning: Failed to create invoice for booking {booking.BookingCode}: {ex.Message}");
+            await transaction.RollbackAsync();
+            _logger.LogError($"? Transaction failed for booking {booking.BookingCode}: {ex.Message}");
+            throw;
         }
 
         await _auditService.LogAsync("Booking", booking.BookingId, "Create", createdBy, null, 
@@ -226,12 +153,18 @@ private readonly ILogger<BookingService> _logger;
 
     public async Task<IEnumerable<Booking>> GetAllBookingsAsync()
     {
-        // Tr? v? T?T C? bookings, bao g?m c? walk-in customers (CustomerId = null)
-        return await _context.Bookings
-            .Include(b => b.Customer)  // Include Customer n?u có, null n?u walk-in
+        if (_cache.TryGetValue("all_bookings", out IEnumerable<Booking> cached))
+            return cached;
+
+        var data = await _context.Bookings
+            .Include(b => b.Customer)
             .Include(b => b.Room)
             .OrderByDescending(b => b.CreatedAt)
+            .Take(50)
             .ToListAsync();
+
+        _cache.Set("all_bookings", data, TimeSpan.FromSeconds(30));
+        return data;
     }
 
     public async Task<IEnumerable<Booking>> GetBookingsByCustomerAsync(int customerId)
@@ -551,6 +484,11 @@ private readonly ILogger<BookingService> _logger;
         return true;
     }
 }
+
+
+
+
+
 
 
 

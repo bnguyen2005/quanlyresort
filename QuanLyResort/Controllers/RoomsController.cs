@@ -1,4 +1,4 @@
-using QuanLyResort.Repositories;
+ï»¿using QuanLyResort.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -30,7 +30,7 @@ public class RoomsController : ControllerBase
     }
 
     /// <summary>
-    /// L?y danh sách t?t c? phòng v?i filter
+    /// L?y danh sï¿½ch t?t c? phï¿½ng v?i filter
     /// GET /api/rooms?status=Available&roomTypeId=1
     /// </summary>
     [HttpGet]
@@ -43,6 +43,7 @@ public class RoomsController : ControllerBase
     {
         var query = _context.Rooms
             .Include(r => r.RoomTypeNavigation)
+            .Where(r => !r.IsDeleted)
             .AsQueryable();
 
         // Filter by availability
@@ -100,7 +101,7 @@ public class RoomsController : ControllerBase
     }
 
     /// <summary>
-    /// L?y chi ti?t phòng
+    /// L?y chi ti?t phï¿½ng
     /// GET /api/rooms/{id}
     /// </summary>
     [HttpGet("{id}")]
@@ -145,7 +146,7 @@ public class RoomsController : ControllerBase
     }
 
     /// <summary>
-    /// L?y th?ng kê phòng
+    /// L?y th?ng kï¿½ phï¿½ng
     /// GET /api/rooms/statistics
     /// </summary>
     [HttpGet("statistics")]
@@ -196,7 +197,7 @@ public class RoomsController : ControllerBase
     }
 
     /// <summary>
-    /// L?y danh sách t?ng
+    /// L?y danh sï¿½ch t?ng
     /// GET /api/rooms/floors
     /// </summary>
     [HttpGet("floors")]
@@ -213,7 +214,7 @@ public class RoomsController : ControllerBase
     }
 
     /// <summary>
-    /// Upload hình ?nh cho phòng
+    /// Upload hï¿½nh ?nh cho phï¿½ng
     /// POST /api/rooms/{id}/upload-image
     /// </summary>
     [HttpPost("{id:int}/upload-image")]
@@ -229,17 +230,17 @@ public class RoomsController : ControllerBase
                 return NotFound(new { message = "Room not found." });
             }
 
-            // Luu oldImageUrl d? dùng cho c? hai tru?ng h?p (xóa và upload m?i)
+            // Luu oldImageUrl d? dï¿½ng cho c? hai tru?ng h?p (xï¿½a vï¿½ upload m?i)
             var oldImageUrl = room.ImageUrl;
 
-            // N?u không có file, xóa image URL
+            // N?u khï¿½ng cï¿½ file, xï¿½a image URL
             if (file == null || file.Length == 0)
             {
                 room.ImageUrl = null;
                 room.UpdatedAt = DateTime.UtcNow;
                 await _unitOfWork.SaveChangesAsync();
 
-                // Xóa file cu n?u có
+                // Xï¿½a file cu n?u cï¿½
                 if (!string.IsNullOrEmpty(oldImageUrl) && oldImageUrl.StartsWith("/"))
                 {
                     var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", oldImageUrl.TrimStart('/'));
@@ -268,7 +269,7 @@ public class RoomsController : ControllerBase
                 return BadRequest(new { message = "File size exceeds 5MB limit." });
             }
 
-            // T?o thu m?c uploads n?u chua có
+            // T?o thu m?c uploads n?u chua cï¿½
             var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "rooms");
             if (!Directory.Exists(uploadsFolder))
             {
@@ -285,7 +286,7 @@ public class RoomsController : ControllerBase
                 await file.CopyToAsync(stream);
             }
 
-            // Xóa file cu n?u có (oldImageUrl dã du?c khai báo ? d?u hàm)
+            // Xï¿½a file cu n?u cï¿½ (oldImageUrl dï¿½ du?c khai bï¿½o ? d?u hï¿½m)
             if (!string.IsNullOrEmpty(oldImageUrl) && oldImageUrl.StartsWith("/"))
             {
                 var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", oldImageUrl.TrimStart('/'));
@@ -313,7 +314,7 @@ public class RoomsController : ControllerBase
     }
 
     /// <summary>
-    /// Thêm hình ?nh vào gallery c?a phòng
+    /// Thï¿½m hï¿½nh ?nh vï¿½o gallery c?a phï¿½ng
     /// POST /api/rooms/{id}/gallery/add
     /// </summary>
     [HttpPost("{id:int}/gallery/add")]
@@ -366,10 +367,10 @@ public class RoomsController : ControllerBase
             // Check max 5 images
             if (gallery.Count >= 5)
             {
-                return BadRequest(new { message = "Gallery dã d?y. T?i da 5 hình ?nh. Vui lòng xóa m?t hình ?nh tru?c khi thêm m?i." });
+                return BadRequest(new { message = "Gallery dï¿½ d?y. T?i da 5 hï¿½nh ?nh. Vui lï¿½ng xï¿½a m?t hï¿½nh ?nh tru?c khi thï¿½m m?i." });
             }
 
-            // T?o thu m?c uploads n?u chua có
+            // T?o thu m?c uploads n?u chua cï¿½
             var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "rooms", "gallery");
             if (!Directory.Exists(uploadsFolder))
             {
@@ -407,7 +408,7 @@ public class RoomsController : ControllerBase
     }
 
     /// <summary>
-    /// Xóa hình ?nh kh?i gallery c?a phòng
+    /// Xï¿½a hï¿½nh ?nh kh?i gallery c?a phï¿½ng
     /// DELETE /api/rooms/{id}/gallery/remove?imageUrl=...
     /// </summary>
     [HttpDelete("{id:int}/gallery/remove")]
@@ -472,7 +473,7 @@ public class RoomsController : ControllerBase
     }
 
     /// <summary>
-    /// T?o phòng m?i
+    /// T?o phï¿½ng m?i
     /// POST /api/rooms
     /// </summary>
     [HttpPost]
@@ -517,7 +518,7 @@ public class RoomsController : ControllerBase
     }
 
     /// <summary>
-    /// C?p nh?t thông tin phòng
+    /// C?p nh?t thï¿½ng tin phï¿½ng
     /// PUT /api/rooms/{id}
     /// </summary>
     [HttpPut("{id}")]
@@ -583,7 +584,7 @@ public class RoomsController : ControllerBase
     }
 
     /// <summary>
-    /// C?p nh?t tr?ng thái phòng
+    /// C?p nh?t tr?ng thï¿½i phï¿½ng
     /// PATCH /api/rooms/{id}/status
     /// </summary>
     [HttpPatch("{id}/status")]
@@ -614,7 +615,7 @@ public class RoomsController : ControllerBase
     }
 
     /// <summary>
-    /// Xóa phòng
+    /// Xï¿½a phï¿½ng
     /// DELETE /api/rooms/{id}
     /// </summary>
     [HttpDelete("{id}")]
@@ -634,7 +635,8 @@ public class RoomsController : ControllerBase
             return Conflict(new { message = $"Cannot delete room '{room.RoomNumber}' because it has active bookings. Please cancel or complete all bookings first." });
         }
 
-        _context.Rooms.Remove(room);
+        room.IsDeleted = true;
+        _context.Rooms.Update(room);
         await _unitOfWork.SaveChangesAsync();
 
         await _auditService.LogAsync("Room", room.RoomId, "Delete", GetCurrentUsername(), System.Text.Json.JsonSerializer.Serialize(room), null, $"Deleted Room: {room.RoomNumber}");
@@ -659,4 +661,5 @@ public class RoomStatusUpdateRequest
     public string HousekeepingStatus { get; set; } = "Ready"; // Ready, Clean, Dirty, InProgress, Maintenance
     public string? Notes { get; set; }
 }
+
 

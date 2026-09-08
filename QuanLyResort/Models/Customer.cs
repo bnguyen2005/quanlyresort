@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -52,7 +53,12 @@ public class Customer
 
     public DateTime? UpdatedAt { get; set; }
 
+    public bool IsDeleted { get; set; } = false;
+
     // Navigation properties
+    [JsonIgnore]
     public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
 }
+
+
 

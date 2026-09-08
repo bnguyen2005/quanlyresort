@@ -1,4 +1,4 @@
-using QuanLyResort.Repositories;
+ï»¿using QuanLyResort.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -27,7 +27,7 @@ public class CustomerManagementController : ControllerBase
     }
 
     /// <summary>
-    /// L?y danh sách t?t c? khách hàng
+    /// L?y danh sï¿½ch t?t c? khï¿½ch hï¿½ng
     /// </summary>
     [HttpGet]
     public async Task<IActionResult> GetAllCustomers(
@@ -35,7 +35,7 @@ public class CustomerManagementController : ControllerBase
         [FromQuery] string? nationality = null,
         [FromQuery] string? search = null)
     {
-        var query = _context.Customers.AsQueryable();
+        var query = _context.Customers.Where(c => !c.IsDeleted).AsQueryable();
 
         if (!string.IsNullOrEmpty(customerType))
             query = query.Where(c => c.CustomerType == customerType);
@@ -82,8 +82,8 @@ public class CustomerManagementController : ControllerBase
     }
 
     /// <summary>
-    /// L?y thông tin khách hàng c?a chính mình (t? JWT token)
-    /// Route này PH?I d?t TRU?C route {id} d? tránh conflict
+    /// L?y thï¿½ng tin khï¿½ch hï¿½ng c?a chï¿½nh mï¿½nh (t? JWT token)
+    /// Route nï¿½y PH?I d?t TRU?C route {id} d? trï¿½nh conflict
     /// </summary>
     [HttpGet("my")]
     [Authorize(Roles = "Customer")]
@@ -102,7 +102,7 @@ public class CustomerManagementController : ControllerBase
             if (string.IsNullOrEmpty(userEmail))
             {
                 _logger.LogWarning("[GetMyCustomer] No user email found");
-                return Unauthorized(new { message = "Không tìm th?y thông tin ngu?i dùng" });
+                return Unauthorized(new { message = "Khï¿½ng tï¿½m th?y thï¿½ng tin ngu?i dï¿½ng" });
             }
 
             Customer? customer = null;
@@ -120,7 +120,7 @@ public class CustomerManagementController : ControllerBase
                 }
             }
 
-            // N?u không tìm th?y qua CustomerId, th? tìm qua email
+            // N?u khï¿½ng tï¿½m th?y qua CustomerId, th? tï¿½m qua email
             if (customer == null)
             {
                 _logger.LogInformation("[GetMyCustomer] Trying to find customer by email: {Email}", userEmail);
@@ -133,7 +133,7 @@ public class CustomerManagementController : ControllerBase
                 }
             }
 
-            // N?u v?n không tìm th?y, th? tìm User và l?y CustomerId t? dó
+            // N?u v?n khï¿½ng tï¿½m th?y, th? tï¿½m User vï¿½ l?y CustomerId t? dï¿½
             if (customer == null)
             {
                 _logger.LogInformation("[GetMyCustomer] Trying to find User by email: {Email}", userEmail);
@@ -142,7 +142,7 @@ public class CustomerManagementController : ControllerBase
                 
                 if (user == null)
                 {
-                    // Th? tìm v?i username
+                    // Th? tï¿½m v?i username
                     _logger.LogInformation("[GetMyCustomer] Trying to find User by username: {Email}", userEmail);
                     user = await _context.Users
                         .FirstOrDefaultAsync(u => u.Username != null && u.Username.ToLower() == userEmail.ToLower());
@@ -169,7 +169,7 @@ public class CustomerManagementController : ControllerBase
             if (customer == null)
             {
                 _logger.LogWarning("[GetMyCustomer] Customer not found for email: {Email}", userEmail);
-                return NotFound(new { message = "Không tìm th?y thông tin khách hàng" });
+                return NotFound(new { message = "Khï¿½ng tï¿½m th?y thï¿½ng tin khï¿½ch hï¿½ng" });
             }
             
             _logger.LogInformation("[GetMyCustomer] Successfully found customer: {Id}, {Name}, {Email}", 
@@ -219,9 +219,9 @@ public class CustomerManagementController : ControllerBase
     }
 
     /// <summary>
-    /// L?y thông tin khách hàng theo ID
-    /// Customer có th? xem thông tin c?a chính h?
-    /// Route constraint: ch? match s? nguyên d? tránh conflict v?i route "my"
+    /// L?y thï¿½ng tin khï¿½ch hï¿½ng theo ID
+    /// Customer cï¿½ th? xem thï¿½ng tin c?a chï¿½nh h?
+    /// Route constraint: ch? match s? nguyï¿½n d? trï¿½nh conflict v?i route "my"
     /// </summary>
     [HttpGet("{id:int}")]
     [Authorize(Roles = "Admin,Manager,FrontDesk,Business,Customer")]
@@ -235,7 +235,7 @@ public class CustomerManagementController : ControllerBase
             
             if (userRole == "Customer" && userCustomerId != null && int.Parse(userCustomerId) != id)
             {
-                return Forbid("B?n ch? có th? xem thông tin c?a chính mình");
+                return Forbid("B?n ch? cï¿½ th? xem thï¿½ng tin c?a chï¿½nh mï¿½nh");
             }
             
             var c = await _context.Customers.AsNoTracking()
@@ -288,7 +288,7 @@ public class CustomerManagementController : ControllerBase
     }
 
     /// <summary>
-    /// T?o khách hàng m?i
+    /// T?o khï¿½ch hï¿½ng m?i
     /// </summary>
     [HttpPost]
     public async Task<IActionResult> CreateCustomer([FromBody] CreateCustomerRequest request)
@@ -331,8 +331,8 @@ public class CustomerManagementController : ControllerBase
     }
 
     /// <summary>
-    /// C?p nh?t thông tin khách hàng
-    /// Customer có th? c?p nh?t thông tin c?a chính h?
+    /// C?p nh?t thï¿½ng tin khï¿½ch hï¿½ng
+    /// Customer cï¿½ th? c?p nh?t thï¿½ng tin c?a chï¿½nh h?
     /// </summary>
     [HttpPut("{id:int}")]
     [Authorize(Roles = "Admin,Manager,FrontDesk,Business,Customer")]
@@ -346,7 +346,7 @@ public class CustomerManagementController : ControllerBase
             
             if (userRole == "Customer" && userCustomerId != null && int.Parse(userCustomerId) != id)
             {
-                return Forbid("B?n ch? có th? c?p nh?t thông tin c?a chính mình");
+                return Forbid("B?n ch? cï¿½ th? c?p nh?t thï¿½ng tin c?a chï¿½nh mï¿½nh");
             }
             
             var customer = await _context.Customers.FindAsync(id);
@@ -414,7 +414,7 @@ public class CustomerManagementController : ControllerBase
     }
 
     /// <summary>
-    /// Upload ?nh d?i di?n cho khách hàng
+    /// Upload ?nh d?i di?n cho khï¿½ch hï¿½ng
     /// POST /api/customermanagement/{id}/upload-avatar
     /// </summary>
     [HttpPost("{id:int}/upload-avatar")]
@@ -429,7 +429,7 @@ public class CustomerManagementController : ControllerBase
             
             if (userRole == "Customer" && userCustomerId != null && int.Parse(userCustomerId) != id)
             {
-                return Forbid("B?n ch? có th? c?p nh?t ?nh d?i di?n c?a chính mình");
+                return Forbid("B?n ch? cï¿½ th? c?p nh?t ?nh d?i di?n c?a chï¿½nh mï¿½nh");
             }
 
             var customer = await _context.Customers.FindAsync(id);
@@ -438,14 +438,14 @@ public class CustomerManagementController : ControllerBase
 
             var oldAvatarUrl = customer.AvatarUrl;
 
-            // N?u không có file, xóa avatar
+            // N?u khï¿½ng cï¿½ file, xï¿½a avatar
             if (file == null || file.Length == 0)
             {
                 customer.AvatarUrl = null;
                 customer.UpdatedAt = DateTime.UtcNow;
                 await _unitOfWork.SaveChangesAsync();
 
-                // Xóa file cu n?u có
+                // Xï¿½a file cu n?u cï¿½
                 if (!string.IsNullOrEmpty(oldAvatarUrl) && oldAvatarUrl.StartsWith("/"))
                 {
                     var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", oldAvatarUrl.TrimStart('/'));
@@ -474,7 +474,7 @@ public class CustomerManagementController : ControllerBase
                 return BadRequest(new { message = "File size exceeds 10MB limit." });
             }
 
-            // T?o thu m?c uploads n?u chua có
+            // T?o thu m?c uploads n?u chua cï¿½
             var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "avatars");
             if (!Directory.Exists(uploadsFolder))
             {
@@ -491,7 +491,7 @@ public class CustomerManagementController : ControllerBase
                 await file.CopyToAsync(stream);
             }
 
-            // Xóa file cu n?u có
+            // Xï¿½a file cu n?u cï¿½
             if (!string.IsNullOrEmpty(oldAvatarUrl) && oldAvatarUrl.StartsWith("/"))
             {
                 var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", oldAvatarUrl.TrimStart('/'));
@@ -519,7 +519,7 @@ public class CustomerManagementController : ControllerBase
     }
 
     /// <summary>
-    /// Thay d?i lo?i khách hàng (Regular, VIP, Corporate)
+    /// Thay d?i lo?i khï¿½ch hï¿½ng (Regular, VIP, Corporate)
     /// </summary>
     [HttpPost("{id:int}/change-type")]
     [Authorize(Roles = "Admin,Manager,Business")]
@@ -550,7 +550,7 @@ public class CustomerManagementController : ControllerBase
     }
 
     /// <summary>
-    /// Thêm loyalty points
+    /// Thï¿½m loyalty points
     /// </summary>
     [HttpPost("{id:int}/add-points")]
     public async Task<IActionResult> AddLoyaltyPoints(int id, [FromBody] AddPointsRequest request)
@@ -584,7 +584,7 @@ public class CustomerManagementController : ControllerBase
     }
 
     /// <summary>
-    /// Xóa khách hàng
+    /// Xï¿½a khï¿½ch hï¿½ng
     /// </summary>
     [HttpDelete("{id:int}")]
     [Authorize(Roles = "Admin")]
@@ -604,7 +604,8 @@ public class CustomerManagementController : ControllerBase
 
         var customerInfo = $"{customer.FullName} ({customer.Email})";
 
-        _context.Customers.Remove(customer);
+        customer.IsDeleted = true;
+        _context.Customers.Update(customer);
         await _unitOfWork.SaveChangesAsync();
 
         // Log audit
@@ -622,7 +623,7 @@ public class CustomerManagementController : ControllerBase
     }
 
     /// <summary>
-    /// Tìm ki?m khách hàng
+    /// Tï¿½m ki?m khï¿½ch hï¿½ng
     /// </summary>
     [HttpGet("search")]
     public async Task<IActionResult> SearchCustomers([FromQuery] string query)
@@ -653,24 +654,24 @@ public class CustomerManagementController : ControllerBase
     }
 
     /// <summary>
-    /// L?y danh sách lo?i khách hàng
+    /// L?y danh sï¿½ch lo?i khï¿½ch hï¿½ng
     /// </summary>
     [HttpGet("types")]
     public IActionResult GetCustomerTypes()
     {
         var types = new[]
         {
-            new { value = "Regular", label = "Thu?ng", description = "Khách hàng thông thu?ng" },
-            new { value = "VIP", label = "VIP", description = "Khách hàng quan tr?ng" },
-            new { value = "Corporate", label = "Doanh nghi?p", description = "Khách hàng công ty" },
-            new { value = "Member", label = "Thành viên", description = "Thành viên thu?ng xuyên" }
+            new { value = "Regular", label = "Thu?ng", description = "Khï¿½ch hï¿½ng thï¿½ng thu?ng" },
+            new { value = "VIP", label = "VIP", description = "Khï¿½ch hï¿½ng quan tr?ng" },
+            new { value = "Corporate", label = "Doanh nghi?p", description = "Khï¿½ch hï¿½ng cï¿½ng ty" },
+            new { value = "Member", label = "Thï¿½nh viï¿½n", description = "Thï¿½nh viï¿½n thu?ng xuyï¿½n" }
         };
 
         return Ok(types);
     }
 
     /// <summary>
-    /// Th?ng kê khách hàng
+    /// Th?ng kï¿½ khï¿½ch hï¿½ng
     /// </summary>
     [HttpGet("statistics")]
     public async Task<IActionResult> GetStatistics()
@@ -691,7 +692,7 @@ public class CustomerManagementController : ControllerBase
                 .Take(10)
                 .ToListAsync();
 
-            // SQLite không order tr?c ti?p t?t v?i decimal => chuy?n sang client d? s?p x?p an toàn
+            // SQLite khï¿½ng order tr?c ti?p t?t v?i decimal => chuy?n sang client d? s?p x?p an toï¿½n
             var topSpenders = _context.Customers
                 .Select(c => new { c.CustomerId, c.FullName, c.TotalSpent, c.LoyaltyPoints })
                 .AsEnumerable()
@@ -760,5 +761,6 @@ public class AddPointsRequest
     public int Points { get; set; }
     public string? Reason { get; set; }
 }
+
 
 

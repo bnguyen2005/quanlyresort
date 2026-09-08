@@ -39,6 +39,9 @@ public class Booking
     [Column(TypeName = "decimal(18,2)")]
     public decimal? EstimatedTotalAmount { get; set; }
 
+    [Column(TypeName = "decimal(18,2)")]
+    public decimal BookedPrice { get; set; } = 0;
+
     [StringLength(1000)]
     public string? SpecialRequests { get; set; }
 

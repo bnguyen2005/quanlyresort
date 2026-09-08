@@ -33,48 +33,10 @@ if (builder.Environment.IsDevelopment())
 builder.Services.AddDbContext<ResortDbContext>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-
-    // Use SQLite if connection string is SQLite format, otherwise try SQL Server
-    // SQLite works on all platforms (Windows, Linux, macOS)
-    if (connectionString != null && (connectionString.Contains("Data Source=") || connectionString.Contains(".db")))
+    options.UseNpgsql(connectionString, pgOptions => 
     {
-        options.UseSqlite(connectionString, sqliteOptions =>
-        {
-            // SQLite doesn't support nvarchar(max), map to TEXT instead
-            sqliteOptions.MigrationsHistoryTable("__EFMigrationsHistory");
-        });
-    }
-    else if (builder.Environment.IsDevelopment())
-    {
-        // Development: prefer SQLite for cross-platform
-        options.UseSqlite(connectionString ?? "Data Source=ResortDev.db", sqliteOptions =>
-        {
-            sqliteOptions.MigrationsHistoryTable("__EFMigrationsHistory");
-        });
-    }
-    else
-    {
-        // Production: try SQL Server, but fallback to SQLite if LocalDB (not supported on Linux)
-        if (connectionString != null && connectionString.Contains("(localdb)"))
-        {
-            // LocalDB not supported on Linux (Render), use SQLite instead
-            options.UseSqlite("Data Source=resort.db", sqliteOptions =>
-            {
-                sqliteOptions.MigrationsHistoryTable("__EFMigrationsHistory");
-            });
-        }
-        else
-        {
-            // ⚠️ QUAN TRỌNG: nếu bạn dùng Render PostgreSQL, connectionString sẽ có
-            // dạng "Host=...;Port=5432;..." — KHÔNG được đưa vào UseSqlServer().
-            // Nếu đúng là bạn dùng Postgres, cài gói Npgsql.EntityFrameworkCore.PostgreSQL
-            // và đổi dòng dưới thành: options.UseNpgsql(connectionString);
-            options.UseSqlServer(connectionString, sql =>
-            {
-                sql.CommandTimeout(20);
-            });
-        }
-    }
+        pgOptions.CommandTimeout(60);
+    });
 });
 
 // Add Repositories
@@ -342,39 +304,14 @@ _ = Task.Run(async () =>
         var isSqlite = context.Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite";
         logger.LogInformation("   Database provider: {Provider}", context.Database.ProviderName);
 
-        if (isSqlite)
-        {
-            // For SQLite, use EnsureCreated to avoid migration issues with AUTOINCREMENT
-            logger.LogInformation("📦 Using SQLite - creating database with EnsureCreated...");
-            await context.Database.EnsureCreatedAsync(cts.Token);
-            logger.LogInformation("✅ Database created using EnsureCreated");
-        }
-        else
-        {
-            // For SQL Server, use migrations
-            var appliedMigrations = await context.Database.GetAppliedMigrationsAsync(cts.Token);
-            var pendingMigrations = await context.Database.GetPendingMigrationsAsync(cts.Token);
+        logger.LogInformation("📦 Creating database with EnsureCreated...");
+        await context.Database.EnsureCreatedAsync(cts.Token);
+        logger.LogInformation("✅ Database created using EnsureCreated");
 
-            logger.LogInformation("   Applied migrations: {Count}", appliedMigrations.Count());
-            logger.LogInformation("   Pending migrations: {Count}", pendingMigrations.Count());
-
-            if (!canConnect || pendingMigrations.Any())
-            {
-                logger.LogInformation("📦 Creating/updating database and applying migrations...");
-                await context.Database.MigrateAsync(cts.Token);
-                logger.LogInformation("✅ Database created/updated and migrations applied");
-            }
-            else
-            {
-                logger.LogInformation("✅ Database is up to date");
-            }
-        }
-
-        // Seed initial data (only if tables are empty)
-        logger.LogInformation("🌱 Seeding initial data...");
-        var seeder = new DataSeeder(context);
-        await seeder.SeedAsync();
-        logger.LogInformation("✅ Data seeded successfully");
+        // logger.LogInformation("🌱 Seeding initial data...");
+        // var seeder = new DataSeeder(context);
+        // await seeder.SeedAsync();
+        // logger.LogInformation("✅ Data seeded successfully");
     }
     catch (OperationCanceledException)
     {
@@ -456,13 +393,13 @@ app.UseSwaggerUI(c =>
 
 app.UseCors("LocalDevAllow");
 
-app.UseAuthentication();
+// app.UseAuthentication();
 
 // Custom JWT Authorization Middleware - Kiểm tra role và phân quyền
 // Đặt TRƯỚC UseAuthorization() để có thể bypass authentication cho public endpoints
-app.UseJwtAuthorizationMiddleware();
+// app.UseJwtAuthorizationMiddleware();
 
-app.UseAuthorization();
+// app.UseAuthorization();
 
 app.MapControllers();
 

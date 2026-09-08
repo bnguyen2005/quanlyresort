@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi" class="light-style layout-menu-fixed" dir="ltr" data-theme="theme-default" data-assets-path="../assets/" data-template="vertical-menu-template-free">
 <head>
   <meta charset="utf-8" />
@@ -225,7 +225,7 @@
               </div>
               <div class="col-md-4 mb-3">
                 <label class="form-label">Giá mỗi đêm (VNĐ) <span class="text-danger">*</span></label>
-                <input type="number" class="form-control" id="pricePerNight" required>
+                <input type="text" class="form-control" id="pricePerNight" required oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, ',')">
               </div>
               <div class="col-md-4 mb-3">
                 <label class="form-label">Sức chứa tối đa <span class="text-danger">*</span></label>
@@ -916,7 +916,12 @@
     // Save room
     async function handleSaveRoom() {
       try {
-        const selectedRoomTypeId = parseInt(document.getElementById('roomTypeId').value);
+                  const btnSave = document.getElementById('btnSaveRoom');
+          const originalBtnText = btnSave.innerHTML;
+          btnSave.disabled = true;
+          btnSave.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang lưu...';
+          
+          const selectedRoomTypeId = parseInt(document.getElementById('roomTypeId').value);
         const selectedRoomType = document.getElementById('roomTypeId').options[document.getElementById('roomTypeId').selectedIndex].text;
         
         const room = {
@@ -924,7 +929,7 @@
           roomType: selectedRoomType,
           roomTypeId: selectedRoomTypeId,
           floor: document.getElementById('floor').value,
-          pricePerNight: parseFloat(document.getElementById('pricePerNight').value),
+          pricePerNight: parseFloat(document.getElementById('pricePerNight').value.replace(/,/g, '')),
           maxOccupancy: parseInt(document.getElementById('maxOccupancy').value),
           description: document.getElementById('description').value,
           amenities: document.getElementById('amenities').value,
@@ -1120,3 +1125,5 @@
     </script>
 </body>
 </html>
+
+
