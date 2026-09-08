@@ -242,16 +242,16 @@ public class ResortDbContext : DbContext
 
             // Check constraints
             entity.ToTable(tb => tb.HasCheckConstraint("CK_RestaurantOrder_Status", 
-                "Status IN ('Pending', 'Confirmed', 'Preparing', 'Ready', 'Delivered', 'Cancelled')"));
+                "\"Status\" IN ('Pending', 'Confirmed', 'Preparing', 'Ready', 'Delivered', 'Cancelled')"));
             
             entity.ToTable(tb => tb.HasCheckConstraint("CK_RestaurantOrder_PaymentStatus", 
-                "PaymentStatus IN ('Unpaid', 'Paid', 'Refunded', 'AwaitingConfirmation')"));
+                "\"PaymentStatus\" IN ('Unpaid', 'Paid', 'Refunded', 'AwaitingConfirmation')"));
             
             entity.ToTable(tb => tb.HasCheckConstraint("CK_RestaurantOrder_TotalAmount", 
-                "TotalAmount >= 0"));
+                "\"TotalAmount\" >= 0"));
             
             entity.ToTable(tb => tb.HasCheckConstraint("CK_RestaurantOrder_PaymentMethod", 
-                "PaymentMethod IS NULL OR PaymentMethod IN ('Cash', 'Card', 'QR', 'RoomCharge', 'BankTransfer')"));
+                "\"PaymentMethod\" IS NULL OR \"PaymentMethod\" IN ('Cash', 'Card', 'QR', 'RoomCharge', 'BankTransfer')"));
 
             entity.HasOne(ro => ro.Customer)
                 .WithMany()
@@ -271,18 +271,18 @@ public class ResortDbContext : DbContext
 
             // Check constraints
             entity.ToTable(tb => tb.HasCheckConstraint("CK_RestaurantOrderItem_Quantity", 
-                "Quantity > 0"));
+                "\"Quantity\" > 0"));
             
             entity.ToTable(tb => tb.HasCheckConstraint("CK_RestaurantOrderItem_UnitPrice", 
-                "UnitPrice >= 0"));
+                "\"UnitPrice\" >= 0"));
             
             entity.ToTable(tb => tb.HasCheckConstraint("CK_RestaurantOrderItem_SubTotal", 
-                "SubTotal >= 0"));
+                "\"SubTotal\" >= 0"));
             
             // Business rule: SubTotal should equal UnitPrice * Quantity (enforced in application layer)
             // But we can add a check to ensure SubTotal >= UnitPrice * Quantity (minimum validation)
             entity.ToTable(tb => tb.HasCheckConstraint("CK_RestaurantOrderItem_SubTotalCalc", 
-                "SubTotal >= UnitPrice * Quantity"));
+                "\"SubTotal\" >= \"UnitPrice\" * \"Quantity\""));
 
             entity.HasOne(roi => roi.Order)
                 .WithMany(ro => ro.OrderItems)
@@ -360,4 +360,5 @@ public class ResortDbContext : DbContext
         });
     }
 }
+
 

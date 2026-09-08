@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -638,10 +638,10 @@ namespace QuanLyResort.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_RestaurantOrders", x => x.OrderId);
-                    table.CheckConstraint("CK_RestaurantOrder_PaymentMethod", "PaymentMethod IS NULL OR PaymentMethod IN ('Cash', 'Card', 'QR', 'RoomCharge', 'BankTransfer')");
-                    table.CheckConstraint("CK_RestaurantOrder_PaymentStatus", "PaymentStatus IN ('Unpaid', 'Paid', 'Refunded', 'AwaitingConfirmation')");
-                    table.CheckConstraint("CK_RestaurantOrder_Status", "Status IN ('Pending', 'Confirmed', 'Preparing', 'Ready', 'Delivered', 'Cancelled')");
-                    table.CheckConstraint("CK_RestaurantOrder_TotalAmount", "TotalAmount >= 0");
+                    table.CheckConstraint("CK_RestaurantOrder_PaymentMethod", "\"PaymentMethod\" IS NULL OR \"PaymentMethod\" IN ('Cash', 'Card', 'QR', 'RoomCharge', 'BankTransfer')");
+                    table.CheckConstraint("CK_RestaurantOrder_PaymentStatus", "\"PaymentStatus\" IN ('Unpaid', 'Paid', 'Refunded', 'AwaitingConfirmation')");
+                    table.CheckConstraint("CK_RestaurantOrder_Status", "\"Status\" IN ('Pending', 'Confirmed', 'Preparing', 'Ready', 'Delivered', 'Cancelled')");
+                    table.CheckConstraint("CK_RestaurantOrder_TotalAmount", "\"TotalAmount\" >= 0");
                     table.ForeignKey(
                         name: "FK_RestaurantOrders_Bookings_BookingId",
                         column: x => x.BookingId,
@@ -762,10 +762,10 @@ namespace QuanLyResort.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_RestaurantOrderItems", x => x.OrderItemId);
-                    table.CheckConstraint("CK_RestaurantOrderItem_Quantity", "Quantity > 0");
-                    table.CheckConstraint("CK_RestaurantOrderItem_SubTotal", "SubTotal >= 0");
-                    table.CheckConstraint("CK_RestaurantOrderItem_SubTotalCalc", "SubTotal >= UnitPrice * Quantity");
-                    table.CheckConstraint("CK_RestaurantOrderItem_UnitPrice", "UnitPrice >= 0");
+                    table.CheckConstraint("CK_RestaurantOrderItem_Quantity", "\"Quantity\" > 0");
+                    table.CheckConstraint("CK_RestaurantOrderItem_SubTotal", "\"SubTotal\" >= 0");
+                    table.CheckConstraint("CK_RestaurantOrderItem_SubTotalCalc", "\"SubTotal\" >= \"UnitPrice\" * \"Quantity\"");
+                    table.CheckConstraint("CK_RestaurantOrderItem_UnitPrice", "\"UnitPrice\" >= 0");
                     table.ForeignKey(
                         name: "FK_RestaurantOrderItems_RestaurantOrders_OrderId",
                         column: x => x.OrderId,
@@ -1177,3 +1177,4 @@ namespace QuanLyResort.Migrations
         }
     }
 }
+
