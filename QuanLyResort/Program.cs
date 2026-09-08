@@ -318,10 +318,10 @@ _ = Task.Run(async () =>
         await context.Database.EnsureCreatedAsync(cts.Token);
         logger.LogInformation("✅ Database created using EnsureCreated");
 
-        // logger.LogInformation("🌱 Seeding initial data...");
-        // var seeder = new DataSeeder(context);
-        // await seeder.SeedAsync();
-        // logger.LogInformation("✅ Data seeded successfully");
+        logger.LogInformation("🌱 Seeding initial data...");
+        var seeder = new DataSeeder(context);
+        await seeder.SeedAsync();
+        logger.LogInformation("✅ Data seeded successfully");
     }
     catch (OperationCanceledException)
     {
